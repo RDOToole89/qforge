@@ -758,8 +758,7 @@ def run_and_visualize(
     )
     print_message("experiment_completed", filename=filename)
 
-    # Debug log to confirm visualization type
-    print_message("debug_viz_type", viz_type=args["visualization_type"])
+    
 
     # If noise stepped is enabled and visualization type is "plot", use the last result;
     # otherwise, pass the entire results (e.g., for hypergraph visualization)

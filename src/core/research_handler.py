@@ -77,39 +77,27 @@ class ResearchExperimentHandler:
         # Extract experiment parameters first
         num_qubits = experiment_config.get('num_qubits', 3)
 
-        # Extract counts from result with better debugging
-        logger.debug(f"Result type: {type(result)}")
-        logger.debug(f"Result has get_counts: {hasattr(result, 'get_counts')}")
-
+        # Extract counts from result (robust handling for different Qiskit result formats)
         try:
             if hasattr(result, 'get_counts'):
                 counts_raw = result.get_counts()
-                logger.debug(f"Counts from get_counts(): {type(counts_raw)}")
             elif isinstance(result, dict) and 'counts' in result:
-                # The result is a dict with a 'counts' key containing the actual Counts object
+                # Result is a dict with a 'counts' key containing the actual Counts object
                 counts_obj = result['counts']
                 counts_raw = dict(counts_obj)  # Convert Counts to dict
-                logger.debug(f"Extracted counts from result dict: {type(counts_raw)}")
             elif isinstance(result, dict):
                 counts_raw = result
-                logger.debug(f"Using result as dict directly")
             else:
                 # Try direct conversion of Counts object
                 counts_raw = dict(result)
-                logger.debug(f"Converted Counts to dict: {type(counts_raw)}")
         except Exception as e:
             logger.error(f"Failed to extract counts: {e}")
             return {}
 
-        # Convert to string keys for consistency
-        logger.debug(f"Raw counts type: {type(counts_raw)}")
-        logger.debug(f"Raw counts sample: {list(counts_raw.items())[:3] if hasattr(counts_raw, 'items') else 'not iterable'}")
-
-        # Handle different count formats
+        # Convert counts to standardized format: bitstring keys, integer values
         counts = {}
         try:
             for key, value in counts_raw.items():
-                logger.debug(f"Processing key={key} (type: {type(key)}), value={value} (type: {type(value)})")
 
                 # Ensure key is a proper bitstring
                 if isinstance(key, int):

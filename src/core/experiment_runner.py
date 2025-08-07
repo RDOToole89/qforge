@@ -289,7 +289,7 @@ class ExperimentRunner:
             },
         )
 
-        print(f"Compiled circuit: {circuit_compiled}")
+        logger.info("Circuit transpilation completed")
         return circuit_compiled
 
     def _run_simulation(

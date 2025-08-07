@@ -51,7 +51,7 @@ def compute_shannon_entropy(counts: Dict[str, int], normalize: bool = True) -> f
         max_entropy = np.log2(num_states) if num_states > 1 else 1
         entropy = entropy / max_entropy if max_entropy > 0 else 0
 
-    logger.debug(f"Shannon entropy: {entropy:.4f} (normalized: {normalize})")
+    # Shannon entropy computed successfully
     return float(entropy)
 
 
@@ -100,7 +100,7 @@ def compute_kl_divergence(observed_counts: Dict[str, int],
     # Compute KL divergence
     kl_div = sum(p * np.log(p / q) for p, q in zip(p_probs, q_probs))
 
-    logger.debug(f"KL divergence: {kl_div:.4f}")
+    # KL divergence computed successfully
     return float(kl_div)
 
 
@@ -141,7 +141,7 @@ def compute_total_variation_distance(observed_counts: Dict[str, int],
 
     tv_distance *= 0.5  # Factor of 1/2 in TV distance definition
 
-    logger.debug(f"Total variation distance: {tv_distance:.4f}")
+    # Total variation distance computed successfully
     return float(tv_distance)
 
 
@@ -192,7 +192,7 @@ def compute_mutual_information(counts: Dict[str, int],
     # Mutual information
     mi = h_a + h_b - h_ab
 
-    logger.debug(f"Mutual information I({qubit_a};{qubit_b}): {mi:.4f}")
+            # Mutual information computed for qubit pair
     return float(mi)
 
 
@@ -249,7 +249,7 @@ def compute_qubit_wise_bias(counts: Dict[str, int], num_qubits: int) -> Dict[str
         else:
             biases[qubit_key] = 0.0
 
-    logger.debug(f"Qubit-wise biases: {biases}")
+    # Qubit-wise biases computed successfully
     return biases
 
 

@@ -36,10 +36,10 @@ def configure_matplotlib_backend() -> None:
     # Determine backend
     if interactive_mode and has_display:
         backend = 'TkAgg'  # Interactive backend
-        print("🎨 Using interactive matplotlib backend (TkAgg)")
+        # Note: Backend configured for interactive mode
     else:
         backend = 'Agg'  # Non-interactive backend
-        print("📊 Using non-interactive matplotlib backend (Agg)")
+        # Note: Backend configured for non-interactive mode
 
     # Set the backend
     os.environ['MPLBACKEND'] = backend

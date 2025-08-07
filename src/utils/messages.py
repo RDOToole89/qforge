@@ -102,7 +102,7 @@ MESSAGES = {
     "config_cancelled": "[bold yellow]Configuration cancelled. Returning to prompt...[/bold yellow]",
     # Experiment execution messages
     "running_with_defaults": "\n[bold blue]⚡ Running with default configuration...[/bold blue]\n",
-    "debug_viz_type": "[bold blue]Debug: Visualization type is {viz_type}[/bold blue]",
+
     "experiment_completed": "[bold green]✅ Experiment completed successfully![/bold green]\n📁 Results saved in `{filename}`",
     "plot_closed_ctrl_c": "\n[bold yellow]Plot closed with Ctrl+C, returning to prompt...[/bold yellow]",
     "current_params": "\n[bold blue]🔄 Current parameters:[/bold blue] {params}",
