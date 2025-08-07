@@ -222,12 +222,19 @@ class InteractiveCLI:
             if viz_type == "histogram":
                 from src.visualization import get_histogram_visualizer
                 plot_function = get_histogram_visualizer()
+                
+                # Get research metrics if available from the research handler
+                research_metrics = None
+                if hasattr(self, '_last_research_analysis'):
+                    research_metrics = self._last_research_analysis.get('research_metrics')
+                
                 plot_function(
                     counts=counts,
                     state_type=state_type,
                     noise_type=noise_type,
                     noise_enabled=noise_enabled,
                     num_qubits=num_qubits,
+                    research_metrics=research_metrics,
                     save_path=None  # Display only, don't save
                 )
 
@@ -243,11 +250,17 @@ class InteractiveCLI:
                     self.display_manager.display_warning_message("⚠️ No density matrix data available")
                     return
 
+                # Get research metrics if available
+                research_metrics = None
+                if hasattr(self, '_last_research_analysis'):
+                    research_metrics = self._last_research_analysis.get('research_metrics')
+                
                 plot_function = get_density_matrix_visualizer()
                 plot_function(
                     density_matrix,
                     state_type=state_type,
-                    noise_type=noise_type
+                    noise_type=noise_type,
+                    research_metrics=research_metrics
                 )
 
             elif viz_type == "hypergraph":
@@ -332,14 +345,17 @@ class InteractiveCLI:
                     if isinstance(result, tuple) and len(result) >= 2:
                         circuit, raw_results = result
 
-                        # Generate research-grade analysis
+                                                # Generate research-grade analysis
                         research_analysis = research_handler.process_experiment_result(
                             circuit=circuit,
                             result=raw_results,
                             experiment_config=experiment_params,
                             experiment_id="cli_experiment"
                         )
-
+                        
+                        # Store research analysis for visualization access
+                        self._last_research_analysis = research_analysis
+                        
                         # Save research results
                         research_file = research_handler.save_research_result(research_analysis)
 
