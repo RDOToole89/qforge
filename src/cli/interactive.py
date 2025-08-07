@@ -206,11 +206,22 @@ class InteractiveCLI:
         try:
             self.display_manager.display_info_message(f"🎨 Generating {viz_type} visualization...")
 
-            # Extract counts from results
-            counts = results.get('counts', {})
-            if not counts:
-                self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
-                return
+            # Handle different result types
+            if viz_type == "density_matrix":
+                # For density matrix visualization, we don't need counts
+                counts = {}
+            else:
+                # Extract counts from results for other visualization types
+                if hasattr(results, 'get'):
+                    counts = results.get('counts', {})
+                else:
+                    # If results is not a dict (e.g., DensityMatrix object), we can't extract counts
+                    self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
+                    return
+                    
+                if not counts:
+                    self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
+                    return
 
             # Get visualization parameters
             num_qubits = params.get('num_qubits', 3)
@@ -222,12 +233,12 @@ class InteractiveCLI:
             if viz_type == "histogram":
                 from src.visualization import get_histogram_visualizer
                 plot_function = get_histogram_visualizer()
-                
+
                 # Get research metrics if available from the research handler
                 research_metrics = None
                 if hasattr(self, '_last_research_analysis'):
                     research_metrics = self._last_research_analysis.get('research_metrics')
-                
+
                 plot_function(
                     counts=counts,
                     state_type=state_type,
@@ -241,12 +252,18 @@ class InteractiveCLI:
             elif viz_type == "density_matrix":
                 from src.visualization import get_density_matrix_visualizer
                 # Check if we have density matrix data
-                if params.get('sim_mode') != 'statevector':
-                    self.display_manager.display_warning_message("⚠️ Density matrix visualization requires statevector simulation mode")
+                if params.get('sim_mode') != 'density':
+                    self.display_manager.display_warning_message("⚠️ Density matrix visualization requires density simulation mode")
                     return
 
-                density_matrix = results.get('density_matrix')
-                if density_matrix is None:
+                # For density mode, results may be the density matrix directly or in a dict
+                if hasattr(results, 'data') and hasattr(results, 'draw'):
+                    # Direct DensityMatrix object
+                    density_matrix = results
+                elif isinstance(results, dict) and 'density_matrix' in results:
+                    # Dictionary containing density matrix
+                    density_matrix = results['density_matrix']
+                else:
                     self.display_manager.display_warning_message("⚠️ No density matrix data available")
                     return
 
@@ -254,7 +271,7 @@ class InteractiveCLI:
                 research_metrics = None
                 if hasattr(self, '_last_research_analysis'):
                     research_metrics = self._last_research_analysis.get('research_metrics')
-                
+
                 plot_function = get_density_matrix_visualizer()
                 plot_function(
                     density_matrix,
@@ -339,48 +356,66 @@ class InteractiveCLI:
                 result = em.run_experiment("ghz_basic", custom_params=experiment_params)
 
                 if result:
-                    # Process with research handler for advanced analysis
-                    research_handler = ResearchExperimentHandler()
+                    # Check if this is a density matrix experiment
+                    is_density_experiment = experiment_params.get('sim_mode') == 'density'
+                    
+                    if not is_density_experiment:
+                        # Process with research handler for advanced analysis (only for count-based experiments)
+                        research_handler = ResearchExperimentHandler()
 
-                    if isinstance(result, tuple) and len(result) >= 2:
-                        circuit, raw_results = result
+                        if isinstance(result, tuple) and len(result) >= 2:
+                            circuit, raw_results = result
 
-                                                # Generate research-grade analysis
-                        research_analysis = research_handler.process_experiment_result(
-                            circuit=circuit,
-                            result=raw_results,
-                            experiment_config=experiment_params,
-                            experiment_id="cli_experiment"
-                        )
-                        
-                        # Store research analysis for visualization access
-                        self._last_research_analysis = research_analysis
-                        
-                        # Save research results
-                        research_file = research_handler.save_research_result(research_analysis)
+                            # Generate research-grade analysis
+                            research_analysis = research_handler.process_experiment_result(
+                                circuit=circuit,
+                                result=raw_results,
+                                experiment_config=experiment_params,
+                                experiment_id="cli_experiment"
+                            )
 
-                                                # Display comprehensive results including circuit diagram
+                            # Store research analysis for visualization access
+                            self._last_research_analysis = research_analysis
+
+                            # Save research results
+                            research_file = research_handler.save_research_result(research_analysis)
+
+                            # Display comprehensive results including circuit diagram
+                            self.display_manager.display_experiment_results(result)
+
+                            # Show visualization if requested
+                            viz_type = experiment_params.get("visualization_type", "none")
+                            if viz_type and viz_type != "none":
+                                self._show_visualization(raw_results, experiment_params, viz_type)
+
+                            # Show research insights
+                            if "research_insights" in research_analysis:
+                                insights = research_analysis["research_insights"]
+                                if insights.get("key_findings"):
+                                    self.display_manager.display_info_message("🔬 Research Insights:")
+                                    for finding in insights["key_findings"]:
+                                        self.display_manager.display_info_message(f"  • {finding}")
+
+                            # Show research file saved
+                            self.display_manager.display_success_message(f"📊 Research-grade analysis saved: {research_file}")
+
+                        else:
+                            # Fallback to basic display for research mode
+                            self.display_manager.display_experiment_results(result)
+                    
+                    else:
+                        # For density matrix experiments, skip research processing and go straight to visualization
                         self.display_manager.display_experiment_results(result)
-
+                        self.display_manager.display_info_message("🔬 Density Matrix Mode: Displaying quantum state analysis")
+                        
                         # Show visualization if requested
                         viz_type = experiment_params.get("visualization_type", "none")
                         if viz_type and viz_type != "none":
-                            self._show_visualization(raw_results, experiment_params, viz_type)
-
-                        # Show research insights
-                        if "research_insights" in research_analysis:
-                            insights = research_analysis["research_insights"]
-                            if insights.get("key_findings"):
-                                self.display_manager.display_info_message("🔬 Research Insights:")
-                                for finding in insights["key_findings"]:
-                                    self.display_manager.display_info_message(f"  • {finding}")
-
-                        # Show research file saved
-                        self.display_manager.display_success_message(f"📊 Research-grade analysis saved: {research_file}")
-
-                    else:
-                        # Fallback to basic display
-                        self.display_manager.display_experiment_results(result)
+                            if isinstance(result, tuple) and len(result) >= 2:
+                                circuit, raw_results = result
+                                self._show_visualization(raw_results, experiment_params, viz_type)
+                            else:
+                                self._show_visualization(result, experiment_params, viz_type)
 
                     self.display_manager.display_success_message("✅ Experiment completed successfully!")
                 else:

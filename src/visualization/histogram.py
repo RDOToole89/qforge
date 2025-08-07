@@ -13,23 +13,23 @@ logger = logging.getLogger("QuantumExperiment.Visualization")
 def get_quantum_color_scheme(states: List[str], state_type: str, num_qubits: int, noise_enabled: bool) -> List[str]:
     """
     Generate quantum-aware color scheme highlighting expected quantum states.
-    
+
     Args:
         states: List of basis states (e.g., ['000', '001', '010', ...])
         state_type: Type of quantum state ('GHZ', 'W', 'CLUSTER', etc.)
         num_qubits: Number of qubits in the system
         noise_enabled: Whether noise is applied
-        
+
     Returns:
         List of colors for each state
     """
     if not state_type:
         # Default coloring for unknown states
         return ['red' if noise_enabled else 'blue'] * len(states)
-    
+
     state_type = state_type.upper()
     colors = []
-    
+
     for state in states:
         if state_type == "GHZ":
             # Highlight GHZ expected states |000⟩ and |111⟩
@@ -37,7 +37,7 @@ def get_quantum_color_scheme(states: List[str], state_type: str, num_qubits: int
                 colors.append('#1f77b4' if not noise_enabled else '#d62728')  # Deep blue/red for expected
             else:
                 colors.append('#ff7f0e' if noise_enabled else '#aec7e8')  # Orange/light blue for errors
-                
+
         elif state_type == "W":
             # Highlight W state components (single excitations: |001⟩, |010⟩, |100⟩)
             w_states = [format(1 << i, f'0{num_qubits}b') for i in range(num_qubits)]
@@ -45,42 +45,42 @@ def get_quantum_color_scheme(states: List[str], state_type: str, num_qubits: int
                 colors.append('#2ca02c' if not noise_enabled else '#d62728')  # Green for W components
             else:
                 colors.append('#ff7f0e' if noise_enabled else '#98df8a')  # Orange/light green for errors
-                
+
         elif state_type == "CLUSTER":
             # For cluster states, all computational basis states should have equal probability
             colors.append('#9467bd' if not noise_enabled else '#ff7f0e')  # Purple for uniform, orange for noise
-            
+
         elif state_type == "BELL":
             # Bell states: |00⟩ and |11⟩ for Φ+, or |01⟩ and |10⟩ for Ψ+
             if state in ['00', '11']:
                 colors.append('#17becf' if not noise_enabled else '#d62728')  # Cyan for Bell components
             else:
                 colors.append('#ff7f0e' if noise_enabled else '#9edae5')  # Orange/light cyan for errors
-                
+
         else:
             # Default quantum coloring
             colors.append('#1f77b4' if not noise_enabled else '#d62728')
-    
+
     return colors
 
 
 def get_ideal_quantum_distribution(state_type: str, num_qubits: int) -> Dict[str, float]:
     """
     Get the ideal probability distribution for a given quantum state type.
-    
+
     Args:
         state_type: Type of quantum state
         num_qubits: Number of qubits
-        
+
     Returns:
         Dictionary of state -> probability
     """
     if not state_type:
         return {}
-        
+
     state_type = state_type.upper()
     total_states = 2 ** num_qubits
-    
+
     if state_type == "GHZ":
         # GHZ state: equal superposition of |000...0⟩ and |111...1⟩
         ideal = {}
@@ -93,7 +93,7 @@ def get_ideal_quantum_distribution(state_type: str, num_qubits: int) -> Dict[str
             else:
                 ideal[state] = 0.0
         return ideal
-        
+
     elif state_type == "W":
         # W state: equal superposition of all single-excitation states
         ideal = {}
@@ -106,12 +106,12 @@ def get_ideal_quantum_distribution(state_type: str, num_qubits: int) -> Dict[str
             else:
                 ideal[state] = 0.0
         return ideal
-        
+
     elif state_type == "CLUSTER":
         # Cluster state: equal superposition of all computational basis states
         prob_per_state = 1.0 / total_states
         return {format(i, f'0{num_qubits}b'): prob_per_state for i in range(total_states)}
-        
+
     elif state_type == "BELL":
         # Bell state: equal superposition of |00⟩ and |11⟩ (for Φ+)
         ideal = {}
@@ -122,7 +122,7 @@ def get_ideal_quantum_distribution(state_type: str, num_qubits: int) -> Dict[str
             else:
                 ideal[state] = 0.0
         return ideal
-        
+
     return {}
 
 
@@ -185,10 +185,10 @@ def plot_histogram(
 
     # Get quantum-aware colors
     colors = get_quantum_color_scheme(states, state_type, num_qubits, noise_enabled or False)
-    
+
     # Create the histogram with enhanced layout
     plt.figure(figsize=(12, 8))
-    
+
     # Create main histogram
     bars = plt.bar(
         states,
@@ -198,13 +198,13 @@ def plot_histogram(
         edgecolor='black',
         linewidth=0.5
     )
-    
+
     # Add ideal distribution comparison if requested and available
     if show_ideal and state_type and not (noise_enabled and noise_type):
         ideal_dist = get_ideal_quantum_distribution(state_type, num_qubits)
         if ideal_dist:
             ideal_probs = [ideal_dist.get(state, 0) for state in states]
-            plt.plot(states, ideal_probs, 'k--', linewidth=2, alpha=0.7, 
+            plt.plot(states, ideal_probs, 'k--', linewidth=2, alpha=0.7,
                     label=f'Ideal {state_type}', marker='o', markersize=4)
 
     # Add counts as labels above the bars
@@ -221,36 +221,36 @@ def plot_histogram(
     # Set labels and enhanced title with research metrics
     plt.xlabel("Basis State", fontsize=12)
     plt.ylabel("Probability", fontsize=12)
-    
+
     # Enhanced title with research metrics
     title = f"{state_type or 'Quantum'} State Distribution ({num_qubits} qubits, {total_shots} shots)"
     if noise_enabled and noise_type:
         title += f"\nwith {noise_type} Noise"
     else:
         title += "\n(Ideal, No Noise)"
-    
+
     # Add research metrics to title if available
     if research_metrics:
         info_theory = research_metrics.get('information_theory', {})
         shannon_entropy = info_theory.get('shannon_entropy', 0)
         normalized_entropy = info_theory.get('normalized_entropy', 0)
         title += f" | H = {shannon_entropy:.3f} (norm: {normalized_entropy:.3f})"
-    
+
     plt.title(title, fontsize=14, pad=20)
     plt.xticks(rotation=45, ha="right", fontsize=10)
     plt.yticks(fontsize=10)
     plt.grid(True, which="both", linestyle="--", alpha=0.3)
-    
+
     # Add legend if ideal distribution is shown
     if show_ideal and state_type and not (noise_enabled and noise_type):
         plt.legend(loc='upper right')
-    
+
     # Add research metadata text box
     if research_metrics:
         info_theory = research_metrics.get('information_theory', {})
         qubit_analysis = research_metrics.get('qubit_analysis', {})
         distribution_comparison = research_metrics.get('distribution_comparison', {})
-        
+
         metadata_text = ""
         if 'shannon_entropy' in info_theory:
             metadata_text += f"Shannon Entropy: {info_theory['shannon_entropy']:.4f}\n"
@@ -260,7 +260,7 @@ def plot_histogram(
             metadata_text += f"KL Divergence: {distribution_comparison['kl_divergence']:.4f}\n"
         if 'total_variation_distance' in distribution_comparison:
             metadata_text += f"TV Distance: {distribution_comparison['total_variation_distance']:.4f}"
-            
+
         if metadata_text:
             plt.text(0.98, 0.98, metadata_text.strip(), transform=plt.gca().transAxes,
                     ha='right', va='top', fontsize=9,

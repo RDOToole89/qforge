@@ -13,12 +13,12 @@ logger = logging.getLogger("QuantumExperiment.Visualization")
 def get_quantum_colormap(state_type: str, show_real: bool, show_imag: bool) -> str:
     """
     Get quantum-optimized colormap based on state type and component.
-    
+
     Args:
         state_type: Type of quantum state
         show_real: Whether showing real part
         show_imag: Whether showing imaginary part
-        
+
     Returns:
         Colormap name optimized for quantum data
     """
@@ -41,32 +41,32 @@ def get_quantum_colormap(state_type: str, show_real: bool, show_imag: bool) -> s
 def compute_quantum_metrics(density_matrix: DensityMatrix) -> Dict[str, float]:
     """
     Compute quantum-specific metrics from density matrix.
-    
+
     Args:
         density_matrix: Qiskit DensityMatrix object
-        
+
     Returns:
         Dictionary of quantum metrics
     """
     dm = density_matrix.data
-    
+
     # Purity: Tr(ρ²)
     purity = np.trace(dm @ dm).real
-    
+
     # Trace: Tr(ρ) (should be 1 for valid density matrix)
     trace = np.trace(dm).real
-    
+
     # Von Neumann entropy: -Tr(ρ log₂(ρ))
     eigenvalues = np.linalg.eigvals(dm)
     eigenvalues = eigenvalues[eigenvalues > 1e-12]  # Remove numerical zeros
     von_neumann_entropy = -np.sum(eigenvalues * np.log2(eigenvalues)).real
-    
+
     # Linear entropy: 1 - Tr(ρ²)
     linear_entropy = 1 - purity
-    
+
     # Participation ratio: 1 / Tr(ρ²)
     participation_ratio = 1 / purity if purity > 1e-12 else float('inf')
-    
+
     return {
         'purity': purity,
         'trace': trace,
@@ -125,7 +125,7 @@ def plot_density_matrix(
     # Plot the heatmap with enhanced layout
     plt.figure(figsize=(12, 10))
     im = plt.imshow(dm_array, cmap=cmap, interpolation="nearest")
-    
+
     # Highlight entangled blocks for specific states
     if state_type and state_type.upper() == 'GHZ' and not show_real and not show_imag:
         # Add visual emphasis for GHZ coherence terms
@@ -137,7 +137,7 @@ def plot_density_matrix(
             # |000⟩⟨111| term at (0, 7)
             rect1 = Rectangle((6.5, -0.5), 1, 1, linewidth=2, edgecolor='red', facecolor='none')
             ax.add_patch(rect1)
-            # |111⟩⟨000| term at (7, 0)  
+            # |111⟩⟨000| term at (7, 0)
             rect2 = Rectangle((-0.5, 6.5), 1, 1, linewidth=2, edgecolor='red', facecolor='none')
             ax.add_patch(rect2)
 
@@ -151,23 +151,23 @@ def plot_density_matrix(
 
     # Set enhanced title with quantum metrics
     component_type = (
-        "Real Part" if show_real 
-        else "Imaginary Part" if show_imag 
+        "Real Part" if show_real
+        else "Imaginary Part" if show_imag
         else "Magnitude"
     )
-    
+
     title = f"Density Matrix - {component_type}"
     if state_type:
         title += f" ({state_type} State)"
     if noise_type:
         title += f" with {noise_type} Noise"
-    
+
     # Add quantum metrics to title
     if quantum_metrics:
         purity = quantum_metrics.get('purity', 0)
         von_neumann = quantum_metrics.get('von_neumann_entropy', 0)
         title += f"\nPurity = {purity:.4f}, S = {von_neumann:.3f}"
-    
+
     plt.title(title, fontsize=14, pad=20)
 
     # Set enhanced axis labels and ticks
@@ -175,11 +175,11 @@ def plot_density_matrix(
     plt.ylabel("Basis State |i⟩", fontsize=12)
     plt.xticks(ticks=range(len(basis_labels)), labels=basis_labels, rotation=45, ha="right", fontsize=10)
     plt.yticks(ticks=range(len(basis_labels)), labels=basis_labels, fontsize=10)
-    
+
     # Add research metrics text box
     if quantum_metrics or research_metrics:
         metadata_text = ""
-        
+
         # Quantum metrics from density matrix
         if quantum_metrics:
             metadata_text += f"Purity: {quantum_metrics['purity']:.5f}\n"
@@ -188,7 +188,7 @@ def plot_density_matrix(
             metadata_text += f"Linear Entropy: {quantum_metrics['linear_entropy']:.5f}\n"
             if quantum_metrics['participation_ratio'] != float('inf'):
                 metadata_text += f"Participation Ratio: {quantum_metrics['participation_ratio']:.3f}\n"
-        
+
         # Research metrics if available
         if research_metrics:
             info_theory = research_metrics.get('information_theory', {})
@@ -197,17 +197,17 @@ def plot_density_matrix(
             if 'kl_divergence' in research_metrics.get('distribution_comparison', {}):
                 kl_div = research_metrics['distribution_comparison']['kl_divergence']
                 metadata_text += f"\nKL Divergence: {kl_div:.4f}"
-        
+
         if metadata_text:
             plt.text(0.98, 0.02, metadata_text.strip(), transform=plt.gca().transAxes,
                     ha='right', va='bottom', fontsize=9,
                     bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.9, edgecolor='gray'))
-    
+
     # Add interpretation text for quantum states
     if state_type and quantum_metrics:
         purity = quantum_metrics.get('purity', 0)
         interpretation = ""
-        
+
         if purity > 0.99:
             interpretation = "Pure quantum state"
         elif purity > 0.8:
@@ -216,12 +216,12 @@ def plot_density_matrix(
             interpretation = "Partially mixed state"
         else:
             interpretation = "Highly mixed state"
-            
+
         if state_type.upper() == 'GHZ' and purity > 0.9:
             interpretation += " (strong entanglement)"
         elif state_type.upper() == 'W' and purity > 0.9:
             interpretation += " (symmetric entanglement)"
-            
+
         plt.text(0.02, 0.98, interpretation, transform=plt.gca().transAxes,
                 ha='left', va='top', fontsize=10, weight='bold',
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='lightblue', alpha=0.8))

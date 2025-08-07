@@ -95,7 +95,7 @@ class ResearchExperimentHandler:
                     num_qubits = int(np.log2(matrix_size))
                     # Generate uniform distribution as placeholder
                     placeholder_shots = 1024
-                    counts_raw = {format(i, f'0{num_qubits}b'): placeholder_shots // matrix_size 
+                    counts_raw = {format(i, f'0{num_qubits}b'): placeholder_shots // matrix_size
                                  for i in range(matrix_size)}
                 else:
                     logger.warning("Invalid density matrix format")

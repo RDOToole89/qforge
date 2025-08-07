@@ -91,13 +91,13 @@ def plot_hypergraph(
                 fs_distances.append(0.0)
 
         # Plot Bloch vectors if requested
-        if config.get("plot_bloch") and time_steps is not None:
+        if config.get("plot_bloch") and time_steps is not None and show_plot_nonblocking is not None:
             plot_closed_with_ctrl_c |= plot_bloch_sphere_vectors(
                 correlation_data, time_steps, save_path, show_plot_nonblocking
             )
 
         # Plot Fubini-Study distance over time
-        if time_steps is not None and fs_distances:
+        if time_steps is not None and fs_distances and show_plot_nonblocking is not None:
             plot_closed_with_ctrl_c |= plot_fubini_study_distance(
                 time_steps, fs_distances, save_path, show_plot_nonblocking
             )
@@ -336,7 +336,13 @@ def plot_single_hypergraph(
         print(
             f"Displaying hypergraph for timestep {time_step if time_step is not None else 'single'}..."
         )
-        return not show_plot_nonblocking(plot_func)
+        if show_plot_nonblocking is not None:
+            return not show_plot_nonblocking(plot_func)
+        else:
+            # Fallback to standard plt.show() if no custom show function
+            plot_func()
+            plt.show()
+            return False
 
 
 def build_analysis_text(
@@ -419,7 +425,7 @@ def plot_bloch_sphere_vectors(
     bloch_vectors: List[Dict[int, tuple]],
     time_steps: List[float],
     save_path: Optional[str],
-    show_plot_nonblocking: Callable,
+    show_plot_nonblocking: Optional[Callable],
 ) -> bool:
     """Plot Bloch sphere trajectories."""
     from mpl_toolkits.mplot3d import Axes3D
@@ -477,7 +483,11 @@ def plot_bloch_sphere_vectors(
             plt.close()
         else:
             print(f"Displaying Bloch sphere plot for qubit {qubit}...")
-            plot_closed_with_ctrl_c |= not show_plot_nonblocking(plot_func)
+            if show_plot_nonblocking is not None:
+                plot_closed_with_ctrl_c |= not show_plot_nonblocking(plot_func)
+            else:
+                plot_func()
+                plt.show()
 
     return plot_closed_with_ctrl_c
 
@@ -486,7 +496,7 @@ def plot_fubini_study_distance(
     time_steps: List[float],
     fs_distances: List[float],
     save_path: Optional[str],
-    show_plot_nonblocking: Callable,
+    show_plot_nonblocking: Optional[Callable],
 ) -> bool:
     """Plot Fubini-Study distance over time."""
 
@@ -512,14 +522,19 @@ def plot_fubini_study_distance(
         return False
     else:
         print("Displaying Fubini-Study distance plot...")
-        return not show_plot_nonblocking(plot_func)
+        if show_plot_nonblocking is not None:
+            return not show_plot_nonblocking(plot_func)
+        else:
+            plot_func()
+            plt.show()
+            return False
 
 
 def plot_error_transition_graph(
     counts_list: List[Dict],
     time_steps: List[float],
     save_path: str,
-    show_plot_nonblocking: Callable,
+    show_plot_nonblocking: Optional[Callable],
 ) -> bool:
     """Plot error transition graph."""
     # Use analysis module for transition computation
@@ -558,6 +573,10 @@ def plot_error_transition_graph(
             plt.close()
         else:
             print(f"Displaying error transition graph for t={t:.2f}...")
-            plot_closed_with_ctrl_c |= not show_plot_nonblocking(plot_transition)
+            if show_plot_nonblocking is not None:
+                plot_closed_with_ctrl_c |= not show_plot_nonblocking(plot_transition)
+            else:
+                plot_transition()
+                plt.show()
 
     return plot_closed_with_ctrl_c

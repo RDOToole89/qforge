@@ -141,7 +141,9 @@ def compute_correlations_for_hypergraph(
     edges = {}
     edge_id = 0
     shots = sum(correlation_data.values()) if mode == "qasm" else 1
-    threshold = config.get("threshold", 0.1 if mode == "qasm" else 0.01)
+    threshold = config.get("threshold")
+    if threshold is None:
+        threshold = 0.1 if mode == "qasm" else 0.01
     max_order = config.get("max_order", 2)
 
     if mode == "qasm":
