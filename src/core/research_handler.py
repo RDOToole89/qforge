@@ -431,8 +431,8 @@ class ResearchExperimentHandler:
                 "Increase shot count to ≥4096 for improved statistical significance"
             )
 
-        error_rate = config.get("error_rate", 0.05)
-        if error_rate > 0.15:
+        error_rate = config.get("error_rate")
+        if error_rate is not None and error_rate > 0.15:
             insights["recommendations"].append(
                 "Consider lower noise levels for better structure detection"
             )

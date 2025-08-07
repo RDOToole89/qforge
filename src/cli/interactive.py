@@ -241,26 +241,26 @@ class InteractiveCLI:
             try:
                 from src.experiments.manager import get_experiment_manager
                 from src.core.research_handler import ResearchExperimentHandler
-                
+
                 self.display_manager.display_info_message("🚀 Running quantum experiment...")
-                
+
                 # Get experiment manager and run experiment
                 em = get_experiment_manager()
-                
+
                 # Run experiment using user parameters as custom params
                 # Filter out metadata that shouldn't go to the experiment runner
-                experiment_params = {k: v for k, v in args.items() 
+                experiment_params = {k: v for k, v in args.items()
                                    if k not in ['name', 'description', 'category', 'difficulty']}
-                
+
                 result = em.run_experiment("ghz_basic", custom_params=experiment_params)
-                
+
                 if result:
                     # Process with research handler for advanced analysis
                     research_handler = ResearchExperimentHandler()
-                    
+
                     if isinstance(result, tuple) and len(result) >= 2:
                         circuit, raw_results = result
-                        
+
                         # Generate research-grade analysis
                         research_analysis = research_handler.process_experiment_result(
                             circuit=circuit,
@@ -268,13 +268,13 @@ class InteractiveCLI:
                             experiment_config=experiment_params,
                             experiment_id="cli_experiment"
                         )
-                        
+
                         # Save research results
                         research_file = research_handler.save_research_result(research_analysis)
-                        
+
                         # Display comprehensive results including circuit diagram
                         self.display_manager.display_experiment_results(result)
-                        
+
                         # Show research insights
                         if "research_insights" in research_analysis:
                             insights = research_analysis["research_insights"]
@@ -282,14 +282,14 @@ class InteractiveCLI:
                                 self.display_manager.display_info_message("🔬 Research Insights:")
                                 for finding in insights["key_findings"]:
                                     self.display_manager.display_info_message(f"  • {finding}")
-                        
+
                         # Show research file saved
                         self.display_manager.display_success_message(f"📊 Research-grade analysis saved: {research_file}")
-                        
+
                     else:
                         # Fallback to basic display
                         self.display_manager.display_experiment_results(result)
-                        
+
                     self.display_manager.display_success_message("✅ Experiment completed successfully!")
                 else:
                     self.display_manager.display_error_message("❌ Experiment failed")
