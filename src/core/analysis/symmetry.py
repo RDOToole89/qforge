@@ -38,7 +38,7 @@ def compute_su2_symmetry(counts: Dict, num_qubits: int, shots: float) -> Dict:
             for bitstring, count in counts.items():
                 bit_i, bit_j = int(bitstring[i]), int(bitstring[j])
                 zz_value = (-1) ** (bit_i + bit_j)
-                zz_corr += zz_value * (count / shots)
+                zz_corr += zz_value * (int(count) / shots)
             correlations["ZZ"][(i, j)] = zz_corr
     zz_values = list(correlations["ZZ"].values())
     su2_symmetry = np.var(zz_values) if zz_values else 0.0
@@ -95,12 +95,12 @@ def compute_parity_distribution(counts: Dict, num_qubits: int) -> Dict:
         Dict: Parity distribution {'even': float, 'odd': float}.
     """
     parity_counts = {"even": 0, "odd": 0}
-    shots = sum(counts.values())
+    shots = sum(int(count) for count in counts.values())
     if shots == 0:
         return parity_counts
     for bitstring, count in counts.items():
         parity = sum(int(bit) for bit in bitstring) % 2
-        parity_counts["even" if parity == 0 else "odd"] += count / shots
+        parity_counts["even" if parity == 0 else "odd"] += int(count) / shots
     return parity_counts
 
 

@@ -218,7 +218,7 @@ class InteractiveCLI:
                     # If results is not a dict (e.g., DensityMatrix object), we can't extract counts
                     self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
                     return
-                    
+
                 if not counts:
                     self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
                     return
@@ -358,7 +358,7 @@ class InteractiveCLI:
                 if result:
                     # Check if this is a density matrix experiment
                     is_density_experiment = experiment_params.get('sim_mode') == 'density'
-                    
+
                     if not is_density_experiment:
                         # Process with research handler for advanced analysis (only for count-based experiments)
                         research_handler = ResearchExperimentHandler()
@@ -402,12 +402,12 @@ class InteractiveCLI:
                         else:
                             # Fallback to basic display for research mode
                             self.display_manager.display_experiment_results(result)
-                    
+
                     else:
                         # For density matrix experiments, skip research processing and go straight to visualization
                         self.display_manager.display_experiment_results(result)
                         self.display_manager.display_info_message("🔬 Density Matrix Mode: Displaying quantum state analysis")
-                        
+
                         # Show visualization if requested
                         viz_type = experiment_params.get("visualization_type", "none")
                         if viz_type and viz_type != "none":

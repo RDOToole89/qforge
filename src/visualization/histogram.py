@@ -277,5 +277,20 @@ def plot_histogram(
             f"Saved histogram to {save_path} (states: {len(states)}, total shots: {total_shots})"
         )
         plt.close()
+    elif state_type:  # Auto-generate organized save path
+        from .save_manager import get_organized_save_path
+        experiment_config = {
+            'state_type': state_type,
+            'noise_type': noise_type,
+            'noise_enabled': noise_enabled,
+            'num_qubits': num_qubits
+        }
+        auto_save_path = get_organized_save_path(
+            viz_type='histogram',
+            experiment_config=experiment_config
+        )
+        plt.savefig(auto_save_path, bbox_inches="tight", dpi=300)
+        logger.info(f"Histogram auto-saved to {auto_save_path} (states: {len(states)}, total shots: {total_shots})")
+        plt.close()
     else:
         plt.show()

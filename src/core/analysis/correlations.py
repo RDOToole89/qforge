@@ -40,7 +40,7 @@ def compute_pairwise_correlations(
                 for bitstring, count in correlation_data.items():
                     bit_i, bit_j = int(bitstring[i]), int(bitstring[j])
                     zz_value = (-1) ** (bit_i + bit_j)
-                    zz_corr += zz_value * (count / shots)
+                    zz_corr += zz_value * (int(count) / shots)
                 correlations[(i, j)] = zz_corr
     else:
         # Convert the NumPy array to a DensityMatrix object
@@ -114,10 +114,109 @@ def compute_permutation_symmetric_correlations(
             for bitstring, count in counts.items():
                 bit_i, bit_j = int(bitstring[i]), int(bitstring[j])
                 zz_value = (-1) ** (bit_i + bit_j)
-                zz_corr += zz_value * (count / shots)
+                zz_corr += zz_value * (int(count) / shots)
             zz_symmetric += zz_corr
             pairs += 1
     return zz_symmetric / pairs if pairs > 0 else 0.0
+
+
+def compute_adaptive_threshold(
+    correlation_data: Dict,
+    num_qubits: int,
+    mode: str,
+    target_edge_count: int = None,
+    percentile: float = 75.0,
+) -> float:
+    """
+    Computes an adaptive threshold for hypergraph edge inclusion.
+
+    Uses statistical analysis to automatically determine optimal thresholds
+    based on the correlation distribution, ensuring meaningful visualizations.
+
+    Args:
+        correlation_data (Dict): Counts or density matrix data.
+        num_qubits (int): Number of qubits.
+        mode (str): 'qasm' or 'density'.
+        target_edge_count (int): Target number of edges (None for percentile-based).
+        percentile (float): Percentile for threshold selection (default: 75%).
+
+    Returns:
+        float: Adaptive threshold value.
+    """
+    if mode == "qasm":
+        # Handle both dict and Counts objects
+        if hasattr(correlation_data, 'shots'):
+            shots = correlation_data.shots()
+        else:
+            shots = sum(int(count) for count in correlation_data.values())
+    else:
+        shots = 1
+    correlation_values = []
+
+    if mode == "qasm":
+        # Compute all possible correlations to find distribution
+        for r in range(2, min(num_qubits + 1, 4)):  # Up to 3-qubit correlations
+            for qubit_subset in combinations(range(num_qubits), r):
+                corr = 0.0
+                for bitstring, count in correlation_data.items():
+                    bits = [int(bitstring[i]) for i in qubit_subset]
+                    value = (-1) ** sum(bits)
+                    corr += value * (int(count) / shots)
+                correlation_values.append(abs(corr))
+    else:
+        # For density matrix mode, analyze off-diagonal elements
+        if "density" in correlation_data:
+            density_matrix = np.array(correlation_data["density"])
+            for i in range(density_matrix.shape[0]):
+                for j in range(i + 1, density_matrix.shape[1]):
+                    corr = abs(density_matrix[i, j])
+                    correlation_values.append(corr)
+
+    if not correlation_values:
+        # Fallback to default values
+        return 0.1 if mode == "qasm" else 0.01
+
+    correlation_values = np.array(correlation_values)
+
+    # Remove zero correlations for better statistics
+    nonzero_correlations = correlation_values[correlation_values > 1e-10]
+
+    if len(nonzero_correlations) == 0:
+        return 0.1 if mode == "qasm" else 0.01
+
+    # Strategy 1: Target edge count (if specified)
+    if target_edge_count is not None:
+        sorted_corrs = np.sort(nonzero_correlations)[::-1]  # Descending
+        if len(sorted_corrs) > target_edge_count:
+            threshold = sorted_corrs[target_edge_count - 1]
+        else:
+            threshold = sorted_corrs[-1] * 0.5  # Half of smallest
+
+        logger.info(f"Adaptive threshold (target {target_edge_count} edges): {threshold:.6f}")
+        return float(threshold)
+
+    # Strategy 2: Percentile-based threshold
+    threshold = np.percentile(nonzero_correlations, percentile)
+
+    # Add some intelligence: avoid too many or too few edges
+    mean_corr = np.mean(nonzero_correlations)
+    std_corr = np.std(nonzero_correlations)
+
+    # If threshold is too low (would create too many edges), raise it
+    if threshold < mean_corr - std_corr:
+        threshold = mean_corr - 0.5 * std_corr
+        logger.info(f"Adjusted threshold upward to avoid too many edges: {threshold:.6f}")
+
+    # If threshold is too high (would create too few edges), lower it
+    elif threshold > mean_corr + std_corr:
+        threshold = mean_corr + 0.5 * std_corr
+        logger.info(f"Adjusted threshold downward to ensure sufficient edges: {threshold:.6f}")
+
+    logger.info(f"Adaptive threshold (mode={mode}, percentile={percentile}%): {threshold:.6f}")
+    logger.info(f"  Correlation stats: mean={mean_corr:.6f}, std={std_corr:.6f}")
+    logger.info(f"  Total correlations analyzed: {len(correlation_values)}")
+
+    return float(threshold)
 
 
 def compute_correlations_for_hypergraph(
@@ -127,7 +226,7 @@ def compute_correlations_for_hypergraph(
     config: Dict,
 ) -> Dict:
     """
-    Computes correlations and builds hypergraph edges.
+    Computes correlations and builds hypergraph edges with adaptive thresholds.
 
     Args:
         correlation_data (Dict): Counts or density matrix data.
@@ -140,10 +239,33 @@ def compute_correlations_for_hypergraph(
     """
     edges = {}
     edge_id = 0
-    shots = sum(correlation_data.values()) if mode == "qasm" else 1
+    if mode == "qasm":
+        # Handle both dict and Counts objects
+        if hasattr(correlation_data, 'shots'):
+            shots = correlation_data.shots()
+        else:
+            shots = sum(int(count) for count in correlation_data.values())
+    else:
+        shots = 1
+
+    # Enhanced threshold selection with adaptive capabilities
     threshold = config.get("threshold")
-    if threshold is None:
-        threshold = 0.1 if mode == "qasm" else 0.01
+    use_adaptive = config.get("adaptive_threshold", True)
+    target_edges = config.get("target_edge_count", None)
+    percentile = config.get("threshold_percentile", 75.0)
+
+    if threshold is None or use_adaptive:
+        if use_adaptive:
+            threshold = compute_adaptive_threshold(
+                correlation_data, num_qubits, mode, target_edges, percentile
+            )
+            logger.info(f"Using adaptive threshold: {threshold:.6f}")
+        else:
+            threshold = 0.1 if mode == "qasm" else 0.01
+            logger.info(f"Using default threshold: {threshold:.6f}")
+    else:
+        logger.info(f"Using manual threshold: {threshold:.6f}")
+
     max_order = config.get("max_order", 2)
 
     if mode == "qasm":
@@ -153,7 +275,7 @@ def compute_correlations_for_hypergraph(
                 for bitstring, count in correlation_data.items():
                     bits = [int(bitstring[i]) for i in qubit_subset]
                     value = (-1) ** sum(bits)
-                    corr += value * (count / shots)
+                    corr += value * (int(count) / shots)
                 if abs(corr) > threshold:
                     edge_nodes = frozenset([f"q{i}" for i in qubit_subset])
                     edges[f"e{edge_id}"] = (edge_nodes, {"weight": corr})

@@ -23,8 +23,9 @@ from .core.noise_models import create_noise_model
 from .core.experiment_runner import ExperimentRunner
 # Lazy import for visualization components
 def get_visualizer():
-    from .visualization.visualizer import Visualizer
-    return Visualizer
+    """Get visualization functions (lazy import)."""
+    from .visualization import get_all_visualizers
+    return get_all_visualizers()
 from .config.settings import settings  # Application settings
 
 # Expose key functions and classes for easier package imports

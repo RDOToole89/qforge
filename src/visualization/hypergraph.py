@@ -36,6 +36,191 @@ from src.core.analysis.transitions import compute_error_transitions
 logger = logging.getLogger("QuantumExperiment.Visualization.Hypergraph")
 
 
+def compute_quantum_layout(
+    num_qubits: int,
+    state_type: str = "GHZ",
+    layout_type: str = "quantum_circuit"
+) -> Dict[str, tuple]:
+    """
+    Computes quantum-specific node layouts for hypergraph visualization.
+
+    Args:
+        num_qubits (int): Number of qubits in the system.
+        state_type (str): Type of quantum state (GHZ, Bell, W, etc.).
+        layout_type (str): Type of layout algorithm to use.
+
+    Returns:
+        Dict[str, tuple]: Node positions as {node_id: (x, y)}.
+    """
+    positions = {}
+
+    if layout_type == "quantum_circuit":
+        # Linear arrangement like a quantum circuit
+        for i in range(num_qubits):
+            positions[f"q{i}"] = (i, 0)
+
+    elif layout_type == "entanglement_tree":
+        # Tree layout based on entanglement structure
+        if state_type in ["GHZ", "W"]:
+            # Star topology: first qubit at center, others around
+            center_x, center_y = 0, 0
+            radius = 1.5
+            positions[f"q0"] = (center_x, center_y)
+
+            for i in range(1, num_qubits):
+                angle = 2 * np.pi * (i - 1) / (num_qubits - 1)
+                x = center_x + radius * np.cos(angle)
+                y = center_y + radius * np.sin(angle)
+                positions[f"q{i}"] = (x, y)
+
+        elif state_type == "Bell":
+            # Simple pair layout for Bell states
+            positions[f"q0"] = (-0.5, 0)
+            positions[f"q1"] = (0.5, 0)
+            for i in range(2, num_qubits):
+                positions[f"q{i}"] = (i - 1, 1)
+
+    elif layout_type == "correlation_strength":
+        # Position based on correlation strengths (placeholder - requires correlation data)
+        # For now, use a circular layout with some randomness
+        radius = 2.0
+        for i in range(num_qubits):
+            angle = 2 * np.pi * i / num_qubits
+            # Add small random offset based on qubit index for distinguishability
+            offset = 0.1 * (i % 3 - 1)
+            x = radius * np.cos(angle) + offset
+            y = radius * np.sin(angle) + offset
+            positions[f"q{i}"] = (x, y)
+
+    elif layout_type == "bloch_sphere":
+        # 3D-inspired layout projecting Bloch sphere positions to 2D
+        if num_qubits <= 3:
+            # For small systems, use special arrangements
+            if num_qubits == 2:
+                positions[f"q0"] = (0, 1)    # |0⟩ at north pole
+                positions[f"q1"] = (0, -1)   # |1⟩ at south pole
+            elif num_qubits == 3:
+                # Triangle arrangement
+                positions[f"q0"] = (0, 1)
+                positions[f"q1"] = (-0.866, -0.5)
+                positions[f"q2"] = (0.866, -0.5)
+        else:
+            # For larger systems, use spherical projection
+            for i in range(num_qubits):
+                phi = 2 * np.pi * i / num_qubits  # Azimuthal angle
+                theta = np.pi * (i + 0.5) / num_qubits  # Polar angle
+
+                # Project sphere to plane using stereographic projection
+                x = 2 * np.sin(theta) * np.cos(phi) / (1 + np.cos(theta))
+                y = 2 * np.sin(theta) * np.sin(phi) / (1 + np.cos(theta))
+                positions[f"q{i}"] = (x, y)
+
+    elif layout_type == "tensor_network":
+        # Layout based on tensor network structure
+        if num_qubits <= 4:
+            # Small tensor networks: rectangular grid
+            cols = int(np.ceil(np.sqrt(num_qubits)))
+            rows = int(np.ceil(num_qubits / cols))
+
+            for i in range(num_qubits):
+                row = i // cols
+                col = i % cols
+                positions[f"q{i}"] = (col, -row)  # Negative for upward growth
+        else:
+            # Larger networks: hexagonal close packing
+            layer = 0
+            positions_per_layer = 1
+            qubit_count = 0
+
+            while qubit_count < num_qubits:
+                if layer == 0:
+                    positions[f"q{qubit_count}"] = (0, 0)
+                    qubit_count += 1
+                else:
+                    radius = layer * 1.5
+                    for i in range(min(6 * layer, num_qubits - qubit_count)):
+                        angle = 2 * np.pi * i / (6 * layer)
+                        x = radius * np.cos(angle)
+                        y = radius * np.sin(angle)
+                        positions[f"q{qubit_count}"] = (x, y)
+                        qubit_count += 1
+                layer += 1
+
+    else:
+        # Default to circular layout
+        radius = max(1.5, num_qubits * 0.3)
+        for i in range(num_qubits):
+            angle = 2 * np.pi * i / num_qubits
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            positions[f"q{i}"] = (x, y)
+
+    logger.info(f"Generated {layout_type} layout for {num_qubits} qubits in {state_type} state")
+    return positions
+
+
+def get_quantum_color_scheme(
+    num_qubits: int,
+    state_type: str = "GHZ",
+    scheme: str = "entanglement"
+) -> Dict[str, str]:
+    """
+    Generate quantum-aware color schemes for nodes and edges.
+
+    Args:
+        num_qubits (int): Number of qubits.
+        state_type (str): Type of quantum state.
+        scheme (str): Color scheme type.
+
+    Returns:
+        Dict[str, str]: Color mapping for nodes.
+    """
+    colors = {}
+
+    if scheme == "entanglement":
+        # Color based on entanglement role
+        if state_type in ["GHZ", "W"]:
+            # Special color for the "central" qubit
+            colors[f"q0"] = "#FF6B6B"  # Red for central qubit
+
+            # Gradient for other qubits
+            for i in range(1, num_qubits):
+                intensity = 1.0 - (i / num_qubits) * 0.5
+                blue_val = int(255 * intensity)
+                colors[f"q{i}"] = f"#{blue_val:02x}{blue_val:02x}FF"
+
+        elif state_type == "Bell":
+            # Symmetric colors for Bell pairs
+            colors[f"q0"] = "#FF6B6B"  # Red
+            colors[f"q1"] = "#4ECDC4"  # Teal
+            for i in range(2, num_qubits):
+                colors[f"q{i}"] = "#95E1D3"  # Light green
+
+    elif scheme == "bloch_phase":
+        # Color based on Bloch sphere position (simulated)
+        for i in range(num_qubits):
+            phase = 2 * np.pi * i / num_qubits
+            r = int(127 + 127 * np.cos(phase))
+            g = int(127 + 127 * np.cos(phase + 2*np.pi/3))
+            b = int(127 + 127 * np.cos(phase + 4*np.pi/3))
+            colors[f"q{i}"] = f"#{r:02x}{g:02x}{b:02x}"
+
+    elif scheme == "correlation_strength":
+        # Use a colormap based on correlation strength (placeholder)
+        cmap = cm.get_cmap('viridis')
+        for i in range(num_qubits):
+            color_val = cmap(i / max(1, num_qubits - 1))
+            colors[f"q{i}"] = mcolors.to_hex(color_val)
+
+    else:
+        # Default quantum colors
+        quantum_colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
+        for i in range(num_qubits):
+            colors[f"q{i}"] = quantum_colors[i % len(quantum_colors)]
+
+    return colors
+
+
 def plot_hypergraph(
     correlation_data: Union[Dict, List[Dict]],
     state_type: Optional[str] = None,
@@ -66,11 +251,22 @@ def plot_hypergraph(
     config = config or {}
     config.setdefault("max_order", 2)
     config.setdefault("threshold", None)
+    config.setdefault("adaptive_threshold", True)
+    config.setdefault("target_edge_count", None)
+    config.setdefault("threshold_percentile", 75.0)
     config.setdefault("symmetry_analysis", False)
     config.setdefault("plot_transitions", False)
     config.setdefault("plot_bloch", False)
     config.setdefault("node_color", "blue")
     config.setdefault("edge_color", "red")
+    config.setdefault("layout", "entanglement_tree")
+    config.setdefault("use_quantum_layout", True)
+    config.setdefault("layout_algorithm", "spring")
+    config.setdefault("color_scheme", "entanglement")
+    config.setdefault("use_quantum_colors", True)
+    config.setdefault("node_size", 800)
+    config.setdefault("node_alpha", 0.8)
+    config.setdefault("label_font_size", 12)
 
     plot_closed_with_ctrl_c = False
 
@@ -184,7 +380,10 @@ def plot_single_hypergraph(
     else:
         first_key = next(iter(correlation_data.keys()))
         num_qubits = len(first_key)
-        shots = sum(correlation_data.values())
+        if hasattr(correlation_data, 'shots'):
+            shots = correlation_data.shots()
+        else:
+            shots = sum(int(count) for count in correlation_data.values())
 
     # Use analysis modules for computations
     edges = compute_correlations_for_hypergraph(
@@ -226,8 +425,38 @@ def plot_single_hypergraph(
         }
         H = hnx.Hypergraph(Hedges)
 
-        # Position nodes
-        pos = nx.spring_layout(H, seed=42)
+        # Enhanced quantum-specific node positioning
+        layout_type = config.get("layout", "quantum_circuit")
+        use_quantum_layout = config.get("use_quantum_layout", True)
+
+        if use_quantum_layout and state_type:
+            # Use quantum-specific layouts
+            pos = compute_quantum_layout(num_qubits, state_type, layout_type)
+            logger.info(f"Using quantum layout: {layout_type} for {state_type} state")
+        else:
+            # Fallback to traditional layout algorithms
+            layout_algorithm = config.get("layout_algorithm", "spring")
+            if layout_algorithm == "spring":
+                pos = nx.spring_layout(H, seed=42)
+            elif layout_algorithm == "circular":
+                pos = nx.circular_layout(H)
+            elif layout_algorithm == "spectral":
+                pos = nx.spectral_layout(H)
+            else:
+                pos = nx.spring_layout(H, seed=42)
+            logger.info(f"Using traditional layout: {layout_algorithm}")
+
+        # Get quantum-aware node colors
+        color_scheme = config.get("color_scheme", "entanglement")
+        use_quantum_colors = config.get("use_quantum_colors", True)
+
+        if use_quantum_colors and state_type:
+            node_colors = get_quantum_color_scheme(num_qubits, state_type, color_scheme)
+            node_color_list = [node_colors.get(node, config.get("node_color", "blue")) for node in H.nodes]
+            logger.info(f"Using quantum color scheme: {color_scheme}")
+        else:
+            node_color_list = config.get("node_color", "blue")
+            logger.info("Using traditional node coloring")
 
         # Build style info for edges
         cmap = cm.RdYlGn
@@ -250,11 +479,20 @@ def plot_single_hypergraph(
                 label_text += " *"
             edge_labels[frozenset(edge_nodes)] = label_text
 
-        # Draw the graph
+        # Draw the graph with quantum-aware styling
         nx.draw_networkx_nodes(
-            H, pos, node_color=config.get("node_color", "blue"), ax=ax_graph
+            H, pos,
+            node_color=node_color_list,
+            node_size=config.get("node_size", 800),
+            alpha=config.get("node_alpha", 0.8),
+            ax=ax_graph
         )
-        nx.draw_networkx_labels(H, pos, ax=ax_graph)
+        nx.draw_networkx_labels(
+            H, pos,
+            font_size=config.get("label_font_size", 12),
+            font_weight="bold",
+            ax=ax_graph
+        )
 
         # Draw hyperedges as polygons
         for ekey, style_dict in edge_styles.items():
@@ -289,13 +527,25 @@ def plot_single_hypergraph(
                 color="black",
             )
 
-        # Title
+        # Enhanced title with layout and threshold information
         title_str = f"{state_type or 'Quantum'} State Hypergraph"
         if noise_type:
             title_str += f" with {noise_type} Noise"
         if time_step is not None:
             title_str += f" (t={time_step:.2f})"
-        ax_graph.set_title(title_str)
+
+        # Add layout and threshold info as subtitle
+        layout_info = f"Layout: {layout_type}" if use_quantum_layout else "Layout: Traditional"
+        threshold_used = config.get("threshold")
+        if config.get("adaptive_threshold", True):
+            threshold_info = f"Adaptive Threshold: {threshold_used:.4f}" if threshold_used else "Adaptive Threshold"
+        else:
+            threshold_info = f"Manual Threshold: {threshold_used:.4f}" if threshold_used else "Default Threshold"
+
+        ax_graph.set_title(title_str, fontsize=14, fontweight='bold')
+        ax_graph.text(0.5, 0.95, f"{layout_info} | {threshold_info}",
+                     transform=ax_graph.transAxes, ha='center', va='top',
+                     fontsize=10, style='italic', alpha=0.8)
 
         # Add colorbar
         sm = cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -330,6 +580,22 @@ def plot_single_hypergraph(
         plot_func()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         logger.info(f"Saved hypergraph to {save_path}")
+        plt.close()
+        return False
+    elif state_type:  # Auto-generate organized save path
+        from .save_manager import get_organized_save_path
+        experiment_config = {
+            'state_type': state_type,
+            'noise_type': noise_type,
+            'num_qubits': num_qubits
+        }
+        auto_save_path = get_organized_save_path(
+            viz_type='hypergraph',
+            experiment_config=experiment_config
+        )
+        plot_func()
+        plt.savefig(auto_save_path, dpi=300, bbox_inches="tight")
+        logger.info(f"Hypergraph auto-saved to {auto_save_path}")
         plt.close()
         return False
     else:

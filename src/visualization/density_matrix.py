@@ -237,5 +237,19 @@ def plot_density_matrix(
         plt.savefig(save_path, bbox_inches="tight", dpi=300)
         logger.info(f"Saved density matrix plot to {save_path} (dimensions: {dm_array.shape})")
         plt.close()
+    elif state_type:  # Auto-generate organized save path
+        from .save_manager import get_organized_save_path
+        experiment_config = {
+            'state_type': state_type,
+            'noise_type': noise_type,
+            'num_qubits': int(np.log2(dm_array.shape[0]))
+        }
+        auto_save_path = get_organized_save_path(
+            viz_type='density_matrix',
+            experiment_config=experiment_config
+        )
+        plt.savefig(auto_save_path, bbox_inches="tight", dpi=300)
+        logger.info(f"Density matrix auto-saved to {auto_save_path} (dimensions: {dm_array.shape})")
+        plt.close()
     else:
         plt.show()

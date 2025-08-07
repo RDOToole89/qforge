@@ -48,15 +48,11 @@ def configure_matplotlib_backend() -> None:
 configure_matplotlib_backend()
 
 # Lazy loading functions for visualization components
-def get_visualization_handler() -> Callable:
-    """Get visualization handler (lazy import)."""
-    from .visualization_handler import VisualizationHandler
-    return VisualizationHandler
 
-def get_visualizer() -> Callable:
-    """Get main visualizer class (lazy import)."""
-    from .visualizer import Visualizer
-    return Visualizer
+def get_save_manager() -> Callable:
+    """Get save path manager (lazy import)."""
+    from .save_manager import get_save_manager
+    return get_save_manager
 
 def get_hypergraph_visualizer() -> Callable:
     """Get hypergraph visualizer (lazy import)."""
@@ -85,8 +81,7 @@ def get_all_visualizers() -> dict:
 # Export main functions and classes
 __all__ = [
     'configure_matplotlib_backend',
-    'get_visualization_handler',
-    'get_visualizer',
+    'get_save_manager',
     'get_hypergraph_visualizer',
     'get_histogram_visualizer',
     'get_density_matrix_visualizer',
