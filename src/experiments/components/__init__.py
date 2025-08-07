@@ -19,18 +19,18 @@ from .metadata import ExperimentMetadata, ComponentMetadata
 __all__ = [
     # Base classes
     "BaseExperiment",
-    "ExperimentComponent", 
-    
+    "ExperimentComponent",
+
     # Mixins
     "NoiseMixin",
-    "AnalysisMixin", 
+    "AnalysisMixin",
     "VisualizationMixin",
     "ResearchMixin",
-    
+
     # Validators
     "ParameterValidator",
     "ConfigurationValidator",
-    
+
     # Metadata
     "ExperimentMetadata",
     "ComponentMetadata",

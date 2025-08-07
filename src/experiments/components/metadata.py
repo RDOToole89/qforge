@@ -14,7 +14,7 @@ import json
 @dataclass
 class ComponentMetadata:
     """Metadata for an experiment component."""
-    
+
     name: str
     version: str
     component_type: str
@@ -23,7 +23,7 @@ class ComponentMetadata:
     author: str = ""
     tags: List[str] = field(default_factory=list)
     parameters: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary format."""
         return {
@@ -36,16 +36,16 @@ class ComponentMetadata:
             "tags": self.tags,
             "parameters": self.parameters
         }
-        
+
     def to_json(self) -> str:
         """Convert metadata to JSON string."""
         return json.dumps(self.to_dict(), indent=2)
 
 
-@dataclass 
+@dataclass
 class ExperimentMetadata:
     """Metadata for a complete experiment."""
-    
+
     name: str
     experiment_id: str
     created_at: datetime
@@ -57,7 +57,7 @@ class ExperimentMetadata:
     tags: List[str] = field(default_factory=list)
     research_type: Optional[str] = None
     parameters: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary format."""
         return {
@@ -73,16 +73,16 @@ class ExperimentMetadata:
             "research_type": self.research_type,
             "parameters": self.parameters
         }
-        
+
     def to_json(self) -> str:
         """Convert metadata to JSON string."""
         return json.dumps(self.to_dict(), indent=2)
-        
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ExperimentMetadata':
         """Create metadata from dictionary."""
         created_at = datetime.fromisoformat(data["created_at"]) if isinstance(data["created_at"], str) else data["created_at"]
-        
+
         return cls(
             name=data["name"],
             experiment_id=data["experiment_id"],

@@ -20,7 +20,7 @@ Designed for modular quantum experiments, extensibility, and research integratio
 
 from .core.state_preparation import prepare_state
 from .core.noise_models import create_noise_model
-from .core.experiment_runner import run_experiment
+from .core.experiment_runner import ExperimentRunner
 # Lazy import for visualization components
 def get_visualizer():
     from .visualization.visualizer import Visualizer
@@ -31,7 +31,7 @@ from .config.settings import settings  # Application settings
 __all__ = [
     "prepare_state",
     "create_noise_model",
-    "run_experiment",
+    "ExperimentRunner",
     "get_visualizer",
     "settings",
 ]

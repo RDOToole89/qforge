@@ -18,6 +18,9 @@ from .state_preparation import prepare_state
 from .noise_models import create_noise_model
 from src.utils import logger as logger_utils
 
+# Initialize logger for this module
+logger = logging.getLogger("QuantumExperiment.ExperimentRunner")
+
 
 class ExperimentRunner:
     """
