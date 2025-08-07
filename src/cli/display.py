@@ -199,17 +199,17 @@ class DisplayManager:
         try:
             if isinstance(result_tuple, tuple) and len(result_tuple) >= 2:
                 circuit, results = result_tuple
-                
+
                 # Display circuit diagram
                 if hasattr(circuit, 'draw'):
                     self.display_circuit_diagram(circuit)
-                
+
                 # Display measurement results
                 if isinstance(results, dict) and 'counts' in results:
                     counts = results['counts']
-                    
+
                     self.console.print("📊 Measurement Results:")
-                    
+
                     # Create a results table
                     table = Table(
                         title="Quantum Measurement Counts",
@@ -219,29 +219,29 @@ class DisplayManager:
                     table.add_column("State", style="cyan", width=10)
                     table.add_column("Count", style="green", width=10)
                     table.add_column("Probability", style="yellow", width=12)
-                    
+
                     total_shots = sum(counts.values())
-                    
+
                     # Sort by count (descending)
                     sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-                    
+
                     for state, count in sorted_counts:
                         probability = f"{count/total_shots:.4f}"
                         table.add_row(f"|{state}⟩", str(count), probability)
-                    
+
                     self.console.print(table)
                     self.console.print(f"\n🎯 Total shots: {total_shots}")
-                
+
                 # Display metadata file if available
                 if isinstance(results, dict) and 'metadata_file' in results:
                     metadata_file = results['metadata_file']
                     if metadata_file != 'results_placeholder':
                         self.console.print(f"📁 Results saved to: {metadata_file}")
-                
+
             else:
                 # Fallback to simple display
                 self.console.print(f"📁 Results: {result_tuple}")
-                
+
         except Exception as e:
             self.console.print(f"⚠️ Error displaying results: {e}", style="yellow")
             self.console.print(f"📁 Raw results: {result_tuple}")
