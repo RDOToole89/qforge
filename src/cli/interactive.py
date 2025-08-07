@@ -21,11 +21,11 @@ from .display import DisplayManager
 class InteractiveCLI:
     """
     Interactive command-line interface for quantum experiments.
-    
+
     This class handles the interactive session, including parameter
     collection, experiment selection, and user interaction.
     """
-    
+
     def __init__(self):
         """Initialize the interactive CLI."""
         self.console = Console()
@@ -37,18 +37,20 @@ class InteractiveCLI:
             log_to_console=True,
             structured_log_file="logs/structured_logs.json",
         )
-    
+
     def print_message(self, key: str, **kwargs) -> None:
         """
         Print a console message from the MESSAGES lookup table.
-        
+
         Args:
             key (str): The key to look up the message in MESSAGES.
             **kwargs: Values to format the message with.
         """
-        message = MESSAGES.get(key, f"[bold red]Missing prompt for key: {key}[/bold red]")
+        message = MESSAGES.get(
+            key, f"[bold red]Missing prompt for key: {key}[/bold red]"
+        )
         self.console.print(message.format(**kwargs))
-    
+
     def display_quick_options(self) -> None:
         """
         Display the available quick experiment options with categories and difficulty levels.
@@ -67,60 +69,64 @@ class InteractiveCLI:
         for key, option in QUICK_EXPERIMENTS.items():
             category = option.get("category", "unknown")
             difficulty = option.get("difficulty", "unknown")
-            table.add_row(key, option["name"], category, difficulty, option["description"])
+            table.add_row(
+                key, option["name"], category, difficulty, option["description"]
+            )
 
         self.console.print(table)
-        self.console.print("\n💡 Choose an option number or press 'c' for custom parameters")
+        self.console.print(
+            "\n💡 Choose an option number or press 'c' for custom parameters"
+        )
         self.console.print(
             "📚 Categories: entanglement, topological, analysis, scaling, dynamics"
         )
         self.console.print("🎯 Difficulty: beginner, intermediate, advanced")
-    
+
     def collect_parameters(self, interactive: bool = True) -> Dict[str, Any]:
         """
         Collect experiment parameters either interactively or from command-line arguments.
-        
+
         Args:
             interactive (bool): Whether to collect parameters interactively.
-            
+
         Returns:
             Dict[str, Any]: Collected experiment parameters.
         """
         # This will be implemented by extracting the parameter collection logic
         # from the current main.py file
         args = apply_defaults({})
-        
+
         if interactive:
             # TODO: Extract parameter collection logic from main.py
             pass
-        
+
         return validate_parameters(args)
-    
+
     def run_quick_experiment(self, choice: str) -> Dict[str, Any]:
         """
         Run a quick experiment based on user choice.
-        
+
         Args:
             choice (str): The experiment choice from the user.
-            
+
         Returns:
             Dict[str, Any]: The experiment configuration.
         """
         if choice == "c":
             return self.collect_parameters(interactive=True)
-        
+
         if choice not in QUICK_EXPERIMENTS:
             self.print_message("invalid_choice")
             return self.collect_parameters(interactive=True)
-        
+
         # Use predefined configuration
         selected_option = QUICK_EXPERIMENTS[choice]
         self.console.print(f"\n✅ Selected: {selected_option['name']}")
         args = apply_defaults(selected_option["config"])
         args = validate_parameters(args)
-        
+
         return args
-    
+
     def run_interactive_session(self) -> None:
         """
         Run the main interactive session loop.
@@ -137,16 +143,16 @@ class InteractiveCLI:
             if choice == "s":
                 self.print_message("running_with_defaults")
                 self.display_quick_options()
-                
+
                 # Get available options
                 valid_choices = list(QUICK_EXPERIMENTS.keys()) + ["c"]
-                
+
                 quick_choice = self.input_handler.get_input(
                     "quick_experiment_choice", "1", valid_choices
                 )
-                
+
                 args = self.run_quick_experiment(quick_choice)
-                
+
             elif choice == "n":
                 args = self.collect_parameters(interactive=True)
             elif choice == "q":
@@ -176,8 +182,8 @@ class InteractiveCLI:
 def run_interactive() -> None:
     """
     Run the interactive CLI session.
-    
+
     This is the main entry point for the interactive mode.
     """
     cli = InteractiveCLI()
-    cli.run_interactive_session() 
+    cli.run_interactive_session()

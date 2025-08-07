@@ -49,7 +49,7 @@ from src.config.constants import (
 )
 from src.config.defaults import DEFAULT_ERROR_RATE
 from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
-from src.noise_models.noise_factory import NOISE_CLASSES
+from src.core.noise_models.noise_factory import NOISE_CLASSES
 from src.utils.messages import MESSAGES  # Import the messages lookup table
 
 # Suppress Qiskit deprecation warnings

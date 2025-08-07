@@ -17,8 +17,8 @@ import logging
 import time
 import numpy as np  # Added for trace calculation
 
-from src.state_preparation import prepare_state
-from src.noise_models import create_noise_model
+from src.core.state_preparation import prepare_state
+from src.core.noise_models import create_noise_model
 from src.utils import logger as logger_utils
 
 # Configure logger

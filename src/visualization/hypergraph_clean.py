@@ -19,19 +19,19 @@ from typing import Optional, Dict, List, Union, Callable
 from scipy.spatial import ConvexHull
 
 # Import analysis modules
-from src.analysis.correlations import (
+from src.core.analysis.correlations import (
     compute_pairwise_correlations,
     compute_correlations_for_hypergraph,
 )
-from src.analysis.decoherence import compute_fubini_study_distance
-from src.analysis.symmetry import (
+from src.core.analysis.decoherence import compute_fubini_study_distance
+from src.core.analysis.symmetry import (
     compute_su2_symmetry,
     compute_su3_symmetry,
     compute_parity_distribution,
 )
-from src.analysis.clustering import cluster_qubits
-from src.analysis.bloch import compute_bloch_vector
-from src.analysis.transitions import compute_error_transitions
+from src.core.analysis.clustering import cluster_qubits
+from src.core.analysis.bloch import compute_bloch_vector
+from src.core.analysis.transitions import compute_error_transitions
 
 logger = logging.getLogger("QuantumExperiment.Visualization.Hypergraph")
 

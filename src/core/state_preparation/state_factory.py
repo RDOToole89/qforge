@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit
 from typing import Optional, Dict
 import logging
 
-from src.state_preparation.state_constants import STATE_CLASSES
+from src.core.state_preparation.state_constants import STATE_CLASSES
 from src.utils import logger as logger_utils
 
 logger = logging.getLogger("QuantumExperiment.StatePreparation")

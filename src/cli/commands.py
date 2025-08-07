@@ -27,9 +27,7 @@ from src.cli.display import DisplayManager
     help="Type of noise model",
 )
 @click.option(
-    "--noise-enabled/--no-noise", 
-    default=True, 
-    help="Enable or disable noise"
+    "--noise-enabled/--no-noise", default=True, help="Enable or disable noise"
 )
 @click.option("--shots", type=int, help="Number of shots for qasm simulation")
 @click.option(
@@ -41,19 +39,13 @@ from src.cli.display import DisplayManager
 @click.option("--z-prob", type=float, help="Z probability for PHASE_FLIP noise")
 @click.option("--i-prob", type=float, help="I probability for PHASE_FLIP noise")
 @click.option(
-    "--t1", 
-    type=float, 
-    help="T1 relaxation time (µs) for THERMAL_RELAXATION noise"
+    "--t1", type=float, help="T1 relaxation time (µs) for THERMAL_RELAXATION noise"
 )
 @click.option(
-    "--t2", 
-    type=float, 
-    help="T2 dephasing time (µs) for THERMAL_RELAXATION noise"
+    "--t2", type=float, help="T2 dephasing time (µs) for THERMAL_RELAXATION noise"
 )
 @click.option(
-    "--interactive/--no-interactive", 
-    default=True, 
-    help="Run in interactive mode"
+    "--interactive/--no-interactive", default=True, help="Run in interactive mode"
 )
 def run_experiment_command(
     num_qubits: Optional[int],
@@ -71,12 +63,13 @@ def run_experiment_command(
 ) -> None:
     """
     Quantum Experiment CLI Command
-    
+
     A CLI tool to run quantum experiments with configurable parameters,
     supporting interactive and non-interactive modes.
     """
     if interactive:
         from src.cli.interactive import run_interactive
+
         run_interactive()
     else:
         # Non-interactive mode
@@ -100,7 +93,7 @@ def run_experiment_command(
             "custom_params": None,
         }
         args = apply_defaults(args)
-        
+
         # TODO: Run experiment with non-interactive args
         # This will be implemented when we extract the experiment running logic
         console = Console()
@@ -110,7 +103,9 @@ def run_experiment_command(
 
 
 @click.command()
-@click.option("--list", "list_experiments", is_flag=True, help="List available experiments")
+@click.option(
+    "--list", "list_experiments", is_flag=True, help="List available experiments"
+)
 @click.option("--category", type=str, help="Filter experiments by category")
 @click.option("--difficulty", type=str, help="Filter experiments by difficulty")
 def list_experiments_command(
@@ -122,10 +117,10 @@ def list_experiments_command(
     List available experiments.
     """
     from src.config.quick_experiments import QUICK_EXPERIMENTS
-    
+
     console = Console()
     display_manager = DisplayManager(console)
-    
+
     if list_experiments:
         # Display all experiments
         for key, experiment in QUICK_EXPERIMENTS.items():
@@ -133,11 +128,8 @@ def list_experiments_command(
                 continue
             if difficulty and experiment.get("difficulty") != difficulty:
                 continue
-            
-            display_manager.display_experiment_info({
-                "key": key,
-                **experiment
-            })
+
+            display_manager.display_experiment_info({"key": key, **experiment})
 
 
 @click.command()
@@ -147,17 +139,19 @@ def run_preset_experiment_command(experiment_key: str) -> None:
     Run a preset experiment by key.
     """
     from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
-    
+
     if experiment_key not in QUICK_EXPERIMENTS:
         click.echo(f"❌ Experiment '{experiment_key}' not found.")
         return
-    
+
     experiment_info = get_experiment_info(experiment_key)
     console = Console()
     display_manager = DisplayManager(console)
-    
+
     display_manager.display_experiment_info(experiment_info)
-    
+
     # TODO: Run the experiment
     # This will be implemented when we extract the experiment running logic
-    display_manager.display_info_message("Preset experiment execution not yet implemented") 
+    display_manager.display_info_message(
+        "Preset experiment execution not yet implemented"
+    )

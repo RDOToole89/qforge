@@ -9,4 +9,4 @@ from .interactive import InteractiveCLI
 from .commands import run_experiment_command
 from .display import DisplayManager
 
-__all__ = ["InteractiveCLI", "run_experiment_command", "DisplayManager"] 
+__all__ = ["InteractiveCLI", "run_experiment_command", "DisplayManager"]

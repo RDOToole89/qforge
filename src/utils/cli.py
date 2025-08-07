@@ -12,8 +12,8 @@ from src.config import (
 
 def parse_args() -> argparse.Namespace:
    # Import STATE_CLASSES locally to break the circular dependency.
-    from src.state_preparation.state_constants import STATE_CLASSES
-    from src.noise_models import NOISE_CLASSES
+    from src.core.state_preparation.state_constants import STATE_CLASSES
+    from src.core.noise_models import NOISE_CLASSES
     """
     Parses command-line arguments for experiment execution.
     """

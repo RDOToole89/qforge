@@ -7,14 +7,18 @@ through the command-line interface.
 
 import click
 from src.cli.interactive import run_interactive
-from src.cli.commands import run_experiment_command, list_experiments_command, run_preset_experiment_command
+from src.cli.commands import (
+    run_experiment_command,
+    list_experiments_command,
+    run_preset_experiment_command,
+)
 
 
 @click.group()
 def cli():
     """
     Quantum Experiment Framework CLI
-    
+
     A research-grade quantum experiment framework for conducting
     quantum computing experiments with configurable parameters,
     noise models, and visualization capabilities.
@@ -32,7 +36,7 @@ cli.add_command(run_preset_experiment_command, name="preset")
 def interactive():
     """
     Run the quantum experiment framework in interactive mode.
-    
+
     This launches the interactive CLI where you can select experiments,
     configure parameters, and run quantum simulations with rich output.
     """
@@ -40,4 +44,4 @@ def interactive():
 
 
 if __name__ == "__main__":
-    cli() 
+    cli()

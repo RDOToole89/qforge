@@ -2,8 +2,8 @@
 
 import numpy as np
 from typing import Optional, List, Union, Type
-from src.state_preparation.state_constants import STATE_CLASSES
-from src.noise_models import NOISE_CLASSES
+from src.core.state_preparation.state_constants import STATE_CLASSES
+from src.core.noise_models import NOISE_CLASSES
 
 
 def validate_inputs(

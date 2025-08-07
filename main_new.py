@@ -16,6 +16,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Set matplotlib backend for interactive plotting
 import matplotlib
+
 matplotlib.use("TkAgg")
 
 from src.cli.main import cli
@@ -24,7 +25,7 @@ from src.cli.main import cli
 def main():
     """
     Main entry point for the Quantum Experiment Framework.
-    
+
     This function sets up the environment and launches the CLI.
     """
     try:
@@ -38,4 +39,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()
