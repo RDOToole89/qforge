@@ -48,6 +48,7 @@ from src.config.constants import (
     SINGLE_QUBIT_NOISE_TYPES,
 )
 from src.config.defaults import DEFAULT_ERROR_RATE
+from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
 from src.noise_models.noise_factory import NOISE_CLASSES
 from src.utils.messages import MESSAGES  # Import the messages lookup table
 
@@ -871,6 +872,43 @@ def main(
         qc, result, _ = run_and_visualize(args, experiment_id)
 
 
+def get_quick_experiment_options() -> Dict:
+    """
+    Returns predefined experiment configurations for quick selection.
+    """
+    return QUICK_EXPERIMENTS
+
+
+def display_quick_options() -> None:
+    """
+    Displays the available quick experiment options with categories and difficulty levels.
+    """
+    options = get_quick_experiment_options()
+
+    table = Table(
+        title="🚀 Quick Experiment Options",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Option", style="cyan", width=8)
+    table.add_column("Name", style="green", width=25)
+    table.add_column("Category", style="blue", width=12)
+    table.add_column("Difficulty", style="magenta", width=12)
+    table.add_column("Description", style="yellow")
+
+    for key, option in options.items():
+        category = option.get("category", "unknown")
+        difficulty = option.get("difficulty", "unknown")
+        table.add_row(key, option["name"], category, difficulty, option["description"])
+
+    console.print(table)
+    console.print("\n💡 Choose an option number or press 'c' for custom parameters")
+    console.print(
+        "📚 Categories: entanglement, topological, analysis, scaling, dynamics"
+    )
+    console.print("🎯 Difficulty: beginner, intermediate, advanced")
+
+
 def interactive_experiment():
     """
     Runs the quantum experiment interactively with rerun and skip options.
@@ -886,23 +924,25 @@ def interactive_experiment():
 
         if choice == "s":
             print_message("running_with_defaults")
-            viz_choice = input_handler.get_input(
-                "viz_type_prompt", "p", ["p", "h", "n"]
+            display_quick_options()
+
+            # Get available options
+            options = get_quick_experiment_options()
+            valid_choices = list(options.keys()) + ["c"]
+
+            quick_choice = input_handler.get_input(
+                "quick_experiment_choice", "1", valid_choices
             )
-            args = collect_parameters(interactive=True)
-            args["visualization_type"] = (
-                "plot"
-                if viz_choice in ["p", "plot"]
-                else "hypergraph" if viz_choice in ["h", "hypergraph"] else "none"
-            )
-            if args["visualization_type"] != "none":
-                args["save_plot"] = (
-                    input_handler.get_input("save_plot_prompt", "").strip() or None
-                )
-                if args["visualization_type"] == "plot" and args["sim_mode"] == "qasm":
-                    args["min_occurrences"] = input_handler.get_numeric_input(
-                        "min_occurrences_prompt", "0"
-                    )
+
+            if quick_choice == "c":
+                args = collect_parameters(interactive=True)
+            else:
+                # Use predefined configuration
+                selected_option = options[quick_choice]
+                console.print(f"\n✅ Selected: {selected_option['name']}")
+                args = apply_defaults(selected_option["config"])
+                args = validate_parameters(args)
+
         elif choice == "n":
             args = collect_parameters(interactive=True)
         elif choice == "q":

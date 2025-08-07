@@ -98,6 +98,7 @@ MESSAGES = {
     "switched_to_plot": "[bold blue]Switching visualization type to 'plot' (histogram/density matrix).[/bold blue]",
     "switched_to_plot_density": "[bold blue]Switching visualization type to 'plot' (density matrix).[/bold blue]",
     "noise_enabled": "[bold green]Noise has been enabled for this configuration.[/bold green]",
+    "quick_experiment_choice": "Choose experiment option [{default}]: ",
     "config_cancelled": "[bold yellow]Configuration cancelled. Returning to prompt...[/bold yellow]",
     # Experiment execution messages
     "running_with_defaults": "\n[bold blue]⚡ Running with default configuration...[/bold blue]\n",
