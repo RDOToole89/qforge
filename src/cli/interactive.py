@@ -240,25 +240,26 @@ class InteractiveCLI:
             # Run the experiment
             try:
                 from src.experiments.manager import get_experiment_manager
-                
+
                 self.display_manager.display_info_message("🚀 Running quantum experiment...")
-                
+
                 # Get experiment manager and run experiment
                 em = get_experiment_manager()
-                
+
                 # Run experiment using user parameters as custom params
                 # Filter out metadata that shouldn't go to the experiment runner
-                experiment_params = {k: v for k, v in args.items() 
+                experiment_params = {k: v for k, v in args.items()
                                    if k not in ['name', 'description', 'category', 'difficulty']}
-                
+
                 result = em.run_experiment("ghz_basic", custom_params=experiment_params)
-                
+
                 if result:
                     self.display_manager.display_success_message("✅ Experiment completed successfully!")
-                    self.display_manager.display_info_message(f"📁 Results: {result}")
+                    # Display comprehensive results including circuit diagram
+                    self.display_manager.display_experiment_results(result)
                 else:
                     self.display_manager.display_error_message("❌ Experiment failed")
-                    
+
             except Exception as e:
                 self.display_manager.display_error_message(f"❌ Error running experiment: {str(e)}")
                 continue
