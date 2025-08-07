@@ -26,6 +26,14 @@ from .symmetry import (
 from .clustering import cluster_qubits
 from .bloch import compute_bloch_vector
 from .transitions import compute_error_transitions
+from .information_theory import (
+    compute_shannon_entropy,
+    compute_kl_divergence,
+    compute_total_variation_distance,
+    compute_mutual_information,
+    compute_qubit_wise_bias,
+    compute_research_metrics,
+)
 
 __all__ = [
     # Correlations
@@ -44,4 +52,11 @@ __all__ = [
     "compute_bloch_vector",
     # Transitions
     "compute_error_transitions",
+    # Information Theory
+    "compute_shannon_entropy",
+    "compute_kl_divergence",
+    "compute_total_variation_distance",
+    "compute_mutual_information",
+    "compute_qubit_wise_bias",
+    "compute_research_metrics",
 ]

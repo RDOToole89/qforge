@@ -292,10 +292,43 @@ class ExperimentManager:
             # Run the experiment
             self.logger.info(f"Running experiment with params: {experiment_params}")
             runner = ExperimentRunner(experiment_id)
-            result = runner.run_experiment(**experiment_params)
+            circuit, result = runner.run_experiment(**experiment_params)
 
-            self.logger.info(f"Successfully ran experiment: {experiment_id}")
-            return result
+            # Check if research-grade analysis is enabled
+            enable_research = params.get('enable_research_metrics', False)
+            research_type = experiment.get('research_type', None)
+
+            if enable_research or research_type:
+                # Import research handler
+                from ..core.research_handler import ResearchExperimentHandler
+
+                # Create research analysis
+                research_handler = ResearchExperimentHandler()
+                full_config = experiment.get('config', {}).copy()
+                full_config.update(params)
+
+                research_analysis = research_handler.process_experiment_result(
+                    circuit=circuit,
+                    result=result,
+                    experiment_config=full_config,
+                    experiment_id=experiment_id
+                )
+
+                # Save research results
+                result_file = research_handler.save_research_result(research_analysis)
+                self.logger.info(f"Research analysis saved to: {result_file}")
+
+                # Return both standard result and research analysis
+                return {
+                    'circuit': circuit,
+                    'result': result,
+                    'research_analysis': research_analysis,
+                    'research_file': result_file
+                }
+            else:
+                # Standard return format for backward compatibility
+                self.logger.info(f"Successfully ran experiment: {experiment_id}")
+                return (circuit, result)
 
         except Exception as e:
             self.logger.error(f"Failed to run experiment {experiment_id}: {e}")

@@ -6,6 +6,7 @@ quantum computing research and advanced studies.
 """
 
 from typing import Dict, Any
+from .ghz_structured_decoherence import GHZ_STRUCTURED_DECOHERENCE_EXPERIMENTS
 
 RESEARCH_EXPERIMENTS: Dict[str, Dict[str, Any]] = {
     "quantum_advantage": {
@@ -57,4 +58,7 @@ RESEARCH_EXPERIMENTS: Dict[str, Dict[str, Any]] = {
             "error_rate": 0.1,
         },
     },
+
+    # Merge GHZ Structured Decoherence experiments
+    **GHZ_STRUCTURED_DECOHERENCE_EXPERIMENTS,
 }
