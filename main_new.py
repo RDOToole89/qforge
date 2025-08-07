@@ -141,6 +141,54 @@ def list_experiments():
         logger.error(f"❌ Error listing experiments: {e}")
         sys.exit(1)
 
+def run_parameter_sweep(experiment_name: str):
+    """Run a parameter sweep on the specified experiment."""
+    try:
+        logger.info(f"🔄 Starting parameter sweep for experiment: {experiment_name}")
+
+        # Import core modules
+        get_experiment_manager, ExperimentRunner, settings, get_all_visualizers = import_core_modules()
+
+        # Import parameter sweep engine
+        from src.core.parameter_sweep import ParameterSweepEngine
+
+        # Initialize sweep engine
+        sweep_engine = ParameterSweepEngine()
+
+        # For structured decoherence experiments, run noise level sweep
+        if 'ghz_structured_decoherence' in experiment_name or 'structured_decoherence' in experiment_name:
+            logger.info("🔬 Running structured decoherence noise level sweep")
+            results = sweep_engine.run_noise_level_sweep(
+                base_experiment_id=experiment_name,
+                noise_levels=[0.01, 0.05, 0.10, 0.20],
+                runs_per_level=3
+            )
+        else:
+            # Generic parameter sweep for other experiments
+            logger.info("⚙️ Running generic parameter sweep")
+            results = sweep_engine.run_parameter_sweep(
+                base_experiment_id=experiment_name,
+                parameter_ranges={
+                    "error_rate": [0.01, 0.05, 0.10],
+                    "shots": [1024, 4096]
+                },
+                runs_per_config=2
+            )
+
+        logger.info("✅ Parameter sweep completed successfully!")
+        logger.info(f"📊 Total experiments: {results['sweep_metadata']['total_experiments']}")
+        logger.info(f"📈 Success rate: {results['aggregated_analysis']['statistical_summary']['success_rate']:.2%}")
+
+        # Print key findings
+        if results['aggregated_analysis']['key_findings']:
+            logger.info("🎯 Key findings:")
+            for finding in results['aggregated_analysis']['key_findings']:
+                logger.info(f"   • {finding}")
+
+    except Exception as e:
+        logger.error(f"❌ Parameter sweep failed: {e}")
+        sys.exit(1)
+
 def show_help():
     """Show help information."""
     print("""
@@ -150,6 +198,7 @@ Usage:
     python3 main_new.py                    # Interactive CLI mode
     python3 main_new.py --list            # List available experiments
     python3 main_new.py --run <exp_name>  # Run specific experiment
+    python3 main_new.py --sweep <exp_name>  # Run parameter sweep on experiment
     QUANTUM_INTERACTIVE=false python3 main_new.py  # Non-interactive mode
 
 Environment Variables:
@@ -159,6 +208,7 @@ Environment Variables:
 Examples:
     python3 main_new.py --list
     python3 main_new.py --run ghz_basic
+    python3 main_new.py --sweep ghz_structured_decoherence_ref
     QUANTUM_INTERACTIVE=false python3 main_new.py --run w_phase_flip
     """)
 
@@ -179,6 +229,8 @@ def main():
         list_experiments()
     elif args[0] == '--run' and len(args) > 1:
         run_experiment_by_name(args[1])
+    elif args[0] == '--sweep' and len(args) > 1:
+        run_parameter_sweep(args[1])
     else:
         print("❌ Invalid arguments. Use --help for usage information.")
         sys.exit(1)
