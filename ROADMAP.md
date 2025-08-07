@@ -91,18 +91,18 @@ qiskit-experiments/
 
 #### **Step 1.1: Create CLI Module Structure**
 
-- [ ] Create `src/cli/` directory
-- [ ] Move CLI logic from `main.py` to `src/cli/interactive.py`
-- [ ] Create `src/cli/commands.py` for Click commands
-- [ ] Create `src/cli/display.py` for Rich terminal output
-- [ ] Simplify `main.py` to just entry point
+- [x] Create `src/cli/` directory
+- [x] Move CLI logic from `main.py` to `src/cli/interactive.py`
+- [x] Create `src/cli/commands.py` for Click commands
+- [x] Create `src/cli/display.py` for Rich terminal output
+- [x] Simplify `main.py` to just entry point
 
 #### **Step 1.2: Create Core Module Structure**
 
-- [ ] Create `src/core/` directory
-- [ ] Move `state_preparation/`, `noise_models/`, `analysis/` to `src/core/`
-- [ ] Create `src/core/experiment_runner.py` from `src/run_experiment.py`
-- [ ] Update all imports to reflect new structure
+- [x] Create `src/core/` directory
+- [x] Move `state_preparation/`, `noise_models/`, `analysis/` to `src/core/`
+- [x] Create `src/core/experiment_runner.py` from `src/run_experiment.py`
+- [x] Update all imports to reflect new structure
 
 #### **Step 1.3: Refactor Configuration**
 
@@ -288,10 +288,10 @@ qiskit-experiments/
 
 ### **Phase 1 Success**
 
-- [ ] `main.py` reduced to <100 lines
-- [ ] CLI logic properly separated into focused modules
-- [ ] All existing functionality preserved
-- [ ] Clear separation between CLI and core logic
+- [x] `main.py` reduced to <100 lines
+- [x] CLI logic properly separated into focused modules
+- [x] All existing functionality preserved
+- [x] Clear separation between CLI and core logic
 
 ### **Phase 2 Success**
 

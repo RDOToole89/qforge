@@ -2,14 +2,7 @@
 
 from typing import Dict, Optional
 from rich.console import Console
-from .defaults import (
-    DEFAULT_NUM_QUBITS,
-    DEFAULT_STATE_TYPE,
-    DEFAULT_NOISE_TYPE,
-    DEFAULT_NOISE_ENABLED,
-    DEFAULT_SHOTS,
-    DEFAULT_SIM_MODE,
-)
+from .settings import settings
 from .constants import (
     VALID_NOISE_TYPES,
     VALID_STATE_TYPES,
@@ -167,12 +160,12 @@ def apply_defaults(args: Dict) -> Dict:
         Dict: Parameters with defaults applied.
     """
     defaults = {
-        "num_qubits": DEFAULT_NUM_QUBITS,
-        "state_type": DEFAULT_STATE_TYPE,
-        "noise_type": DEFAULT_NOISE_TYPE,
-        "noise_enabled": DEFAULT_NOISE_ENABLED,
-        "shots": DEFAULT_SHOTS,
-        "sim_mode": DEFAULT_SIM_MODE,
+        "num_qubits": settings.DEFAULT_NUM_QUBITS,
+        "state_type": settings.DEFAULT_STATE_TYPE,
+        "noise_type": settings.DEFAULT_NOISE_TYPE,
+        "noise_enabled": settings.DEFAULT_NOISE_ENABLED,
+        "shots": settings.DEFAULT_SHOTS,
+        "sim_mode": settings.DEFAULT_SIM_MODE,
         "visualization_type": "none",
         "save_plot": None,
         "min_occurrences": 0,

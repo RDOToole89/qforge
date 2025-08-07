@@ -47,7 +47,7 @@ from src.config.constants import (
     NOISE_SHORTCUTS,
     SINGLE_QUBIT_NOISE_TYPES,
 )
-from src.config.defaults import DEFAULT_ERROR_RATE
+from src.config.settings import settings
 from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
 from src.core.noise_models.noise_factory import NOISE_CLASSES
 from src.utils.messages import MESSAGES  # Import the messages lookup table
@@ -398,7 +398,7 @@ def collect_optional_parameters(args: Dict) -> Dict:
     # Optional parameters with confirmation
     if input_handler.prompt_yes_no("custom_error_rate_prompt", default="n"):
         args["error_rate"] = input_handler.get_numeric_input(
-            "error_rate_value_prompt", str(DEFAULT_ERROR_RATE), float
+            "error_rate_value_prompt", str(settings.DEFAULT_ERROR_RATE), float
         )
     if args["noise_type"] == "PHASE_FLIP" and input_handler.prompt_yes_no(
         "custom_zi_probs_prompt", default="n"

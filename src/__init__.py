@@ -22,20 +22,7 @@ from .core.state_preparation import prepare_state
 from .core.noise_models import create_noise_model
 from .core.experiment_runner import run_experiment
 from .visualization import Visualizer  # Uses updated class-based visualization
-from .config.config import (  # Centralized experiment configurations
-    DEFAULT_NUM_QUBITS,
-    DEFAULT_STATE_TYPE,
-    DEFAULT_NOISE_TYPE,
-    DEFAULT_NOISE_ENABLED,
-    DEFAULT_SHOTS,
-    DEFAULT_SIM_MODE,
-    DEFAULT_ERROR_RATE,
-    DEFAULT_T1,
-    DEFAULT_T2,
-    DEFAULT_Z_PROB,
-    DEFAULT_I_PROB,
-    DEFAULT_CLUSTER_LATTICE,
-)
+from .config.settings import settings  # Application settings
 
 # Expose key functions and classes for easier package imports
 __all__ = [

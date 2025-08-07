@@ -1,14 +1,7 @@
 import argparse
 import json
 import numpy as np
-from src.config import (
-    DEFAULT_NUM_QUBITS,
-    DEFAULT_STATE_TYPE,
-    DEFAULT_NOISE_TYPE,
-    DEFAULT_NOISE_ENABLED,
-    DEFAULT_SHOTS,
-    DEFAULT_SIM_MODE,
-)
+from src.config.settings import settings
 
 def parse_args() -> argparse.Namespace:
    # Import STATE_CLASSES locally to break the circular dependency.
@@ -22,41 +15,41 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num_qubits",
         type=int,
-        default=DEFAULT_NUM_QUBITS,
-        help=f"Number of qubits (default: {DEFAULT_NUM_QUBITS}, minimum 1)",
+        default=settings.DEFAULT_NUM_QUBITS,
+        help=f"Number of qubits (default: {settings.DEFAULT_NUM_QUBITS}, minimum 1)",
     )
     parser.add_argument(
         "--state_type",
         type=str,
-        default=DEFAULT_STATE_TYPE,
+        default=settings.DEFAULT_STATE_TYPE,
         choices=list(STATE_CLASSES.keys()),
-        help=f"Quantum state type (default: {DEFAULT_STATE_TYPE})",
+        help=f"Quantum state type (default: {settings.DEFAULT_STATE_TYPE})",
     )
     parser.add_argument(
         "--noise_type",
         type=str,
-        default=DEFAULT_NOISE_TYPE,
+        default=settings.DEFAULT_NOISE_TYPE,
         choices=list(NOISE_CLASSES.keys()),
-        help=f"Type of noise (default: {DEFAULT_NOISE_TYPE})",
+        help=f"Type of noise (default: {settings.DEFAULT_NOISE_TYPE})",
     )
     parser.add_argument(
         "--noise_enabled",
         action="store_true",
-        default=DEFAULT_NOISE_ENABLED,
-        help=f"Enable noise? (default: {DEFAULT_NOISE_ENABLED})",
+        default=settings.DEFAULT_NOISE_ENABLED,
+        help=f"Enable noise? (default: {settings.DEFAULT_NOISE_ENABLED})",
     )
     parser.add_argument(
         "--shots",
         type=int,
-        default=DEFAULT_SHOTS,
-        help=f"Number of shots (default: {DEFAULT_SHOTS})",
+        default=settings.DEFAULT_SHOTS,
+        help=f"Number of shots (default: {settings.DEFAULT_SHOTS})",
     )
     parser.add_argument(
         "--sim_mode",
         type=str,
-        default=DEFAULT_SIM_MODE,
+        default=settings.DEFAULT_SIM_MODE,
         choices=["qasm", "density"],
-        help=f"Simulation mode (default: {DEFAULT_SIM_MODE})",
+        help=f"Simulation mode (default: {settings.DEFAULT_SIM_MODE})",
     )
     parser.add_argument(
         "--error_rate",

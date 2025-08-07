@@ -1,10 +1,11 @@
-# src/config/constants.py
-
 """
-Constants for the Quantum Experiment Interactive Runner.
+Constants for the Quantum Experiment Framework.
+
+This module defines all constant values used throughout the framework,
+including valid types, shortcuts, and configuration constants.
 """
 
-# Valid noise types and state types
+# === 🧪 Valid Experiment Types ===
 VALID_NOISE_TYPES = [
     "DEPOLARIZING",
     "PHASE_FLIP",
@@ -13,9 +14,12 @@ VALID_NOISE_TYPES = [
     "THERMAL_RELAXATION",
     "BIT_FLIP",
 ]
+
 VALID_STATE_TYPES = ["GHZ", "W", "CLUSTER"]
 
-# One-letter shortcuts for noise types (case-insensitive)
+VALID_SIM_MODES = ["qasm", "density"]
+
+# === ⌨️ User Interface Shortcuts ===
 NOISE_SHORTCUTS = {
     "d": "DEPOLARIZING",
     "p": "PHASE_FLIP",
@@ -25,5 +29,21 @@ NOISE_SHORTCUTS = {
     "b": "BIT_FLIP",
 }
 
-# Single-qubit noise types
+STATE_SHORTCUTS = {
+    "g": "GHZ",
+    "w": "W",
+    "c": "CLUSTER",
+}
+
+# === 🔧 Technical Constants ===
 SINGLE_QUBIT_NOISE_TYPES = ["AMPLITUDE_DAMPING", "PHASE_DAMPING", "BIT_FLIP"]
+
+# === 📊 Analysis Constants ===
+MAX_CORRELATION_ORDER = 4
+MIN_OCCURRENCES_THRESHOLD = 0.001
+DEFAULT_CLUSTERING_THRESHOLD = 0.5
+
+# === 🎨 Visualization Constants ===
+DEFAULT_NODE_COLOR = "blue"
+DEFAULT_EDGE_COLOR = "red"
+DEFAULT_PLOT_STYLE = "default"
