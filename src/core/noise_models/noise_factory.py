@@ -46,66 +46,154 @@ def create_noise_model(
     i_prob: Optional[float] = None,
     t1: Optional[float] = None,
     t2: Optional[float] = None,
+    t2_star: Optional[float] = None,
+    gate_time: Optional[float] = None,
+    temperature: Optional[float] = None,
     simulate_density: bool = False,
     experiment_id: str = "N/A",
 ) -> NoiseModel:
     """
-    Creates a scalable, configurable noise model for quantum experiments.
+    Enhanced noise model factory with comprehensive validation and physics-based parameters.
 
-    When simulate_density is True (e.g. for density matrix simulation),
-    only multi-qubit (2+ qubit) errors are added—this mimics the old behavior that
-    worked in density mode (which only added a "cx" error).
+    Creates physically accurate noise models with proper parameter validation.
+    Supports both phenomenological error rates and physics-based parameters (T1, T2, etc.).
 
     Args:
-        noise_type (str): Type of noise to apply.
-        num_qubits (int): Number of qubits in the circuit.
-        error_rate (float, optional): Custom error rate for noise models.
-        z_prob (float, optional): Z probability for custom noise models (e.g., DEPOLARIZING).
-        i_prob (float, optional): I probability for custom noise models (e.g., DEPOLARIZING).
-        t1 (float, optional): T1 relaxation time for THERMAL_RELAXATION noise.
-        t2 (float, optional): T2 dephasing time for THERMAL_RELAXATION noise.
-        simulate_density (bool): Whether to simulate density matrix mode.
+        noise_type (str): Type of noise to apply. Supported: {list(NOISE_CLASSES.keys())}
+        num_qubits (int): Number of qubits in the circuit (must be positive).
+        error_rate (float, optional): Phenomenological error rate [0, 1].
+        z_prob (float, optional): Z probability for Pauli error models.
+        i_prob (float, optional): Identity probability for Pauli error models.
+        t1 (float, optional): T1 relaxation time (seconds, positive).
+        t2 (float, optional): T2 dephasing time (seconds, positive, ≤ 2*T1).
+        t2_star (float, optional): T2* pure dephasing time (seconds, positive).
+        gate_time (float, optional): Gate duration (seconds, default: 20ns).
+        temperature (float, optional): Operating temperature (Kelvin, default: 15mK).
+        simulate_density (bool): Whether to optimize for density matrix simulation.
         experiment_id (str): Unique identifier for this experiment run.
 
     Returns:
-        NoiseModel: Configured noise model.
+        NoiseModel: Configured Qiskit noise model with validation.
 
     Raises:
-        ValueError: If the noise type or parameters are invalid.
+        ValueError: If noise type, parameters, or physics constraints are invalid.
+        TypeError: If parameter types are incorrect.
     """
+    # Input validation
+    if not isinstance(noise_type, str):
+        raise TypeError(f"noise_type must be string, got {type(noise_type)}")
+
     if noise_type not in NOISE_CLASSES:
         raise ValueError(
-            f"Invalid NOISE_TYPE: {noise_type}. Choose from {list(NOISE_CLASSES.keys())}"
+            f"Invalid noise_type: '{noise_type}'. Choose from {list(NOISE_CLASSES.keys())}"
         )
+
+    if not isinstance(num_qubits, int) or num_qubits <= 0:
+        raise ValueError(f"num_qubits must be positive integer, got {num_qubits}")
+
+    if num_qubits > 10:
+        logger.warning(f"Large qubit count ({num_qubits}) may impact simulation performance")
+
+    # Validate optional parameters
+    if error_rate is not None and not (0 <= error_rate <= 1):
+        raise ValueError(f"error_rate must be in [0, 1], got {error_rate}")
+
+    if z_prob is not None and not (0 <= z_prob <= 1):
+        raise ValueError(f"z_prob must be in [0, 1], got {z_prob}")
+
+    if i_prob is not None and not (0 <= i_prob <= 1):
+        raise ValueError(f"i_prob must be in [0, 1], got {i_prob}")
+
+    if z_prob is not None and i_prob is not None:
+        if abs(z_prob + i_prob - 1.0) > 1e-6:
+            raise ValueError(f"z_prob + i_prob must equal 1, got {z_prob + i_prob}")
+
+    # Physics parameter validation
+    if t1 is not None and t1 <= 0:
+        raise ValueError(f"T1 must be positive, got {t1}")
+
+    if t2 is not None and t2 <= 0:
+        raise ValueError(f"T2 must be positive, got {t2}")
+
+    if t2_star is not None and t2_star <= 0:
+        raise ValueError(f"T2* must be positive, got {t2_star}")
+
+    if t1 is not None and t2 is not None and t2 > 2 * t1:
+        raise ValueError(f"T2 ({t2}) cannot exceed 2*T1 ({2*t1}) - violates quantum physics")
+
+    if gate_time is not None and gate_time <= 0:
+        raise ValueError(f"gate_time must be positive, got {gate_time}")
+
+    if temperature is not None and temperature <= 0:
+        raise ValueError(f"temperature must be positive, got {temperature}")
+
+    # Set defaults
+    gate_time = gate_time or 20e-9  # 20 ns default
+    temperature = temperature or 0.015  # 15 mK default
+
+    logger.info(f"Creating {noise_type} noise model with {num_qubits} qubits")
 
     noise_model = NoiseModel()
     noise_class = NOISE_CLASSES[noise_type]
 
-    # Instantiate the noise object with parameters specific to the noise type
-    if noise_type == "THERMAL_RELAXATION":
-        noise = noise_class(
-            error_rate=error_rate or DEFAULT_ERROR_RATE,
-            num_qubits=num_qubits,
-            t1=t1 or DEFAULT_T1,
-            t2=t2 or DEFAULT_T2,
-            experiment_id=experiment_id,
-        )
-    elif noise_type == "PHASE_FLIP":
-        # Explicitly pass z_prob and i_prob as None if not provided
-        noise = noise_class(
-            error_rate=error_rate or DEFAULT_ERROR_RATE,
-            num_qubits=num_qubits,
-            z_prob=z_prob,
-            i_prob=i_prob,
-            experiment_id=experiment_id,
-        )
-    else:
-        # For other noise types (DEPOLARIZING, AMPLITUDE_DAMPING, etc.), z_prob and i_prob are not used
-        noise = noise_class(
-            error_rate=error_rate or DEFAULT_ERROR_RATE,
-            num_qubits=num_qubits,
-            experiment_id=experiment_id,
-        )
+    # Instantiate noise with enhanced parameters and validation
+    try:
+        if noise_type == "THERMAL_RELAXATION":
+            noise = noise_class(
+                error_rate=error_rate or DEFAULT_ERROR_RATE,
+                num_qubits=num_qubits,
+                t1=t1 or DEFAULT_T1,
+                t2=t2 or DEFAULT_T2,
+                gate_time=gate_time,
+                temperature=temperature,
+                experiment_id=experiment_id,
+            )
+        elif noise_type == "PHASE_FLIP":
+            noise = noise_class(
+                error_rate=error_rate or DEFAULT_ERROR_RATE,
+                num_qubits=num_qubits,
+                z_prob=z_prob,
+                i_prob=i_prob,
+                experiment_id=experiment_id,
+            )
+        elif noise_type == "AMPLITUDE_DAMPING":
+            noise = noise_class(
+                error_rate=error_rate or NOISE_CONFIG[noise_type]["error_rate"],
+                num_qubits=num_qubits,
+                t1=t1,  # Optional physics-based parameter
+                gate_time=gate_time,
+                temperature=temperature,
+                experiment_id=experiment_id,
+            )
+        elif noise_type == "PHASE_DAMPING":
+            noise = noise_class(
+                error_rate=error_rate or NOISE_CONFIG[noise_type]["error_rate"],
+                num_qubits=num_qubits,
+                t2_star=t2_star,  # Optional physics-based parameter
+                gate_time=gate_time,
+                experiment_id=experiment_id,
+            )
+        elif noise_type == "BIT_FLIP":
+            noise = noise_class(
+                error_rate=error_rate or NOISE_CONFIG[noise_type]["error_rate"],
+                num_qubits=num_qubits,
+                x_prob=z_prob,  # Reuse z_prob parameter for X probability
+                i_prob=i_prob,
+                experiment_id=experiment_id,
+            )
+        else:
+            # Default case for DEPOLARIZING and other noise types
+            noise = noise_class(
+                error_rate=error_rate or NOISE_CONFIG[noise_type]["error_rate"],
+                num_qubits=num_qubits,
+                experiment_id=experiment_id,
+            )
+
+        logger.info(f"Successfully created {noise_type} noise instance")
+
+    except Exception as e:
+        logger.error(f"Failed to create {noise_type} noise: {e}")
+        raise ValueError(f"Error creating {noise_type} noise: {e}") from e
 
     # Define gate lists and their corresponding qubit counts
     gate_configs = []
