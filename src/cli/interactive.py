@@ -92,13 +92,80 @@ class InteractiveCLI:
         Returns:
             Dict[str, Any]: Collected experiment parameters.
         """
-        # This will be implemented by extracting the parameter collection logic
-        # from the current main.py file
+        # Start with default parameters
         args = apply_defaults({})
 
         if interactive:
-            # TODO: Extract parameter collection logic from main.py
-            pass
+            # Interactive parameter collection using InputHandler
+            self.display_manager.display_info_message("🔧 Let's configure your quantum experiment!")
+
+            # Number of qubits
+            num_qubits = self.input_handler.get_numeric_input(
+                "num_qubits_prompt",
+                str(args["num_qubits"]),
+                expected_type=int
+            )
+            args["num_qubits"] = int(num_qubits)
+
+            # State type
+            state_type = self.input_handler.get_input(
+                "state_type_prompt",
+                args["state_type"],
+                valid_options=["ghz", "w", "cluster", "bell", "random"],
+                valid_options_display=["GHZ", "W", "CLUSTER", "BELL", "RANDOM"]
+            )
+            args["state_type"] = state_type.upper()
+
+            # Noise configuration
+            noise_enabled = self.input_handler.prompt_yes_no("enable_noise_prompt", "y")
+            args["noise_enabled"] = noise_enabled
+
+            if noise_enabled:
+                noise_type = self.input_handler.get_input(
+                    "noise_type_prompt",
+                    args.get("noise_type", "DEPOLARIZING"),
+                    valid_options=["depolarizing", "phase_flip", "bit_flip", "thermal_relaxation"],
+                    valid_options_display=["DEPOLARIZING", "PHASE_FLIP", "BIT_FLIP", "THERMAL_RELAXATION"]
+                )
+                args["noise_type"] = noise_type.upper()
+
+                # Error rate
+                error_rate = self.input_handler.get_numeric_input(
+                    "error_rate_prompt",
+                    str(args.get("error_rate", 0.1)),
+                    expected_type=float
+                )
+                args["error_rate"] = float(error_rate)
+
+            # Shots
+            shots = self.input_handler.get_numeric_input(
+                "shots_prompt",
+                str(args["shots"]),
+                expected_type=int
+            )
+            args["shots"] = int(shots)
+
+            # Simulation mode
+            sim_mode = self.input_handler.get_input(
+                "sim_mode_prompt",
+                args["sim_mode"],
+                valid_options=["qasm", "statevector"],
+                valid_options_display=["QASM", "Statevector"]
+            )
+            args["sim_mode"] = sim_mode.lower()
+
+            # Visualization preferences
+            enable_viz = self.input_handler.prompt_yes_no("enable_visualization_prompt", "y")
+            if enable_viz:
+                viz_type = self.input_handler.get_input(
+                    "visualization_type_prompt",
+                    "histogram",
+                    valid_options=["histogram", "density_matrix", "hypergraph"],
+                    valid_options_display=["Histogram", "Density Matrix", "Hypergraph"]
+                )
+                args["visualization_type"] = viz_type.lower()
+            else:
+                args["visualization_type"] = "none"
 
         return validate_parameters(args)
 
@@ -170,13 +237,31 @@ class InteractiveCLI:
                 self.print_message("params_discarded")
                 continue
 
-            # TODO: Run the experiment
-            # This will be implemented when we extract the experiment running logic
-            experiment_id = str(uuid.uuid4())
-            # qc, result, plot_closed_with_ctrl_c = run_and_visualize(args, experiment_id)
-
-            # TODO: Implement rerun logic
-            # This will be extracted from the current main.py
+            # Run the experiment
+            try:
+                from src.experiments.manager import get_experiment_manager
+                
+                self.display_manager.display_info_message("🚀 Running quantum experiment...")
+                
+                # Get experiment manager and run experiment
+                em = get_experiment_manager()
+                
+                # Run experiment using user parameters as custom params
+                # Filter out metadata that shouldn't go to the experiment runner
+                experiment_params = {k: v for k, v in args.items() 
+                                   if k not in ['name', 'description', 'category', 'difficulty']}
+                
+                result = em.run_experiment("ghz_basic", custom_params=experiment_params)
+                
+                if result:
+                    self.display_manager.display_success_message("✅ Experiment completed successfully!")
+                    self.display_manager.display_info_message(f"📁 Results: {result}")
+                else:
+                    self.display_manager.display_error_message("❌ Experiment failed")
+                    
+            except Exception as e:
+                self.display_manager.display_error_message(f"❌ Error running experiment: {str(e)}")
+                continue
 
 
 def run_interactive() -> None:

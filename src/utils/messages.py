@@ -114,4 +114,15 @@ MESSAGES = {
     "running_step": "Running step {step} of {total}: error_rate={error_rate}, z_prob={z_prob}, i_prob={i_prob}, t1={t1}, t2={t2}",
     "params_discarded": "[bold yellow]Parameters discarded. Returning to prompt...[/bold yellow]",
     "goodbye": "\n[bold yellow]👋 Exiting Quantum Experiment Runner. Goodbye![/bold yellow]",
+
+    # Interactive parameter collection prompts
+    "num_qubits_prompt": "🔢 Number of qubits [{default}]: ",
+    "state_type_prompt": "🌀 Quantum state type (GHZ/W/CLUSTER/BELL/RANDOM) [{default}]: ",
+    "enable_noise_prompt": "🔊 Enable noise? (y/n): ",
+    "noise_type_prompt": "⚡ Noise type (DEPOLARIZING/PHASE_FLIP/BIT_FLIP/THERMAL_RELAXATION) [{default}]: ",
+    "error_rate_prompt": "📊 Error rate (0.0-1.0) [{default}]: ",
+    "shots_prompt": "🎯 Number of shots [{default}]: ",
+    "sim_mode_prompt": "💻 Simulation mode (qasm/statevector) [{default}]: ",
+    "enable_visualization_prompt": "📊 Enable visualization? (y/n): ",
+    "visualization_type_prompt": "🎨 Visualization type (histogram/density_matrix/hypergraph) [{default}]: ",
 }
