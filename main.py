@@ -18,17 +18,23 @@ Example usage:
     python main.py --num-qubits 3 --state-type GHZ --sim-mode density  # Non-interactive mode
 """
 
+import os
+import sys
+import time
+import json
+import logging
+from pathlib import Path
+from typing import Dict, Any, Optional
+
+# Configure matplotlib backend BEFORE any imports to prevent GUI issues
+os.environ['MPLBACKEND'] = 'Agg'  # Non-interactive backend
+
 import matplotlib
+matplotlib.use("Agg")  # Set Matplotlib backend to Agg for non-interactive plotting
 
-matplotlib.use("TkAgg")  # Set Matplotlib backend to TkAgg for interactive plotting
-
-import click
-from rich.console import Console
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn
+# Now safe to import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import json
 import warnings
 import uuid
 from datetime import datetime

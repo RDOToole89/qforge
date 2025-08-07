@@ -4,7 +4,10 @@ from typing import Dict, Union, Optional, List, Callable
 from qiskit.quantum_info import DensityMatrix
 import numpy as np
 import matplotlib.pyplot as plt
-from src.visualization import Visualizer
+# Lazy import for Visualizer
+def get_visualizer():
+    from src.visualization.visualizer import Visualizer
+    return Visualizer
 from src.visualization.hypergraph import plot_hypergraph
 from src.utils import logger as logger_utils
 
@@ -72,7 +75,7 @@ def handle_visualization(
                     )
                     if save_plot:
                         save_path = f"{save_plot}_timestep_{idx}.png"
-                        Visualizer.plot_density_matrix(
+                        get_visualizer().plot_density_matrix(
                             res,
                             cmap="viridis",
                             show_real=args["show_real"],
@@ -88,7 +91,7 @@ def handle_visualization(
                     else:
 
                         def plot_func():
-                            Visualizer.plot_density_matrix(
+                            get_visualizer().plot_density_matrix(
                                 res,
                                 cmap="viridis",
                                 show_real=args["show_real"],
@@ -110,7 +113,7 @@ def handle_visualization(
                         "Expected a dictionary with 'counts' key for QASM mode visualization"
                     )
                 if save_plot:
-                    Visualizer.plot_histogram(
+                    get_visualizer().plot_histogram(
                         single_result["counts"],
                         state_type=state_type,
                         noise_type=noise_type if noise_enabled else None,
@@ -123,7 +126,7 @@ def handle_visualization(
                 else:
                     logger.info("Displaying histogram plot")
                     plot_closed_with_ctrl_c = not show_plot_nonblocking(
-                        Visualizer.plot_histogram,
+                        get_visualizer().plot_histogram,
                         single_result["counts"],
                         state_type=state_type,
                         noise_type=noise_type if noise_enabled else None,
@@ -169,7 +172,7 @@ def handle_visualization(
                         "Expected a dictionary with 'counts' key for QASM mode visualization"
                     )
                 if save_plot:
-                    Visualizer.plot_histogram(
+                    get_visualizer().plot_histogram(
                         single_result["counts"],
                         state_type=state_type,
                         noise_type=noise_type if noise_enabled else None,
@@ -182,7 +185,7 @@ def handle_visualization(
                 else:
                     logger.info("Displaying histogram plot")
                     plot_closed_with_ctrl_c = not show_plot_nonblocking(
-                        Visualizer.plot_histogram,
+                        get_visualizer().plot_histogram,
                         single_result["counts"],
                         state_type=state_type,
                         noise_type=noise_type if noise_enabled else None,
@@ -198,7 +201,7 @@ def handle_visualization(
                 args["show_real"] = args.get("show_real", False)
                 args["show_imag"] = args.get("show_imag", False)
                 if save_plot:
-                    Visualizer.plot_density_matrix(
+                    get_visualizer().plot_density_matrix(
                         single_result,
                         cmap="viridis",
                         show_real=args["show_real"],
@@ -213,7 +216,7 @@ def handle_visualization(
                 else:
                     logger.info("Displaying density matrix plot")
                     plot_closed_with_ctrl_c = not show_plot_nonblocking(
-                        Visualizer.plot_density_matrix,
+                        get_visualizer().plot_density_matrix,
                         single_result,
                         cmap="viridis",
                         show_real=args["show_real"],
