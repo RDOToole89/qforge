@@ -194,6 +194,77 @@ class InteractiveCLI:
 
         return args
 
+    def _show_visualization(self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str) -> None:
+        """
+        Display visualization based on user preference.
+
+        Args:
+            results: Experiment results containing counts and other data
+            params: Experiment parameters
+            viz_type: Type of visualization (histogram, density_matrix, hypergraph)
+        """
+        try:
+            self.display_manager.display_info_message(f"🎨 Generating {viz_type} visualization...")
+
+            # Extract counts from results
+            counts = results.get('counts', {})
+            if not counts:
+                self.display_manager.display_warning_message("⚠️ No measurement data available for visualization")
+                return
+
+            # Get visualization parameters
+            num_qubits = params.get('num_qubits', 3)
+            state_type = params.get('state_type', 'GHZ')
+            noise_type = params.get('noise_type', 'DEPOLARIZING')
+            noise_enabled = params.get('noise_enabled', True)
+
+            # Import visualization functions (lazy loading)
+            if viz_type == "histogram":
+                from src.visualization import get_histogram_visualizer
+                plot_function = get_histogram_visualizer()
+                plot_function(
+                    counts=counts,
+                    state_type=state_type,
+                    noise_type=noise_type,
+                    noise_enabled=noise_enabled,
+                    num_qubits=num_qubits,
+                    save_path=None  # Display only, don't save
+                )
+
+            elif viz_type == "density_matrix":
+                from src.visualization import get_density_matrix_visualizer
+                # Check if we have density matrix data
+                if params.get('sim_mode') != 'statevector':
+                    self.display_manager.display_warning_message("⚠️ Density matrix visualization requires statevector simulation mode")
+                    return
+
+                density_matrix = results.get('density_matrix')
+                if density_matrix is None:
+                    self.display_manager.display_warning_message("⚠️ No density matrix data available")
+                    return
+
+                plot_function = get_density_matrix_visualizer()
+                plot_function(
+                    density_matrix,
+                    state_type=state_type,
+                    noise_type=noise_type
+                )
+
+            elif viz_type == "hypergraph":
+                from src.visualization import get_hypergraph_visualizer
+                plot_function = get_hypergraph_visualizer()
+                plot_function(
+                    correlation_data=counts,
+                    state_type=state_type,
+                    noise_type=noise_type,
+                    config={}  # Provide empty config to avoid None comparison issues
+                )
+
+            self.display_manager.display_success_message(f"✅ {viz_type.title()} visualization displayed!")
+
+        except Exception as e:
+            self.display_manager.display_error_message(f"❌ Visualization error: {str(e)}")
+
     def run_interactive_session(self) -> None:
         """
         Run the main interactive session loop.
@@ -272,8 +343,13 @@ class InteractiveCLI:
                         # Save research results
                         research_file = research_handler.save_research_result(research_analysis)
 
-                        # Display comprehensive results including circuit diagram
+                                                # Display comprehensive results including circuit diagram
                         self.display_manager.display_experiment_results(result)
+
+                        # Show visualization if requested
+                        viz_type = experiment_params.get("visualization_type", "none")
+                        if viz_type and viz_type != "none":
+                            self._show_visualization(raw_results, experiment_params, viz_type)
 
                         # Show research insights
                         if "research_insights" in research_analysis:
