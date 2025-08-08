@@ -21,7 +21,7 @@ from .interactive.presets_browser import PresetsBrowser
 from .interactive.viz import VisualizationOrchestrator
 from .interactive.results import ResultsManager
 from .interactive.settings import SettingsUI
-from .interactive.router import Router
+from .router import Router
 
 
 class InteractiveCLI:
