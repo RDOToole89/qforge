@@ -23,11 +23,7 @@ def prepare_state(
         if state_type not in STATE_CLASSES:
             raise ValueError(f"Invalid state type: {state_type}. Choose from {list(STATE_CLASSES.keys())}")
 
-        if custom_params and "custom_gates" in custom_params:
-            qc = QuantumCircuit(num_qubits)
-            for gate, params in custom_params["custom_gates"].items():
-                qc.append(gate, params["qargs"], params.get("cargs", []))
-            return qc
+        # Legacy custom_gates path removed in favor of state_type="CUSTOM"
 
         state = STATE_CLASSES[state_type](num_qubits, custom_params=custom_params)
         qc = state.create(add_barrier=add_barrier, experiment_id=experiment_id)

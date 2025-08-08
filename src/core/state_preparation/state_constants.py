@@ -5,6 +5,7 @@ from .w_state import WState
 from .cluster_state import ClusterState
 from .superposition_state import SuperpositionState
 from .bell_state import BellState
+from .custom_state import CustomState
 
 STATE_CLASSES = {
     "GHZ": GHZState,
@@ -12,4 +13,5 @@ STATE_CLASSES = {
     "CLUSTER": ClusterState,
     "SUPERPOSITION": SuperpositionState,
     "BELL": BellState,
+    "CUSTOM": CustomState,
 }
