@@ -82,15 +82,32 @@ def validate_parameters(args: Dict) -> Dict:
             raise ValueError(f"Invalid noise type: {validated_args['noise_type']}")
 
     # State type validation
-    validated_args["state_type"] = validated_args["state_type"].upper()
+    validated_args["state_type"] = str(validated_args["state_type"]).upper()
     if validated_args["state_type"] not in VALID_STATE_TYPES:
         console.print(
             f"[bold red]Error: Invalid state type '{validated_args['state_type']}'. Choose from {VALID_STATE_TYPES}.[/bold red]"
         )
         raise ValueError(f"Invalid state type: {validated_args['state_type']}")
 
+    # Stricter constraints
+    st = validated_args["state_type"]
+    nq = validated_args["num_qubits"]
+    if st == "BELL" and nq != 2:
+        raise ValueError("BELL state requires num_qubits=2")
+    if st == "GHZ" and nq < 3:
+        raise ValueError("GHZ state requires num_qubits >= 3")
+    # Cluster 2D constraints if provided
+    cp = validated_args.get("custom_params") or {}
+    if st == "CLUSTER" and {"rows", "cols"}.issubset(cp):
+        rows, cols = cp.get("rows"), cp.get("cols")
+        if isinstance(rows, int) and isinstance(cols, int) and rows * cols != nq:
+            raise ValueError("Cluster 2D requires rows*cols == num_qubits")
+
     # Validate error_rate (only meaningful if noise enabled)
-    if validated_args.get("noise_enabled", False) and validated_args["error_rate"] is not None:
+    if (
+        validated_args.get("noise_enabled", False)
+        and validated_args["error_rate"] is not None
+    ):
         if not (0 <= validated_args["error_rate"] <= 1):
             console.print(
                 "[bold red]Error: error_rate must be between 0 and 1[/bold red]"
@@ -143,7 +160,7 @@ def validate_parameters(args: Dict) -> Dict:
             )
             validated_args["z_prob"], validated_args["i_prob"] = None, None
 
-    # Validate T1/T2 for THERMAL_RELAXATION
+    # Validate T1/T2 for THERMAL_RELAXATION (physics: T2 <= 2*T1)
     if (
         validated_args.get("noise_enabled", False)
         and validated_args.get("noise_type") == "THERMAL_RELAXATION"
@@ -153,10 +170,10 @@ def validate_parameters(args: Dict) -> Dict:
         if (
             validated_args["t1"] <= 0
             or validated_args["t2"] <= 0
-            or validated_args["t2"] > validated_args["t1"]
+            or validated_args["t2"] > 2 * validated_args["t1"]
         ):
             console.print(
-                "[bold red]⚠️ T1 and T2 must be positive, with T2 <= T1 for realistic relaxation.[/bold red]"
+                "[bold red]⚠️ T1 and T2 must be positive, with T2 ≤ 2*T1 (physics constraint).[/bold red]"
             )
             validated_args["t1"], validated_args["t2"] = None, None
 

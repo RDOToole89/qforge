@@ -15,7 +15,15 @@ VALID_NOISE_TYPES = [
     "BIT_FLIP",
 ]
 
-VALID_STATE_TYPES = ["GHZ", "W", "CLUSTER"]
+VALID_STATE_TYPES = [
+    "GHZ",
+    "W",
+    "CLUSTER",
+    "BELL",
+    "SUPERPOSITION",
+    "CUSTOM",
+    "RANDOM",
+]
 
 VALID_SIM_MODES = ["qasm", "density"]
 

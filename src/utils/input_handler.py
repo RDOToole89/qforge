@@ -139,6 +139,7 @@ class InputHandler:
         default_value: str,
         hotkey_map: Optional[dict] = None,
         help_context: Optional[str] = None,
+        enable_arrow_navigation: bool = True,
     ) -> str:
         """Interactive selection helper with numbers, hotkeys, and defaults.
 
@@ -176,6 +177,28 @@ class InputHandler:
             default_value = values[0]
 
         while True:
+            # Fancy arrow-key UI if available
+            if enable_arrow_navigation:
+                try:
+                    import sys
+                    if sys.stdin.isatty():
+                        import questionary
+                        choices = []
+                        for idx, (value, label, hotkey) in enumerate(normalized, start=1):
+                            is_default = (idx - 1) == default_index
+                            title_text = f"{label} ({value})" + (" [default]" if is_default else "")
+                            choices.append(questionary.Choice(title_text, value))
+                        answer = questionary.select(
+                            title,
+                            choices=choices,
+                            default=normalized[default_index][0],
+                        ).ask()
+                        if answer is not None:
+                            return str(answer)
+                except Exception:
+                    # Fall back to rich table UI
+                    pass
+
             table = Table(title=title, show_header=True, header_style="bold magenta")
             table.add_column("#", style="cyan", width=4)
             table.add_column("Option", style="green")

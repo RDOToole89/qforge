@@ -8,6 +8,7 @@ and formatted text for the CLI interface.
 from typing import Dict, Any
 from rich.console import Console
 from rich.table import Table
+from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 
@@ -60,10 +61,14 @@ class DisplayManager:
                         else "Default"
                     ),
                     "Z Probability": (
-                        args.get("z_prob") if args.get("z_prob") is not None else "Default"
+                        args.get("z_prob")
+                        if args.get("z_prob") is not None
+                        else "Default"
                     ),
                     "I Probability": (
-                        args.get("i_prob") if args.get("i_prob") is not None else "Default"
+                        args.get("i_prob")
+                        if args.get("i_prob") is not None
+                        else "Default"
                     ),
                     "T1": args.get("t1") if args.get("t1") is not None else "Default",
                     "T2": args.get("t2") if args.get("t2") is not None else "Default",
@@ -136,6 +141,54 @@ class DisplayManager:
 
         self.console.print(table)
 
+    def display_research_report(self, research_analysis: Dict[str, Any]) -> None:
+        """Show a concise, professional insights panel from research analysis."""
+        insights = research_analysis.get("research_insights", {})
+        key_findings = insights.get("key_findings", [])
+        lines = []
+        if key_findings:
+            for f in key_findings[:5]:
+                lines.append(f"• {f}")
+        info = research_analysis.get("research_metrics", {}).get("information_theory", {})
+        dist = research_analysis.get("research_metrics", {}).get("distribution_comparison", {})
+        if info:
+            lines.append(f"Entropy (norm): {info.get('normalized_entropy','-')}")
+        if dist:
+            lines.append(f"TVD vs ideal: {dist.get('total_variation_distance','-')}")
+        text = "\n".join(lines) or "No insights available"
+        self.console.print(Panel.fit(text, title="Key Insights", border_style="green"))
+
+    def display_research_details(self, research_analysis: Dict[str, Any]) -> None:
+        """Show detailed metrics tables (information theory, distribution comparison, qubit biases)."""
+        metrics = research_analysis.get("research_metrics", {})
+        info = metrics.get("information_theory", {})
+        dist = metrics.get("distribution_comparison", {})
+        qubits = metrics.get("qubit_analysis", {}).get("qubit_wise_bias", {})
+
+        if info:
+            t = Table(title="Information Theory", show_header=True, header_style="bold magenta")
+            t.add_column("Metric", style="cyan")
+            t.add_column("Value", style="green")
+            for k, v in info.items():
+                t.add_row(k, str(v))
+            self.console.print(t)
+
+        if dist:
+            t2 = Table(title="Distribution Comparison", show_header=True, header_style="bold magenta")
+            t2.add_column("Metric", style="cyan")
+            t2.add_column("Value", style="green")
+            for k, v in dist.items():
+                t2.add_row(k, str(v))
+            self.console.print(t2)
+
+        if qubits:
+            t3 = Table(title="Qubit-wise Bias", show_header=True, header_style="bold magenta")
+            t3.add_column("Qubit", style="cyan")
+            t3.add_column("Bias", style="green")
+            for q, v in qubits.items():
+                t3.add_row(q, str(v))
+            self.console.print(t3)
+
     def create_progress_bar(self, description: str) -> Progress:
         """
         Create a progress bar for long-running operations.
@@ -197,7 +250,7 @@ class DisplayManager:
             circuit: Qiskit QuantumCircuit object to display.
         """
         try:
-            circuit_text = circuit.draw(output='text', fold=-1)
+            circuit_text = circuit.draw(output="text", fold=-1)
             self.console.print("\n🔧 Compiled Circuit:")
             self.console.print(str(circuit_text), style="cyan")
             self.console.print("")
@@ -216,12 +269,12 @@ class DisplayManager:
                 circuit, results = result_tuple
 
                 # Display circuit diagram
-                if hasattr(circuit, 'draw'):
+                if hasattr(circuit, "draw"):
                     self.display_circuit_diagram(circuit)
 
                 # Display measurement results
-                if isinstance(results, dict) and 'counts' in results:
-                    counts = results['counts']
+                if isinstance(results, dict) and "counts" in results:
+                    counts = results["counts"]
 
                     self.console.print("📊 Measurement Results:")
 
@@ -238,7 +291,9 @@ class DisplayManager:
                     total_shots = sum(counts.values())
 
                     # Sort by count (descending)
-                    sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+                    sorted_counts = sorted(
+                        counts.items(), key=lambda x: x[1], reverse=True
+                    )
 
                     for state, count in sorted_counts:
                         probability = f"{count/total_shots:.4f}"
@@ -248,9 +303,9 @@ class DisplayManager:
                     self.console.print(f"\n🎯 Total shots: {total_shots}")
 
                 # Display metadata file if available
-                if isinstance(results, dict) and 'metadata_file' in results:
-                    metadata_file = results['metadata_file']
-                    if metadata_file != 'results_placeholder':
+                if isinstance(results, dict) and "metadata_file" in results:
+                    metadata_file = results["metadata_file"]
+                    if metadata_file != "results_placeholder":
                         self.console.print(f"📁 Results saved to: {metadata_file}")
 
             else:

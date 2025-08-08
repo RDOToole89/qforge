@@ -1015,17 +1015,16 @@ class InteractiveCLI:
                                     raw_results, experiment_params, viz_type
                                 )
 
-                            # Show research insights
-                            if "research_insights" in research_analysis:
-                                insights = research_analysis["research_insights"]
-                                if insights.get("key_findings"):
-                                    self.display_manager.display_info_message(
-                                        "🔬 Research Insights:"
-                                    )
-                                    for finding in insights["key_findings"]:
-                                        self.display_manager.display_info_message(
-                                            f"  • {finding}"
-                                        )
+                            # Show research report and optional details
+                            self.display_manager.display_research_report(
+                                research_analysis
+                            )
+                            if self.input_handler.prompt_yes_no(
+                                "insights_details_prompt", "n"
+                            ):
+                                self.display_manager.display_research_details(
+                                    research_analysis
+                                )
 
                             # Show research file saved
                             self.display_manager.display_success_message(
