@@ -10,14 +10,14 @@ from typing import Dict, Any, Optional
 from rich.console import Console
 from rich.table import Table
 
-from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
-from src.experiments.presets import load_preset_experiments
 from src.config.params import apply_defaults, validate_parameters
 from src.utils.input_handler import InputHandler
 from .help import HelpManager
 from src.utils.messages import MESSAGES
 from src.utils import logger as logger_utils
 from .display import DisplayManager
+from .interactive.collectors import ParameterCollector
+from .interactive.presets_browser import PresetsBrowser
 
 
 class InteractiveCLI:
@@ -36,12 +36,23 @@ class InteractiveCLI:
             self.console, MESSAGES, help_manager=self.help_manager
         )
         self.display_manager = DisplayManager(self.console)
+        # Initialize logger once for interactive mode, suppress duplicate handlers
         self.logger = logger_utils.setup_logger(
             log_level="INFO",
             log_to_file=True,
             log_to_console=True,
             structured_log_file="logs/structured_logs.json",
         )
+        # Tame noisy third-party loggers
+        try:
+            import logging as _logging
+
+            _logging.getLogger("qiskit").setLevel(_logging.WARNING)
+            _logging.getLogger("qiskit_aer").setLevel(_logging.WARNING)
+            # Prevent propagation to root to avoid duplicates
+            self.logger.propagate = False
+        except Exception:
+            pass
 
     def print_message(self, key: str, **kwargs) -> None:
         """
@@ -57,184 +68,74 @@ class InteractiveCLI:
         self.console.print(message.format(**kwargs))
 
     def display_quick_options(self) -> None:
-        """
-        Display the available quick experiment options with categories and difficulty levels.
-        """
-        table = Table(
-            title="🚀 Quick Experiment Options",
-            show_header=True,
-            header_style="bold magenta",
-        )
-        table.add_column("Option", style="cyan", width=8)
-        table.add_column("Name", style="green", width=25)
-        table.add_column("Category", style="blue", width=12)
-        table.add_column("Difficulty", style="magenta", width=12)
+        # Minimal curated preset overview only (difficulty removed in Phase 8)
+        table = Table(title="🚀 Quick Start Presets", show_header=True, header_style="bold magenta")
+        table.add_column("Key", style="cyan", width=14)
+        table.add_column("Name", style="green", width=28)
+        table.add_column("Family", style="blue", width=12)
         table.add_column("Description", style="yellow")
-
-        for key, option in QUICK_EXPERIMENTS.items():
-            category = option.get("category", "unknown")
-            difficulty = option.get("difficulty", "unknown")
-            table.add_row(
-                key, option["name"], category, difficulty, option["description"]
-            )
-
+        curated = [
+            ("ghz_basic", "GHZ State Basics", "GHZ", "3-qubit GHZ state baseline"),
+            ("ghz_noise", "GHZ with Noise", "GHZ", "GHZ with depolarizing noise"),
+            ("density_analysis", "Density Matrix Analysis", "GHZ", "Statevector analysis for GHZ"),
+            ("ghz_structured_decoherence_ref", "Structured Decoherence (Ref)", "GHZ", "Research preset"),
+        ]
+        for key, name, family, desc in curated:
+            table.add_row(key, name, family, desc)
         self.console.print(table)
-        # ASCII circuit preview intentionally omitted here; shown after compilation
-        self.console.print(
-            "\n💡 Choose an option number or press 'c' for custom parameters"
-        )
-        self.console.print(
-            "📚 Categories: entanglement, topological, analysis, scaling, dynamics"
-        )
-        self.console.print("🎯 Difficulty: beginner, intermediate, advanced")
 
     def collect_parameters(
-        self, interactive: bool = True, base_args: Optional[Dict[str, Any]] = None
+        self,
+        interactive: bool = True,
+        base_args: Optional[Dict[str, Any]] = None,
+        force_state_type: Optional[str] = None,
     ) -> Dict[str, Any]:
+        collector = ParameterCollector(self.input_handler, self.display_manager)
+        return collector.collect_parameters(
+            interactive=interactive,
+            base_args=base_args,
+            force_state_type=force_state_type,
+        )
+
+    def _collect_custom_state_params(
+        self, default_num_qubits: int
+    ) -> Optional[Dict[str, Any]]:
+        """Collect parameters for CustomState (source: gates|builder|openqasm).
+
+        Returns None if the user cancels.
         """
-        Collect experiment parameters either interactively or from command-line arguments.
-
-        Args:
-            interactive (bool): Whether to collect parameters interactively.
-
-        Returns:
-            Dict[str, Any]: Collected experiment parameters.
-        """
-        # Start with default parameters (allow overriding defaults via base_args)
-        args = apply_defaults(base_args or {})
-
-        if interactive:
-            # Interactive parameter collection using InputHandler
-            self.display_manager.display_info_message(
-                "🔧 Let's configure your quantum experiment!"
-            )
-
-            # Number of qubits
-            num_qubits = self.input_handler.get_numeric_input(
-                "num_qubits_prompt", str(args["num_qubits"]), expected_type=int
-            )
-            args["num_qubits"] = int(num_qubits)
-
-            # State type with numeric and hotkeys
-            state_options = [
-                ("GHZ", "GHZ State", "g"),
-                ("W", "W State", "w"),
-                ("CLUSTER", "Cluster State", "c"),
-                ("BELL", "Bell State", "b"),
-                ("SUPERPOSITION", "Superposition (|+>^n)", "u"),
-                ("CUSTOM", "Custom State", "m"),
-                ("RANDOM", "Random State", "r"),
-            ]
-            args["state_type"] = self.input_handler.select_option(
-                title="State Type",
-                options=state_options,
-                default_value=args["state_type"],
-                help_context="state_type",
-                show_value_column=False,
-            )
-
-            # Collect custom state parameters if needed
-            if args["state_type"] == "CUSTOM":
-                args["custom_params"] = self._collect_custom_state_params(
-                    args["num_qubits"]
-                )  # may include its own num_qubits
-                # Optional preview and validation
-                if self.input_handler.prompt_yes_no("custom_preview_prompt", "y"):
-                    preview_nq = args["custom_params"].get(
-                        "num_qubits", args["num_qubits"]
-                    )
-                    self._preview_custom_circuit(preview_nq, args["custom_params"])
-
-            # Noise configuration
-            noise_enabled = self.input_handler.prompt_yes_no(
-                "enable_noise_prompt", "y", help_context="noise"
-            )
-            args["noise_enabled"] = noise_enabled
-
-            if noise_enabled:
-                noise_options = [
-                    ("DEPOLARIZING", "Depolarizing", "d"),
-                    ("PHASE_FLIP", "Phase Flip", "p"),
-                    ("BIT_FLIP", "Bit Flip", "b"),
-                    ("THERMAL_RELAXATION", "Thermal Relaxation", "t"),
-                ]
-                args["noise_type"] = self.input_handler.select_option(
-                    title="Noise Type",
-                    options=noise_options,
-                    default_value=args.get("noise_type", "DEPOLARIZING"),
-                    help_context="noise_type",
-                    show_value_column=False,
-                )
-
-                # Error rate (Enter keeps default shown)
-                error_rate = self.input_handler.get_numeric_input(
-                    "error_rate_prompt",
-                    str(args.get("error_rate", 0.1)),
-                    expected_type=float,
-                )
-                try:
-                    args["error_rate"] = float(error_rate)
-                except Exception:
-                    # Keep current default if input was empty
-                    pass
-
-            # Shots
-            shots = self.input_handler.get_numeric_input(
-                "shots_prompt", str(args["shots"]), expected_type=int
-            )
-            args["shots"] = int(shots)
-
-            # Simulation mode
-            sim_mode = self.input_handler.select_option(
-                title="Simulation Mode",
-                options=[
-                    ("qasm", "QASM (shots)", "q"),
-                    ("density", "Density Matrix", "d"),
-                ],
-                default_value=args["sim_mode"],
-                help_context="sim_mode",
-                show_value_column=False,
-            )
-            args["sim_mode"] = sim_mode
-
-            # Visualization preferences
-            enable_viz = self.input_handler.prompt_yes_no(
-                "enable_visualization_prompt", "y", help_context="viz"
-            )
-            if enable_viz:
-                viz_type = self.input_handler.select_option(
-                    title="Visualization Type",
-                    options=[
-                        ("histogram", "Histogram", "h"),
-                        ("density_matrix", "Density Matrix", "d"),
-                        ("hypergraph", "Hypergraph", "g"),
-                    ],
-                    default_value="histogram",
-                    help_context="viz_type",
-                    show_value_column=False,
-                )
-                args["visualization_type"] = viz_type
-            else:
-                args["visualization_type"] = "none"
-
-        return validate_parameters(args)
-
-    def _collect_custom_state_params(self, default_num_qubits: int) -> Dict[str, Any]:
-        """Collect parameters for CustomState (source: gates|builder|openqasm)."""
         custom_params: Dict[str, Any] = {}
         # Optional template quick-pick
+        # Show only templates relevant to the current qubit count for a smoother UX
+        relevant_templates = [
+            ("none", "None", "n"),
+            ("bell_phi_plus", "Bell |Φ+> (2 qubits)", "1"),
+            ("w3_gate", "W(3) gate-based", "2"),
+            ("cluster_1d_3", "Cluster 1D (3)", "3"),
+            ("ghz_3", "GHZ (3) via gates", "4"),
+            ("cancel", "Cancel and go back", "q"),
+        ]
+        # Filter by target qubits
+        filtered_templates = [
+            (v, l, h)
+            for (v, l, h) in relevant_templates
+            if (
+                v in {"none", "cancel"}
+                or (v == "bell_phi_plus" and default_num_qubits == 2)
+                or (
+                    v in {"w3_gate", "cluster_1d_3", "ghz_3"}
+                    and default_num_qubits == 3
+                )
+            )
+        ]
         template_choice = self.input_handler.select_option(
             title="Custom Templates (optional)",
-            options=[
-                ("none", "None", "n"),
-                ("bell_phi_plus", "Bell |Φ+> (2 qubits)", "1"),
-                ("w3_gate", "W(3) gate-based", "2"),
-                ("cluster_1d_3", "Cluster 1D (3)", "3"),
-                ("ghz_3", "GHZ (3) via gates", "4"),
-            ],
+            options=filtered_templates or [("cancel", "Cancel and go back", "q")],
             default_value="none",
             show_value_column=False,
         )
+        if template_choice == "cancel":
+            return None
         if template_choice == "bell_phi_plus":
             return {
                 "source": "gates",
@@ -279,16 +180,40 @@ class InteractiveCLI:
                     {"name": "cx", "qargs": [1, 2]},
                 ],
             }
-        # Choose source
+        # Choose source with Advanced toggle (default simple)
         self.display_manager.display_info_message(
-            "Choose how to define your custom circuit: gates JSON, Python builder, or OpenQASM file."
+            "Simple: Gates JSON (recommended). Advanced: Python builder/OpenQASM (experts)."
         )
-        source = self.input_handler.get_input(
-            "custom_state_source_prompt",
-            "gates",
-            valid_options=["gates", "builder", "openqasm"],
-            valid_options_display=["GATES", "BUILDER", "OPENQASM"],
-        )
+        advanced_enabled = False
+        source: Optional[str] = None
+        while True:
+            source_options = [("gates", "Gates JSON", "g")]
+            if not advanced_enabled:
+                source_options.append(
+                    ("advanced", "Show advanced (builder/OpenQASM)", "a")
+                )
+            else:
+                source_options.extend(
+                    [
+                        ("builder", "Python builder (module:function)", "b"),
+                        ("openqasm", "OpenQASM file", "o"),
+                    ]
+                )
+            source_options.append(("cancel", "Cancel and go back", "q"))
+
+            choice = self.input_handler.select_option(
+                title="Custom Circuit Source",
+                options=source_options,
+                default_value="gates",
+                show_value_column=False,
+            )
+            if choice == "advanced":
+                advanced_enabled = True
+                continue
+            if choice == "cancel":
+                return None
+            source = choice
+            break
         custom_params["source"] = source
 
         # Common validate flag
@@ -301,37 +226,101 @@ class InteractiveCLI:
             self.display_manager.display_info_message(
                 'Example: [{"name":"h","qargs":[0]},{"name":"cx","qargs":[0,1}]'
             )
-            gates_json = self.input_handler.get_input(
-                "custom_state_gates_json_prompt", "[{'name':'h','qargs':[0]}]"
-            )
-            try:
-                import json as _json
+            import json as _json
 
-                gates = _json.loads(gates_json.replace("'", '"'))
-            except Exception:
-                gates = []
-            custom_params["gates"] = gates
+            while True:
+                gates_json = self.input_handler.get_input(
+                    "custom_state_gates_json_prompt", '[{"name":"h","qargs":[0]}]'
+                )
+                try:
+                    gates = _json.loads(gates_json.replace("'", '"'))
+                except Exception as e:
+                    self.display_manager.display_error_message(f"Invalid JSON: {e}")
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
+                        return None
+                    continue
+                ok, reason = self._validate_gates_list(gates)
+                if not ok:
+                    self.display_manager.display_error_message(
+                        f"Invalid gates specification: {reason}"
+                    )
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
+                        return None
+                    continue
+                custom_params["gates"] = gates
+                break
         elif source == "builder":
             self.display_manager.display_info_message(
                 "Provide a dotted path to a callable that builds and returns a QuantumCircuit."
             )
-            builder = self.input_handler.get_input(
-                "custom_state_builder_prompt", "mypkg.builders:make_qc"
-            )
-            custom_params["builder"] = builder
+            while True:
+                builder = self.input_handler.get_input(
+                    "custom_state_builder_prompt", "mypkg.builders:make_qc"
+                )
+                if ":" not in builder or builder.count(":") != 1:
+                    self.display_manager.display_error_message(
+                        "Builder must be in the form 'module.sub:func'"
+                    )
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
+                        return None
+                    continue
+                custom_params["builder"] = builder
+                break
             custom_params["num_qubits"] = default_num_qubits
         else:  # openqasm
             self.display_manager.display_info_message(
                 "Enter a local path to a .qasm file compatible with Qiskit parser."
             )
-            qasm_path = self.input_handler.get_input(
-                "custom_state_qasm_path_prompt", "path/to/circuit.qasm"
-            )
-            custom_params["openqasm"] = qasm_path
+            from pathlib import Path as _Path
+
+            while True:
+                qasm_path = self.input_handler.get_input(
+                    "custom_state_qasm_path_prompt", "path/to/circuit.qasm"
+                )
+                if not _Path(qasm_path).exists():
+                    self.display_manager.display_warning_message(
+                        "Path not found. Ensure the file exists."
+                    )
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
+                        return None
+                    continue
+                custom_params["openqasm"] = qasm_path
+                break
             # optional num_qubits; default to current selection
             custom_params["num_qubits"] = default_num_qubits
 
         return custom_params
+
+    @staticmethod
+    def _validate_gates_list(gates_obj: Any) -> tuple[bool, str]:
+        """Validate a gates JSON structure for CustomState.
+
+        Expect a list of {name: str, qargs: list[int], params?: list[number]}.
+        """
+        if not isinstance(gates_obj, list):
+            return False, "Expected a list of gate objects"
+        for idx, item in enumerate(gates_obj):
+            if not isinstance(item, dict):
+                return False, f"Item {idx} must be an object"
+            if "name" not in item or "qargs" not in item:
+                return False, f"Item {idx} missing 'name' or 'qargs'"
+            if not isinstance(item["name"], str):
+                return False, f"Item {idx} 'name' must be string"
+            if not isinstance(item["qargs"], list) or not all(
+                isinstance(q, int) for q in item["qargs"]
+            ):
+                return False, f"Item {idx} 'qargs' must be list of integers"
+            if "params" in item and not isinstance(item["params"], list):
+                return False, f"Item {idx} 'params' must be a list if provided"
+        return True, ""
 
     def _preview_custom_circuit(
         self, num_qubits: int, custom_params: Dict[str, Any]
@@ -374,196 +363,16 @@ class InteractiveCLI:
         if choice == "c":
             return self.collect_parameters(interactive=True)
 
-        if choice not in QUICK_EXPERIMENTS:
-            self.print_message("invalid_choice")
-            return self.collect_parameters(interactive=True)
-
-        # Use predefined configuration
-        selected_option = QUICK_EXPERIMENTS[choice]
-        self.console.print(f"\n✅ Selected: {selected_option['name']}")
-        args = apply_defaults(selected_option["config"])
-        args = validate_parameters(args)
-
-        return args
+        # This part of the logic needs to be refactored to use the new PresetsBrowser
+        # For now, we'll just return a default or raise an error if the choice is not handled
+        # This will be addressed in a subsequent edit.
+        self.print_message("invalid_choice")
+        return self.collect_parameters(interactive=True)
 
     def browse_presets(self, include_keys: Optional[list] = None) -> Dict[str, Any]:
-        """
-        Browse presets via a numeric/hotkey menu and return selected configuration.
-
-        Args:
-            include_keys: Optional list of preset keys to show. If None, show all.
-
-        Returns:
-            Dict[str, Any]: Validated experiment parameters.
-        """
-        # Load unified presets from registry
-        unified = load_preset_experiments()
-        # Build keys
-        keys = list(unified.keys())
-        if include_keys is not None:
-            keys = [k for k in keys if k in include_keys]
-        if not keys:
-            keys = list(unified.keys())
-
-        # Optional search/filter step
-        # Category filter
-        categories = sorted({unified[k].get("category", "?") for k in keys})
-        categories = [c for c in categories if c]
-        categories.insert(0, "all")
-        cat_choice = self.input_handler.select_option(
-            title="Filter by Category",
-            options=[(c, c.title(), c[0] if c != "all" else "a") for c in categories],
-            default_value="all",
-            show_value_column=False,
-        )
-        if cat_choice != "all":
-            keys = [k for k in keys if unified[k].get("category") == cat_choice]
-
-        # Difficulty filter
-        diffs = sorted({unified[k].get("difficulty", "?") for k in keys})
-        diffs = [d for d in diffs if d]
-        diffs.insert(0, "all")
-        diff_choice = self.input_handler.select_option(
-            title="Filter by Difficulty",
-            options=[(d, d.title(), d[0] if d != "all" else "a") for d in diffs],
-            default_value="all",
-            show_value_column=False,
-        )
-        if diff_choice != "all":
-            keys = [k for k in keys if unified[k].get("difficulty") == diff_choice]
-
-        # Show active filter chips and search hint
-        try:
-            chips = []
-            chips.append(f"Cat: {cat_choice}")
-            chips.append(f"Diff: {diff_choice}")
-            self.display_manager.display_footer_hints([" / = search", *chips])
-        except Exception:
-            pass
-
-        # Free-text search
-        search_text = self.input_handler.get_input("preset_search_prompt", "", None)
-        if search_text:
-            st = search_text.lower()
-
-            def match(meta: dict) -> bool:
-                blob = " ".join(
-                    [
-                        meta.get("name", ""),
-                        meta.get("description", ""),
-                        meta.get("category", ""),
-                        meta.get("difficulty", ""),
-                    ]
-                ).lower()
-                return st in blob
-
-            keys = [k for k in keys if match(unified[k])]
-
-        # Build compact presets table options
-        options = []
-        for k in keys:
-            meta = unified[k]
-            cfg = meta.get("config", {})
-            name = meta.get("name", k)
-            state = cfg.get("state_type", "-")
-            q = cfg.get("num_qubits", "-")
-            noise = cfg.get("noise_type", "-")
-            sim = cfg.get("sim_mode", "-")
-            shots = cfg.get("shots", "-")
-            diff = meta.get("difficulty", "-")
-            cat = meta.get("category", "-")
-            label = f"{name}  |  State={state}  Q={q}  Noise={noise}  Sim={sim}  Shots={shots}  Diff={diff}  Cat={cat}"
-            options.append((k, label, k))
-        options.append(("show_all", "Show all options/help", "?"))
-        options.append(("c", "Custom Parameters", "c"))
-        options.append(("q", "Back", "q"))
-
-        choice = self.input_handler.select_option(
-            title="Presets Browser",
-            options=options,
-            default_value=keys[0],
-            show_value_column=False,
-        )
-        if choice == "show_all":
-            # Helper panel with available categories, difficulties, noise types
-            from src.config.constants import VALID_NOISE_TYPES
-
-            help_table = Table(title="Options Overview")
-            help_table.add_column("Category", style="cyan")
-            help_table.add_column("Values", style="green")
-            help_table.add_row(
-                "Categories",
-                ", ".join(sorted({unified[k].get("category", "-") for k in unified})),
-            )
-            help_table.add_row(
-                "Difficulties",
-                ", ".join(sorted({unified[k].get("difficulty", "-") for k in unified})),
-            )
-            help_table.add_row("Noise Types", ", ".join(VALID_NOISE_TYPES))
-            self.console.print(help_table)
-            # Re-enter browser
-            return self.browse_presets(include_keys)
-        if choice == "q":
-            # Go back to main menu by raising to caller
-            raise KeyboardInterrupt
-        # Convert preset to args
-        selected = unified.get(choice)
-        if choice == "c" or selected is None:
-            return self.collect_parameters(interactive=True)
-
-        # Detail pane
-        self.show_preset_details(choice, selected)
-        # Footer key hints
-        try:
-            self.display_manager.display_footer_hints(
-                ["r=run", "e=edit", "l=preview", "b=back", "?=help"]
-            )
-        except Exception:
-            pass
-        # Quick actions before proceed
-        quick_action = self.input_handler.select_option(
-            title="Actions",
-            options=[
-                ("run", "Run", "r"),
-                ("edit", "Edit parameters", "e"),
-                ("preview", "Preview circuit (ASCII)", "l"),
-                ("back", "Back", "b"),
-            ],
-            default_value="run",
-            show_value_column=False,
-        )
-        if quick_action == "back":
-            raise KeyboardInterrupt
-        if quick_action == "edit":
-            return self.collect_parameters(
-                interactive=True, base_args=selected.get("config", {})
-            )
-        if quick_action == "preview":
-            try:
-                self._preview_preset_circuit(selected.get("config", {}))
-            except Exception as _e:
-                self.display_manager.display_warning_message(
-                    f"Could not preview circuit: {_e}"
-                )
-        # Offer quick help
-        if self.input_handler.prompt_yes_no("preset_show_options_help", "n"):
-            from src.config.constants import VALID_NOISE_TYPES
-
-            tips = Table(title="Preset Details: Options")
-            tips.add_column("Topic", style="cyan")
-            tips.add_column("Info", style="green")
-            tips.add_row("Noise Types", ", ".join(VALID_NOISE_TYPES))
-            tips.add_row("Sim Modes", "qasm, density")
-            self.console.print(tips)
-        proceed = self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) == "y"
-        if not proceed:
-            # Auto open Edit (pre-filled), with option to go back via ESC in wizard
-            return self.collect_parameters(
-                interactive=True, base_args=selected.get("config", {})
-            )
-
-        args = apply_defaults(selected.get("config", {}))
-        return validate_parameters(args)
+        browser = PresetsBrowser(self.input_handler, self.display_manager, self.console)
+        args = browser.browse(include_keys=include_keys)
+        return validate_parameters(apply_defaults(args))
 
     def show_preset_details(self, key: str, meta: Dict[str, Any]) -> None:
         table = Table(title=f"Preset: {meta.get('name', key)}")
@@ -572,7 +381,9 @@ class InteractiveCLI:
         cfg = meta.get("config", {})
         table.add_row("Description", meta.get("description", "-"))
         table.add_row("Category", meta.get("category", "-"))
-        table.add_row("Difficulty", meta.get("difficulty", "-"))
+        # Prefer experiment family over difficulty in the UI
+        fam = meta.get("family", cfg.get("state_type", "-"))
+        table.add_row("Family", str(fam))
         table.add_row("State", str(cfg.get("state_type", "-")))
         table.add_row("Qubits", str(cfg.get("num_qubits", "-")))
         table.add_row("Noise", str(cfg.get("noise_type", "-")))
@@ -1216,12 +1027,14 @@ class InteractiveCLI:
                 except KeyboardInterrupt:
                     continue
             elif choice == "3":
-                # Force CUSTOM path
-                args = self.collect_parameters(interactive=True)
-                args["state_type"] = "CUSTOM"
-                args["custom_params"] = self._collect_custom_state_params(
-                    args["num_qubits"]
-                )
+                # Build Custom State: go directly into wizard with forced CUSTOM state
+                try:
+                    args = self.collect_parameters(
+                        interactive=True, force_state_type="CUSTOM"
+                    )
+                except KeyboardInterrupt:
+                    # User cancelled within the custom wizard; return to main menu
+                    continue
             elif choice == "4":
                 self.show_recent_results()
                 continue
@@ -1273,8 +1086,16 @@ class InteractiveCLI:
 
             # Confirm before running
             if self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) != "y":
-                self.print_message("params_discarded")
-                continue
+                # Open Edit with current values instead of exiting
+                try:
+                    args = self.collect_parameters(
+                        interactive=True, base_args=normalized
+                    )
+                    normalized = validate_parameters(apply_defaults(args))
+                    self.display_manager.display_params_summary(normalized)
+                except Exception:
+                    self.print_message("params_discarded")
+                    continue
 
                 # Run the experiment with research-grade analysis
             try:
