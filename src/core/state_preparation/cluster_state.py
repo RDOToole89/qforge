@@ -3,12 +3,15 @@
 from qiskit import QuantumCircuit
 from .base_state import BaseState
 
+
 class ClusterState(BaseState):
     """
     Cluster state preparation for a 1D or 2D lattice.
     """
 
-    def create(self, add_barrier: bool = False, experiment_id: str = "N/A") -> QuantumCircuit:
+    def create(
+        self, add_barrier: bool = False, experiment_id: str = "N/A"
+    ) -> QuantumCircuit:
         qc = QuantumCircuit(self.num_qubits)
         # Parameters
         lattice = (self.custom_params or {}).get("lattice", "1d").lower()
@@ -29,8 +32,15 @@ class ClusterState(BaseState):
 
         elif lattice == "2d":
             if rows is None or cols is None:
-                raise ValueError("2d cluster requires 'rows' and 'cols' in custom_params")
-            if not isinstance(rows, int) or not isinstance(cols, int) or rows <= 0 or cols <= 0:
+                raise ValueError(
+                    "2d cluster requires 'rows' and 'cols' in custom_params"
+                )
+            if (
+                not isinstance(rows, int)
+                or not isinstance(cols, int)
+                or rows <= 0
+                or cols <= 0
+            ):
                 raise ValueError("'rows' and 'cols' must be positive integers")
             if rows * cols != self.num_qubits:
                 raise ValueError("rows*cols must equal num_qubits for 2d cluster")
