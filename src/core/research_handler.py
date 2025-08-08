@@ -50,13 +50,17 @@ class ResearchExperimentHandler:
         (self.results_dir / "parameter_sweeps").mkdir(exist_ok=True)
         (self.results_dir / "convergence_tests").mkdir(exist_ok=True)
 
-        logger.info(f"Research handler initialized with results directory: {self.results_dir}")
+        logger.info(
+            f"Research handler initialized with results directory: {self.results_dir}"
+        )
 
-    def process_experiment_result(self,
-                                circuit: Any,
-                                result: Any,
-                                experiment_config: Dict[str, Any],
-                                experiment_id: Optional[str] = None) -> Dict[str, Any]:
+    def process_experiment_result(
+        self,
+        circuit: Any,
+        result: Any,
+        experiment_config: Dict[str, Any],
+        experiment_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Process a quantum experiment result with comprehensive research analysis.
 
@@ -75,28 +79,33 @@ class ResearchExperimentHandler:
         logger.info(f"Processing research experiment: {experiment_id}")
 
         # Extract experiment parameters first
-        num_qubits = experiment_config.get('num_qubits', 3)
+        num_qubits = experiment_config.get("num_qubits", 3)
 
         # Extract counts from result (robust handling for different Qiskit result formats)
         try:
-            if hasattr(result, 'get_counts'):
+            if hasattr(result, "get_counts"):
                 counts_raw = result.get_counts()
-            elif isinstance(result, dict) and 'counts' in result:
+            elif isinstance(result, dict) and "counts" in result:
                 # Result is a dict with a 'counts' key containing the actual Counts object
-                counts_obj = result['counts']
+                counts_obj = result["counts"]
                 counts_raw = dict(counts_obj)  # Convert Counts to dict
-            elif isinstance(result, dict) and 'density_matrix' in result:
+            elif isinstance(result, dict) and "density_matrix" in result:
                 # For density matrix results, generate placeholder counts for analysis
-                logger.info("Density matrix result detected - generating placeholder counts for metrics analysis")
-                density_matrix = result['density_matrix']
-                if hasattr(density_matrix, 'data'):
+                logger.info(
+                    "Density matrix result detected - generating placeholder counts for metrics analysis"
+                )
+                density_matrix = result["density_matrix"]
+                if hasattr(density_matrix, "data"):
                     import numpy as np
+
                     matrix_size = density_matrix.data.shape[0]
                     num_qubits = int(np.log2(matrix_size))
                     # Generate uniform distribution as placeholder
                     placeholder_shots = 1024
-                    counts_raw = {format(i, f'0{num_qubits}b'): placeholder_shots // matrix_size
-                                 for i in range(matrix_size)}
+                    counts_raw = {
+                        format(i, f"0{num_qubits}b"): placeholder_shots // matrix_size
+                        for i in range(matrix_size)
+                    }
                 else:
                     logger.warning("Invalid density matrix format")
                     return {}
@@ -117,38 +126,42 @@ class ResearchExperimentHandler:
                 # Ensure key is a proper bitstring
                 if isinstance(key, int):
                     # Convert integer to bitstring
-                    key_str = format(key, f'0{num_qubits}b')
+                    key_str = format(key, f"0{num_qubits}b")
                 else:
                     key_str = str(key)
 
                 # Ensure value is an integer - handle Counts objects as values
                 try:
-                    if hasattr(value, 'item'):  # numpy scalar
+                    if hasattr(value, "item"):  # numpy scalar
                         value_int = int(value.item())
                     elif isinstance(value, (int, float)):
                         value_int = int(value)
-                    elif hasattr(value, '__int__'):
+                    elif hasattr(value, "__int__"):
                         value_int = int(value)
                     else:
                         # If it's a Counts object or similar, skip this problematic entry
-                        logger.warning(f"Skipping problematic value type: {type(value)} for key {key}")
+                        logger.warning(
+                            f"Skipping problematic value type: {type(value)} for key {key}"
+                        )
                         continue
 
                     counts[key_str] = value_int
 
                 except (ValueError, TypeError) as ve:
-                    logger.warning(f"Could not convert value {value} (type: {type(value)}) to int for key {key}: {ve}")
+                    logger.warning(
+                        f"Could not convert value {value} (type: {type(value)}) to int for key {key}: {ve}"
+                    )
                     continue
 
         except Exception as e:
             logger.error(f"Failed to process counts: {e}")
             # Try alternative approach - maybe the result itself is the counts
             try:
-                if hasattr(counts_raw, 'binary_probabilities'):
+                if hasattr(counts_raw, "binary_probabilities"):
                     # Alternative Qiskit counts format
                     for bitstring, count in counts_raw.binary_probabilities().items():
                         counts[bitstring] = int(count * sum(counts_raw.values()))
-                elif hasattr(counts_raw, 'most_frequent'):
+                elif hasattr(counts_raw, "most_frequent"):
                     # Another alternative - just get the most frequent outcome for now
                     most_frequent = counts_raw.most_frequent(1)[0]
                     counts[most_frequent[0]] = most_frequent[1]
@@ -159,60 +172,97 @@ class ResearchExperimentHandler:
                 logger.error(f"Alternative count extraction failed: {e2}")
                 return {}
 
-        state_type = experiment_config.get('state_type', 'GHZ')
-        noise_type = experiment_config.get('noise_type', 'DEPOLARIZING')
-        error_rate = experiment_config.get('error_rate', 0.05)
-        shots = experiment_config.get('shots', 1024)
+        state_type = experiment_config.get("state_type", "GHZ")
+        noise_type = experiment_config.get("noise_type", "DEPOLARIZING")
+        error_rate = experiment_config.get("error_rate", 0.05)
+        shots = experiment_config.get("shots", 1024)
 
         # Create comprehensive analysis
         analysis = {
+            "schema_version": "1.0.0",
             "experiment_metadata": {
                 "experiment_id": experiment_id,
                 "timestamp": datetime.now().isoformat(),
                 "framework_version": "2.0.0",
-                "research_type": experiment_config.get('research_type', 'structured_decoherence')
+                "research_type": experiment_config.get(
+                    "research_type", "structured_decoherence"
+                ),
             },
-
             "experiment_parameters": {
                 "num_qubits": num_qubits,
                 "state_type": state_type,
                 "noise_type": noise_type,
-                "noise_enabled": experiment_config.get('noise_enabled', True),
+                "noise_enabled": experiment_config.get("noise_enabled", True),
                 "error_rate": error_rate,
                 "shots": shots,
-                "sim_mode": experiment_config.get('sim_mode', 'qasm'),
-                "multiple_runs": experiment_config.get('multiple_runs', 1),
+                "sim_mode": experiment_config.get("sim_mode", "qasm"),
+                "multiple_runs": experiment_config.get("multiple_runs", 1),
             },
-
             "circuit_statistics": {
-                "depth": circuit.depth() if hasattr(circuit, 'depth') else 0,
-                "num_gates": len(circuit.data) if hasattr(circuit, 'data') else 0,
-                "num_qubits": circuit.num_qubits if hasattr(circuit, 'num_qubits') else num_qubits,
-                "gate_types": self._count_gate_types(circuit) if hasattr(circuit, 'data') else {}
+                "depth": circuit.depth() if hasattr(circuit, "depth") else 0,
+                "num_gates": len(circuit.data) if hasattr(circuit, "data") else 0,
+                "num_qubits": (
+                    circuit.num_qubits if hasattr(circuit, "num_qubits") else num_qubits
+                ),
+                "gate_types": (
+                    self._count_gate_types(circuit) if hasattr(circuit, "data") else {}
+                ),
             },
-
             "measurement_results": {
                 "raw_counts": counts,
                 "total_shots": sum(counts.values()),
                 "unique_outcomes": len(counts),
-                "outcome_probabilities": self._compute_probabilities(counts)
-            }
+                "outcome_probabilities": self._compute_probabilities(counts),
+            },
         }
 
         # Add comprehensive research metrics
         ideal_counts = None
-        if state_type.upper() == 'GHZ':
+        if state_type.upper() == "GHZ":
             ideal_dist = get_ideal_ghz_distribution(num_qubits)
             total_shots = sum(counts.values())
             ideal_counts = {k: int(v * total_shots) for k, v in ideal_dist.items()}
 
         research_metrics = compute_research_metrics(
-            counts=counts,
-            ideal_counts=ideal_counts,
-            num_qubits=num_qubits
+            counts=counts, ideal_counts=ideal_counts, num_qubits=num_qubits
         )
 
         analysis["research_metrics"] = research_metrics
+
+        # Attach provenance information (best-effort)
+        try:
+            import platform
+            import sys as _sys
+
+            provenance = {
+                "software_versions": {
+                    "python": _sys.version.split()[0],
+                    "platform": platform.platform(),
+                },
+                "rng_seed": experiment_config.get("rng_seed"),
+                "transpilation": {
+                    "depth": analysis["circuit_statistics"].get("depth"),
+                    "num_gates": analysis["circuit_statistics"].get("num_gates"),
+                },
+                "simulator": experiment_config.get("simulator", "aer_qasm"),
+            }
+            # Deterministic short hash of normalized config for filenames/tracking
+            import json as _json
+            import hashlib
+
+            normalized = {
+                k: v
+                for k, v in analysis["experiment_parameters"].items()
+                if k not in ["multiple_runs"]
+            }
+            short_hash = hashlib.sha1(
+                _json.dumps(normalized, sort_keys=True).encode()
+            ).hexdigest()[:8]
+            provenance["config_hash"] = short_hash
+            analysis["provenance"] = provenance
+        except Exception:
+            # Non-fatal; provenance is optional
+            pass
 
         # Add decoherence-specific analysis
         if ideal_counts:
@@ -233,8 +283,9 @@ class ResearchExperimentHandler:
         logger.info(f"Research analysis completed for experiment: {experiment_id}")
         return analysis
 
-    def save_research_result(self, analysis: Dict[str, Any],
-                           filename: Optional[str] = None) -> str:
+    def save_research_result(
+        self, analysis: Dict[str, Any], filename: Optional[str] = None
+    ) -> str:
         """
         Save research analysis to a JSON file with organized directory structure.
 
@@ -248,11 +299,17 @@ class ResearchExperimentHandler:
         if filename is None:
             exp_id = analysis["experiment_metadata"]["experiment_id"]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            research_type = analysis["experiment_metadata"].get("research_type", "experiment")
-            filename = f"{research_type}_{exp_id[:8]}_{timestamp}.json"
+            research_type = analysis["experiment_metadata"].get(
+                "research_type", "experiment"
+            )
+            cfg_hash = analysis.get("provenance", {}).get("config_hash", "")
+            hash_segment = f"_{cfg_hash}" if cfg_hash else ""
+            filename = f"{research_type}_{exp_id[:8]}_{timestamp}{hash_segment}.json"
 
         # Determine subdirectory based on research type
-        research_type = analysis["experiment_metadata"].get("research_type", "experiment")
+        research_type = analysis["experiment_metadata"].get(
+            "research_type", "experiment"
+        )
         if "sweep" in research_type or "batch" in research_type:
             subdir = "parameter_sweeps"
         elif "convergence" in research_type:
@@ -263,7 +320,7 @@ class ResearchExperimentHandler:
         filepath = self.results_dir / subdir / filename
 
         # Save with pretty formatting for readability
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(analysis, f, indent=2, default=str)
 
         logger.info(f"Research results saved to: {filepath}")
@@ -279,16 +336,18 @@ class ResearchExperimentHandler:
     def _count_gate_types(self, circuit) -> Dict[str, int]:
         """Count the types of gates in the circuit."""
         gate_counts = {}
-        if hasattr(circuit, 'data'):
+        if hasattr(circuit, "data"):
             for instruction, _, _ in circuit.data:
                 gate_name = instruction.name
                 gate_counts[gate_name] = gate_counts.get(gate_name, 0) + 1
         return gate_counts
 
-    def _compute_decoherence_metrics(self,
-                                   observed_counts: Dict[str, int],
-                                   ideal_counts: Dict[str, int],
-                                   config: Dict[str, Any]) -> Dict[str, Any]:
+    def _compute_decoherence_metrics(
+        self,
+        observed_counts: Dict[str, int],
+        ideal_counts: Dict[str, int],
+        config: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Compute decoherence-specific metrics for structured decoherence research."""
 
         # Compute deviation from ideal distribution
@@ -304,20 +363,28 @@ class ResearchExperimentHandler:
             deviations[outcome] = obs_prob - ideal_prob
 
         # Identify patterns in deviations
-        error_bitstrings = {k: v for k, v in deviations.items()
-                           if k not in ['000', '111'] and abs(v) > 0.001}
+        error_bitstrings = {
+            k: v
+            for k, v in deviations.items()
+            if k not in ["000", "111"] and abs(v) > 0.001
+        }
 
         return {
             "probability_deviations": deviations,
             "error_bitstring_frequencies": error_bitstrings,
             "max_deviation": max(abs(v) for v in deviations.values()),
-            "total_error_probability": sum(observed_counts.get(k, 0) for k in error_bitstrings.keys()) / total_observed,
-            "structured_vs_random": self._assess_structure_vs_randomness(error_bitstrings)
+            "total_error_probability": sum(
+                observed_counts.get(k, 0) for k in error_bitstrings.keys()
+            )
+            / total_observed,
+            "structured_vs_random": self._assess_structure_vs_randomness(
+                error_bitstrings
+            ),
         }
 
-    def _compute_statistical_validation(self,
-                                      counts: Dict[str, int],
-                                      config: Dict[str, Any]) -> Dict[str, Any]:
+    def _compute_statistical_validation(
+        self, counts: Dict[str, int], config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Compute statistical validation metrics."""
         total_shots = sum(counts.values())
         num_outcomes = len(counts)
@@ -328,18 +395,18 @@ class ResearchExperimentHandler:
                 "total_shots": total_shots,
                 "recommended_min_shots": num_outcomes * 100,  # Rule of thumb
                 "adequacy_ratio": total_shots / (num_outcomes * 100),
-                "adequate": total_shots >= num_outcomes * 100
+                "adequate": total_shots >= num_outcomes * 100,
             },
             "sampling_quality": {
-                "outcome_coverage": num_outcomes / (2 ** config.get('num_qubits', 3)),
+                "outcome_coverage": num_outcomes / (2 ** config.get("num_qubits", 3)),
                 "min_count_per_outcome": min(counts.values()) if counts else 0,
                 "max_count_per_outcome": max(counts.values()) if counts else 0,
-            }
+            },
         }
 
         # Confidence intervals for main outcomes (simplified)
-        if 'num_qubits' in config and config['num_qubits'] == 3:
-            for outcome in ['000', '111']:
+        if "num_qubits" in config and config["num_qubits"] == 3:
+            for outcome in ["000", "111"]:
                 if outcome in counts:
                     p = counts[outcome] / total_shots
                     # Simple binomial confidence interval
@@ -348,12 +415,14 @@ class ResearchExperimentHandler:
                         "point_estimate": p,
                         "standard_error": std_err,
                         "ci_95_lower": max(0, p - 1.96 * std_err),
-                        "ci_95_upper": min(1, p + 1.96 * std_err)
+                        "ci_95_upper": min(1, p + 1.96 * std_err),
                     }
 
         return validation
 
-    def _assess_structure_vs_randomness(self, error_bitstrings: Dict[str, float]) -> Dict[str, Any]:
+    def _assess_structure_vs_randomness(
+        self, error_bitstrings: Dict[str, float]
+    ) -> Dict[str, Any]:
         """Assess whether error patterns show structure vs pure randomness."""
         if not error_bitstrings:
             return {"assessment": "insufficient_data", "confidence": 0.0}
@@ -370,7 +439,9 @@ class ResearchExperimentHandler:
         structure_indicators = {
             "coefficient_of_variation": cv,
             "uniformity_score": 1 - cv,  # High uniformity suggests randomness
-            "pattern_concentration": max(error_probs) / sum(error_probs) if sum(error_probs) > 0 else 0,
+            "pattern_concentration": (
+                max(error_probs) / sum(error_probs) if sum(error_probs) > 0 else 0
+            ),
         }
 
         # Simple classification
@@ -387,17 +458,17 @@ class ResearchExperimentHandler:
         return {
             "assessment": assessment,
             "confidence": confidence,
-            "indicators": structure_indicators
+            "indicators": structure_indicators,
         }
 
-    def _generate_research_insights(self,
-                                  analysis: Dict[str, Any],
-                                  config: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_research_insights(
+        self, analysis: Dict[str, Any], config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Generate research insights and interpretations."""
         insights = {
             "key_findings": [],
             "research_questions_addressed": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Extract key metrics for insight generation
@@ -456,7 +527,9 @@ class ResearchExperimentHandler:
 
 
 # Convenience function for quick research analysis
-def analyze_research_experiment(circuit, result, config, experiment_id=None) -> Dict[str, Any]:
+def analyze_research_experiment(
+    circuit, result, config, experiment_id=None
+) -> Dict[str, Any]:
     """
     Quick function to analyze a research experiment with full metrics.
 

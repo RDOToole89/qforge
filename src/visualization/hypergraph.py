@@ -19,27 +19,23 @@ from typing import Optional, Dict, List, Union, Callable
 from scipy.spatial import ConvexHull
 
 # Import analysis modules
-from src.core.analysis.correlations import (
+from src.core.analysis import (
     compute_pairwise_correlations,
     compute_correlations_for_hypergraph,
-)
-from src.core.analysis.decoherence import compute_fubini_study_distance
-from src.core.analysis.symmetry import (
+    compute_fubini_study_distance,
     compute_su2_symmetry,
     compute_su3_symmetry,
     compute_parity_distribution,
+    cluster_qubits,
 )
-from src.core.analysis.clustering import cluster_qubits
-from src.core.analysis.bloch import compute_bloch_vector
-from src.core.analysis.transitions import compute_error_transitions
+from src.core.analysis import compute_bloch_vector
+from src.core.analysis import compute_error_transitions
 
 logger = logging.getLogger("QuantumExperiment.Visualization.Hypergraph")
 
 
 def compute_quantum_layout(
-    num_qubits: int,
-    state_type: str = "GHZ",
-    layout_type: str = "quantum_circuit"
+    num_qubits: int, state_type: str = "GHZ", layout_type: str = "quantum_circuit"
 ) -> Dict[str, tuple]:
     """
     Computes quantum-specific node layouts for hypergraph visualization.
@@ -97,8 +93,8 @@ def compute_quantum_layout(
         if num_qubits <= 3:
             # For small systems, use special arrangements
             if num_qubits == 2:
-                positions[f"q0"] = (0, 1)    # |0⟩ at north pole
-                positions[f"q1"] = (0, -1)   # |1⟩ at south pole
+                positions[f"q0"] = (0, 1)  # |0⟩ at north pole
+                positions[f"q1"] = (0, -1)  # |1⟩ at south pole
             elif num_qubits == 3:
                 # Triangle arrangement
                 positions[f"q0"] = (0, 1)
@@ -155,14 +151,14 @@ def compute_quantum_layout(
             y = radius * np.sin(angle)
             positions[f"q{i}"] = (x, y)
 
-    logger.info(f"Generated {layout_type} layout for {num_qubits} qubits in {state_type} state")
+    logger.info(
+        f"Generated {layout_type} layout for {num_qubits} qubits in {state_type} state"
+    )
     return positions
 
 
 def get_quantum_color_scheme(
-    num_qubits: int,
-    state_type: str = "GHZ",
-    scheme: str = "entanglement"
+    num_qubits: int, state_type: str = "GHZ", scheme: str = "entanglement"
 ) -> Dict[str, str]:
     """
     Generate quantum-aware color schemes for nodes and edges.
@@ -201,20 +197,27 @@ def get_quantum_color_scheme(
         for i in range(num_qubits):
             phase = 2 * np.pi * i / num_qubits
             r = int(127 + 127 * np.cos(phase))
-            g = int(127 + 127 * np.cos(phase + 2*np.pi/3))
-            b = int(127 + 127 * np.cos(phase + 4*np.pi/3))
+            g = int(127 + 127 * np.cos(phase + 2 * np.pi / 3))
+            b = int(127 + 127 * np.cos(phase + 4 * np.pi / 3))
             colors[f"q{i}"] = f"#{r:02x}{g:02x}{b:02x}"
 
     elif scheme == "correlation_strength":
         # Use a colormap based on correlation strength (placeholder)
-        cmap = cm.get_cmap('viridis')
+        cmap = cm.get_cmap("viridis")
         for i in range(num_qubits):
             color_val = cmap(i / max(1, num_qubits - 1))
             colors[f"q{i}"] = mcolors.to_hex(color_val)
 
     else:
         # Default quantum colors
-        quantum_colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
+        quantum_colors = [
+            "#FF6B6B",
+            "#4ECDC4",
+            "#45B7D1",
+            "#96CEB4",
+            "#FFEAA7",
+            "#DDA0DD",
+        ]
         for i in range(num_qubits):
             colors[f"q{i}"] = quantum_colors[i % len(quantum_colors)]
 
@@ -287,13 +290,21 @@ def plot_hypergraph(
                 fs_distances.append(0.0)
 
         # Plot Bloch vectors if requested
-        if config.get("plot_bloch") and time_steps is not None and show_plot_nonblocking is not None:
+        if (
+            config.get("plot_bloch")
+            and time_steps is not None
+            and show_plot_nonblocking is not None
+        ):
             plot_closed_with_ctrl_c |= plot_bloch_sphere_vectors(
                 correlation_data, time_steps, save_path, show_plot_nonblocking
             )
 
         # Plot Fubini-Study distance over time
-        if time_steps is not None and fs_distances and show_plot_nonblocking is not None:
+        if (
+            time_steps is not None
+            and fs_distances
+            and show_plot_nonblocking is not None
+        ):
             plot_closed_with_ctrl_c |= plot_fubini_study_distance(
                 time_steps, fs_distances, save_path, show_plot_nonblocking
             )
@@ -380,7 +391,7 @@ def plot_single_hypergraph(
     else:
         first_key = next(iter(correlation_data.keys()))
         num_qubits = len(first_key)
-        if hasattr(correlation_data, 'shots'):
+        if hasattr(correlation_data, "shots"):
             shots = correlation_data.shots()
         else:
             shots = sum(int(count) for count in correlation_data.values())
@@ -452,7 +463,10 @@ def plot_single_hypergraph(
 
         if use_quantum_colors and state_type:
             node_colors = get_quantum_color_scheme(num_qubits, state_type, color_scheme)
-            node_color_list = [node_colors.get(node, config.get("node_color", "blue")) for node in H.nodes]
+            node_color_list = [
+                node_colors.get(node, config.get("node_color", "blue"))
+                for node in H.nodes
+            ]
             logger.info(f"Using quantum color scheme: {color_scheme}")
         else:
             node_color_list = config.get("node_color", "blue")
@@ -481,17 +495,19 @@ def plot_single_hypergraph(
 
         # Draw the graph with quantum-aware styling
         nx.draw_networkx_nodes(
-            H, pos,
+            H,
+            pos,
             node_color=node_color_list,
             node_size=config.get("node_size", 800),
             alpha=config.get("node_alpha", 0.8),
-            ax=ax_graph
+            ax=ax_graph,
         )
         nx.draw_networkx_labels(
-            H, pos,
+            H,
+            pos,
             font_size=config.get("label_font_size", 12),
             font_weight="bold",
-            ax=ax_graph
+            ax=ax_graph,
         )
 
         # Draw hyperedges as polygons
@@ -535,17 +551,35 @@ def plot_single_hypergraph(
             title_str += f" (t={time_step:.2f})"
 
         # Add layout and threshold info as subtitle
-        layout_info = f"Layout: {layout_type}" if use_quantum_layout else "Layout: Traditional"
+        layout_info = (
+            f"Layout: {layout_type}" if use_quantum_layout else "Layout: Traditional"
+        )
         threshold_used = config.get("threshold")
         if config.get("adaptive_threshold", True):
-            threshold_info = f"Adaptive Threshold: {threshold_used:.4f}" if threshold_used else "Adaptive Threshold"
+            threshold_info = (
+                f"Adaptive Threshold: {threshold_used:.4f}"
+                if threshold_used
+                else "Adaptive Threshold"
+            )
         else:
-            threshold_info = f"Manual Threshold: {threshold_used:.4f}" if threshold_used else "Default Threshold"
+            threshold_info = (
+                f"Manual Threshold: {threshold_used:.4f}"
+                if threshold_used
+                else "Default Threshold"
+            )
 
-        ax_graph.set_title(title_str, fontsize=14, fontweight='bold')
-        ax_graph.text(0.5, 0.95, f"{layout_info} | {threshold_info}",
-                     transform=ax_graph.transAxes, ha='center', va='top',
-                     fontsize=10, style='italic', alpha=0.8)
+        ax_graph.set_title(title_str, fontsize=14, fontweight="bold")
+        ax_graph.text(
+            0.5,
+            0.95,
+            f"{layout_info} | {threshold_info}",
+            transform=ax_graph.transAxes,
+            ha="center",
+            va="top",
+            fontsize=10,
+            style="italic",
+            alpha=0.8,
+        )
 
         # Add colorbar
         sm = cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -584,14 +618,14 @@ def plot_single_hypergraph(
         return False
     elif state_type:  # Auto-generate organized save path
         from .save_manager import get_organized_save_path
+
         experiment_config = {
-            'state_type': state_type,
-            'noise_type': noise_type,
-            'num_qubits': num_qubits
+            "state_type": state_type,
+            "noise_type": noise_type,
+            "num_qubits": num_qubits,
         }
         auto_save_path = get_organized_save_path(
-            viz_type='hypergraph',
-            experiment_config=experiment_config
+            viz_type="hypergraph", experiment_config=experiment_config
         )
         plot_func()
         plt.savefig(auto_save_path, dpi=300, bbox_inches="tight")

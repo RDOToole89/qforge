@@ -309,7 +309,11 @@ def main():
     elif args[0] == "--list":
         list_experiments()
     elif args[0] == "--run" and len(args) > 1:
+        # Support `--run <exp_name>` as preset name
         run_experiment_by_name(args[1])
+    elif args[0] == "run" and len(args) > 2 and args[1] == "--preset":
+        # New subcommand style: run --preset <id>
+        run_experiment_by_name(args[2])
     elif args[0] == "--sweep" and len(args) > 1:
         run_parameter_sweep(args[1])
     elif args[0] == "--viz" and len(args) > 1:
@@ -320,6 +324,15 @@ def main():
             except Exception:
                 pass
         visualize_from_json(args[1], viz_type)
+    elif args[0] == "viz" and len(args) > 2 and args[1] == "--from":
+        # New subcommand: viz --from <file> [--type ...]
+        viz_type = "histogram"
+        if "--type" in args:
+            try:
+                viz_type = args[args.index("--type") + 1]
+            except Exception:
+                pass
+        visualize_from_json(args[2], viz_type)
     else:
         print("❌ Invalid arguments. Use --help for usage information.")
         sys.exit(1)

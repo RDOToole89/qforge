@@ -770,15 +770,32 @@ class InteractiveCLI:
         table.add_column("#", style="cyan", width=4)
         table.add_column("Filename", style="green")
         table.add_column("Modified", style="yellow", width=20)
+        table.add_column("Metric", style="magenta", width=12)
         for idx, f in enumerate(files, start=1):
             try:
                 mtime = f.stat().st_mtime
                 from datetime import datetime
+                import json as _json
 
                 ts = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+                # Try to extract a key metric (normalized entropy)
+                metric = "-"
+                try:
+                    with open(f, "r") as jf:
+                        data = _json.load(jf)
+                    info = data.get("research_metrics", {}).get(
+                        "information_theory", {}
+                    )
+                    if "normalized_entropy" in info and isinstance(
+                        info["normalized_entropy"], (int, float)
+                    ):
+                        metric = f"H_norm={info['normalized_entropy']:.3f}"
+                except Exception:
+                    metric = "-"
             except Exception:
                 ts = "-"
-            table.add_row(str(idx), str(f), ts)
+                metric = "-"
+            table.add_row(str(idx), str(f), ts, metric)
         self.console.print(table)
         # Actions: re-open viz or re-run (stubs)
         action = self.input_handler.select_option(
@@ -1013,15 +1030,46 @@ class InteractiveCLI:
             title="Settings Actions",
             options=[
                 ("back", "Back", "b"),
-                ("profiles", "Profiles (coming soon)", "p"),
+                ("profiles_save", "Save Profile", "s"),
+                ("profiles_load", "Load Profile", "l"),
             ],
             default_value="back",
             show_value_column=False,
         )
-        if action == "profiles":
-            self.console.print(
-                "[yellow]Profiles management will be added next.[/yellow]"
-            )
+        if action in {"profiles_save", "profiles_load"}:
+            try:
+                from src.config import profiles as _profiles
+
+                if action == "profiles_save":
+                    name = self.input_handler.get_input(
+                        "custom_template_prompt", "default"
+                    )
+                    path = _profiles.save_profile(name)
+                    self.display_manager.display_success_message(
+                        f"✅ Saved profile to {path}"
+                    )
+                else:
+                    existing = _profiles.list_profiles()
+                    if not existing:
+                        self.display_manager.display_info_message("No profiles found.")
+                    else:
+                        # Simple selector by number
+                        options = [(n, n, n[0]) for n in existing]
+                        pick = self.input_handler.select_option(
+                            "Select Profile",
+                            options,
+                            existing[0],
+                            show_value_column=False,
+                        )
+                        prof = _profiles.load_profile(pick)
+                        _profiles.apply_profile(prof)
+                        self.display_manager.display_success_message(
+                            f"✅ Loaded profile '{pick}'"
+                        )
+            except Exception as e:
+                self.display_manager.display_error_message(
+                    f"Profile operation failed: {e}"
+                )
 
     def _show_help_menu(self) -> None:
         # Minimal glossary stub

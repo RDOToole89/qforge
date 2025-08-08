@@ -67,6 +67,8 @@ class InputHandler:
                         pass
                     # reprint prompt after help
                     continue
+                if raw.lower() == "s":
+                    raw = default
                 user_input = (raw or default).lower()
                 if self.validator.validate_choice(user_input, valid_options):
                     return user_input
@@ -185,6 +187,7 @@ class InputHandler:
 
                     if sys.stdin.isatty():
                         from importlib import import_module
+
                         questionary = import_module("questionary")  # type: ignore
 
                         choices = []
