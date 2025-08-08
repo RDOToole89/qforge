@@ -91,10 +91,11 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] JSON schema v1 fields: schema_version, timestamp, software_versions; rng_seed/transpile/simulator (partial)
 - [x] Attach normalized experiment_config, raw results, derived metrics, artifact paths, insights (initial)
 - [x] Deterministic filenames (timestamp + short config hash)
+- [x] Expanded provenance: backend/method, host/CPU info, git SHA (initial); docs pending
 
 ### Visualization & Insights
 
-- [x] “Experiment Report” (Markdown) from saved JSON; CLI `report --from`
+- [x] “Experiment Report” (Markdown + basic HTML) from saved JSON; CLI `report --from`
 - [x] Footer key hints added in major screens
 - [x] Re-introduce Density Matrix sim mode and align viz prompts
 

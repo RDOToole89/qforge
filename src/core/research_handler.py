@@ -233,6 +233,8 @@ class ResearchExperimentHandler:
         try:
             import platform
             import sys as _sys
+            import socket
+            import subprocess
 
             provenance = {
                 "software_versions": {
@@ -244,8 +246,38 @@ class ResearchExperimentHandler:
                     "depth": analysis["circuit_statistics"].get("depth"),
                     "num_gates": analysis["circuit_statistics"].get("num_gates"),
                 },
-                "simulator": experiment_config.get("simulator", "aer_qasm"),
+                "simulator": experiment_config.get("simulator", "aer"),
             }
+            # Backend/method guess from sim_mode
+            sim_mode_val = experiment_config.get("sim_mode", "qasm")
+            if sim_mode_val == "qasm":
+                provenance["backend"] = {"name": "QasmSimulator", "method": "qasm"}
+            else:
+                provenance["backend"] = {
+                    "name": "AerSimulator",
+                    "method": "statevector",
+                }
+
+            # Host & CPU info
+            provenance["host"] = {
+                "hostname": socket.gethostname(),
+                "cpu_count": os.cpu_count(),
+                "processor": platform.processor(),
+            }
+
+            # Git commit (best effort)
+            try:
+                git_sha = (
+                    subprocess.check_output(
+                        ["git", "rev-parse", "--short", "HEAD"],
+                        stderr=subprocess.DEVNULL,
+                    )
+                    .decode()
+                    .strip()
+                )
+                provenance["git_commit"] = git_sha
+            except Exception:
+                pass
             # Deterministic short hash of normalized config for filenames/tracking
             import json as _json
             import hashlib
