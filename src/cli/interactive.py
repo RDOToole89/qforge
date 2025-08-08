@@ -130,6 +130,7 @@ class InteractiveCLI:
                 options=state_options,
                 default_value=args["state_type"],
                 help_context="state_type",
+                show_value_column=False,
             )
 
             # Collect custom state parameters if needed
@@ -162,6 +163,7 @@ class InteractiveCLI:
                     options=noise_options,
                     default_value=args.get("noise_type", "DEPOLARIZING"),
                     help_context="noise_type",
+                    show_value_column=False,
                 )
 
                 # Error rate (Enter keeps default shown)
@@ -191,6 +193,7 @@ class InteractiveCLI:
                 ],
                 default_value=args["sim_mode"],
                 help_context="sim_mode",
+                show_value_column=False,
             )
             args["sim_mode"] = sim_mode
 
@@ -208,6 +211,7 @@ class InteractiveCLI:
                     ],
                     default_value="histogram",
                     help_context="viz_type",
+                    show_value_column=False,
                 )
                 args["visualization_type"] = viz_type
             else:
@@ -229,6 +233,7 @@ class InteractiveCLI:
                 ("ghz_3", "GHZ (3) via gates", "4"),
             ],
             default_value="none",
+            show_value_column=False,
         )
         if template_choice == "bell_phi_plus":
             return {
