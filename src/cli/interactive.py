@@ -594,7 +594,11 @@ class InteractiveCLI:
         # Actions: re-open viz or re-run (stubs)
         action = self.input_handler.select_option(
             title=MESSAGES.get("recent_action_title", "Result Actions"),
-            options=[("back", "Back", "b"), ("open", "Open Visualization", "o"), ("rerun", "Re-run", "r")],
+            options=[
+                ("back", "Back", "b"),
+                ("open", "Open Visualization", "o"),
+                ("rerun", "Re-run", "r"),
+            ],
             default_value="back",
         )
         if action == "back":
@@ -613,10 +617,89 @@ class InteractiveCLI:
             return
         if action == "open":
             self.console.print(f"Opening: {chosen}")
-            # TODO: implement visualization opening from JSON
+            try:
+                self._open_visualization_from_result_json(str(chosen))
+            except Exception as e:
+                self.display_manager.display_error_message(f"Failed to open visualization: {e}")
         elif action == "rerun":
             self.console.print(f"Re-running from: {chosen}")
-            # TODO: load JSON, extract config, and re-run
+            try:
+                self._rerun_from_result_json(str(chosen))
+            except Exception as e:
+                self.display_manager.display_error_message(f"Failed to re-run: {e}")
+
+    def _open_visualization_from_result_json(self, file_path: str) -> None:
+        import json as _json
+        with open(file_path, "r") as f:
+            analysis = _json.load(f)
+        self._last_research_analysis = analysis
+        params = analysis.get("experiment_parameters", {})
+        counts = analysis.get("measurement_results", {}).get("raw_counts", {})
+        # pick viz type
+        viz = self.input_handler.select_option(
+            title="Visualization Type",
+            options=[
+                ("histogram", "Histogram", "h"),
+                ("density_matrix", "Density Matrix", "d"),
+                ("hypergraph", "Hypergraph", "g"),
+            ],
+            default_value="histogram",
+        )
+        # Display params summary then viz
+        args = apply_defaults(params)
+        args["visualization_type"] = viz
+        self.display_manager.display_params_summary(args)
+        # For histogram/hypergraph we pass counts; for density we cannot reconstruct DM here
+        self._show_visualization({"counts": counts}, args, viz)
+
+    def _rerun_from_result_json(self, file_path: str) -> None:
+        import json as _json
+        from src.experiments.manager import get_experiment_manager
+        from src.core.research_handler import ResearchExperimentHandler
+        with open(file_path, "r") as f:
+            analysis = _json.load(f)
+        params = analysis.get("experiment_parameters", {})
+        args = apply_defaults(params)
+        self.display_manager.display_params_summary(args)
+        if self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) != "y":
+            return
+        self.display_manager.display_info_message("🚀 Running quantum experiment...")
+        em = get_experiment_manager()
+        experiment_params = {k: v for k, v in args.items() if k not in ["name", "description", "category", "difficulty"]}
+        result = em.run_experiment("ghz_basic", custom_params=experiment_params)
+        if not result:
+            self.display_manager.display_error_message("❌ Experiment failed")
+            return
+        is_density_experiment = experiment_params.get("sim_mode") == "density"
+        if not is_density_experiment:
+            research_handler = ResearchExperimentHandler()
+            if isinstance(result, tuple) and len(result) >= 2:
+                circuit, raw_results = result
+                research_analysis = research_handler.process_experiment_result(
+                    circuit=circuit,
+                    result=raw_results,
+                    experiment_config=experiment_params,
+                    experiment_id="cli_experiment",
+                )
+                self._last_research_analysis = research_analysis
+                research_file = research_handler.save_research_result(research_analysis)
+                self.display_manager.display_experiment_results(result)
+                viz_type = experiment_params.get("visualization_type", "none")
+                if viz_type and viz_type != "none":
+                    self._show_visualization(raw_results, experiment_params, viz_type)
+                self.display_manager.display_success_message(
+                    f"📊 Research-grade analysis saved: {research_file}"
+                )
+        else:
+            self.display_manager.display_experiment_results(result)
+            self.display_manager.display_info_message("🔬 Density Matrix Mode: Displaying quantum state analysis")
+            viz_type = experiment_params.get("visualization_type", "none")
+            if viz_type and viz_type != "none":
+                if isinstance(result, tuple) and len(result) >= 2:
+                    _c, raw_results = result
+                    self._show_visualization(raw_results, experiment_params, viz_type)
+                else:
+                    self._show_visualization(result, experiment_params, viz_type)
 
     def show_settings_stub(self) -> None:
         # Display current defaults; editing will be added later
