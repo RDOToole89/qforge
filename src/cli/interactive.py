@@ -79,13 +79,7 @@ class InteractiveCLI:
             )
 
         self.console.print(table)
-        # ASCII circuit (compact)
-        try:
-            ascii_circuit = qc.draw(output="text")
-            self.console.print("[bold]ASCII Circuit:[/bold]")
-            self.console.print(str(ascii_circuit))
-        except Exception:
-            pass
+        # ASCII circuit preview intentionally omitted here; shown after compilation
         self.console.print(
             "\n💡 Choose an option number or press 'c' for custom parameters"
         )
@@ -449,16 +443,20 @@ class InteractiveCLI:
 
             keys = [k for k in keys if match(unified[k])]
 
+        # Build compact presets table options
         options = []
         for k in keys:
             meta = unified[k]
             cfg = meta.get("config", {})
+            name = meta.get("name", k)
+            state = cfg.get("state_type", "-")
+            q = cfg.get("num_qubits", "-")
             noise = cfg.get("noise_type", "-")
             sim = cfg.get("sim_mode", "-")
-            label = (
-                f"{meta['name']} | State={cfg.get('state_type','-')} Q={cfg.get('num_qubits','-')} "
-                f"Noise={noise} Shots={cfg.get('shots','-')} Sim={sim}"
-            )
+            shots = cfg.get("shots", "-")
+            diff = meta.get("difficulty", "-")
+            cat = meta.get("category", "-")
+            label = f"{name}  |  State={state}  Q={q}  Noise={noise}  Sim={sim}  Shots={shots}  Diff={diff}  Cat={cat}"
             options.append((k, label, k))
         options.append(("show_all", "Show all options/help", "?"))
         options.append(("c", "Custom Parameters", "c"))
@@ -468,6 +466,7 @@ class InteractiveCLI:
             title="Presets Browser",
             options=options,
             default_value=keys[0],
+            show_value_column=False,
         )
         if choice == "show_all":
             # Helper panel with available categories, difficulties, noise types
@@ -498,6 +497,11 @@ class InteractiveCLI:
 
         # Detail pane
         self.show_preset_details(choice, selected)
+        # Footer key hints
+        try:
+            self.display_manager.display_footer_hints(["r=run", "e=edit", "b=back", "?=help"])
+        except Exception:
+            pass
         # Offer quick help
         if self.input_handler.prompt_yes_no("preset_show_options_help", "n"):
             from src.config.constants import VALID_NOISE_TYPES
@@ -510,17 +514,10 @@ class InteractiveCLI:
             self.console.print(tips)
         proceed = self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) == "y"
         if not proceed:
-            # Offer clone & edit
-            clone_or_back = self.input_handler.select_option(
-                title="Clone & Edit?",
-                options=[("clone", "Clone and Edit", "c"), ("back", "Back", "b")],
-                default_value="back",
+            # Auto open Edit (pre-filled), with option to go back via ESC in wizard
+            return self.collect_parameters(
+                interactive=True, base_args=selected.get("config", {})
             )
-            if clone_or_back == "clone":
-                return self.collect_parameters(
-                    interactive=True, base_args=selected.get("config", {})
-                )
-            raise KeyboardInterrupt
 
         args = apply_defaults(selected.get("config", {}))
         return validate_parameters(args)
@@ -1029,6 +1026,7 @@ class InteractiveCLI:
                     self.show_settings_stub()
                 elif sub == "noise_help":
                     from src.config.constants import VALID_NOISE_TYPES
+
                     t = Table(title="Available Noise Types")
                     t.add_column("Type", style="cyan")
                     t.add_column("Summary", style="green")

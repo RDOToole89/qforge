@@ -329,3 +329,22 @@ class DisplayManager:
         except Exception as e:
             self.console.print(f"⚠️ Error displaying results: {e}", style="yellow")
             self.console.print(f"📁 Raw results: {result_tuple}")
+
+    def display_footer_hints(self, hints: Any) -> None:
+        """Render a subtle footer with key hints.
+
+        Args:
+            hints: A list of short hint strings or a single string.
+        """
+        try:
+            if isinstance(hints, (list, tuple)):
+                text = "  •  ".join(str(h) for h in hints)
+            else:
+                text = str(hints)
+            from rich.text import Text
+
+            hint_text = Text(f"{text}", style="dim")
+            self.console.print(hint_text)
+        except Exception:
+            # Best-effort only; ignore rendering issues
+            pass

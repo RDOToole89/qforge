@@ -140,6 +140,7 @@ class InputHandler:
         hotkey_map: Optional[dict] = None,
         help_context: Optional[str] = None,
         enable_arrow_navigation: bool = True,
+        show_value_column: bool = True,
     ) -> str:
         """Interactive selection helper with numbers, hotkeys, and defaults.
 
@@ -183,7 +184,8 @@ class InputHandler:
                     import sys
 
                     if sys.stdin.isatty():
-                        import questionary
+                        from importlib import import_module
+                        questionary = import_module("questionary")  # type: ignore
 
                         choices = []
                         for idx, (value, label, hotkey) in enumerate(
@@ -209,12 +211,16 @@ class InputHandler:
             table.add_column("#", style="cyan", width=4)
             table.add_column("Option", style="green")
             table.add_column("Hotkey", style="yellow", width=8)
-            table.add_column("Value", style="blue")
+            if show_value_column:
+                table.add_column("Value", style="blue")
             for idx, (value, label, hotkey) in enumerate(normalized, start=1):
                 label_display = label
                 if idx - 1 == default_index:
                     label_display = f"{label} [default]"
-                table.add_row(str(idx), label_display, hotkey or "-", value)
+                if show_value_column:
+                    table.add_row(str(idx), label_display, hotkey or "-", value)
+                else:
+                    table.add_row(str(idx), label_display, hotkey or "-")
 
             self.console.print(table)
             suffix = " [? for help]" if self.help_manager else ""
