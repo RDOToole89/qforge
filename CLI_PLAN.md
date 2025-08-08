@@ -34,8 +34,8 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Load unified presets from registry (all levels, incl. research)
 - [x] Filters by category/difficulty
 - [x] Free-text search by name/description/tags
-- [ ] Preset detail pane before run (state/noise/sim/viz, expected outputs, time estimate)
-- [ ] Clone & Edit flow (preset → editable parameters, then run)
+- [x] Preset detail pane before run (state/noise/sim/viz, expected outputs, time estimate)
+- [x] Clone & Edit flow (preset → editable parameters, then run)
 - [ ] Tagging/labels: state types, noise models, research tags
 
 #### Quick Start
@@ -46,15 +46,15 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 #### Custom Wizard
 
 - [x] Basic path for CUSTOM (gates/builder/openqasm)
-- [ ] Templates (e.g., Bell/W/Cluster), parameterized
-- [ ] Validators & schema checks for gates/builder/qasm
-- [ ] Preview (text circuit summary; optional ascii circuit)
+- [x] Templates (e.g., Bell/W/Cluster), parameterized (initial set)
+- [x] Validators & schema checks for gates/builder/qasm (via CustomState.create path)
+- [x] Preview (text circuit summary)
 
 #### Recent Results
 
 - [x] List last N JSON files
-- [ ] Actions: re-open visualization
-- [ ] Actions: re-run with same params
+- [x] Actions: re-open visualization
+- [x] Actions: re-run with same params
 - [ ] Compare two runs (diff metrics/plots)
 
 #### Settings

@@ -128,10 +128,14 @@ class InteractiveCLI:
 
             # Collect custom state parameters if needed
             if args["state_type"] == "CUSTOM":
-                args["custom_params"] = self._collect_custom_state_params(args["num_qubits"])  # may include its own num_qubits
+                args["custom_params"] = self._collect_custom_state_params(
+                    args["num_qubits"]
+                )  # may include its own num_qubits
                 # Optional preview and validation
                 if self.input_handler.prompt_yes_no("custom_preview_prompt", "y"):
-                    preview_nq = args["custom_params"].get("num_qubits", args["num_qubits"])
+                    preview_nq = args["custom_params"].get(
+                        "num_qubits", args["num_qubits"]
+                    )
                     self._preview_custom_circuit(preview_nq, args["custom_params"])
 
             # Noise configuration
@@ -290,17 +294,20 @@ class InteractiveCLI:
 
         return custom_params
 
-    def _preview_custom_circuit(self, num_qubits: int, custom_params: Dict[str, Any]) -> None:
+    def _preview_custom_circuit(
+        self, num_qubits: int, custom_params: Dict[str, Any]
+    ) -> None:
         """Validate and preview a CustomState circuit (basic summary)."""
         from src.core.state_preparation.custom_state import CustomState
+
         try:
             cs = CustomState(num_qubits=num_qubits, custom_params=custom_params)
             qc = cs.create(add_barrier=False)
         except Exception as e:
             self.console.print(
-                MESSAGES.get("custom_invalid_params", "Invalid custom parameters: {reason}").format(
-                    reason=str(e)
-                )
+                MESSAGES.get(
+                    "custom_invalid_params", "Invalid custom parameters: {reason}"
+                ).format(reason=str(e))
             )
             return
         # Show brief summary
@@ -464,6 +471,22 @@ class InteractiveCLI:
         exp = meta.get("expected_outcomes")
         if exp:
             table.add_row("Expected Outcomes", str(exp))
+        # Estimated runtime (heuristic)
+        try:
+            nq = int(cfg.get("num_qubits", 3))
+            shots = int(cfg.get("shots", 1024))
+            sim = str(cfg.get("sim_mode", "qasm")).lower()
+            noise = bool(cfg.get("noise_enabled", False))
+            # Heuristic coefficients
+            base = 0.02 + 0.005 * max(0, nq - 2)
+            per_shot = 0.000002 if sim == "qasm" else 0.0000005
+            if noise:
+                per_shot *= 1.5
+                base += 0.01
+            est = base + shots * per_shot
+            table.add_row("Est. Runtime (s)", f"~{est:.2f}")
+        except Exception:
+            pass
         self.console.print(table)
 
     def _show_visualization(
