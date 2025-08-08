@@ -55,6 +55,7 @@ class SettingsUI:
 
     def _edit_settings(self) -> None:
         from src.config.settings import settings
+
         try:
             new_shots = self.input_handler.get_numeric_input(
                 "shots_prompt", str(settings.DEFAULT_SHOTS), int
@@ -95,13 +96,16 @@ class SettingsUI:
 
     def _profiles_action(self, action: str) -> None:
         from src.config.settings import settings
+
         try:
             from src.config import profiles as _profiles
 
             if action == "profiles_save":
                 name = self.input_handler.get_input("custom_template_prompt", "default")
                 path = _profiles.save_profile(name)
-                self.display_manager.display_success_message(f"✅ Saved profile to {path}")
+                self.display_manager.display_success_message(
+                    f"✅ Saved profile to {path}"
+                )
             else:
                 existing = _profiles.list_profiles()
                 if not existing:
@@ -113,11 +117,15 @@ class SettingsUI:
                 )
                 prof = _profiles.load_profile(pick)
                 _profiles.apply_profile(prof)
-                self.display_manager.display_success_message(f"✅ Loaded profile '{pick}'")
+                self.display_manager.display_success_message(
+                    f"✅ Loaded profile '{pick}'"
+                )
             try:
                 from src.visualization.save_manager import set_save_manager_base_dir
 
-                set_save_manager_base_dir(settings.DEFAULT_RESULTS_DIR + "/visualizations")
+                set_save_manager_base_dir(
+                    settings.DEFAULT_RESULTS_DIR + "/visualizations"
+                )
             except Exception:
                 pass
         except Exception as e:

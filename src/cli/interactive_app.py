@@ -12,7 +12,7 @@ from rich.table import Table
 
 from src.config.params import apply_defaults, validate_parameters
 from src.utils.input_handler import InputHandler
-from .help import HelpManager
+from .interactive.help import HelpManager
 from src.utils.messages import MESSAGES
 from src.utils import logger as logger_utils
 from .display import DisplayManager
@@ -22,6 +22,7 @@ from .interactive.viz import VisualizationOrchestrator
 from .interactive.results import ResultsManager
 from .interactive.settings import SettingsUI
 from .router import Router
+from .common.context import CLIContext
 
 
 class InteractiveCLI:
@@ -40,6 +41,11 @@ class InteractiveCLI:
             self.console, MESSAGES, help_manager=self.help_manager
         )
         self.display_manager = DisplayManager(self.console)
+        self.ctx = CLIContext(
+            console=self.console,
+            input_handler=self.input_handler,
+            display_manager=self.display_manager,
+        )
         # Initialize logger once for interactive mode, suppress duplicate handlers
         self.logger = logger_utils.setup_logger(
             log_level="INFO",
@@ -521,7 +527,7 @@ class InteractiveCLI:
         self.console.print(table)
 
     def run_interactive_session(self) -> None:
-        Router(self.console, self.input_handler, self.display_manager).run()
+        Router(self.ctx.console, self.ctx.input_handler, self.ctx.display_manager).run()
 
 
 def run_interactive() -> None:

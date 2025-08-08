@@ -47,6 +47,8 @@ def test_router_quit_immediately(monkeypatch):
     assert isinstance(MESSAGES, dict)
     console = Console(force_terminal=False, color_system=None)
 
-    router = Router(console=console, input_handler=FakeInput(), display_manager=FakeDisplay())
+    router = Router(
+        console=console, input_handler=FakeInput(), display_manager=FakeDisplay()
+    )
     # Should not raise
     router.run()

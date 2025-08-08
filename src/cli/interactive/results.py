@@ -18,11 +18,14 @@ class ResultsManager:
 
     def show_recent_results(self, max_items: int = 10) -> None:
         from pathlib import Path
+
         base = Path("results")
         if not base.exists():
             self.display_manager.console.print("[yellow]No results found.[/yellow]")
             return
-        files = sorted(base.rglob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:max_items]
+        files = sorted(
+            base.rglob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+        )[:max_items]
         if not files:
             self.display_manager.console.print("[yellow]No results found.[/yellow]")
             return
@@ -33,14 +36,19 @@ class ResultsManager:
         table.add_column("Metric", style="magenta", width=12)
         from datetime import datetime
         import json as _json
+
         for idx, f in enumerate(files, start=1):
             try:
-                ts = datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                ts = datetime.fromtimestamp(f.stat().st_mtime).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
                 metric = "-"
                 try:
                     with open(f, "r") as jf:
                         data = _json.load(jf)
-                    info = data.get("research_metrics", {}).get("information_theory", {})
+                    info = data.get("research_metrics", {}).get(
+                        "information_theory", {}
+                    )
                     if isinstance(info.get("normalized_entropy"), (int, float)):
                         metric = f"H_norm={info['normalized_entropy']:.3f}"
                 except Exception:
@@ -64,7 +72,10 @@ class ResultsManager:
             return
         idx_map = [(str(i), str(i), str(i)) for i in range(1, len(files) + 1)]
         pick = self.input_handler.select_option(
-            title="Select Result", options=idx_map, default_value="1", show_value_column=False
+            title="Select Result",
+            options=idx_map,
+            default_value="1",
+            show_value_column=False,
         )
         try:
             chosen = files[int(pick) - 1]
@@ -75,7 +86,9 @@ class ResultsManager:
             try:
                 self.open_visualization_from_result_json(str(chosen))
             except Exception as e:
-                self.display_manager.display_error_message(f"Failed to open visualization: {e}")
+                self.display_manager.display_error_message(
+                    f"Failed to open visualization: {e}"
+                )
         elif action == "rerun":
             self.console.print(f"Re-running from: {chosen}")
             try:
@@ -84,7 +97,10 @@ class ResultsManager:
                 self.display_manager.display_error_message(f"Failed to re-run: {e}")
         elif action == "compare":
             pick2 = self.input_handler.select_option(
-                title="Compare Results", options=idx_map, default_value="2" if len(files) > 1 else "1", show_value_column=False
+                title="Compare Results",
+                options=idx_map,
+                default_value="2" if len(files) > 1 else "1",
+                show_value_column=False,
             )
             try:
                 chosen2 = files[int(pick2) - 1]
@@ -99,6 +115,7 @@ class ResultsManager:
 
     def open_visualization_from_result_json(self, file_path: str) -> None:
         import json as _json
+
         with open(file_path, "r") as f:
             analysis = _json.load(f)
         self._last_research_analysis = analysis
@@ -106,14 +123,21 @@ class ResultsManager:
         counts = analysis.get("measurement_results", {}).get("raw_counts", {})
         viz = self.input_handler.select_option(
             title="Visualization Type",
-            options=[("histogram", "Histogram", "h"), ("density_matrix", "Density Matrix", "d"), ("hypergraph", "Hypergraph", "g")],
+            options=[
+                ("histogram", "Histogram", "h"),
+                ("density_matrix", "Density Matrix", "d"),
+                ("hypergraph", "Hypergraph", "g"),
+            ],
             default_value="histogram",
             show_value_column=False,
         )
         args = {**params, "visualization_type": viz}
         self.display_manager.display_params_summary(args)
         from .viz import VisualizationOrchestrator
-        VisualizationOrchestrator(self.display_manager).show({"counts": counts}, args, viz)
+
+        VisualizationOrchestrator(self.display_manager).show(
+            {"counts": counts}, args, viz
+        )
 
     def rerun_from_result_json(self, file_path: str) -> None:
         import json as _json
@@ -129,7 +153,11 @@ class ResultsManager:
             return
         self.display_manager.display_info_message("🚀 Running quantum experiment...")
         em = get_experiment_manager()
-        experiment_params = {k: v for k, v in args.items() if k not in ["name", "description", "category", "difficulty"]}
+        experiment_params = {
+            k: v
+            for k, v in args.items()
+            if k not in ["name", "description", "category", "difficulty"]
+        }
         result = em.run_experiment("ghz_basic", custom_params=experiment_params)
         if not result:
             self.display_manager.display_error_message("❌ Experiment failed")
@@ -151,23 +179,37 @@ class ResultsManager:
                 viz_type = experiment_params.get("visualization_type", "none")
                 if viz_type and viz_type != "none":
                     from .viz import VisualizationOrchestrator
-                    VisualizationOrchestrator(self.display_manager).show(raw_results, experiment_params, viz_type)
-                self.display_manager.display_success_message(f"📊 Research-grade analysis saved: {research_file}")
+
+                    VisualizationOrchestrator(self.display_manager).show(
+                        raw_results, experiment_params, viz_type
+                    )
+                self.display_manager.display_success_message(
+                    f"📊 Research-grade analysis saved: {research_file}"
+                )
         else:
             self.display_manager.display_experiment_results(result)
-            self.display_manager.display_info_message("🔬 Density Matrix Mode: Displaying quantum state analysis")
+            self.display_manager.display_info_message(
+                "🔬 Density Matrix Mode: Displaying quantum state analysis"
+            )
             viz_type = experiment_params.get("visualization_type", "none")
             if viz_type and viz_type != "none":
                 if isinstance(result, tuple) and len(result) >= 2:
                     _c, raw_results = result
                     from .viz import VisualizationOrchestrator
-                    VisualizationOrchestrator(self.display_manager).show(raw_results, experiment_params, viz_type)
+
+                    VisualizationOrchestrator(self.display_manager).show(
+                        raw_results, experiment_params, viz_type
+                    )
                 else:
                     from .viz import VisualizationOrchestrator
-                    VisualizationOrchestrator(self.display_manager).show(result, experiment_params, viz_type)
+
+                    VisualizationOrchestrator(self.display_manager).show(
+                        result, experiment_params, viz_type
+                    )
 
     def compare_results(self, file_a: str, file_b: str) -> None:
         import json as _json
+
         a, b = None, None
         with open(file_a, "r") as fa, open(file_b, "r") as fb:
             a = _json.load(fa)

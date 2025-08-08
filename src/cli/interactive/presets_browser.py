@@ -40,13 +40,20 @@ class PresetsBrowser:
         # Family filter (replaces difficulty)
         families = sorted(
             {unified[k].get("family", "?") for k in keys}
-            | {unified[k].get("state", unified[k].get("config", {}).get("state_type", "?")) for k in keys}
+            | {
+                unified[k].get(
+                    "state", unified[k].get("config", {}).get("state_type", "?")
+                )
+                for k in keys
+            }
         )
         families = [f for f in families if f and f != "?"]
         families.insert(0, "all")
         fam_choice = self.input_handler.select_option(
             title="Filter by Experiment Family",
-            options=[(f, str(f).title(), str(f)[0] if f != "all" else "a") for f in families],
+            options=[
+                (f, str(f).title(), str(f)[0] if f != "all" else "a") for f in families
+            ],
             default_value="all",
             show_value_column=False,
         )
@@ -110,17 +117,21 @@ class PresetsBrowser:
         if choice == "c" or selected is None:
             from .collectors import ParameterCollector  # lazy import to avoid cycle
 
-            return ParameterCollector(self.input_handler, self.display_manager).collect_parameters(
-                interactive=True
-            )
+            return ParameterCollector(
+                self.input_handler, self.display_manager
+            ).collect_parameters(interactive=True)
         return selected.get("config", {})
 
     def _show_overview(self, unified: Dict[str, Any]) -> None:
         table = Table(title="Options Overview")
         table.add_column("Category", style="cyan")
         table.add_column("Values", style="green")
-        categories = ", ".join(sorted({unified[k].get("category", "-") for k in unified}))
-        difficulties = ", ".join(sorted({unified[k].get("difficulty", "-") for k in unified}))
+        categories = ", ".join(
+            sorted({unified[k].get("category", "-") for k in unified})
+        )
+        difficulties = ", ".join(
+            sorted({unified[k].get("difficulty", "-") for k in unified})
+        )
         table.add_row("Categories", categories)
         table.add_row("Difficulties", difficulties)
         self.console.print(table)

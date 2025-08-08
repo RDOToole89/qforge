@@ -11,22 +11,29 @@ from .interactive.presets_browser import PresetsBrowser
 from .interactive.viz import VisualizationOrchestrator
 from .interactive.results import ResultsManager
 from .interactive.settings import SettingsUI
+from .common.context import CLIContext
+from .common.constants import (
+    MAIN_MENU_OPTIONS,
+    SETTINGS_MENU_OPTIONS,
+    FOOTER_HINTS,
+    CURATED_PRESETS,
+    PROMPT_IDS,
+)
 from src.config.params import apply_defaults, validate_parameters
+from .actions.run import execute_run
 
 
 class Router:
     """Interactive menu router that orchestrates the main CLI loop."""
 
     def __init__(self, console, input_handler, display_manager):
-        self.console = console
-        self.input_handler = input_handler
-        self.display_manager = display_manager
+        self.ctx = CLIContext(console=console, input_handler=input_handler, display_manager=display_manager)
         # Components
-        self.collector = ParameterCollector(input_handler, display_manager)
-        self.browser = PresetsBrowser(input_handler, display_manager, console)
-        self.results = ResultsManager(console, input_handler, display_manager)
-        self.viz = VisualizationOrchestrator(display_manager)
-        self.settings = SettingsUI(console, input_handler, display_manager)
+        self.collector = ParameterCollector(self.ctx.input_handler, self.ctx.display_manager)
+        self.browser = PresetsBrowser(self.ctx.input_handler, self.ctx.display_manager, self.ctx.console)
+        self.results = ResultsManager(self.ctx.console, self.ctx.input_handler, self.ctx.display_manager)
+        self.viz = VisualizationOrchestrator(self.ctx.display_manager)
+        self.settings = SettingsUI(self.ctx.console, self.ctx.input_handler, self.ctx.display_manager)
 
     def display_quick_options(self) -> None:
         table = Table(
@@ -38,47 +45,24 @@ class Router:
         table.add_column("Name", style="green", width=28)
         table.add_column("Family", style="blue", width=12)
         table.add_column("Description", style="yellow")
-        curated = [
-            ("ghz_basic", "GHZ State Basics", "GHZ", "3-qubit GHZ state baseline"),
-            ("ghz_noise", "GHZ with Noise", "GHZ", "GHZ with depolarizing noise"),
-            (
-                "density_analysis",
-                "Density Matrix Analysis",
-                "GHZ",
-                "Statevector analysis for GHZ",
-            ),
-            (
-                "ghz_structured_decoherence_ref",
-                "Structured Decoherence (Ref)",
-                "GHZ",
-                "Research preset",
-            ),
-        ]
-        for key, name, family, desc in curated:
+        for key, name, family, desc in CURATED_PRESETS:
             table.add_row(key, name, family, desc)
-        self.console.print(table)
+        self.ctx.console.print(table)
 
     def run(self) -> None:
         from src.utils.messages import MESSAGES
 
         while True:
-            self.console.print(MESSAGES.get("welcome", "Welcome"))
-            choice = self.input_handler.select_option(
+            self.ctx.console.print(MESSAGES.get(PROMPT_IDS["welcome"], "Welcome"))
+            choice = self.ctx.input_handler.select_option(
                 title="Main Menu",
-                options=[
-                    ("1", "Quick Start (curated presets)", "1"),
-                    ("2", "Browse Presets", "2"),
-                    ("3", "Build Custom State", "3"),
-                    ("4", "Recent Results", "4"),
-                    ("5", "Settings", "5"),
-                    ("q", "Quit", "q"),
-                ],
+                options=MAIN_MENU_OPTIONS,
                 default_value="1",
                 show_value_column=False,
             )
             try:
-                self.display_manager.display_footer_hints(
-                    ["numbers=select", "enter=default", "?=help", "q=quit"]
+                self.ctx.display_manager.display_footer_hints(
+                    FOOTER_HINTS
                 )
             except Exception:
                 pass
@@ -87,12 +71,7 @@ class Router:
                 self.display_quick_options()
                 try:
                     args = self.browser.browse(
-                        include_keys=[
-                            "ghz_basic",
-                            "ghz_noise",
-                            "density_analysis",
-                            "ghz_structured_decoherence_ref",
-                        ]
+                        include_keys=[k for k, *_ in CURATED_PRESETS]
                     )
                 except KeyboardInterrupt:
                     continue
@@ -112,13 +91,9 @@ class Router:
                 self.results.show_recent_results()
                 continue
             elif choice == "5":
-                sub = self.input_handler.select_option(
+                sub = self.ctx.input_handler.select_option(
                     title="Settings & Help",
-                    options=[
-                        ("settings", "Settings", "s"),
-                        ("help", "Help & Glossary", "h"),
-                        ("back", "Back", "b"),
-                    ],
+                    options=SETTINGS_MENU_OPTIONS,
                     default_value="settings",
                     show_value_column=False,
                 )
@@ -128,91 +103,37 @@ class Router:
                     self._show_help_menu()
                 continue
             elif choice == "q":
-                self.console.print(MESSAGES.get("goodbye", "Goodbye"))
+                self.ctx.console.print(MESSAGES.get(PROMPT_IDS["goodbye"], "Goodbye"))
                 return
             else:
-                self.console.print(MESSAGES.get("invalid_choice", "Invalid choice"))
+                self.ctx.console.print(MESSAGES.get(PROMPT_IDS["invalid_choice"], "Invalid choice"))
                 continue
 
             # Normalize and display parameter summary
             normalized = validate_parameters(apply_defaults(args))
-            self.display_manager.display_params_summary(normalized)
+            self.ctx.display_manager.display_params_summary(normalized)
 
             # Confirm before running
-            if self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) != "y":
+            if self.ctx.input_handler.get_input(PROMPT_IDS["proceed_prompt"], "y", ["y", "n"]) != "y":
                 try:
                     args = self.collector.collect_parameters(
                         interactive=True, base_args=normalized
                     )
                     normalized = validate_parameters(apply_defaults(args))
-                    self.display_manager.display_params_summary(normalized)
+                    self.ctx.display_manager.display_params_summary(normalized)
                 except Exception:
-                    self.console.print(
+                    self.ctx.console.print(
                         MESSAGES.get("params_discarded", "Parameters discarded")
                     )
                     continue
 
             # Execute run using legacy ExperimentManager to avoid scope creep here
             try:
-                from src.experiments.manager import get_experiment_manager
-                from src.core.research_handler import ResearchExperimentHandler
-
-                self.display_manager.display_info_message(
-                    "🚀 Running quantum experiment..."
-                )
-                em = get_experiment_manager()
-                experiment_params = {
-                    k: v
-                    for k, v in normalized.items()
-                    if k not in ["name", "description", "category", "difficulty"]
-                }
-                result = em.run_experiment("ghz_basic", custom_params=experiment_params)
-                if result:
-                    is_density = experiment_params.get("sim_mode") == "density"
-                    if not is_density:
-                        research_handler = ResearchExperimentHandler()
-                        if isinstance(result, tuple) and len(result) >= 2:
-                            circuit, raw_results = result
-                            research_analysis = (
-                                research_handler.process_experiment_result(
-                                    circuit=circuit,
-                                    result=raw_results,
-                                    experiment_config=experiment_params,
-                                    experiment_id="cli_experiment",
-                                )
-                            )
-                            self.results._last_research_analysis = research_analysis
-                            research_file = research_handler.save_research_result(
-                                research_analysis
-                            )
-                            self.display_manager.display_experiment_results(result)
-                            viz_type = experiment_params.get(
-                                "visualization_type", "none"
-                            )
-                            if viz_type and viz_type != "none":
-                                self.viz.show(raw_results, experiment_params, viz_type)
-                            self.display_manager.display_success_message(
-                                f"📊 Research-grade analysis saved: {research_file}"
-                            )
-                    else:
-                        self.display_manager.display_experiment_results(result)
-                        self.display_manager.display_info_message(
-                            "🔬 Density Matrix Mode: Displaying quantum state analysis"
-                        )
-                        viz_type = experiment_params.get("visualization_type", "none")
-                        if viz_type and viz_type != "none":
-                            if isinstance(result, tuple) and len(result) >= 2:
-                                _c, raw_results = result
-                                self.viz.show(raw_results, experiment_params, viz_type)
-                            else:
-                                self.viz.show(result, experiment_params, viz_type)
-                    self.display_manager.display_success_message(
-                        "✅ Experiment completed successfully!"
-                    )
-                else:
-                    self.display_manager.display_error_message("❌ Experiment failed")
+                research_file = execute_run(normalized, self.ctx.display_manager, self.viz)
+                if research_file is not None:
+                    self.results._last_research_analysis = research_file  # lightweight track
             except Exception as e:
-                self.display_manager.display_error_message(
+                self.ctx.display_manager.display_error_message(
                     f"❌ Error running experiment: {str(e)}"
                 )
                 continue

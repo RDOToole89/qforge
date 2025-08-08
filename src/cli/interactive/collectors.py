@@ -153,7 +153,9 @@ class ParameterCollector:
 
     # --- Custom state helpers ---
 
-    def _collect_custom_state_params(self, default_num_qubits: int) -> Optional[Dict[str, Any]]:
+    def _collect_custom_state_params(
+        self, default_num_qubits: int
+    ) -> Optional[Dict[str, Any]]:
         custom_params: Dict[str, Any] = {}
         relevant_templates = [
             ("none", "None", "n"),
@@ -169,7 +171,10 @@ class ParameterCollector:
             if (
                 v in {"none", "cancel"}
                 or (v == "bell_phi_plus" and default_num_qubits == 2)
-                or (v in {"w3_gate", "cluster_1d_3", "ghz_3"} and default_num_qubits == 3)
+                or (
+                    v in {"w3_gate", "cluster_1d_3", "ghz_3"}
+                    and default_num_qubits == 3
+                )
             )
         ]
         template_choice = self.input_handler.select_option(
@@ -230,12 +235,16 @@ class ParameterCollector:
         while True:
             source_options = [("gates", "Gates JSON", "g")]
             if not advanced_enabled:
-                source_options.append(("advanced", "Show advanced (builder/OpenQASM)", "a"))
+                source_options.append(
+                    ("advanced", "Show advanced (builder/OpenQASM)", "a")
+                )
             else:
-                source_options.extend([
-                    ("builder", "Python builder (module:function)", "b"),
-                    ("openqasm", "OpenQASM file", "o"),
-                ])
+                source_options.extend(
+                    [
+                        ("builder", "Python builder (module:function)", "b"),
+                        ("openqasm", "OpenQASM file", "o"),
+                    ]
+                )
             source_options.append(("cancel", "Cancel and go back", "q"))
             choice = self.input_handler.select_option(
                 title="Custom Circuit Source",
@@ -267,7 +276,9 @@ class ParameterCollector:
                     gates = _json.loads(gates_json.replace("'", '"'))
                 except Exception as e:
                     self.display_manager.display_error_message(f"Invalid JSON: {e}")
-                    if not self.input_handler.prompt_yes_no("custom_state_validate_prompt", "y"):
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
                         return None
                     continue
                 ok, reason = self._validate_gates_list(gates)
@@ -275,7 +286,9 @@ class ParameterCollector:
                     self.display_manager.display_error_message(
                         f"Invalid gates specification: {reason}"
                     )
-                    if not self.input_handler.prompt_yes_no("custom_state_validate_prompt", "y"):
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
                         return None
                     continue
                 custom_params["gates"] = gates
@@ -289,7 +302,9 @@ class ParameterCollector:
                     self.display_manager.display_error_message(
                         "Builder must be in the form 'module.sub:func'"
                     )
-                    if not self.input_handler.prompt_yes_no("custom_state_validate_prompt", "y"):
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
                         return None
                     continue
                 custom_params["builder"] = builder
@@ -303,8 +318,12 @@ class ParameterCollector:
                     "custom_state_qasm_path_prompt", "path/to/circuit.qasm"
                 )
                 if not _Path(qasm_path).exists():
-                    self.display_manager.display_warning_message("Path not found. Ensure the file exists.")
-                    if not self.input_handler.prompt_yes_no("custom_state_validate_prompt", "y"):
+                    self.display_manager.display_warning_message(
+                        "Path not found. Ensure the file exists."
+                    )
+                    if not self.input_handler.prompt_yes_no(
+                        "custom_state_validate_prompt", "y"
+                    ):
                         return None
                     continue
                 custom_params["openqasm"] = qasm_path
@@ -324,7 +343,9 @@ class ParameterCollector:
                 return False, f"Item {idx} missing 'name' or 'qargs'"
             if not isinstance(item["name"], str):
                 return False, f"Item {idx} 'name' must be string"
-            if not isinstance(item["qargs"], list) or not all(isinstance(q, int) for q in item["qargs"]):
+            if not isinstance(item["qargs"], list) or not all(
+                isinstance(q, int) for q in item["qargs"]
+            ):
                 return False, f"Item {idx} 'qargs' must be list of integers"
             if "params" in item and not isinstance(item["params"], list):
                 return False, f"Item {idx} 'params' must be a list if provided"

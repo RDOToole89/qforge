@@ -11,7 +11,9 @@ class VisualizationOrchestrator:
     def __init__(self, display_manager):
         self.display_manager = display_manager
 
-    def show(self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str) -> None:
+    def show(
+        self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str
+    ) -> None:
         try:
             self.display_manager.display_info_message(
                 f"🎨 Generating {viz_type} visualization..."
@@ -108,4 +110,6 @@ class VisualizationOrchestrator:
                 f"✅ {viz_type.title()} visualization displayed!"
             )
         except Exception as e:
-            self.display_manager.display_error_message(f"❌ Visualization error: {str(e)}")
+            self.display_manager.display_error_message(
+                f"❌ Visualization error: {str(e)}"
+            )
