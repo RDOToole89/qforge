@@ -34,6 +34,14 @@ click==8.1.8
 rich==13.9.4
 tqdm==4.67.1
 natsort==8.4.0
+typer==0.16.0
+shellingham==1.5.4
+
+# ==========================
+# ✅ Pydantic (models & validation)
+# ==========================
+
+pydantic==2.9.2
 
 # ==========================
 # ✅ Test Dependencies
