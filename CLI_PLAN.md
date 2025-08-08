@@ -14,7 +14,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 ## Current CLI structure
 
 - Main menu: Browse Presets, Quick Start, Build Custom, Recent Results, Settings
-- Presets Browser: filters (category/difficulty), free-text search, selection
+- Presets Browser: filters (category/difficulty), free-text search, selection, active filter chips, compact list
 - Custom Wizard: basic (state → custom source when CUSTOM → noise → sim → viz)
 - Recent Results: list last N JSON files
 - Settings: read-only defaults (editing pending)
@@ -38,6 +38,8 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Preset detail pane before run (state/noise/sim/viz, expected outputs, time estimate)
 - [x] Clone & Edit flow (preset → editable parameters, then run)
 - [ ] Tagging/labels: state types, noise models, research tags
+- [x] Active filter chips + '/' search hint
+- [x] Compact list (no Value column in menus)
 
 ### Quick Start
 
@@ -60,18 +62,21 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Actions: re-run with same params
 - [x] Compare two runs (diff metrics/plots) – basic metrics table
 - [x] Compare: add TVD/KL vs ideal deltas; optional small chart (metrics table; chart pending)
+- [x] Compact selections (no Value column)
 
 ### Settings
 
 - [x] Read-only view of defaults
 - [ ] Editing: error_rate, shots, default backend, SaveManager base dir
 - [ ] Profiles: save/load named configurations
+- [x] Actions stub (profiles/back) with footer hints
 
 ### Help & Glossary
 
 - [x] `Help` main menu with searchable glossary (noise models, metrics, objects)
 - [x] Inline `?` hotkey: show short definition + examples (basic)
 - [ ] Link to local markdown docs / external references
+- [x] Preset details footer hints and Actions (r/e/l/b)
 
 ### Headless/Server alignment
 
@@ -89,6 +94,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 ### Visualization & Insights
 
 - [ ] Professional “Experiment Report” panel: Key Insights, expand Details, Save report
+- [x] Footer key hints added in major screens
 - [x] Re-introduce Density Matrix sim mode and align viz prompts
 
 ### Cleanup & tests
@@ -100,8 +106,8 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ## Status snapshot (today)
 
-- Completed: unified presets, curated quick start, filters/search, selection UX, numeric defaults, recent results list, settings (read-only).
-- Next to implement: preset detail pane, improved Custom wizard (templates/validators/preview), recent results actions, settings editing, help/glossary overlay, headless commands, JSON schema v1, tests, and retire old quick configs.
+- Completed: unified presets, curated quick start, filters/search with active chips, compact menus (no Value column) across CLI, numeric defaults and 's' shortcut, preset details with Actions and ASCII preview, auto-Edit on 'n', recent results (list/open/rerun/compare + compact), settings read-only with actions stub, footer key hints on main screens.
+- Next to implement: profiles save/load, headless commands, JSON schema v1, report export, tests (CLI smoke/schema/presets/manifest), tagging/labels, compact results key metric column, and retire old quick configs.
 
 ---
 
@@ -164,34 +170,34 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ### Presets UI
 
-- [ ] Replace list with compact table (#, Name, State, Q, Noise, Sim, Shots, Diff, Cat)
-- [ ] Restore concise hotkeys (r/e/b/?) with footer hints
-- [ ] Add top filter chips and "/" fuzzy search in browser
-- [ ] Remove verbose "Value" column from displays
+- [x] Replace list with compact table (#, Name, State, Q, Noise, Sim, Shots, Diff, Cat)
+- [x] Restore concise hotkeys (r/e/b/?) with footer hints
+- [x] Add top filter chips and "/" fuzzy search in browser
+- [x] Remove verbose "Value" column from displays
 
 ### Details & flow
 
-- [ ] Make detail pane actions explicit: Run [r], Edit [e], Back [b]
-- [ ] Auto-open Edit when "Proceed?" = n (pre-filled)
-- [ ] Add quick keys: l=circuit preview, v=viz pipeline, h=help
+- [x] Make detail pane actions explicit: Run [r], Edit [e], Back [b], Preview [l]
+- [x] Auto-open Edit when "Proceed?" = n (pre-filled)
+- [x] Add quick key: l=circuit preview (ASCII)
 
 ### Wizard UX
 
 - [ ] Breadcrumb header (Preset → Params → Viz → Review)
-- [ ] "s" to keep default on prompts; show defaults inline
+- [x] "s" to keep default on prompts; show defaults inline
 - [ ] Inline autofix prompts for constraint violations (e.g., set BELL→2 qubits)
 - [ ] Density mode: skip measurement-only prompts; show context note
 - [ ] Hide noise fields when disabled; normalize params to None
 
 ### Keyboard model
 
-- [ ] Standardize Enter/Esc/numbers/arrows/"/"/"?"/q across all screens
-- [ ] Footer key-hints component shared by menus and wizards
+- [x] Standardize Enter/Numbers/?/q across key screens (TTY arrows soft-dep)
+- [x] Footer key-hints component used in main menus and presets
 
 ### Recent results
 
 - [ ] Replace list with compact table incl. Key metric column
-- [ ] Actions: Open [o], Re-run [r], Compare [c], Report [p]
+- [x] Actions: Open [o], Re-run [r], Compare [c]
 - [ ] Compare: metrics diff view; toggle ideal deltas (TVD/KL)
 - [ ] Optional small overlay chart in compare
 
