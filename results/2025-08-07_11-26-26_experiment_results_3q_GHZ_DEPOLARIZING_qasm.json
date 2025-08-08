@@ -1,0 +1,51 @@
+{
+    "experiment_id": "cceef882-cf13-4669-ab03-29b14cdbf3e0",
+    "timestamp": "2025-08-07 11:26:26",
+    "parameters": {
+        "num_qubits": 3,
+        "state_type": "GHZ",
+        "noise_type": "DEPOLARIZING",
+        "noise_enabled": true,
+        "shots": 1024,
+        "sim_mode": "qasm",
+        "error_rate": null,
+        "z_prob": null,
+        "i_prob": null,
+        "t1": null,
+        "t2": null,
+        "custom_params": null,
+        "experiment_id": "cceef882-cf13-4669-ab03-29b14cdbf3e0"
+    },
+    "circuit_stats": {
+        "depth": 4,
+        "num_gates": 7,
+        "num_qubits": 3
+    },
+    "results": {
+        "counts": {
+            "101": 20,
+            "110": 30,
+            "100": 7,
+            "001": 42,
+            "010": 12,
+            "000": 464,
+            "011": 7,
+            "111": 442
+        },
+        "probabilities": {
+            "101": 0.01953125,
+            "110": 0.029296875,
+            "100": 0.0068359375,
+            "001": 0.041015625,
+            "010": 0.01171875,
+            "000": 0.453125,
+            "011": 0.0068359375,
+            "111": 0.431640625
+        },
+        "metadata_file": "results_placeholder",
+        "expected_probabilities": {
+            "000": 0.5,
+            "111": 0.5
+        }
+    }
+}

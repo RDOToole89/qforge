@@ -16,9 +16,9 @@ from pathlib import Path
 import numpy as np
 from qiskit.result import Counts
 
-from .analysis.information_theory import compute_research_metrics
-from .analysis.decoherence import compute_fubini_study_distance
-from .analysis.correlations import compute_pairwise_correlations
+from .analysis.core.information_theory import compute_research_metrics
+from .analysis.dynamics.decoherence import compute_fubini_study_distance
+from .analysis.core.correlations import compute_pairwise_correlations
 from ..experiments.presets.ghz_structured_decoherence import get_ideal_ghz_distribution
 
 logger = logging.getLogger("QuantumExperiment.ResearchHandler")

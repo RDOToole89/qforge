@@ -308,13 +308,25 @@ class AdvancedVisualizationPipeline(VisualizationPipeline):
         for render_name, render_result in results.get('rendering', {}).items():
             if hasattr(render_result, 'write_html'):  # Plotly figure
                 if self.export_config.get('html'):
-                    html_path = f"{render_name}.html"
+                    from .save_manager import get_organized_save_path
+                    html_path = get_organized_save_path(
+                        viz_type='research',
+                        experiment_config=self.export_config.get('experiment_config'),
+                        custom_name=render_name,
+                        extension='html'
+                    )
                     render_result.write_html(html_path)
                     exports[f"{render_name}_html"] = html_path
 
             elif hasattr(render_result, 'savefig'):  # Matplotlib figure
                 if self.export_config.get('png'):
-                    png_path = f"{render_name}.png"
+                    from .save_manager import get_organized_save_path
+                    png_path = get_organized_save_path(
+                        viz_type='research',
+                        experiment_config=self.export_config.get('experiment_config'),
+                        custom_name=render_name,
+                        extension='png'
+                    )
                     render_result.savefig(png_path, dpi=self.export_config.get('dpi', 300))
                     exports[f"{render_name}_png"] = png_path
 

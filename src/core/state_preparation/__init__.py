@@ -14,6 +14,7 @@ from .base_state import BaseState
 from .ghz_state import GHZState
 from .w_state import WState
 from .cluster_state import ClusterState
+from .superposition_state import SuperpositionState
 from .state_factory import prepare_state
 from .state_constants import STATE_CLASSES
 
@@ -22,6 +23,7 @@ __all__ = [
     "GHZState",
     "WState",
     "ClusterState",
+    "SuperpositionState",
     "prepare_state",
     "STATE_CLASSES",
 ]

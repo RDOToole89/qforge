@@ -17,8 +17,8 @@ build/
 .ipynb_checkpoints
 
 # Logs and results (optional, if you don't want to track generated logs/results)
-logs/
-results/
+# logs/
+# results/
 
 # Temporary and system files
 *.log

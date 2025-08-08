@@ -23,7 +23,7 @@ class VisualizationSaveManager:
     └── research_outputs/
     """
 
-    def __init__(self, base_dir: str = "visualizations"):
+    def __init__(self, base_dir: str = "results/visualizations"):
         """
         Initialize the save manager.
 
