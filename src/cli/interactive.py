@@ -18,6 +18,7 @@ from src.utils import logger as logger_utils
 from .display import DisplayManager
 from .interactive.collectors import ParameterCollector
 from .interactive.presets_browser import PresetsBrowser
+from .interactive.viz import VisualizationOrchestrator
 
 
 class InteractiveCLI:
@@ -69,7 +70,11 @@ class InteractiveCLI:
 
     def display_quick_options(self) -> None:
         # Minimal curated preset overview only (difficulty removed in Phase 8)
-        table = Table(title="🚀 Quick Start Presets", show_header=True, header_style="bold magenta")
+        table = Table(
+            title="🚀 Quick Start Presets",
+            show_header=True,
+            header_style="bold magenta",
+        )
         table.add_column("Key", style="cyan", width=14)
         table.add_column("Name", style="green", width=28)
         table.add_column("Family", style="blue", width=12)
@@ -77,8 +82,18 @@ class InteractiveCLI:
         curated = [
             ("ghz_basic", "GHZ State Basics", "GHZ", "3-qubit GHZ state baseline"),
             ("ghz_noise", "GHZ with Noise", "GHZ", "GHZ with depolarizing noise"),
-            ("density_analysis", "Density Matrix Analysis", "GHZ", "Statevector analysis for GHZ"),
-            ("ghz_structured_decoherence_ref", "Structured Decoherence (Ref)", "GHZ", "Research preset"),
+            (
+                "density_analysis",
+                "Density Matrix Analysis",
+                "GHZ",
+                "Statevector analysis for GHZ",
+            ),
+            (
+                "ghz_structured_decoherence_ref",
+                "Structured Decoherence (Ref)",
+                "GHZ",
+                "Research preset",
+            ),
         ]
         for key, name, family, desc in curated:
             table.add_row(key, name, family, desc)
@@ -439,129 +454,8 @@ class InteractiveCLI:
             self.console.print("[bold]ASCII Circuit Preview:[/bold]")
             self.console.print(str(qc.draw(output="text", fold=-1)))
 
-    def _show_visualization(
-        self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str
-    ) -> None:
-        """
-        Display visualization based on user preference.
-
-        Args:
-            results: Experiment results containing counts and other data
-            params: Experiment parameters
-            viz_type: Type of visualization (histogram, density_matrix, hypergraph)
-        """
-        try:
-            self.display_manager.display_info_message(
-                f"🎨 Generating {viz_type} visualization..."
-            )
-
-            # Handle different result types
-            if viz_type == "density_matrix":
-                # For density matrix visualization, we don't need counts
-                counts = {}
-            else:
-                # Extract counts from results for other visualization types
-                if hasattr(results, "get"):
-                    counts = results.get("counts", {})
-                else:
-                    # If results is not a dict (e.g., DensityMatrix object), we can't extract counts
-                    self.display_manager.display_warning_message(
-                        "⚠️ No measurement data available for visualization"
-                    )
-                    return
-
-                if not counts:
-                    self.display_manager.display_warning_message(
-                        "⚠️ No measurement data available for visualization"
-                    )
-                    return
-
-            # Get visualization parameters
-            num_qubits = params.get("num_qubits", 3)
-            state_type = params.get("state_type", "GHZ")
-            noise_type = params.get("noise_type", "DEPOLARIZING")
-            noise_enabled = params.get("noise_enabled", True)
-
-            # Import visualization functions (lazy loading)
-            if viz_type == "histogram":
-                from src.visualization import get_histogram_visualizer
-
-                plot_function = get_histogram_visualizer()
-
-                # Get research metrics if available from the research handler
-                research_metrics = None
-                if hasattr(self, "_last_research_analysis"):
-                    research_metrics = self._last_research_analysis.get(
-                        "research_metrics"
-                    )
-
-                plot_function(
-                    counts=counts,
-                    state_type=state_type,
-                    noise_type=noise_type,
-                    noise_enabled=noise_enabled,
-                    num_qubits=num_qubits,
-                    research_metrics=research_metrics,
-                    save_path=None,  # Display only, don't save
-                )
-
-            elif viz_type == "density_matrix":
-                from src.visualization import get_density_matrix_visualizer
-
-                # Check if we have density matrix data
-                if params.get("sim_mode") != "density":
-                    self.display_manager.display_warning_message(
-                        "⚠️ Density matrix visualization requires density simulation mode"
-                    )
-                    return
-
-                # For density mode, results may be the density matrix directly or in a dict
-                if hasattr(results, "data") and hasattr(results, "draw"):
-                    # Direct DensityMatrix object
-                    density_matrix = results
-                elif isinstance(results, dict) and "density_matrix" in results:
-                    # Dictionary containing density matrix
-                    density_matrix = results["density_matrix"]
-                else:
-                    self.display_manager.display_warning_message(
-                        "⚠️ No density matrix data available"
-                    )
-                    return
-
-                # Get research metrics if available
-                research_metrics = None
-                if hasattr(self, "_last_research_analysis"):
-                    research_metrics = self._last_research_analysis.get(
-                        "research_metrics"
-                    )
-
-                plot_function = get_density_matrix_visualizer()
-                plot_function(
-                    density_matrix,
-                    state_type=state_type,
-                    noise_type=noise_type,
-                    research_metrics=research_metrics,
-                )
-
-            elif viz_type == "hypergraph":
-                from src.visualization import get_hypergraph_visualizer
-
-                plot_function = get_hypergraph_visualizer()
-                plot_function(
-                    correlation_data=counts,
-                    state_type=state_type,
-                    noise_type=noise_type,
-                    config={},  # Provide empty config to avoid None comparison issues
-                )
-
-            self.display_manager.display_success_message(
-                f"✅ {viz_type.title()} visualization displayed!"
-            )
-
-        except Exception as e:
-            self.display_manager.display_error_message(
-                f"❌ Visualization error: {str(e)}"
-            )
+    def _show_visualization(self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str) -> None:
+        VisualizationOrchestrator(self.display_manager).show(results, params, viz_type)
 
     def show_recent_results(self, max_items: int = 10) -> None:
         from pathlib import Path
