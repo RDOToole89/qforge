@@ -1,6 +1,20 @@
 # 🔌 Quantum Experiments Plugin System
 
-This directory contains plugins that extend the Quantum Experiment Framework with custom experiments and analysis tools.
+## 📁 **Plugin Directory Structure**
+
+```
+qiskit-experiments/
+├── src/experiments/plugins/    # 🔧 Plugin system implementation (framework code)
+│   └── __init__.py            # Plugin loading and discovery engine
+└── plugins/                   # 📦 Plugin storage directory (user plugins go here!)
+    ├── README.md              # This file
+    ├── example_plugin.py      # Advanced example plugin
+    └── simple_demo.py         # Minimal example plugin
+```
+
+**This directory (`/plugins/`) contains plugins that extend the Quantum Experiment Framework with custom experiments and analysis tools.**
+
+**The plugin system code lives in `/src/experiments/plugins/` - you don't need to modify that unless you're extending the plugin system itself.**
 
 ## 🚀 How to Create a Plugin
 

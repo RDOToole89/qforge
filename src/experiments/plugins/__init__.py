@@ -5,7 +5,6 @@ This module provides a plugin system for extending the framework
 with custom experiments and analysis tools.
 """
 
-import os
 import sys
 import importlib
 import importlib.util
