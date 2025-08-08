@@ -199,6 +199,7 @@ Usage:
     python3 main_new.py --list            # List available experiments
     python3 main_new.py --run <exp_name>  # Run specific experiment
     python3 main_new.py --sweep <exp_name>  # Run parameter sweep on experiment
+    python3 main_new.py --viz <results.json> [--type histogram|density_matrix|hypergraph]
     QUANTUM_INTERACTIVE=false python3 main_new.py  # Non-interactive mode
 
 Environment Variables:
@@ -210,7 +211,59 @@ Examples:
     python3 main_new.py --run ghz_basic
     python3 main_new.py --sweep ghz_structured_decoherence_ref
     QUANTUM_INTERACTIVE=false python3 main_new.py --run w_phase_flip
+    python3 main_new.py --viz results/.../structured_decoherence_xyz.json --type histogram
     """)
+
+def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
+    """Visualize results from a saved JSON analysis file.
+
+    Args:
+        json_path: Path to results JSON saved by ResearchHandler
+        viz_type: histogram | density_matrix | hypergraph
+    """
+    import json as _json
+    try:
+        with open(json_path, "r") as f:
+            analysis = _json.load(f)
+    except Exception as e:
+        logger.error(f"❌ Failed to load JSON: {e}")
+        sys.exit(1)
+
+    params = analysis.get("experiment_parameters", {})
+    counts = analysis.get("measurement_results", {}).get("raw_counts", {})
+
+    # Prepare visualization
+    try:
+        if viz_type == "histogram":
+            from src.visualization import get_histogram_visualizer
+            plot_fn = get_histogram_visualizer()
+            plot_fn(
+                counts=counts,
+                state_type=params.get("state_type", "GHZ"),
+                noise_type=params.get("noise_type", "DEPOLARIZING"),
+                noise_enabled=params.get("noise_enabled", True),
+                num_qubits=int(params.get("num_qubits", 3)),
+                research_metrics=analysis.get("research_metrics"),
+                save_path=None,
+            )
+        elif viz_type == "hypergraph":
+            from src.visualization import get_hypergraph_visualizer
+            plot_fn = get_hypergraph_visualizer()
+            plot_fn(
+                correlation_data=counts,
+                state_type=params.get("state_type", "GHZ"),
+                noise_type=params.get("noise_type", "DEPOLARIZING"),
+                config={},
+            )
+        elif viz_type == "density_matrix":
+            logger.error("❌ Cannot reconstruct density matrix from saved counts; use during density runs.")
+            sys.exit(2)
+        else:
+            logger.error(f"❌ Unsupported visualization type: {viz_type}")
+            sys.exit(2)
+    except Exception as e:
+        logger.error(f"❌ Visualization failed: {e}")
+        sys.exit(1)
 
 def main():
     """Main entry point."""
@@ -231,6 +284,14 @@ def main():
         run_experiment_by_name(args[1])
     elif args[0] == '--sweep' and len(args) > 1:
         run_parameter_sweep(args[1])
+    elif args[0] == '--viz' and len(args) > 1:
+        viz_type = 'histogram'
+        if '--type' in args:
+            try:
+                viz_type = args[args.index('--type') + 1]
+            except Exception:
+                pass
+        visualize_from_json(args[1], viz_type)
     else:
         print("❌ Invalid arguments. Use --help for usage information.")
         sys.exit(1)

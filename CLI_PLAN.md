@@ -72,6 +72,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 #### Headless/Server alignment
 
 - [ ] CLI subcommands: `run --preset`, `run --config`, `sweep --manifest`, `viz --from results.json`
+- [x] Visualize from saved JSON (`--viz <file> --type ...`)
 - [ ] Manifest format (JSON/YAML) for batches/sweeps; deterministic runs with seeds
 - [ ] Streaming progress and structured logs for server use
 
