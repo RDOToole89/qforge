@@ -126,6 +126,13 @@ MESSAGES = {
     # Recent results menu
     "recent_results_title": "Recent Results",
     "no_results_found": "[bold yellow]No recent results found.[/bold yellow]",
+    # Preset details and clone
+    "clone_edit_title": "Clone & Edit?",
+    # Custom wizard templates
+    "custom_template_prompt": "Choose a template (optional) [{default}]: ",
+    # Recent results actions
+    "recent_action_title": "Result Actions",
+    "recent_action_prompt": "Select action [{default}]: ",
     # Presets browser prompts
     "preset_search_prompt": "🔎 Search presets (Enter to skip) [{default}]: ",
 }

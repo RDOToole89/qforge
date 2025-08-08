@@ -83,7 +83,9 @@ class InteractiveCLI:
         )
         self.console.print("🎯 Difficulty: beginner, intermediate, advanced")
 
-    def collect_parameters(self, interactive: bool = True) -> Dict[str, Any]:
+    def collect_parameters(
+        self, interactive: bool = True, base_args: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Collect experiment parameters either interactively or from command-line arguments.
 
@@ -93,8 +95,8 @@ class InteractiveCLI:
         Returns:
             Dict[str, Any]: Collected experiment parameters.
         """
-        # Start with default parameters
-        args = apply_defaults({})
+        # Start with default parameters (allow overriding defaults via base_args)
+        args = apply_defaults(base_args or {})
 
         if interactive:
             # Interactive parameter collection using InputHandler
@@ -199,6 +201,51 @@ class InteractiveCLI:
     def _collect_custom_state_params(self, default_num_qubits: int) -> Dict[str, Any]:
         """Collect parameters for CustomState (source: gates|builder|openqasm)."""
         custom_params: Dict[str, Any] = {}
+        # Optional template quick-pick
+        template_choice = self.input_handler.select_option(
+            title="Custom Templates (optional)",
+            options=[
+                ("none", "None", "n"),
+                ("bell_phi_plus", "Bell |Φ+> (2 qubits)", "1"),
+                ("w3_gate", "W(3) gate-based", "2"),
+                ("cluster_1d_3", "Cluster 1D (3)", "3"),
+            ],
+            default_value="none",
+        )
+        if template_choice == "bell_phi_plus":
+            return {
+                "source": "gates",
+                "num_qubits": 2,
+                "gates": [
+                    {"name": "h", "qargs": [0]},
+                    {"name": "cx", "qargs": [0, 1]},
+                ],
+            }
+        if template_choice == "w3_gate":
+            return {
+                "source": "gates",
+                "num_qubits": 3,
+                "gates": [
+                    {"name": "u3", "params": [1.910633, 0, 0], "qargs": [0]},
+                    {"name": "cx", "qargs": [0, 1]},
+                    {"name": "u3", "params": [-1.910633, 0, 0], "qargs": [0]},
+                    {"name": "u3", "params": [1.230959, 0, 0], "qargs": [0]},
+                    {"name": "cx", "qargs": [0, 2]},
+                    {"name": "u3", "params": [-1.230959, 0, 0], "qargs": [0]},
+                ],
+            }
+        if template_choice == "cluster_1d_3":
+            return {
+                "source": "gates",
+                "num_qubits": 3,
+                "gates": [
+                    {"name": "h", "qargs": [0]},
+                    {"name": "h", "qargs": [1]},
+                    {"name": "h", "qargs": [2]},
+                    {"name": "cz", "qargs": [0, 1]},
+                    {"name": "cz", "qargs": [1, 2]},
+                ],
+            }
         # Choose source
         source = self.input_handler.get_input(
             "custom_state_source_prompt",
@@ -348,8 +395,49 @@ class InteractiveCLI:
         selected = unified.get(choice)
         if choice == "c" or selected is None:
             return self.collect_parameters(interactive=True)
+
+        # Detail pane
+        self.show_preset_details(choice, selected)
+        proceed = self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) == "y"
+        if not proceed:
+            # Offer clone & edit
+            clone_or_back = self.input_handler.select_option(
+                title="Clone & Edit?",
+                options=[("clone", "Clone and Edit", "c"), ("back", "Back", "b")],
+                default_value="back",
+            )
+            if clone_or_back == "clone":
+                return self.collect_parameters(
+                    interactive=True, base_args=selected.get("config", {})
+                )
+            raise KeyboardInterrupt
+
         args = apply_defaults(selected.get("config", {}))
         return validate_parameters(args)
+
+    def show_preset_details(self, key: str, meta: Dict[str, Any]) -> None:
+        table = Table(title=f"Preset: {meta.get('name', key)}")
+        table.add_column("Field", style="cyan")
+        table.add_column("Value", style="green")
+        cfg = meta.get("config", {})
+        table.add_row("Description", meta.get("description", "-"))
+        table.add_row("Category", meta.get("category", "-"))
+        table.add_row("Difficulty", meta.get("difficulty", "-"))
+        table.add_row("State", str(cfg.get("state_type", "-")))
+        table.add_row("Qubits", str(cfg.get("num_qubits", "-")))
+        table.add_row("Noise", str(cfg.get("noise_type", "-")))
+        table.add_row("Noise Enabled", str(cfg.get("noise_enabled", False)))
+        table.add_row("Error Rate", str(cfg.get("error_rate", "-")))
+        table.add_row("Shots", str(cfg.get("shots", "-")))
+        table.add_row("Sim Mode", str(cfg.get("sim_mode", "-")))
+        table.add_row("Viz Type", str(cfg.get("visualization_type", "-")))
+        if "research_type" in meta:
+            table.add_row("Research Type", str(meta.get("research_type")))
+        # Expected outputs (if provided)
+        exp = meta.get("expected_outcomes")
+        if exp:
+            table.add_row("Expected Outcomes", str(exp))
+        self.console.print(table)
 
     def _show_visualization(
         self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str
@@ -503,6 +591,32 @@ class InteractiveCLI:
                 ts = "-"
             table.add_row(str(idx), str(f), ts)
         self.console.print(table)
+        # Actions: re-open viz or re-run (stubs)
+        action = self.input_handler.select_option(
+            title=MESSAGES.get("recent_action_title", "Result Actions"),
+            options=[("back", "Back", "b"), ("open", "Open Visualization", "o"), ("rerun", "Re-run", "r")],
+            default_value="back",
+        )
+        if action == "back":
+            return
+        # Pick item
+        idx_map = [(str(i), str(i), str(i)) for i in range(1, len(files) + 1)]
+        pick = self.input_handler.select_option(
+            title="Select Result",
+            options=idx_map,
+            default_value="1",
+        )
+        try:
+            sel = int(pick)
+            chosen = files[sel - 1]
+        except Exception:
+            return
+        if action == "open":
+            self.console.print(f"Opening: {chosen}")
+            # TODO: implement visualization opening from JSON
+        elif action == "rerun":
+            self.console.print(f"Re-running from: {chosen}")
+            # TODO: load JSON, extract config, and re-run
 
     def show_settings_stub(self) -> None:
         # Display current defaults; editing will be added later
