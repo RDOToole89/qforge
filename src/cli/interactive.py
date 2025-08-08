@@ -499,9 +499,36 @@ class InteractiveCLI:
         self.show_preset_details(choice, selected)
         # Footer key hints
         try:
-            self.display_manager.display_footer_hints(["r=run", "e=edit", "b=back", "?=help"])
+            self.display_manager.display_footer_hints(
+                ["r=run", "e=edit", "l=preview", "b=back", "?=help"]
+            )
         except Exception:
             pass
+        # Quick actions before proceed
+        quick_action = self.input_handler.select_option(
+            title="Actions",
+            options=[
+                ("run", "Run", "r"),
+                ("edit", "Edit parameters", "e"),
+                ("preview", "Preview circuit (ASCII)", "l"),
+                ("back", "Back", "b"),
+            ],
+            default_value="run",
+            show_value_column=False,
+        )
+        if quick_action == "back":
+            raise KeyboardInterrupt
+        if quick_action == "edit":
+            return self.collect_parameters(
+                interactive=True, base_args=selected.get("config", {})
+            )
+        if quick_action == "preview":
+            try:
+                self._preview_preset_circuit(selected.get("config", {}))
+            except Exception as _e:
+                self.display_manager.display_warning_message(
+                    f"Could not preview circuit: {_e}"
+                )
         # Offer quick help
         if self.input_handler.prompt_yes_no("preset_show_options_help", "n"):
             from src.config.constants import VALID_NOISE_TYPES
@@ -561,6 +588,29 @@ class InteractiveCLI:
         except Exception:
             pass
         self.console.print(table)
+
+    def _preview_preset_circuit(self, config: Dict[str, Any]) -> None:
+        """Render a fast ASCII preview of the circuit from a preset config without running.
+
+        Args:
+            config: Preset configuration dict.
+        """
+        from src.core.state_preparation import prepare_state
+        from qiskit import QuantumCircuit
+
+        state_type = config.get("state_type", "GHZ")
+        num_qubits = int(config.get("num_qubits", 3))
+        custom_params = config.get("custom_params")
+        qc = prepare_state(
+            state_type=state_type,
+            num_qubits=num_qubits,
+            custom_params=custom_params,
+            add_barrier=False,
+            experiment_id="preview",
+        )
+        if hasattr(qc, "draw"):
+            self.console.print("[bold]ASCII Circuit Preview:[/bold]")
+            self.console.print(str(qc.draw(output="text", fold=-1)))
 
     def _show_visualization(
         self, results: Dict[str, Any], params: Dict[str, Any], viz_type: str
