@@ -152,6 +152,21 @@ def setup_logger(
     for handler in handlers:
         logger.addHandler(handler)
 
+    # Suppress noisy third-party loggers (Qiskit, Aer) by default
+    try:
+        noisy = [
+            "qiskit",
+            "qiskit.providers",
+            "qiskit_aer",
+            "qiskit.transpiler",
+        ]
+        for name in noisy:
+            nl = logging.getLogger(name)
+            nl.setLevel(logging.ERROR)
+            nl.propagate = False
+    except Exception:
+        pass
+
     # Initial log to confirm setup
     logger.debug(
         "Logger configured for quantum experiment utilities",

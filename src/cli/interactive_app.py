@@ -13,9 +13,9 @@ from rich.table import Table
 from src.config.params import apply_defaults, validate_parameters
 from src.cli.common import InputHandler
 from .interactive.help import HelpManager
-from src.utils.messages import MESSAGES
+from src.cli.common.messages import MESSAGES
 from src.utils import logger as logger_utils
-from .display import DisplayManager
+from .common import DisplayManager
 from .interactive.collectors import ParameterCollector
 from .interactive.presets_browser import PresetsBrowser
 from .interactive.viz import VisualizationOrchestrator
@@ -78,35 +78,12 @@ class InteractiveCLI:
         self.console.print(message.format(**kwargs))
 
     def display_quick_options(self) -> None:
-        # Minimal curated preset overview only (difficulty removed in Phase 8)
-        table = Table(
-            title="🚀 Quick Start Presets",
-            show_header=True,
-            header_style="bold magenta",
-        )
-        table.add_column("Key", style="cyan", width=14)
-        table.add_column("Name", style="green", width=28)
-        table.add_column("Family", style="blue", width=12)
-        table.add_column("Description", style="yellow")
-        curated = [
-            ("ghz_basic", "GHZ State Basics", "GHZ", "3-qubit GHZ state baseline"),
-            ("ghz_noise", "GHZ with Noise", "GHZ", "GHZ with depolarizing noise"),
-            (
-                "density_analysis",
-                "Density Matrix Analysis",
-                "GHZ",
-                "Statevector analysis for GHZ",
-            ),
-            (
-                "ghz_structured_decoherence_ref",
-                "Structured Decoherence (Ref)",
-                "GHZ",
-                "Research preset",
-            ),
-        ]
-        for key, name, family, desc in curated:
-            table.add_row(key, name, family, desc)
-        self.console.print(table)
+        # Kept for compatibility; Router now handles quick options display
+        from src.cli.router import Router as _R
+
+        _R(
+            self.console, self.input_handler, self.display_manager
+        ).display_quick_options()
 
     def collect_parameters(
         self,
@@ -399,46 +376,12 @@ class InteractiveCLI:
         return validate_parameters(apply_defaults(args))
 
     def show_preset_details(self, key: str, meta: Dict[str, Any]) -> None:
-        table = Table(title=f"Preset: {meta.get('name', key)}")
-        table.add_column("Field", style="cyan")
-        table.add_column("Value", style="green")
-        cfg = meta.get("config", {})
-        table.add_row("Description", meta.get("description", "-"))
-        table.add_row("Category", meta.get("category", "-"))
-        # Prefer experiment family over difficulty in the UI
-        fam = meta.get("family", cfg.get("state_type", "-"))
-        table.add_row("Family", str(fam))
-        table.add_row("State", str(cfg.get("state_type", "-")))
-        table.add_row("Qubits", str(cfg.get("num_qubits", "-")))
-        table.add_row("Noise", str(cfg.get("noise_type", "-")))
-        table.add_row("Noise Enabled", str(cfg.get("noise_enabled", False)))
-        table.add_row("Error Rate", str(cfg.get("error_rate", "-")))
-        table.add_row("Shots", str(cfg.get("shots", "-")))
-        table.add_row("Sim Mode", str(cfg.get("sim_mode", "-")))
-        table.add_row("Viz Type", str(cfg.get("visualization_type", "-")))
-        if "research_type" in meta:
-            table.add_row("Research Type", str(meta.get("research_type")))
-        # Expected outputs (if provided)
-        exp = meta.get("expected_outcomes")
-        if exp:
-            table.add_row("Expected Outcomes", str(exp))
-        # Estimated runtime (heuristic)
-        try:
-            nq = int(cfg.get("num_qubits", 3))
-            shots = int(cfg.get("shots", 1024))
-            sim = str(cfg.get("sim_mode", "qasm")).lower()
-            noise = bool(cfg.get("noise_enabled", False))
-            # Heuristic coefficients
-            base = 0.02 + 0.005 * max(0, nq - 2)
-            per_shot = 0.000002 if sim == "qasm" else 0.0000005
-            if noise:
-                per_shot *= 1.5
-                base += 0.01
-            est = base + shots * per_shot
-            table.add_row("Est. Runtime (s)", f"~{est:.2f}")
-        except Exception:
-            pass
-        self.console.print(table)
+        # Delegate to presets browser to avoid duplication
+        from src.cli.interactive.presets_browser import PresetsBrowser as _PB
+
+        _PB(self.input_handler, self.display_manager, self.console).show_preset_details(
+            key, meta
+        )
 
     def _preview_preset_circuit(self, config: Dict[str, Any]) -> None:
         """Render a fast ASCII preview of the circuit from a preset config without running.

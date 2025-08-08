@@ -51,17 +51,10 @@ def import_core_modules():
 def run_interactive_mode():
     """Run the framework in interactive CLI mode."""
     try:
-from src.cli.interactive_app import InteractiveCLI
-        from src.cli.display import DisplayManager
+        from src.cli.interactive_app import InteractiveCLI
 
         logger.info("🎮 Starting interactive CLI mode")
-
-        # Initialize CLI components
-        cli = InteractiveCLI()
-
-        # Run interactive session
-        cli.run_interactive_session()
-
+        InteractiveCLI().run_interactive_session()
     except Exception as e:
         logger.error(f"❌ Error in interactive mode: {e}")
         sys.exit(1)
@@ -542,134 +535,10 @@ def apply_profile_from_args(args: list) -> list:
 
 
 def main():
-    """Main entry point."""
-    # Set up environment
-    setup_environment()
+    """Thin shim delegating to CLI entrypoint parser."""
+    from src.cli.entrypoints.args import dispatch
 
-    # Parse command line arguments
-    args = sys.argv[1:]
-
-    # Optional: apply profile early if provided
-    args = apply_profile_from_args(args)
-
-    # Streaming structured logs for headless/server mode and quiet/JSON/verbose flags
-    console_json = "-J" in args or "--json-only" in args
-    if "--stream-logs" in args or "-q" in args or "--quiet" in args or console_json:
-        try:
-            from src.utils import logger as logger_utils
-
-            logger_utils.setup_logger(
-                log_level=os.environ.get("QUANTUM_LOG_LEVEL", "INFO"),
-                log_to_file=False,
-                log_to_console=True,
-                structured_log_file=(
-                    "logs/structured_logs.json" if "--stream-logs" in args else None
-                ),
-                console_json_mode=console_json,
-            )
-            logger.info(
-                "📡 Headless logging configured (stream=%s, json_console=%s)",
-                "on" if "--stream-logs" in args else "off",
-                str(console_json),
-            )
-        except Exception as _e:
-            logger.warning(f"Failed to configure headless logging: {_e}")
-        # Remove flags from args for further parsing
-        for flag in [
-            "-q",
-            "--quiet",
-            "-J",
-            "--json-only",
-            "-v",
-            "--verbose",
-            "--stream-logs",
-        ]:
-            try:
-                while flag in args:
-                    args.remove(flag)
-            except ValueError:
-                pass
-
-    if not args:
-        # No arguments - run interactive mode
-        run_interactive_mode()
-    elif args[0] == "--help" or args[0] == "-h":
-        show_help()
-    elif args[0] == "--list":
-        list_experiments()
-    elif args[0] == "--run" and len(args) > 1:
-        # Support `--run <exp_name>` as preset name
-        run_experiment_by_name(args[1])
-    elif args[0] == "run" and len(args) > 2 and args[1] == "--preset":
-        # New subcommand style: run --preset <id>
-        run_experiment_by_name(args[2])
-    elif args[0] == "run" and len(args) > 2 and args[1] == "--config":
-        run_from_config(args[2])
-    elif args[0] == "--sweep" and len(args) > 1:
-        run_parameter_sweep(args[1])
-    elif args[0] == "sweep" and len(args) > 2 and args[1] == "--manifest":
-        run_sweep_from_manifest(args[2])
-    elif args[0] == "--viz" and len(args) > 1:
-        viz_type = "histogram"
-        if "--type" in args:
-            try:
-                viz_type = args[args.index("--type") + 1]
-            except Exception:
-                pass
-        # Optional backend and outdir flags
-        backend = None
-        outdir = None
-        if "--backend" in args:
-            try:
-                backend = args[args.index("--backend") + 1]
-            except Exception:
-                pass
-        if "--outdir" in args:
-            try:
-                outdir = args[args.index("--outdir") + 1]
-            except Exception:
-                pass
-        visualize_from_json(args[1], viz_type, backend=backend, outdir=outdir)
-    elif args[0] == "viz" and len(args) > 2 and args[1] == "--from":
-        # New subcommand: viz --from <file> [--type ...]
-        viz_type = "histogram"
-        if "--type" in args:
-            try:
-                viz_type = args[args.index("--type") + 1]
-            except Exception:
-                pass
-        backend = None
-        outdir = None
-        if "--backend" in args:
-            try:
-                backend = args[args.index("--backend") + 1]
-            except Exception:
-                pass
-        if "--outdir" in args:
-            try:
-                outdir = args[args.index("--outdir") + 1]
-            except Exception:
-                pass
-        visualize_from_json(args[2], viz_type, backend=backend, outdir=outdir)
-    elif args[0] == "report" and len(args) > 2 and args[1] == "--from":
-        # New subcommand: report --from <results.json> [--format md]
-        fmt = "md"
-        if "--format" in args:
-            try:
-                fmt = args[args.index("--format") + 1]
-            except Exception:
-                pass
-        try:
-            from src.visualization.report import save_report_from_json
-
-            out = save_report_from_json(args[2], fmt=fmt)
-            logger.info(f"📝 Report saved to: {out}")
-        except Exception as e:
-            logger.error(f"❌ Report generation failed: {e}")
-            sys.exit(2)
-    else:
-        print("❌ Invalid arguments. Use --help for usage information.")
-        sys.exit(1)
+    sys.exit(dispatch(sys.argv[1:]))
 
 
 if __name__ == "__main__":

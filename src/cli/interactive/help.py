@@ -1,7 +1,7 @@
 from typing import Optional
 from rich.console import Console
 from rich.table import Table
-from src.utils.glossary import search_terms
+from src.cli.common.glossary import search_terms
 
 
 class HelpManager:

@@ -6,7 +6,9 @@ from src.core.research_handler import ResearchExperimentHandler
 from src.experiments.manager import get_experiment_manager
 
 
-def execute_run(normalized_params: Dict[str, Any], display_manager, viz) -> Optional[str]:
+def execute_run(
+    normalized_params: Dict[str, Any], display_manager, viz
+) -> Optional[str]:
     """Run an experiment using legacy ExperimentManager and return research file if saved."""
     display_manager.display_info_message("🚀 Running quantum experiment...")
     em = get_experiment_manager()
@@ -39,7 +41,9 @@ def execute_run(normalized_params: Dict[str, Any], display_manager, viz) -> Opti
             display_manager.display_success_message(
                 f"📊 Research-grade analysis saved: {research_file}"
             )
-            display_manager.display_success_message("✅ Experiment completed successfully!")
+            display_manager.display_success_message(
+                "✅ Experiment completed successfully!"
+            )
             return str(research_file)
     else:
         display_manager.display_experiment_results(result)

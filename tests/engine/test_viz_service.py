@@ -44,7 +44,9 @@ def test_viz_service_hypergraph_saves_artifact(tmp_path):
     json_path = _dummy_analysis(tmp_path)
 
     svc = VisualizationService()
-    req = VisualizationRequest(viz_type="hypergraph", output_base_dir=str(tmp_path / "viz_out"))
+    req = VisualizationRequest(
+        viz_type="hypergraph", output_base_dir=str(tmp_path / "viz_out")
+    )
     artifact = svc.render_from_json(str(json_path), request=req)
 
     assert artifact.kind == "hypergraph"

@@ -5,7 +5,7 @@ from __future__ import annotations
 from rich.console import Console
 
 from src.cli.router import Router
-from src.utils.messages import MESSAGES
+from src.cli.common.messages import MESSAGES
 
 
 class FakeDisplay:

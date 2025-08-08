@@ -127,9 +127,8 @@ def validate_parameters(args: Dict) -> Dict:
         and validated_args.get("noise_type") in single_qubit_noise_types
     ):
         console.print(
-            f"[bold yellow]⚠️ Warning: {validated_args['noise_type']} noise only applies to single-qubit gates, which are skipped in density matrix simulation mode. "
-            "No noise will be applied with this configuration. Noise will be disabled to proceed. "
-            "Consider using multi-qubit noise types (e.g., DEPOLARIZING, PHASE_FLIP, THERMAL_RELAXATION) for density mode.[/bold yellow]"
+            f"[bold yellow]⚠️ {validated_args['noise_type']} is ineffective in density mode (single-qubit channels are skipped). Disabling noise. "
+            "Use DEPOLARIZING/PHASE_FLIP/THERMAL_RELAXATION for density mode.[/bold yellow]"
         )
         validated_args["noise_enabled"] = False
         validated_args["noise_type"] = None

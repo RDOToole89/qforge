@@ -48,7 +48,9 @@ def test_cli_viz_outdir_flag(tmp_path, monkeypatch):
     monkeypatch.setenv("QEXP_USE_ENGINE_API", "1")
 
     # Call visualize with explicit outdir
-    visualize_from_json(json_path, viz_type="histogram", backend=None, outdir=str(outdir))
+    visualize_from_json(
+        json_path, viz_type="histogram", backend=None, outdir=str(outdir)
+    )
 
     # Expect artifact saved under outdir/histograms
     assert any((outdir / "histograms").glob("*.png"))

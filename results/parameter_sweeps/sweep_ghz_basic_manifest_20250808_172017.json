@@ -1,0 +1,50 @@
+{
+  "sweep_metadata": {
+    "sweep_id": "3f8b71e6",
+    "sweep_name": "ghz_basic_manifest",
+    "base_experiment_id": "ghz_basic",
+    "timestamp": "2025-08-08T17:20:17.404481",
+    "total_experiments": 2,
+    "parameter_ranges": {
+      "error_rate": [
+        0.01,
+        0.02
+      ]
+    },
+    "runs_per_config": 1
+  },
+  "experiment_results": [
+    {
+      "parameter_combination": {
+        "error_rate": 0.01
+      },
+      "runs": [
+        {
+          "run_number": 1,
+          "experiment_id": "ghz_basic_sweep_3f8b71e6_1",
+          "success": false,
+          "error": "No research analysis returned"
+        }
+      ]
+    },
+    {
+      "parameter_combination": {
+        "error_rate": 0.02
+      },
+      "runs": [
+        {
+          "run_number": 1,
+          "experiment_id": "ghz_basic_sweep_3f8b71e6_2",
+          "success": false,
+          "error": "No research analysis returned"
+        }
+      ]
+    }
+  ],
+  "aggregated_analysis": {
+    "parameter_analysis": {},
+    "statistical_summary": {},
+    "trends": {},
+    "key_findings": []
+  }
+}

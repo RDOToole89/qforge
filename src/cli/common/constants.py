@@ -20,14 +20,18 @@ FOOTER_HINTS = ["numbers=select", "enter=default", "?=help", "q=quit"]
 CURATED_PRESETS = [
     ("ghz_basic", "GHZ State Basics", "GHZ", "3-qubit GHZ state baseline"),
     ("ghz_noise", "GHZ with Noise", "GHZ", "GHZ with depolarizing noise"),
-    ("density_analysis", "Density Matrix Analysis", "GHZ", "Statevector analysis for GHZ"),
-    ("ghz_structured_decoherence_ref", "Structured Decoherence (Ref)", "GHZ", "Research preset"),
+    (
+        "density_analysis",
+        "Density Matrix Analysis",
+        "GHZ",
+        "Statevector analysis for GHZ",
+    ),
+    (
+        "ghz_structured_decoherence_ref",
+        "Structured Decoherence (Ref)",
+        "GHZ",
+        "Research preset",
+    ),
 ]
 
-PROMPT_IDS = {
-    "welcome": "welcome",
-    "goodbye": "goodbye",
-    "invalid_choice": "invalid_choice",
-    "proceed_prompt": "proceed_prompt",
-    "help_search_prompt": "help_search_prompt",
-}
+# Use message keys directly; keep for future remapping if needed

@@ -6,7 +6,7 @@ interactively and through command-line arguments.
 """
 
 from .interactive_app import InteractiveCLI
-from .display import DisplayManager
+from .common import DisplayManager
 from .router import Router
 
 __all__ = ["InteractiveCLI", "DisplayManager", "Router"]

@@ -17,7 +17,6 @@ from .common.constants import (
     SETTINGS_MENU_OPTIONS,
     FOOTER_HINTS,
     CURATED_PRESETS,
-    PROMPT_IDS,
 )
 from src.config.params import apply_defaults, validate_parameters
 from .actions.run import execute_run
@@ -27,13 +26,25 @@ class Router:
     """Interactive menu router that orchestrates the main CLI loop."""
 
     def __init__(self, console, input_handler, display_manager):
-        self.ctx = CLIContext(console=console, input_handler=input_handler, display_manager=display_manager)
+        self.ctx = CLIContext(
+            console=console,
+            input_handler=input_handler,
+            display_manager=display_manager,
+        )
         # Components
-        self.collector = ParameterCollector(self.ctx.input_handler, self.ctx.display_manager)
-        self.browser = PresetsBrowser(self.ctx.input_handler, self.ctx.display_manager, self.ctx.console)
-        self.results = ResultsManager(self.ctx.console, self.ctx.input_handler, self.ctx.display_manager)
+        self.collector = ParameterCollector(
+            self.ctx.input_handler, self.ctx.display_manager
+        )
+        self.browser = PresetsBrowser(
+            self.ctx.input_handler, self.ctx.display_manager, self.ctx.console
+        )
+        self.results = ResultsManager(
+            self.ctx.console, self.ctx.input_handler, self.ctx.display_manager
+        )
         self.viz = VisualizationOrchestrator(self.ctx.display_manager)
-        self.settings = SettingsUI(self.ctx.console, self.ctx.input_handler, self.ctx.display_manager)
+        self.settings = SettingsUI(
+            self.ctx.console, self.ctx.input_handler, self.ctx.display_manager
+        )
 
     def display_quick_options(self) -> None:
         table = Table(
@@ -50,10 +61,10 @@ class Router:
         self.ctx.console.print(table)
 
     def run(self) -> None:
-        from src.utils.messages import MESSAGES
+        from .common.messages import MESSAGES
 
         while True:
-            self.ctx.console.print(MESSAGES.get(PROMPT_IDS["welcome"], "Welcome"))
+            self.ctx.console.print(MESSAGES.get("welcome", "Welcome"))
             choice = self.ctx.input_handler.select_option(
                 title="Main Menu",
                 options=MAIN_MENU_OPTIONS,
@@ -61,9 +72,7 @@ class Router:
                 show_value_column=False,
             )
             try:
-                self.ctx.display_manager.display_footer_hints(
-                    FOOTER_HINTS
-                )
+                self.ctx.display_manager.display_footer_hints(FOOTER_HINTS)
             except Exception:
                 pass
 
@@ -103,10 +112,10 @@ class Router:
                     self._show_help_menu()
                 continue
             elif choice == "q":
-                self.ctx.console.print(MESSAGES.get(PROMPT_IDS["goodbye"], "Goodbye"))
+                self.ctx.console.print(MESSAGES.get("goodbye", "Goodbye"))
                 return
             else:
-                self.ctx.console.print(MESSAGES.get(PROMPT_IDS["invalid_choice"], "Invalid choice"))
+                self.ctx.console.print(MESSAGES.get("invalid_choice", "Invalid choice"))
                 continue
 
             # Normalize and display parameter summary
@@ -114,7 +123,10 @@ class Router:
             self.ctx.display_manager.display_params_summary(normalized)
 
             # Confirm before running
-            if self.ctx.input_handler.get_input(PROMPT_IDS["proceed_prompt"], "y", ["y", "n"]) != "y":
+            if (
+                self.ctx.input_handler.get_input("proceed_prompt", "y", ["y", "n"])
+                != "y"
+            ):
                 try:
                     args = self.collector.collect_parameters(
                         interactive=True, base_args=normalized
@@ -129,9 +141,13 @@ class Router:
 
             # Execute run using legacy ExperimentManager to avoid scope creep here
             try:
-                research_file = execute_run(normalized, self.ctx.display_manager, self.viz)
+                research_file = execute_run(
+                    normalized, self.ctx.display_manager, self.viz
+                )
                 if research_file is not None:
-                    self.results._last_research_analysis = research_file  # lightweight track
+                    self.results._last_research_analysis = (
+                        research_file  # lightweight track
+                    )
             except Exception as e:
                 self.ctx.display_manager.display_error_message(
                     f"❌ Error running experiment: {str(e)}"
@@ -139,29 +155,10 @@ class Router:
                 continue
 
     def _show_help_menu(self) -> None:
-        glossary = {
-            "depolarizing": "Noise channel replacing the state with the maximally mixed state with probability p.",
-            "phase_flip": "Z errors with some probability (dephasing)",
-            "density matrix": "Matrix representation supporting mixed states.",
-            "counts": "Measurement outcome frequencies from shot-based simulations/experiments.",
-            "fubini-study": "Distance measure on quantum states in projective Hilbert space.",
-        }
-        term = self.input_handler.get_input("help_search_prompt", "")
-        table = Table(title="Help & Glossary")
-        table.add_column("Term", style="cyan")
-        table.add_column("Definition", style="green")
-        items = (
-            glossary.items()
-            if not term
-            else [
-                (k, v)
-                for k, v in glossary.items()
-                if term.lower() in k.lower() or term.lower() in v.lower()
-            ]
-        )
-        if not items:
-            self.console.print("[yellow]No entries found.[/yellow]")
-            return
-        for k, v in items:
-            table.add_row(k, v)
-        self.console.print(table)
+        try:
+            from .interactive.help import HelpManager
+
+            HelpManager(self.ctx.console).show()
+        except Exception:
+            # Fall back to minimal message if help fails
+            self.ctx.console.print("[yellow]Help unavailable.[/yellow]")

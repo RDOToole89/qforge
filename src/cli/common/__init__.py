@@ -1,6 +1,6 @@
 from __future__ import annotations
 
 from .input_handler import InputHandler  # CLI-owned now
-from src.cli.display import DisplayManager  # re-export
+from .display import DisplayManager  # CLI-owned now
 
 __all__ = ["InputHandler", "DisplayManager"]

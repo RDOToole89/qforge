@@ -140,7 +140,9 @@ class VisualizationService:
                 # If fig is available, persist it; otherwise fallback
                 if fig is not None and hasattr(fig, "write_html"):
                     fig.write_html(save_path)
-                    return ArtifactRef(kind="histogram", path=save_path, metadata={"backend": "plotly"})
+                    return ArtifactRef(
+                        kind="histogram", path=save_path, metadata={"backend": "plotly"}
+                    )
             except Exception as e:
                 logger.warning(f"Plotly histogram fallback to matplotlib due to: {e}")
 
@@ -158,6 +160,7 @@ class VisualizationService:
             extension="png",
         )
         from src.visualization.histogram import plot_histogram
+
         plot_histogram(
             counts=counts,
             state_type=params.get("state_type"),
@@ -167,7 +170,9 @@ class VisualizationService:
             research_metrics=analysis.get("research_metrics"),
             save_path=save_path,
         )
-        return ArtifactRef(kind="histogram", path=save_path, metadata={"backend": "matplotlib"})
+        return ArtifactRef(
+            kind="histogram", path=save_path, metadata={"backend": "matplotlib"}
+        )
 
     def _render_density_matrix(
         self, analysis: Dict[str, Any], request: VisualizationRequest
@@ -219,7 +224,11 @@ class VisualizationService:
                 )
                 if fig is not None and hasattr(fig, "write_html"):
                     fig.write_html(save_path)
-                    return ArtifactRef(kind="density_matrix", path=save_path, metadata={"backend": "plotly"})
+                    return ArtifactRef(
+                        kind="density_matrix",
+                        path=save_path,
+                        metadata={"backend": "plotly"},
+                    )
             except Exception as e:
                 logger.warning(f"Plotly density fallback to matplotlib due to: {e}")
 
@@ -235,6 +244,7 @@ class VisualizationService:
             extension="png",
         )
         from src.visualization.density_matrix import plot_density_matrix
+
         plot_density_matrix(
             density_matrix=density_matrix,
             state_type=params.get("state_type"),
@@ -242,7 +252,9 @@ class VisualizationService:
             research_metrics=analysis.get("research_metrics"),
             save_path=save_path,
         )
-        return ArtifactRef(kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"})
+        return ArtifactRef(
+            kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"}
+        )
 
     def _render_hypergraph(
         self, analysis: Dict[str, Any], request: VisualizationRequest
