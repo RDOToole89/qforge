@@ -54,6 +54,7 @@ class ExperimentRunner:
         t1: Optional[float] = None,
         t2: Optional[float] = None,
         custom_params: Optional[Dict] = None,
+        rng_seed: Optional[int] = None,
     ) -> Tuple[QuantumCircuit, Union[Dict, DensityMatrix]]:
         """
         Run a quantum experiment with specified parameters.
@@ -96,10 +97,10 @@ class ExperimentRunner:
         )
 
         # Configure backend and circuit
-        backend, qc = self._configure_simulation(qc, sim_mode)
+        backend, qc = self._configure_simulation(qc, sim_mode, rng_seed=rng_seed)
 
         # Transpile and run
-        circuit_compiled = self._transpile_circuit(qc, backend)
+        circuit_compiled = self._transpile_circuit(qc, backend, rng_seed=rng_seed)
         result_data = self._run_simulation(
             circuit_compiled, backend, shots, noise_model, sim_mode
         )
@@ -227,7 +228,7 @@ class ExperimentRunner:
             raise
 
     def _configure_simulation(
-        self, qc: QuantumCircuit, sim_mode: str
+        self, qc: QuantumCircuit, sim_mode: str, rng_seed: Optional[int] = None
     ) -> Tuple[object, QuantumCircuit]:
         """
         Configure the backend and circuit for simulation.
@@ -259,9 +260,18 @@ class ExperimentRunner:
                 self.experiment_id,
             )
 
+        # Apply RNG seed if provided
+        try:
+            if rng_seed is not None and hasattr(backend, "set_options"):
+                backend.set_options(seed_simulator=int(rng_seed))
+        except Exception:
+            pass
+
         return backend, qc
 
-    def _transpile_circuit(self, qc: QuantumCircuit, backend: object) -> QuantumCircuit:
+    def _transpile_circuit(
+        self, qc: QuantumCircuit, backend: object, rng_seed: Optional[int] = None
+    ) -> QuantumCircuit:
         """
         Transpile the circuit for the backend.
 
@@ -277,7 +287,14 @@ class ExperimentRunner:
         )
 
         start_time = time.time()
-        circuit_compiled = transpile(qc, backend)
+        try:
+            circuit_compiled = transpile(
+                qc,
+                backend,
+                seed_transpiler=int(rng_seed) if rng_seed is not None else None,
+            )
+        except Exception:
+            circuit_compiled = transpile(qc, backend)
         transpile_time = time.time() - start_time
 
         logger_utils.log_with_experiment_id(
@@ -415,6 +432,7 @@ def run_experiment(
     t2: Optional[float] = None,
     custom_params: Optional[Dict] = None,
     experiment_id: str = "N/A",
+    rng_seed: Optional[int] = None,
 ) -> Tuple[QuantumCircuit, Union[Dict, DensityMatrix]]:
     """
     Convenience function to run a quantum experiment.
@@ -453,4 +471,5 @@ def run_experiment(
         t1=t1,
         t2=t2,
         custom_params=custom_params,
+        rng_seed=rng_seed,
     )

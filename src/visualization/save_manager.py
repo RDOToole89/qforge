@@ -42,17 +42,19 @@ class VisualizationSaveManager:
             "animations",
             "research_outputs",
             "bloch_spheres",
-            "correlations"
+            "correlations",
         ]
 
         for subdir in subdirs:
             (self.base_dir / subdir).mkdir(parents=True, exist_ok=True)
 
-    def get_save_path(self,
-                     viz_type: str,
-                     experiment_config: Optional[Dict[str, Any]] = None,
-                     custom_name: Optional[str] = None,
-                     extension: str = "png") -> str:
+    def get_save_path(
+        self,
+        viz_type: str,
+        experiment_config: Optional[Dict[str, Any]] = None,
+        custom_name: Optional[str] = None,
+        extension: str = "png",
+    ) -> str:
         """
         Generate an organized save path for a visualization.
 
@@ -67,17 +69,17 @@ class VisualizationSaveManager:
         """
         # Map visualization types to directories
         type_mapping = {
-            'histogram': 'histograms',
-            'density_matrix': 'density_matrices',
-            'hypergraph': 'hypergraphs',
-            'animation': 'animations',
-            'bloch_sphere': 'bloch_spheres',
-            'correlation': 'correlations',
-            'research': 'research_outputs'
+            "histogram": "histograms",
+            "density_matrix": "density_matrices",
+            "hypergraph": "hypergraphs",
+            "animation": "animations",
+            "bloch_sphere": "bloch_spheres",
+            "correlation": "correlations",
+            "research": "research_outputs",
         }
 
         # Get the appropriate subdirectory
-        subdir = type_mapping.get(viz_type, 'research_outputs')
+        subdir = type_mapping.get(viz_type, "research_outputs")
         save_dir = self.base_dir / subdir
 
         # Generate filename
@@ -88,10 +90,12 @@ class VisualizationSaveManager:
 
         return str(save_dir / filename)
 
-    def _generate_filename(self,
-                          viz_type: str,
-                          config: Optional[Dict[str, Any]] = None,
-                          extension: str = "png") -> str:
+    def _generate_filename(
+        self,
+        viz_type: str,
+        config: Optional[Dict[str, Any]] = None,
+        extension: str = "png",
+    ) -> str:
         """
         Generate a descriptive filename based on experiment configuration.
 
@@ -109,10 +113,10 @@ class VisualizationSaveManager:
             return f"{viz_type}_{timestamp}.{extension}"
 
         # Extract key parameters for filename
-        state_type = config.get('state_type', 'unknown')
-        noise_type = config.get('noise_type', 'no_noise')
-        num_qubits = config.get('num_qubits', 'N')
-        noise_enabled = config.get('noise_enabled', False)
+        state_type = config.get("state_type", "unknown")
+        noise_type = config.get("noise_type", "no_noise")
+        num_qubits = config.get("num_qubits", "N")
+        noise_enabled = config.get("noise_enabled", False)
 
         # Build descriptive filename
         parts = [
@@ -121,7 +125,7 @@ class VisualizationSaveManager:
         ]
 
         if noise_enabled and noise_type:
-            error_rate = config.get('error_rate', '')
+            error_rate = config.get("error_rate", "")
             if error_rate:
                 parts.append(f"{noise_type}_{error_rate}")
             else:
@@ -131,7 +135,7 @@ class VisualizationSaveManager:
 
         parts.append(timestamp)
 
-        filename = "_".join(str(part).lower().replace(' ', '_') for part in parts)
+        filename = "_".join(str(part).lower().replace(" ", "_") for part in parts)
         return f"{filename}.{extension}"
 
     def get_directory_info(self) -> Dict[str, Any]:
@@ -142,23 +146,25 @@ class VisualizationSaveManager:
             Dictionary with directory statistics
         """
         info = {
-            'base_directory': str(self.base_dir),
-            'subdirectories': {},
-            'total_files': 0
+            "base_directory": str(self.base_dir),
+            "subdirectories": {},
+            "total_files": 0,
         }
 
         for subdir in self.base_dir.iterdir():
             if subdir.is_dir():
                 file_count = len(list(subdir.glob("*.*")))
-                info['subdirectories'][subdir.name] = {
-                    'path': str(subdir),
-                    'file_count': file_count
+                info["subdirectories"][subdir.name] = {
+                    "path": str(subdir),
+                    "file_count": file_count,
                 }
-                info['total_files'] += file_count
+                info["total_files"] += file_count
 
         return info
 
-    def clean_old_files(self, days_old: int = 30, viz_type: Optional[str] = None) -> int:
+    def clean_old_files(
+        self, days_old: int = 30, viz_type: Optional[str] = None
+    ) -> int:
         """
         Clean up old visualization files.
 
@@ -177,13 +183,13 @@ class VisualizationSaveManager:
         # Determine which directories to clean
         if viz_type:
             type_mapping = {
-                'histogram': 'histograms',
-                'density_matrix': 'density_matrices',
-                'hypergraph': 'hypergraphs',
-                'animation': 'animations',
-                'bloch_sphere': 'bloch_spheres',
-                'correlation': 'correlations',
-                'research': 'research_outputs'
+                "histogram": "histograms",
+                "density_matrix": "density_matrices",
+                "hypergraph": "hypergraphs",
+                "animation": "animations",
+                "bloch_sphere": "bloch_spheres",
+                "correlation": "correlations",
+                "research": "research_outputs",
             }
             dirs_to_clean = [self.base_dir / type_mapping.get(viz_type, viz_type)]
         else:
@@ -216,10 +222,18 @@ def get_save_manager() -> VisualizationSaveManager:
     return _save_manager
 
 
-def get_organized_save_path(viz_type: str,
-                           experiment_config: Optional[Dict[str, Any]] = None,
-                           custom_name: Optional[str] = None,
-                           extension: str = "png") -> str:
+def set_save_manager_base_dir(base_dir: str) -> None:
+    """Reset the global save manager with a new base directory."""
+    global _save_manager
+    _save_manager = VisualizationSaveManager(base_dir=base_dir)
+
+
+def get_organized_save_path(
+    viz_type: str,
+    experiment_config: Optional[Dict[str, Any]] = None,
+    custom_name: Optional[str] = None,
+    extension: str = "png",
+) -> str:
     """
     Convenience function to get an organized save path.
 
@@ -236,5 +250,5 @@ def get_organized_save_path(viz_type: str,
         viz_type=viz_type,
         experiment_config=experiment_config,
         custom_name=custom_name,
-        extension=extension
+        extension=extension,
     )

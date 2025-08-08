@@ -53,3 +53,32 @@ def validate_results_schema(data: Dict[str, Any]) -> bool:
         raise ValueError("provenance must be an object if present")
 
     return True
+
+
+def validate_manifest_schema(data: Dict[str, Any]) -> bool:
+    """Validate minimal structure of a sweep manifest.
+
+    Required:
+      - base_preset: str
+      - parameter_ranges: dict[str, list]
+      - runs_per_config: int
+    Optional:
+      - override: dict (applied to base preset)
+      - rng_seed: int
+    """
+    if not isinstance(data, dict):
+        raise ValueError("Manifest must be an object")
+    if "base_preset" not in data or not isinstance(data["base_preset"], str):
+        raise ValueError("Manifest missing 'base_preset' (str)")
+    if "parameter_ranges" not in data or not isinstance(data["parameter_ranges"], dict):
+        raise ValueError("Manifest missing 'parameter_ranges' (object)")
+    for k, v in data["parameter_ranges"].items():
+        if not isinstance(v, list):
+            raise ValueError(f"parameter_ranges['{k}'] must be a list")
+    if "runs_per_config" not in data or not isinstance(data["runs_per_config"], int):
+        raise ValueError("Manifest missing 'runs_per_config' (int)")
+    if "override" in data and not isinstance(data["override"], dict):
+        raise ValueError("'override' must be an object if present")
+    if "rng_seed" in data and not isinstance(data["rng_seed"], int):
+        raise ValueError("'rng_seed' must be an int if present")
+    return True

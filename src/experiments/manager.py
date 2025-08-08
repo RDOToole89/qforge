@@ -42,6 +42,7 @@ class ExperimentManager:
         """Load preset experiments from the presets directory."""
         try:
             from .presets import load_preset_experiments
+
             preset_experiments = load_preset_experiments()
             self.experiments.update(preset_experiments)
             self.logger.info(f"Loaded {len(preset_experiments)} preset experiments")
@@ -58,13 +59,13 @@ class ExperimentManager:
 
         for experiment_file in experiments_dir.glob("*.json"):
             try:
-                with open(experiment_file, 'r') as f:
+                with open(experiment_file, "r") as f:
                     experiment_data = json.load(f)
 
                 experiment_id = experiment_file.stem
-                experiment_data['id'] = experiment_id
-                experiment_data['source'] = 'custom'
-                experiment_data['file_path'] = str(experiment_file)
+                experiment_data["id"] = experiment_id
+                experiment_data["source"] = "custom"
+                experiment_data["file_path"] = str(experiment_file)
 
                 self.experiments[experiment_id] = experiment_data
                 self.logger.info(f"Loaded custom experiment: {experiment_id}")
@@ -76,6 +77,7 @@ class ExperimentManager:
         """Load experiment plugins."""
         try:
             from .plugins import load_plugins
+
             plugin_experiments = load_plugins()
             self.experiments.update(plugin_experiments)
             self.logger.info(f"Loaded {len(plugin_experiments)} plugin experiments")
@@ -86,13 +88,13 @@ class ExperimentManager:
         """Organize experiments by categories and difficulty levels."""
         for experiment_id, experiment in self.experiments.items():
             # Organize by category
-            category = experiment.get('category', 'unknown')
+            category = experiment.get("category", "unknown")
             if category not in self.categories:
                 self.categories[category] = []
             self.categories[category].append(experiment_id)
 
             # Organize by difficulty
-            difficulty = experiment.get('difficulty', 'unknown')
+            difficulty = experiment.get("difficulty", "unknown")
             if difficulty not in self.difficulty_levels:
                 self.difficulty_levels[difficulty] = []
             self.difficulty_levels[difficulty].append(experiment_id)
@@ -110,9 +112,7 @@ class ExperimentManager:
         return self.experiments.get(experiment_id)
 
     def list_experiments(
-        self,
-        category: Optional[str] = None,
-        difficulty: Optional[str] = None
+        self, category: Optional[str] = None, difficulty: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         List experiments with optional filtering.
@@ -128,17 +128,14 @@ class ExperimentManager:
 
         for experiment_id, experiment in self.experiments.items():
             # Apply category filter
-            if category and experiment.get('category') != category:
+            if category and experiment.get("category") != category:
                 continue
 
             # Apply difficulty filter
-            if difficulty and experiment.get('difficulty') != difficulty:
+            if difficulty and experiment.get("difficulty") != difficulty:
                 continue
 
-            filtered_experiments.append({
-                'id': experiment_id,
-                **experiment
-            })
+            filtered_experiments.append({"id": experiment_id, **experiment})
 
         return filtered_experiments
 
@@ -174,18 +171,17 @@ class ExperimentManager:
         matching_experiments = []
 
         for experiment_id, experiment in self.experiments.items():
-            name = experiment.get('name', '').lower()
-            description = experiment.get('description', '').lower()
+            name = experiment.get("name", "").lower()
+            description = experiment.get("description", "").lower()
 
             if query in name or query in description:
-                matching_experiments.append({
-                    'id': experiment_id,
-                    **experiment
-                })
+                matching_experiments.append({"id": experiment_id, **experiment})
 
         return matching_experiments
 
-    def add_experiment(self, experiment_id: str, experiment_config: Dict[str, Any]) -> bool:
+    def add_experiment(
+        self, experiment_id: str, experiment_config: Dict[str, Any]
+    ) -> bool:
         """
         Add a new experiment.
 
@@ -199,13 +195,14 @@ class ExperimentManager:
         try:
             # Validate experiment configuration
             from .validator import ExperimentValidator
+
             validator = ExperimentValidator()
             if not validator.validate_experiment(experiment_config):
                 return False
 
             # Add experiment
-            experiment_config['id'] = experiment_id
-            experiment_config['source'] = 'custom'
+            experiment_config["id"] = experiment_id
+            experiment_config["source"] = "custom"
             self.experiments[experiment_id] = experiment_config
 
             # Reorganize
@@ -232,9 +229,9 @@ class ExperimentManager:
             experiment = self.experiments[experiment_id]
 
             # Remove from custom experiments file if it exists
-            if experiment.get('source') == 'custom' and 'file_path' in experiment:
+            if experiment.get("source") == "custom" and "file_path" in experiment:
                 try:
-                    os.remove(experiment['file_path'])
+                    os.remove(experiment["file_path"])
                 except OSError:
                     pass  # File might not exist
 
@@ -250,9 +247,7 @@ class ExperimentManager:
         return False
 
     def run_experiment(
-        self,
-        experiment_id: str,
-        custom_params: Optional[Dict[str, Any]] = None
+        self, experiment_id: str, custom_params: Optional[Dict[str, Any]] = None
     ) -> Optional[Any]:
         """
         Run an experiment.
@@ -271,7 +266,7 @@ class ExperimentManager:
 
         try:
             # Get experiment parameters
-            params = experiment.get('config', {}).copy()
+            params = experiment.get("config", {}).copy()
 
             # Override with custom parameters
             if custom_params:
@@ -279,15 +274,24 @@ class ExperimentManager:
 
             # Filter out non-experiment parameters
             valid_params = {
-                'num_qubits', 'state_type', 'noise_type', 'noise_enabled',
-                'shots', 'sim_mode', 'error_rate', 'z_prob', 'i_prob',
-                't1', 't2'
+                "num_qubits",
+                "state_type",
+                "noise_type",
+                "noise_enabled",
+                "shots",
+                "sim_mode",
+                "error_rate",
+                "z_prob",
+                "i_prob",
+                "t1",
+                "t2",
+                "rng_seed",
             }
             experiment_params = {k: v for k, v in params.items() if k in valid_params}
 
             # Handle custom_params separately
-            if 'custom_params' in params:
-                experiment_params['custom_params'] = params['custom_params']
+            if "custom_params" in params:
+                experiment_params["custom_params"] = params["custom_params"]
 
             # Run the experiment
             self.logger.info(f"Running experiment with params: {experiment_params}")
@@ -295,8 +299,8 @@ class ExperimentManager:
             circuit, result = runner.run_experiment(**experiment_params)
 
             # Check if research-grade analysis is enabled
-            enable_research = params.get('enable_research_metrics', False)
-            research_type = experiment.get('research_type', None)
+            enable_research = params.get("enable_research_metrics", False)
+            research_type = experiment.get("research_type", None)
 
             if enable_research or research_type:
                 # Import research handler
@@ -304,14 +308,14 @@ class ExperimentManager:
 
                 # Create research analysis
                 research_handler = ResearchExperimentHandler()
-                full_config = experiment.get('config', {}).copy()
+                full_config = experiment.get("config", {}).copy()
                 full_config.update(params)
 
                 research_analysis = research_handler.process_experiment_result(
                     circuit=circuit,
                     result=result,
                     experiment_config=full_config,
-                    experiment_id=experiment_id
+                    experiment_id=experiment_id,
                 )
 
                 # Save research results
@@ -320,10 +324,10 @@ class ExperimentManager:
 
                 # Return both standard result and research analysis
                 return {
-                    'circuit': circuit,
-                    'result': result,
-                    'research_analysis': research_analysis,
-                    'research_file': result_file
+                    "circuit": circuit,
+                    "result": result,
+                    "research_analysis": research_analysis,
+                    "research_file": result_file,
                 }
             else:
                 # Standard return format for backward compatibility
@@ -350,7 +354,7 @@ class ExperimentManager:
             return False
 
         try:
-            with open(file_path, 'w') as f:
+            with open(file_path, "w") as f:
                 json.dump(experiment, f, indent=2)
 
             self.logger.info(f"Exported experiment {experiment_id} to {file_path}")
@@ -371,10 +375,10 @@ class ExperimentManager:
             Optional[str]: Experiment ID if imported successfully.
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, "r") as f:
                 experiment_config = json.load(f)
 
-            experiment_id = experiment_config.get('id', Path(file_path).stem)
+            experiment_id = experiment_config.get("id", Path(file_path).stem)
 
             if self.add_experiment(experiment_id, experiment_config):
                 return experiment_id

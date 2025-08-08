@@ -208,6 +208,90 @@ def run_parameter_sweep(experiment_name: str):
         sys.exit(1)
 
 
+def run_from_config(config_path: str) -> None:
+    """Run an experiment from a JSON/YAML config file."""
+    import json as _json
+
+    try:
+        if config_path.endswith((".yaml", ".yml")):
+            import yaml  # type: ignore
+
+            with open(config_path, "r") as f:
+                data = yaml.safe_load(f)
+        else:
+            with open(config_path, "r") as f:
+                data = _json.load(f)
+    except Exception as e:
+        logger.error(f"❌ Failed to load config: {e}")
+        sys.exit(1)
+
+    try:
+        get_experiment_manager, _, _, _ = import_core_modules()
+        em = get_experiment_manager()
+
+        preset = data.get("preset")
+        params_override = {k: v for k, v in data.items() if k != "preset"}
+        if preset:
+            result = em.run_experiment(preset, custom_params=params_override)
+        else:
+            result = em.run_experiment("ghz_basic", custom_params=data)
+
+        if result is None:
+            logger.error("❌ Experiment failed to run from config")
+            sys.exit(1)
+        logger.info("✅ Experiment from config completed")
+    except Exception as e:
+        logger.error(f"❌ Error running from config: {e}")
+        sys.exit(1)
+
+
+def run_sweep_from_manifest(manifest_path: str) -> None:
+    """Run a parameter sweep described by a JSON/YAML manifest."""
+    import json as _json
+
+    try:
+        if manifest_path.endswith((".yaml", ".yml")):
+            import yaml  # type: ignore
+
+            with open(manifest_path, "r") as f:
+                data = yaml.safe_load(f)
+        else:
+            with open(manifest_path, "r") as f:
+                data = _json.load(f)
+    except Exception as e:
+        logger.error(f"❌ Failed to load manifest: {e}")
+        sys.exit(1)
+
+    # Validate manifest
+    try:
+        from src.utils.schema import validate_manifest_schema
+
+        validate_manifest_schema(data)
+    except Exception as e:
+        logger.error(f"❌ Invalid manifest: {e}")
+        sys.exit(2)
+
+    base_preset = data["base_preset"]
+    parameter_ranges = data["parameter_ranges"]
+    runs_per_config = int(data.get("runs_per_config", 3))
+    # Optional override (not yet merged at engine-level; presets can be pre-edited accordingly)
+
+    try:
+        from src.core.parameter_sweep import ParameterSweepEngine
+
+        engine = ParameterSweepEngine()
+        engine.run_parameter_sweep(
+            base_experiment_id=base_preset,
+            parameter_ranges=parameter_ranges,
+            runs_per_config=runs_per_config,
+            sweep_name=f"{base_preset}_manifest",
+        )
+        logger.info("✅ Sweep from manifest completed")
+    except Exception as e:
+        logger.error(f"❌ Sweep failed: {e}")
+        sys.exit(1)
+
+
 def show_help():
     """Show help information."""
     print(
@@ -301,6 +385,20 @@ def main():
     # Parse command line arguments
     args = sys.argv[1:]
 
+    # Streaming structured logs for headless/server mode
+    if "--stream-logs" in args:
+        try:
+            from src.utils import logger as logger_utils
+            logger_utils.setup_logger(
+                log_level=os.environ.get("QUANTUM_LOG_LEVEL", "INFO"),
+                log_to_file=False,
+                log_to_console=True,
+                structured_log_file="logs/structured_logs.json",
+            )
+            logger.info("📡 Streaming structured logs enabled → logs/structured_logs.json")
+        except Exception as _e:
+            logger.warning(f"Failed to enable streaming logs: {_e}")
+
     if not args:
         # No arguments - run interactive mode
         run_interactive_mode()
@@ -314,8 +412,12 @@ def main():
     elif args[0] == "run" and len(args) > 2 and args[1] == "--preset":
         # New subcommand style: run --preset <id>
         run_experiment_by_name(args[2])
+    elif args[0] == "run" and len(args) > 2 and args[1] == "--config":
+        run_from_config(args[2])
     elif args[0] == "--sweep" and len(args) > 1:
         run_parameter_sweep(args[1])
+    elif args[0] == "sweep" and len(args) > 2 and args[1] == "--manifest":
+        run_sweep_from_manifest(args[2])
     elif args[0] == "--viz" and len(args) > 1:
         viz_type = "histogram"
         if "--type" in args:

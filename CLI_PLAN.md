@@ -9,7 +9,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Selection UX with numbers/hotkeys/defaults; Enter accepts default
 - [x] Organized save paths via SaveManager; real-data visualizations
 - [ ] Headless commands (`qexp`) for server/batch use
-- [ ] Results JSON schema v1 with provenance + docs
+- [x] Results JSON schema v1 with provenance (initial) + docs (pending)
 
 ## Current CLI structure
 
@@ -17,7 +17,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - Presets Browser: filters (category/difficulty), free-text search, selection, active filter chips, compact list
 - Custom Wizard: basic (state → custom source when CUSTOM → noise → sim → viz)
 - Recent Results: list last N JSON files
-- Settings: read-only defaults (editing pending)
+- [x] Settings: read-only defaults; basic editing (shots, error_rate, backend, save dir)
 
 ---
 
@@ -80,16 +80,17 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ### Headless/Server alignment
 
-- [ ] CLI subcommands: `run --preset`, `run --config`, `sweep --manifest`, `viz --from results.json`
+- [x] CLI subcommands: `run --preset`, `run --config`, `sweep --manifest`, `viz --from results.json`
 - [x] Visualize from saved JSON (`--viz <file> --type ...`)
+- [x] Streaming structured logs flag (`--stream-logs`) for headless/server
 - [ ] Manifest format (JSON/YAML) for batches/sweeps; deterministic runs with seeds
 - [ ] Streaming progress and structured logs for server use
 
 ### Results schema & provenance
 
-- [ ] JSON schema v1 with: schema_version, timestamp, software_versions, rng_seed, transpile settings, device/simulator info
-- [ ] Attach normalized experiment_config, raw results, derived metrics, artifact paths, insights
-- [ ] Deterministic filenames (timestamp + short config hash)
+- [x] JSON schema v1 fields: schema_version, timestamp, software_versions; rng_seed/transpile/simulator (partial)
+- [x] Attach normalized experiment_config, raw results, derived metrics, artifact paths, insights (initial)
+- [x] Deterministic filenames (timestamp + short config hash)
 
 ### Visualization & Insights
 
@@ -198,8 +199,8 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 - [ ] Replace list with compact table incl. Key metric column
 - [x] Actions: Open [o], Re-run [r], Compare [c]
-- [ ] Compare: metrics diff view; toggle ideal deltas (TVD/KL)
-- [ ] Optional small overlay chart in compare
+- [x] Compare: metrics diff view; ideal deltas (TVD/KL)
+- [x] Optional small overlay chart in compare (mini entropy bar)
 
 ### Reports & outputs
 
@@ -216,9 +217,9 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ### Headless/server
 
-- [ ] Subcommands: run --preset, run --config, sweep --manifest, viz --from
-- [ ] Manifest (JSON/YAML) schema for batches/sweeps; seeds
-- [ ] Structured logs + streaming progress for server mode
+- [x] Subcommands: run --preset, run --config, sweep --manifest, viz --from
+- [x] Manifest (JSON) minimal schema; seeds partially supported
+- [x] Structured logs + streaming flag for server mode
 
 ### Results schema & provenance (TODOs)
 

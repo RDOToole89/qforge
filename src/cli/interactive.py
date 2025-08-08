@@ -944,6 +944,7 @@ class InteractiveCLI:
     def _compare_results(self, file_a: str, file_b: str) -> None:
         import json as _json
         from math import isclose
+        import matplotlib.pyplot as _plt
 
         with open(file_a, "r") as fa, open(file_b, "r") as fb:
             a = _json.load(fa)
@@ -969,6 +970,20 @@ class InteractiveCLI:
             else:
                 table.add_row(key, str(av), str(bv), "-")
         self.console.print(table)
+
+        # Mini chart: bar of normalized entropy for A vs B if available
+        try:
+            a_h = a_info.get("normalized_entropy")
+            b_h = b_info.get("normalized_entropy")
+            if isinstance(a_h, (int, float)) and isinstance(b_h, (int, float)):
+                _plt.figure(figsize=(4, 3))
+                _plt.bar(["A", "B"], [a_h, b_h], color=["#1f77b4", "#ff7f0e"]) 
+                _plt.title("Normalized Entropy")
+                _plt.ylim(0, 1)
+                _plt.tight_layout()
+                _plt.show()
+        except Exception:
+            pass
 
     def _compare_vs_ideal(self, file_path: str) -> None:
         import json as _json
@@ -1007,7 +1022,7 @@ class InteractiveCLI:
         # Display current defaults; editing will be added later
         from src.config.settings import settings
 
-        table = Table(title="Settings (read-only)")
+        table = Table(title="Settings")
         table.add_column("Setting", style="cyan")
         table.add_column("Value", style="green")
         table.add_row("DEFAULT_NUM_QUBITS", str(settings.DEFAULT_NUM_QUBITS))
@@ -1030,12 +1045,59 @@ class InteractiveCLI:
             title="Settings Actions",
             options=[
                 ("back", "Back", "b"),
+                ("edit", "Edit Settings", "e"),
                 ("profiles_save", "Save Profile", "s"),
                 ("profiles_load", "Load Profile", "l"),
             ],
             default_value="back",
             show_value_column=False,
         )
+        if action == "edit":
+            # Simple inline editor for common fields
+            try:
+                new_shots = self.input_handler.get_numeric_input(
+                    "shots_prompt", str(settings.DEFAULT_SHOTS), int
+                )
+                new_err = self.input_handler.get_numeric_input(
+                    "error_rate_prompt", str(settings.DEFAULT_ERROR_RATE), float
+                )
+                settings.DEFAULT_SHOTS = int(new_shots)
+                settings.DEFAULT_ERROR_RATE = float(new_err)
+                # Optional: visualization backend
+                backend_choice = self.input_handler.get_input(
+                    "visualization_type_prompt",
+                    "histogram",
+                    ["matplotlib", "plotly"],
+                    ["matplotlib", "plotly"],
+                ).lower()
+                try:
+                    from src.visualization.backends import set_visualization_backend
+
+                    set_visualization_backend(
+                        "plotly" if backend_choice == "plotly" else "matplotlib"
+                    )
+                except Exception:
+                    pass
+                # Optional: save base dir
+                save_base = self.input_handler.get_input(
+                    "custom_state_qasm_path_prompt", "results/visualizations"
+                )
+                try:
+                    from src.visualization.save_manager import (
+                        set_save_manager_base_dir,
+                    )
+
+                    set_save_manager_base_dir(save_base)
+                except Exception:
+                    pass
+                self.display_manager.display_success_message(
+                    "✅ Updated settings (shots, error_rate, viz backend, save dir)"
+                )
+            except Exception as e:
+                self.display_manager.display_error_message(
+                    f"Failed to edit settings: {e}"
+                )
+            return
         if action in {"profiles_save", "profiles_load"}:
             try:
                 from src.config import profiles as _profiles
@@ -1063,9 +1125,18 @@ class InteractiveCLI:
                         )
                         prof = _profiles.load_profile(pick)
                         _profiles.apply_profile(prof)
-                        self.display_manager.display_success_message(
-                            f"✅ Loaded profile '{pick}'"
-                        )
+                self.display_manager.display_success_message(
+                    f"✅ Loaded profile '{pick}'"
+                )
+                # After applying a profile, refresh save manager and optionally backend
+                try:
+                    from src.visualization.save_manager import set_save_manager_base_dir
+
+                    set_save_manager_base_dir(
+                        settings.DEFAULT_RESULTS_DIR + "/visualizations"
+                    )
+                except Exception:
+                    pass
             except Exception as e:
                 self.display_manager.display_error_message(
                     f"Profile operation failed: {e}"
