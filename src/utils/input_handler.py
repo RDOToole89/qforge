@@ -8,7 +8,7 @@ from src.utils.validation import InputValidator
 class InputHandler:
     """Handles user input with validation and formatting using rich console."""
 
-    def __init__(self, console: Console, messages: dict):
+    def __init__(self, console: Console, messages: dict, help_manager=None):
         """
         Initializes the InputHandler with a rich console and messages dictionary.
 
@@ -19,6 +19,7 @@ class InputHandler:
         self.console = console
         self.messages = messages
         self.validator = InputValidator()
+        self.help_manager = help_manager
 
     def get_input(
         self,
@@ -26,6 +27,7 @@ class InputHandler:
         default: str,
         valid_options: Optional[List[str]] = None,
         valid_options_display: Optional[List[str]] = None,
+        help_context: Optional[str] = None,
         **kwargs,
     ) -> str:
         """
@@ -55,8 +57,17 @@ class InputHandler:
                         else valid_options
                     )
                 format_kwargs.update(kwargs)
-                self.console.print(prompt.format(**format_kwargs), end="")
-                user_input = input().strip().lower() or default.lower()
+                extra = " [? for help]" if self.help_manager else ""
+                self.console.print((prompt + extra).format(**format_kwargs), end="")
+                raw = input().strip()
+                if self.help_manager and raw == "?":
+                    try:
+                        self.help_manager.show()
+                    except Exception:
+                        pass
+                    # reprint prompt after help
+                    continue
+                user_input = (raw or default).lower()
                 if self.validator.validate_choice(user_input, valid_options):
                     return user_input
                 self.console.print(
@@ -100,7 +111,9 @@ class InputHandler:
             )
             # keep looping until valid input is provided
 
-    def prompt_yes_no(self, key: str, default: str = "n") -> bool:
+    def prompt_yes_no(
+        self, key: str, default: str = "n", help_context: Optional[str] = None
+    ) -> bool:
         """
         Prompts the user for a yes/no answer.
 
@@ -112,7 +125,10 @@ class InputHandler:
             bool: True if yes, False if no.
         """
         user_input = self.get_input(
-            key, default, ["y", "yes", "t", "true", "n", "no", "f", "false"]
+            key,
+            default,
+            ["y", "yes", "t", "true", "n", "no", "f", "false"],
+            help_context=help_context,
         )
         return self.validator.validate_yes_no(user_input)
 
@@ -122,6 +138,7 @@ class InputHandler:
         options: list,
         default_value: str,
         hotkey_map: Optional[dict] = None,
+        help_context: Optional[str] = None,
     ) -> str:
         """Interactive selection helper with numbers, hotkeys, and defaults.
 
@@ -171,10 +188,18 @@ class InputHandler:
                 table.add_row(str(idx), label_display, hotkey or "-", value)
 
             self.console.print(table)
+            suffix = " [? for help]" if self.help_manager else ""
             self.console.print(
-                f"Select option number, hotkey, or value [{default_index+1}]: ", end=""
+                f"Select option number, hotkey, or value [{default_index+1}]{suffix}: ",
+                end="",
             )
             raw = input().strip()
+            if self.help_manager and raw == "?":
+                try:
+                    self.help_manager.show()
+                except Exception:
+                    pass
+                continue
             if raw == "":
                 return values[default_index]
 

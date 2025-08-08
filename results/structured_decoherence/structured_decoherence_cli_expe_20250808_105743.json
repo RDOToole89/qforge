@@ -1,0 +1,90 @@
+{
+  "experiment_metadata": {
+    "experiment_id": "cli_experiment",
+    "timestamp": "2025-08-08T10:57:43.313478",
+    "framework_version": "2.0.0",
+    "research_type": "structured_decoherence"
+  },
+  "experiment_parameters": {
+    "num_qubits": 3,
+    "state_type": "W",
+    "noise_type": "DEPOLARIZING",
+    "noise_enabled": false,
+    "error_rate": 0.1,
+    "shots": 1024,
+    "sim_mode": "qasm",
+    "multiple_runs": 1
+  },
+  "circuit_statistics": {
+    "depth": 2,
+    "num_gates": 5,
+    "num_qubits": 3,
+    "gate_types": {
+      "initialize": 1,
+      "barrier": 1,
+      "measure": 3
+    }
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "100": 318,
+      "010": 326,
+      "001": 380
+    },
+    "total_shots": 1024,
+    "unique_outcomes": 3,
+    "outcome_probabilities": {
+      "100": 0.310546875,
+      "010": 0.318359375,
+      "001": 0.37109375
+    }
+  },
+  "research_metrics": {
+    "basic_stats": {
+      "total_shots": 1024,
+      "unique_outcomes": 3,
+      "num_qubits": 3
+    },
+    "information_theory": {
+      "shannon_entropy": 1.5803444441157066,
+      "normalized_entropy": 0.9970863306839447
+    },
+    "qubit_analysis": {
+      "qubit_wise_bias": {
+        "q0": -0.37890625,
+        "q1": -0.36328125,
+        "q2": -0.2578125
+      }
+    },
+    "entanglement_analysis": {
+      "mutual_information_matrix": {
+        "I(0;1)": 0.21604768724801726,
+        "I(0;2)": 0.2649674816836569,
+        "I(1;2)": 0.27375216638698685
+      }
+    }
+  },
+  "statistical_validation": {
+    "shot_count_adequacy": {
+      "total_shots": 1024,
+      "recommended_min_shots": 300,
+      "adequacy_ratio": 3.4133333333333336,
+      "adequate": true
+    },
+    "sampling_quality": {
+      "outcome_coverage": 0.375,
+      "min_count_per_outcome": 318,
+      "max_count_per_outcome": 380
+    }
+  },
+  "research_insights": {
+    "key_findings": [
+      "High normalized entropy (0.997) indicates near-random decoherence patterns",
+      "Significant qubit bias detected (max: 0.379), suggesting asymmetric decoherence"
+    ],
+    "research_questions_addressed": [],
+    "recommendations": [
+      "Increase shot count to \u22654096 for improved statistical significance"
+    ]
+  }
+}

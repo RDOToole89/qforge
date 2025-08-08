@@ -133,6 +133,7 @@ MESSAGES = {
     # Recent results actions
     "recent_action_title": "Result Actions",
     "recent_action_prompt": "Select action [{default}]: ",
+    "recent_compare_title": "Compare Results",
     # Help & glossary
     "help_title": "Help & Glossary",
     "help_search_prompt": "Search term (Enter to list all) [{default}]: ",

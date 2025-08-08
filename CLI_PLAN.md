@@ -21,13 +21,14 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ---
 
-### Detailed checklist
+### Detailed checklist (prioritized next)
 
 #### Selection & inputs
 
 - [x] Numeric/hotkey selections for: Main menu, State, Noise, Sim mode, Visualization
 - [x] Numeric inputs accept Enter defaults (no `None` prompts)
-- [ ] Global “?” help hotkey on every prompt (term popover)
+- [x] Global “?” help hotkey on prompts (basic glossary popover)
+- [ ] Arrow-key navigation (soft-dependency) with fallback to current menus
 
 #### Presets
 
@@ -49,13 +50,16 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Templates (e.g., Bell/W/Cluster), parameterized (initial set)
 - [x] Validators & schema checks for gates/builder/qasm (via CustomState.create path)
 - [x] Preview (text circuit summary)
+- [ ] Parameter normalization: hide noise fields when disabled; set to None
+- [ ] Constraints: enforce state↔qubits, physics (T2 ≤ 2*T1), compatible sim/noise
 
 #### Recent Results
 
 - [x] List last N JSON files
 - [x] Actions: re-open visualization
 - [x] Actions: re-run with same params
-- [ ] Compare two runs (diff metrics/plots)
+- [x] Compare two runs (diff metrics/plots) – basic metrics table
+- [ ] Compare: add TVD/KL vs ideal deltas; optional small chart
 
 #### Settings
 
@@ -65,8 +69,8 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 #### Help & Glossary
 
-- [ ] `Help` menu with searchable glossary (noise models, metrics, objects)
-- [ ] Inline `?` hotkey: show short definition + examples
+- [ ] `Help` main menu with searchable glossary (noise models, metrics, objects)
+- [x] Inline `?` hotkey: show short definition + examples (basic)
 - [ ] Link to local markdown docs / external references
 
 #### Headless/Server alignment
@@ -81,6 +85,11 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [ ] JSON schema v1 with: schema_version, timestamp, software_versions, rng_seed, transpile settings, device/simulator info
 - [ ] Attach normalized experiment_config, raw results, derived metrics, artifact paths, insights
 - [ ] Deterministic filenames (timestamp + short config hash)
+
+#### Visualization & Insights
+
+- [ ] Professional “Experiment Report” panel: Key Insights, expand Details, Save report
+- [ ] Re-introduce Density Matrix sim mode and align viz prompts
 
 #### Cleanup & tests
 

@@ -14,6 +14,7 @@ from src.config.quick_experiments import QUICK_EXPERIMENTS, get_experiment_info
 from src.experiments.presets import load_preset_experiments
 from src.config.params import apply_defaults, validate_parameters
 from src.utils.input_handler import InputHandler
+from .help import HelpManager
 from src.utils.messages import MESSAGES
 from src.utils import logger as logger_utils
 from .display import DisplayManager
@@ -30,7 +31,10 @@ class InteractiveCLI:
     def __init__(self):
         """Initialize the interactive CLI."""
         self.console = Console()
-        self.input_handler = InputHandler(self.console, MESSAGES)
+        self.help_manager = HelpManager(self.console)
+        self.input_handler = InputHandler(
+            self.console, MESSAGES, help_manager=self.help_manager
+        )
         self.display_manager = DisplayManager(self.console)
         self.logger = logger_utils.setup_logger(
             log_level="INFO",
@@ -131,6 +135,7 @@ class InteractiveCLI:
                 title="State Type",
                 options=state_options,
                 default_value=args["state_type"],
+                help_context="state_type",
             )
 
             # Collect custom state parameters if needed
@@ -146,7 +151,9 @@ class InteractiveCLI:
                     self._preview_custom_circuit(preview_nq, args["custom_params"])
 
             # Noise configuration
-            noise_enabled = self.input_handler.prompt_yes_no("enable_noise_prompt", "y")
+            noise_enabled = self.input_handler.prompt_yes_no(
+                "enable_noise_prompt", "y", help_context="noise"
+            )
             args["noise_enabled"] = noise_enabled
 
             if noise_enabled:
@@ -160,6 +167,7 @@ class InteractiveCLI:
                     title="Noise Type",
                     options=noise_options,
                     default_value=args.get("noise_type", "DEPOLARIZING"),
+                    help_context="noise_type",
                 )
 
                 # Error rate (Enter keeps default shown)
@@ -188,12 +196,13 @@ class InteractiveCLI:
                     ("statevector", "Statevector", "s"),
                 ],
                 default_value=args["sim_mode"],
+                help_context="sim_mode",
             )
             args["sim_mode"] = sim_mode
 
             # Visualization preferences
             enable_viz = self.input_handler.prompt_yes_no(
-                "enable_visualization_prompt", "y"
+                "enable_visualization_prompt", "y", help_context="viz"
             )
             if enable_viz:
                 viz_type = self.input_handler.select_option(
@@ -204,6 +213,7 @@ class InteractiveCLI:
                         ("hypergraph", "Hypergraph", "g"),
                     ],
                     default_value="histogram",
+                    help_context="viz_type",
                 )
                 args["visualization_type"] = viz_type
             else:
@@ -655,6 +665,7 @@ class InteractiveCLI:
                 ("back", "Back", "b"),
                 ("open", "Open Visualization", "o"),
                 ("rerun", "Re-run", "r"),
+                ("compare", "Compare Two Results", "c"),
             ],
             default_value="back",
         )
@@ -686,6 +697,22 @@ class InteractiveCLI:
                 self._rerun_from_result_json(str(chosen))
             except Exception as e:
                 self.display_manager.display_error_message(f"Failed to re-run: {e}")
+        elif action == "compare":
+            # pick second file
+            pick2 = self.input_handler.select_option(
+                title=MESSAGES.get("recent_compare_title", "Compare Results"),
+                options=idx_map,
+                default_value="2" if len(files) > 1 else "1",
+            )
+            try:
+                sel2 = int(pick2)
+                chosen2 = files[sel2 - 1]
+            except Exception:
+                return
+            try:
+                self._compare_results(str(chosen), str(chosen2))
+            except Exception as e:
+                self.display_manager.display_error_message(f"Failed to compare: {e}")
 
     def _open_visualization_from_result_json(self, file_path: str) -> None:
         import json as _json
@@ -767,6 +794,35 @@ class InteractiveCLI:
                     self._show_visualization(raw_results, experiment_params, viz_type)
                 else:
                     self._show_visualization(result, experiment_params, viz_type)
+
+    def _compare_results(self, file_a: str, file_b: str) -> None:
+        import json as _json
+        from math import isclose
+
+        with open(file_a, "r") as fa, open(file_b, "r") as fb:
+            a = _json.load(fa)
+            b = _json.load(fb)
+        a_metrics = a.get("research_metrics", {})
+        b_metrics = b.get("research_metrics", {})
+        a_info = a_metrics.get("information_theory", {})
+        b_info = b_metrics.get("information_theory", {})
+        table = Table(title="Result Comparison (Information Theory)")
+        table.add_column("Metric", style="cyan")
+        table.add_column("A", style="green")
+        table.add_column("B", style="yellow")
+        table.add_column("Δ (B-A)", style="magenta")
+        for key in sorted(set(a_info.keys()) | set(b_info.keys())):
+            av = a_info.get(key, None)
+            bv = b_info.get(key, None)
+            if isinstance(av, (int, float)) or isinstance(bv, (int, float)):
+                try:
+                    delta = (bv or 0) - (av or 0)
+                    table.add_row(key, f"{av}", f"{bv}", f"{delta:+.6f}")
+                except Exception:
+                    table.add_row(key, str(av), str(bv), "-")
+            else:
+                table.add_row(key, str(av), str(bv), "-")
+        self.console.print(table)
 
     def show_settings_stub(self) -> None:
         # Display current defaults; editing will be added later
