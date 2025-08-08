@@ -15,30 +15,21 @@ def render_from_json(
     with open(path, "r") as f:
         analysis = _json.load(f)
 
-    use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
     vtype = viz_type or "histogram"
-    if use_engine and vtype in {"histogram", "density_matrix", "hypergraph"}:
-        try:
-            from src.engine.viz_service import (
-                VisualizationService,
-                VisualizationRequest,
-            )
+    try:
+        # Prefer visualization facade (which delegates to engine service for now)
+        from src.visualization.service import VisualizationService, VizRequest
 
-            svc = VisualizationService(default_backend=(backend or "matplotlib"))
-            req = VisualizationRequest(
-                viz_type=vtype,
-                backend=(backend or "matplotlib"),
-                output_base_dir=outdir,
-            )
-            svc.render_from_json(path, req)
-            return
-        except Exception:
-            pass
+        svc = VisualizationService(default_backend=(backend or "matplotlib"))
+        req = VizRequest(
+            viz_type=vtype,
+            backend=(backend or "matplotlib"),
+            output_base_dir=outdir,
+        )
+        svc.render_from_json(path, req)
+        return
+    except Exception:
+        pass
 
     # Legacy fallback
     params = analysis.get("experiment_parameters", {})

@@ -159,10 +159,10 @@ class VisualizationService:
             custom_name=None,
             extension="png",
         )
-        from src.visualization.histogram import plot_histogram
+        from src.visualization.plots.histogram import render_histogram
 
-        plot_histogram(
-            counts=counts,
+        render_histogram(
+            counts,
             state_type=params.get("state_type"),
             noise_type=params.get("noise_type"),
             noise_enabled=params.get("noise_enabled", True),
@@ -243,10 +243,10 @@ class VisualizationService:
             custom_name=None,
             extension="png",
         )
-        from src.visualization.density_matrix import plot_density_matrix
+        from src.visualization.plots.density_matrix import render_density_matrix
 
-        plot_density_matrix(
-            density_matrix=density_matrix,
+        render_density_matrix(
+            density_matrix,
             state_type=params.get("state_type"),
             noise_type=params.get("noise_type"),
             research_metrics=analysis.get("research_metrics"),
@@ -285,16 +285,16 @@ class VisualizationService:
             extension="png",
         )
 
-        from src.visualization.hypergraph import plot_hypergraph
+        # Route through hypergraphs drawer (delegates to monolith for now)
+        from src.visualization.plots.hypergraph import draw_hypergraph
 
         # Minimal config; users can later pass more via request metadata if needed
-        plot_hypergraph(
+        draw_hypergraph(
             correlation_data=counts,
             state_type=params.get("state_type"),
             noise_type=params.get("noise_type"),
             save_path=save_path,
             config={},
-            show_plot_nonblocking=None,
         )
 
         # Ensure an artifact exists; if no significant correlations, the module may skip saving

@@ -44,7 +44,7 @@
 - Plugins
   - State preparation, noise models, and viz backends behind simple interfaces.
 
-### Proposed Module Layout
+### Current Module Layout (post-Phase 8+)
 
 ```
 src/
@@ -108,18 +108,13 @@ src/
 
   visualization/
     __init__.py
-    adapters/
+    backends/
       __init__.py
-      base.py              # VisualizationAdapter protocol, VizKind enum
-      matplotlib_adapter.py
-      plotly_adapter.py
-      webjson_adapter.py   # optional; JSON payloads for web
-    service.py             # VisualizationService (adapter registry/orchestration)
-    report/
-      __init__.py
-      renderer.py          # Markdown/HTML report generation
-      templates/
-        report_template.html
+      plotly_backend.py
+    service.py             # (planned) VisualizationService (adapters to backends)
+    report.py              # Markdown/HTML report generation
+    templates/
+      report_template.html
 
   experiments/
     __init__.py
@@ -134,10 +129,29 @@ src/
 
   cli/
     __init__.py
-    headless.py            # argparse subcommands: run/sweep/viz/report
-    interactive.py         # thin interactive menus; calls engine.api + visualization.service
-    display.py
-    help.py
+    interactive_app.py     # thin facade to Router
+    router.py              # main menu controller
+    entrypoints/
+      main.py              # CLI entry shim
+      args.py              # argument dispatch
+    headless/
+      run.py               # run --preset / run --config (engine-first + fallback)
+      sweep.py             # sweep --manifest (engine-first + fallback)
+      viz.py               # viz --from (engine-first + fallback)
+    common/
+      __init__.py          # re-exports InputHandler, DisplayManager
+      input_handler.py     # CLI-owned input
+      display.py           # CLI-owned display utilities
+      messages.py          # user-facing strings
+      glossary.py          # help/glossary data
+      constants.py         # menu options and curated presets
+      context.py           # CLIContext (console, input, display, settings)
+    interactive/
+      collectors.py        # parameter wizard
+      presets_browser.py   # browse/inspect presets
+      results.py           # recent results UI and actions
+      settings.py          # settings/profile UI
+      viz.py               # interactive viz orchestrator
 
   config/
     __init__.py
@@ -891,7 +905,8 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 - Phase 9: Profiles → `AppContext`
   - Profiles produce `AppContext`; remove core reads of globals.
 - Phase 10: Cleanup & deprecations
-  - Deprecate `quick_experiments`, archive legacy presets, purge artifacts, docs/examples, pre-commit tooling.
+  - DONE: removed `src/config/quick_experiments.py`.
+  - Archive legacy presets, purge artifacts, docs/examples, pre-commit tooling.
 - Phase 11: Flip default & release
   - Default engine on; deprecate legacy paths with notice; changelog.
 

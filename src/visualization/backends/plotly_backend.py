@@ -17,17 +17,20 @@ try:
     import plotly.graph_objects as go
     import plotly.express as px
     from plotly.subplots import make_subplots
+
     PLOTLY_AVAILABLE = True
 except ImportError:
     logger.warning("Plotly not available. Install with: pip install plotly")
     PLOTLY_AVAILABLE = False
 
 
-def plot_interactive_histogram(counts: Dict[str, int],
-                             state_type: Optional[str] = None,
-                             noise_type: Optional[str] = None,
-                             research_metrics: Optional[Dict] = None,
-                             **kwargs) -> Optional[go.Figure]:
+def plot_interactive_histogram(
+    counts: Dict[str, int],
+    state_type: Optional[str] = None,
+    noise_type: Optional[str] = None,
+    research_metrics: Optional[Dict] = None,
+    **kwargs,
+) -> Optional[go.Figure]:
     """
     Create interactive histogram with Plotly.
 
@@ -45,7 +48,7 @@ def plot_interactive_histogram(counts: Dict[str, int],
     states = list(counts.keys())
     values = list(counts.values())
     total_shots = sum(values)
-    probabilities = [v/total_shots for v in values]
+    probabilities = [v / total_shots for v in values]
 
     # Quantum-aware colors
     colors = []
@@ -56,7 +59,7 @@ def plot_interactive_histogram(counts: Dict[str, int],
             else:
                 colors.append("#ff7f0e")  # Orange for error states
         elif state_type == "W":
-            ones_count = state.count('1')
+            ones_count = state.count("1")
             if ones_count == 1:
                 colors.append("#2ca02c")  # Green for W states
             else:
@@ -65,19 +68,21 @@ def plot_interactive_histogram(counts: Dict[str, int],
             colors.append("#1f77b4")  # Default blue
 
     # Create interactive histogram
-    fig = go.Figure(data=[
-        go.Bar(
-            x=states,
-            y=values,
-            marker_color=colors,
-            hovertemplate="<b>State:</b> |%{x}⟩<br>" +
-                         "<b>Count:</b> %{y}<br>" +
-                         "<b>Probability:</b> %{customdata:.4f}<br>" +
-                         "<extra></extra>",
-            customdata=probabilities,
-            name="Measurement Counts"
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=states,
+                y=values,
+                marker_color=colors,
+                hovertemplate="<b>State:</b> |%{x}⟩<br>"
+                + "<b>Count:</b> %{y}<br>"
+                + "<b>Probability:</b> %{customdata:.4f}<br>"
+                + "<extra></extra>",
+                customdata=probabilities,
+                name="Measurement Counts",
+            )
+        ]
+    )
 
     # Enhanced layout
     title = f"{state_type or 'Quantum'} State Measurements"
@@ -85,35 +90,35 @@ def plot_interactive_histogram(counts: Dict[str, int],
         title += f" (with {noise_type} noise)"
 
     fig.update_layout(
-        title=dict(
-            text=title,
-            x=0.5,
-            font=dict(size=18, family="Arial, sans-serif")
-        ),
+        title=dict(text=title, x=0.5, font=dict(size=18, family="Arial, sans-serif")),
         xaxis_title="Quantum States",
         yaxis_title="Measurement Counts",
         template="plotly_white",
         hovermode="closest",
         showlegend=False,
         font=dict(size=12),
-        margin=dict(l=50, r=50, t=80, b=50)
+        margin=dict(l=50, r=50, t=80, b=50),
     )
 
     # Add research metrics annotation if available
-    if research_metrics and 'information_theory' in research_metrics:
-        metrics = research_metrics['information_theory']
-        annotation_text = f"Shannon Entropy: {metrics.get('shannon_entropy', 0):.3f}<br>"
+    if research_metrics and "information_theory" in research_metrics:
+        metrics = research_metrics["information_theory"]
+        annotation_text = (
+            f"Shannon Entropy: {metrics.get('shannon_entropy', 0):.3f}<br>"
+        )
         annotation_text += f"Normalized H: {metrics.get('normalized_entropy', 0):.3f}"
 
         fig.add_annotation(
-            x=0.02, y=0.98,
-            xref="paper", yref="paper",
+            x=0.02,
+            y=0.98,
+            xref="paper",
+            yref="paper",
             text=annotation_text,
             showarrow=False,
             bgcolor="rgba(255,255,255,0.8)",
             bordercolor="gray",
             borderwidth=1,
-            font=dict(size=10)
+            font=dict(size=10),
         )
 
     # Display
@@ -121,10 +126,12 @@ def plot_interactive_histogram(counts: Dict[str, int],
     return fig
 
 
-def plot_interactive_density_matrix(density_matrix: Any,
-                                  state_type: Optional[str] = None,
-                                  research_metrics: Optional[Dict] = None,
-                                  **kwargs) -> Optional[go.Figure]:
+def plot_interactive_density_matrix(
+    density_matrix: Any,
+    state_type: Optional[str] = None,
+    research_metrics: Optional[Dict] = None,
+    **kwargs,
+) -> Optional[go.Figure]:
     """
     Create interactive 3D density matrix visualization.
 
@@ -138,7 +145,7 @@ def plot_interactive_density_matrix(density_matrix: Any,
         return None
 
     # Extract matrix data
-    if hasattr(density_matrix, 'data'):
+    if hasattr(density_matrix, "data"):
         matrix = density_matrix.data
     else:
         matrix = np.array(density_matrix)
@@ -149,35 +156,42 @@ def plot_interactive_density_matrix(density_matrix: Any,
 
     # Create subplots for real and imaginary parts
     fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=('Real Part', 'Imaginary Part'),
-        specs=[[{'type': 'surface'}, {'type': 'surface'}]]
+        rows=1,
+        cols=2,
+        subplot_titles=("Real Part", "Imaginary Part"),
+        specs=[[{"type": "surface"}, {"type": "surface"}]],
     )
 
     # Real part
     fig.add_trace(
         go.Surface(
-            x=x_mesh, y=y_mesh, z=np.real(matrix),
-            colorscale='RdBu',
-            name='Real',
-            hovertemplate="<b>Element:</b> ρ[%{y},%{x}]<br>" +
-                         "<b>Real:</b> %{z:.4f}<br>" +
-                         "<extra></extra>"
+            x=x_mesh,
+            y=y_mesh,
+            z=np.real(matrix),
+            colorscale="RdBu",
+            name="Real",
+            hovertemplate="<b>Element:</b> ρ[%{y},%{x}]<br>"
+            + "<b>Real:</b> %{z:.4f}<br>"
+            + "<extra></extra>",
         ),
-        row=1, col=1
+        row=1,
+        col=1,
     )
 
     # Imaginary part
     fig.add_trace(
         go.Surface(
-            x=x_mesh, y=y_mesh, z=np.imag(matrix),
-            colorscale='Viridis',
-            name='Imaginary',
-            hovertemplate="<b>Element:</b> ρ[%{y},%{x}]<br>" +
-                         "<b>Imaginary:</b> %{z:.4f}<br>" +
-                         "<extra></extra>"
+            x=x_mesh,
+            y=y_mesh,
+            z=np.imag(matrix),
+            colorscale="Viridis",
+            name="Imaginary",
+            hovertemplate="<b>Element:</b> ρ[%{y},%{x}]<br>"
+            + "<b>Imaginary:</b> %{z:.4f}<br>"
+            + "<extra></extra>",
         ),
-        row=1, col=2
+        row=1,
+        col=2,
     )
 
     # Update layout
@@ -185,26 +199,24 @@ def plot_interactive_density_matrix(density_matrix: Any,
     fig.update_layout(
         title=dict(text=title, x=0.5, font=dict(size=16)),
         scene=dict(
-            xaxis_title="Column Index",
-            yaxis_title="Row Index",
-            zaxis_title="Amplitude"
+            xaxis_title="Column Index", yaxis_title="Row Index", zaxis_title="Amplitude"
         ),
         scene2=dict(
-            xaxis_title="Column Index",
-            yaxis_title="Row Index",
-            zaxis_title="Amplitude"
+            xaxis_title="Column Index", yaxis_title="Row Index", zaxis_title="Amplitude"
         ),
-        height=600
+        height=600,
     )
 
     fig.show()
     return fig
 
 
-def plot_interactive_bloch_sphere(bloch_vectors: List[tuple],
-                                 time_steps: Optional[List[float]] = None,
-                                 state_type: Optional[str] = None,
-                                 **kwargs) -> Optional[go.Figure]:
+def plot_interactive_bloch_sphere(
+    bloch_vectors: List[tuple],
+    time_steps: Optional[List[float]] = None,
+    state_type: Optional[str] = None,
+    **kwargs,
+) -> Optional[go.Figure]:
     """
     Create interactive 3D Bloch sphere with trajectory.
 
@@ -226,13 +238,17 @@ def plot_interactive_bloch_sphere(bloch_vectors: List[tuple],
     y_sphere = np.outer(np.sin(u), np.sin(v))
     z_sphere = np.outer(np.ones(np.size(u)), np.cos(v))
 
-    fig.add_trace(go.Surface(
-        x=x_sphere, y=y_sphere, z=z_sphere,
-        opacity=0.3,
-        colorscale='Blues',
-        showscale=False,
-        hoverinfo='skip'
-    ))
+    fig.add_trace(
+        go.Surface(
+            x=x_sphere,
+            y=y_sphere,
+            z=z_sphere,
+            opacity=0.3,
+            colorscale="Blues",
+            showscale=False,
+            hoverinfo="skip",
+        )
+    )
 
     # Add Bloch vectors trajectory
     if isinstance(bloch_vectors[0], dict):
@@ -245,37 +261,47 @@ def plot_interactive_bloch_sphere(bloch_vectors: List[tuple],
             else:
                 x_vals, y_vals, z_vals = zip(*vectors)
 
-            fig.add_trace(go.Scatter3d(
-                x=x_vals, y=y_vals, z=z_vals,
-                mode='lines+markers',
-                name=f'Qubit {qubit_id}',
-                line=dict(width=4),
-                marker=dict(size=4)
-            ))
+            fig.add_trace(
+                go.Scatter3d(
+                    x=x_vals,
+                    y=y_vals,
+                    z=z_vals,
+                    mode="lines+markers",
+                    name=f"Qubit {qubit_id}",
+                    line=dict(width=4),
+                    marker=dict(size=4),
+                )
+            )
     else:
         # Single trajectory
         x_vals, y_vals, z_vals = zip(*bloch_vectors)
 
-        fig.add_trace(go.Scatter3d(
-            x=x_vals, y=y_vals, z=z_vals,
-            mode='lines+markers',
-            name='Bloch Vector',
-            line=dict(width=6),
-            marker=dict(size=6, color=np.arange(len(x_vals)), colorscale='Viridis')
-        ))
+        fig.add_trace(
+            go.Scatter3d(
+                x=x_vals,
+                y=y_vals,
+                z=z_vals,
+                mode="lines+markers",
+                name="Bloch Vector",
+                line=dict(width=6),
+                marker=dict(size=6, color=np.arange(len(x_vals)), colorscale="Viridis"),
+            )
+        )
 
     # Update layout
     fig.update_layout(
         title=f"{state_type or 'Quantum'} State Bloch Sphere Evolution",
         scene=dict(
-            xaxis_title="X", yaxis_title="Y", zaxis_title="Z",
+            xaxis_title="X",
+            yaxis_title="Y",
+            zaxis_title="Z",
             camera=dict(eye=dict(x=1.5, y=1.5, z=1.5)),
-            aspectmode='cube',
+            aspectmode="cube",
             xaxis=dict(range=[-1.5, 1.5]),
             yaxis=dict(range=[-1.5, 1.5]),
-            zaxis=dict(range=[-1.5, 1.5])
+            zaxis=dict(range=[-1.5, 1.5]),
         ),
-        height=700
+        height=700,
     )
 
     fig.show()
@@ -291,12 +317,12 @@ def register_plotly_backend():
     from . import backend_registry
 
     plotly_functions = {
-        'plot_histogram': plot_interactive_histogram,
-        'plot_density_matrix': plot_interactive_density_matrix,
-        'plot_bloch_sphere': plot_interactive_bloch_sphere,
+        "plot_histogram": plot_interactive_histogram,
+        "plot_density_matrix": plot_interactive_density_matrix,
+        "plot_bloch_sphere": plot_interactive_bloch_sphere,
     }
 
-    backend_registry.register_backend('plotly', plotly_functions)
+    backend_registry.register_backend("plotly", plotly_functions)
 
 
 # Auto-register when imported
