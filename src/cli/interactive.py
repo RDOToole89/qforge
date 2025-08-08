@@ -300,7 +300,7 @@ class InteractiveCLI:
             # Require num_qubits and gates JSON
             custom_params["num_qubits"] = default_num_qubits
             self.display_manager.display_info_message(
-                "Example: [{\"name\":\"h\",\"qargs\":[0]},{\"name\":\"cx\",\"qargs\":[0,1}]"
+                'Example: [{"name":"h","qargs":[0]},{"name":"cx","qargs":[0,1}]'
             )
             gates_json = self.input_handler.get_input(
                 "custom_state_gates_json_prompt", "[{'name':'h','qargs':[0]}]"
@@ -472,11 +472,18 @@ class InteractiveCLI:
         if choice == "show_all":
             # Helper panel with available categories, difficulties, noise types
             from src.config.constants import VALID_NOISE_TYPES
+
             help_table = Table(title="Options Overview")
             help_table.add_column("Category", style="cyan")
             help_table.add_column("Values", style="green")
-            help_table.add_row("Categories", ", ".join(sorted({unified[k].get("category","-") for k in unified})))
-            help_table.add_row("Difficulties", ", ".join(sorted({unified[k].get("difficulty","-") for k in unified})))
+            help_table.add_row(
+                "Categories",
+                ", ".join(sorted({unified[k].get("category", "-") for k in unified})),
+            )
+            help_table.add_row(
+                "Difficulties",
+                ", ".join(sorted({unified[k].get("difficulty", "-") for k in unified})),
+            )
             help_table.add_row("Noise Types", ", ".join(VALID_NOISE_TYPES))
             self.console.print(help_table)
             # Re-enter browser
@@ -494,6 +501,7 @@ class InteractiveCLI:
         # Offer quick help
         if self.input_handler.prompt_yes_no("preset_show_options_help", "n"):
             from src.config.constants import VALID_NOISE_TYPES
+
             tips = Table(title="Preset Details: Options")
             tips.add_column("Topic", style="cyan")
             tips.add_column("Info", style="green")
@@ -1011,6 +1019,7 @@ class InteractiveCLI:
                     title="Settings & Help",
                     options=[
                         ("settings", "Settings", "s"),
+                        ("noise_help", "Noise Types (help)", "n"),
                         ("help", "Help & Glossary", "h"),
                         ("back", "Back", "b"),
                     ],
@@ -1018,6 +1027,22 @@ class InteractiveCLI:
                 )
                 if sub == "settings":
                     self.show_settings_stub()
+                elif sub == "noise_help":
+                    from src.config.constants import VALID_NOISE_TYPES
+                    t = Table(title="Available Noise Types")
+                    t.add_column("Type", style="cyan")
+                    t.add_column("Summary", style="green")
+                    summaries = {
+                        "DEPOLARIZING": "Uniform Pauli errors; mixes state with prob p",
+                        "PHASE_FLIP": "Z errors with prob p (dephasing)",
+                        "BIT_FLIP": "X errors with prob p (bit flips)",
+                        "THERMAL_RELAXATION": "T1/T2 hardware-like relaxation",
+                        "AMPLITUDE_DAMPING": "Energy loss (|1>→|0>)",
+                        "PHASE_DAMPING": "Pure dephasing without energy loss",
+                    }
+                    for nt in VALID_NOISE_TYPES:
+                        t.add_row(nt, summaries.get(nt, "-"))
+                    self.console.print(t)
                 elif sub == "help":
                     self._show_help_menu()
                 continue

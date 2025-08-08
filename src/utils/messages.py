@@ -5,29 +5,10 @@ Centralized lookup table for console messages used in the Quantum Experiment Int
 MESSAGES = {
     # Welcome and main menu messages
     "welcome": "[bold green]🚀 Welcome to the Quantum Experiment Interactive Runner![/bold green]",
-    "choose_option": "🔹 Choose an option:",
-    "skip_option": "🔄 Press 's' to skip and use default settings",
-    "new_option": "🆕 Press 'n' to enter parameters manually",
-    "quit_option": "❌ Press 'q' to quit",
-    "your_choice": "➡️ Your choice: [{default}] ",
-    "invalid_choice": "[bold red]⚠️ Invalid choice! Please enter s, n, or q.[/bold red]",
+    # Kept minimal top-level helpers
+    "invalid_choice": "[bold red]⚠️ Invalid choice.[/bold red]",
     # (legacy prompts removed)
-    # Time-stepped noise prompts
-    "noise_stepped_prompt": "Enable time-stepped noise simulation? (y/n) [{default}]: ",
-    "noise_steps_prompt": "Number of steps for the noise range? [{default}]: ",
-    "custom_error_rate_stepped_prompt": "Use a stepped error_rate? (y/n) [{default}]: ",
-    "noise_start_prompt": "Enter start error rate [{default}]: ",
-    "noise_end_prompt": "Enter end error rate [{default}]: ",
-    "custom_zi_probs_stepped_prompt": "Use stepped Z/I probabilities? (y/n) [{default}]: ",
-    "z_prob_start_prompt": "Z probability start [{default}]: ",
-    "z_prob_end_prompt": "Z probability end [{default}]: ",
-    "i_prob_start_prompt": "I probability start [{default}]: ",
-    "i_prob_end_prompt": "I probability end [{default}]: ",
-    "custom_t1t2_stepped_prompt": "Use stepped T1/T2? (y/n) [{default}]: ",
-    "t1_start_prompt": "T1 start (µs) [{default}]: ",
-    "t1_end_prompt": "T1 end (µs) [{default}]: ",
-    "t2_start_prompt": "T2 start (µs) [{default}]: ",
-    "t2_end_prompt": "T2 end (µs) [{default}]: ",
+    # (unused stepped prompts removed)
     # Hypergraph-specific prompts
     "hypergraph_max_order_prompt": "Maximum correlation order (2-3) [{default}]: ",
     "hypergraph_threshold_prompt": "Correlation threshold for hypergraph [{default}]: ",
@@ -75,8 +56,7 @@ MESSAGES = {
     "switched_to_plot": "[bold blue]Switching visualization type to 'plot' (histogram/density matrix).[/bold blue]",
     "switched_to_plot_density": "[bold blue]Switching visualization type to 'plot' (density matrix).[/bold blue]",
     "noise_enabled": "[bold green]Noise has been enabled for this configuration.[/bold green]",
-    "quick_experiment_choice": "Choose experiment option [{default}]: ",
-    "config_cancelled": "[bold yellow]Configuration cancelled. Returning to prompt...[/bold yellow]",
+    # (unused legacy prompts removed)
     # Experiment execution messages
     "running_with_defaults": "\n[bold blue]⚡ Running with default configuration...[/bold blue]\n",
     "experiment_completed": "[bold green]✅ Experiment completed successfully![/bold green]\n📁 Results saved in `{filename}`",
