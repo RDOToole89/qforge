@@ -1030,7 +1030,12 @@ class InteractiveCLI:
                     ("q", "Quit", "q"),
                 ],
                 default_value="1",
+                show_value_column=False,
             )
+            try:
+                self.display_manager.display_footer_hints(["numbers=select", "enter=default", "?=help", "q=quit"])
+            except Exception:
+                pass
 
             if choice == "1":
                 # Quick Start: curated subset of unified presets (beginner + research anchor)
