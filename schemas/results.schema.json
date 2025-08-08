@@ -1,62 +1,135 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://qexp.local/schemas/results.schema.json",
-  "title": "Quantum Experiment Results",
-  "type": "object",
-  "required": [
-    "schema_version",
-    "experiment_metadata",
-    "experiment_parameters",
-    "measurement_results"
-  ],
-  "properties": {
-    "schema_version": { "type": "string" },
-    "experiment_metadata": {
-      "type": "object",
-      "required": [
-        "experiment_id",
-        "timestamp",
-        "framework_version",
-        "research_type"
-      ],
+  "$defs": {
+    "ArtifactRef": {
       "properties": {
-        "experiment_id": { "type": "string" },
-        "timestamp": { "type": "string" },
-        "framework_version": { "type": "string" },
-        "research_type": { "type": "string" }
-      }
-    },
-    "experiment_parameters": {
-      "type": "object",
-      "required": ["num_qubits", "state_type", "shots", "sim_mode"],
-      "properties": {
-        "num_qubits": { "type": "integer", "minimum": 1 },
-        "state_type": { "type": "string" },
-        "noise_type": { "type": "string" },
-        "noise_enabled": { "type": "boolean" },
-        "error_rate": { "type": ["number", "null"] },
-        "shots": { "type": "integer", "minimum": 1 },
-        "sim_mode": { "type": "string", "enum": ["qasm", "density"] }
-      }
-    },
-    "measurement_results": {
-      "type": "object",
-      "required": ["raw_counts", "total_shots"],
-      "properties": {
-        "raw_counts": {
-          "type": "object",
-          "additionalProperties": { "type": "integer", "minimum": 0 }
+        "kind": {
+          "default": "other",
+          "enum": [
+            "histogram",
+            "density_matrix",
+            "hypergraph",
+            "report",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
         },
-        "total_shots": { "type": "integer", "minimum": 0 },
-        "unique_outcomes": { "type": "integer", "minimum": 0 },
-        "outcome_probabilities": {
-          "type": "object",
-          "additionalProperties": { "type": "number", "minimum": 0 }
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "metadata": {
+          "title": "Metadata",
+          "type": "object"
         }
-      }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
     },
-    "research_metrics": { "type": "object" },
-    "provenance": { "type": "object" }
+    "Provenance": {
+      "properties": {
+        "schema_version": {
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "software_versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Software Versions",
+          "type": "object"
+        },
+        "host_info": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Host Info",
+          "type": "object"
+        },
+        "git_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Git Sha"
+        },
+        "rng_seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rng Seed"
+        },
+        "simulator_info": {
+          "title": "Simulator Info",
+          "type": "object"
+        },
+        "transpilation_summary": {
+          "title": "Transpilation Summary",
+          "type": "object"
+        }
+      },
+      "required": [
+        "timestamp"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "properties": {
+    "analysis": {
+      "title": "Analysis",
+      "type": "object"
+    },
+    "metrics": {
+      "title": "Metrics",
+      "type": "object"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/ArtifactRef"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "config_hash": {
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "string"
+    }
+  },
+  "required": [
+    "analysis",
+    "metrics",
+    "provenance",
+    "config_hash",
+    "timestamp"
+  ],
+  "title": "ExperimentResult",
+  "type": "object"
 }

@@ -1,0 +1,102 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "num_qubits": {
+      "title": "Num Qubits",
+      "type": "integer"
+    },
+    "state_type": {
+      "enum": [
+        "GHZ",
+        "W",
+        "CLUSTER",
+        "BELL",
+        "SUPERPOSITION",
+        "CUSTOM"
+      ],
+      "title": "State Type",
+      "type": "string"
+    },
+    "sim_mode": {
+      "default": "qasm",
+      "enum": [
+        "qasm",
+        "density"
+      ],
+      "title": "Sim Mode",
+      "type": "string"
+    },
+    "shots": {
+      "default": 1024,
+      "title": "Shots",
+      "type": "integer"
+    },
+    "noise_enabled": {
+      "default": false,
+      "title": "Noise Enabled",
+      "type": "boolean"
+    },
+    "noise_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "depolarizing",
+            "amplitude_damping",
+            "phase_damping",
+            "bit_flip",
+            "phase_flip",
+            "thermal_relaxation"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Noise Type"
+    },
+    "error_rate": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Rate"
+    },
+    "rng_seed": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rng Seed"
+    },
+    "custom_params": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Custom Params"
+    }
+  },
+  "required": [
+    "num_qubits",
+    "state_type"
+  ],
+  "title": "ExperimentConfig",
+  "type": "object"
+}

@@ -1,20 +1,162 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://qexp.local/schemas/manifest.schema.json",
-  "title": "Parameter Sweep Manifest",
-  "type": "object",
-  "required": ["base_preset", "parameter_ranges", "runs_per_config"],
-  "properties": {
-    "base_preset": { "type": "string" },
-    "parameter_ranges": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "array"
-      }
-    },
-    "runs_per_config": { "type": "integer", "minimum": 1 },
-    "override": { "type": "object" },
-    "rng_seed": { "type": ["integer", "null"] }
+  "$defs": {
+    "ExperimentConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "num_qubits": {
+          "title": "Num Qubits",
+          "type": "integer"
+        },
+        "state_type": {
+          "enum": [
+            "GHZ",
+            "W",
+            "CLUSTER",
+            "BELL",
+            "SUPERPOSITION",
+            "CUSTOM"
+          ],
+          "title": "State Type",
+          "type": "string"
+        },
+        "sim_mode": {
+          "default": "qasm",
+          "enum": [
+            "qasm",
+            "density"
+          ],
+          "title": "Sim Mode",
+          "type": "string"
+        },
+        "shots": {
+          "default": 1024,
+          "title": "Shots",
+          "type": "integer"
+        },
+        "noise_enabled": {
+          "default": false,
+          "title": "Noise Enabled",
+          "type": "boolean"
+        },
+        "noise_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "depolarizing",
+                "amplitude_damping",
+                "phase_damping",
+                "bit_flip",
+                "phase_flip",
+                "thermal_relaxation"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noise Type"
+        },
+        "error_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Rate"
+        },
+        "rng_seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rng Seed"
+        },
+        "custom_params": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Custom Params"
+        }
+      },
+      "required": [
+        "num_qubits",
+        "state_type"
+      ],
+      "title": "ExperimentConfig",
+      "type": "object"
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": false,
+  "properties": {
+    "base_preset": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Base Preset"
+    },
+    "base_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExperimentConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "parameter_ranges": {
+      "additionalProperties": {
+        "items": {},
+        "type": "array"
+      },
+      "title": "Parameter Ranges",
+      "type": "object"
+    },
+    "runs_per_config": {
+      "default": 1,
+      "title": "Runs Per Config",
+      "type": "integer"
+    },
+    "rng_seed": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rng Seed"
+    }
+  },
+  "required": [
+    "parameter_ranges"
+  ],
+  "title": "SweepManifest",
+  "type": "object"
 }
