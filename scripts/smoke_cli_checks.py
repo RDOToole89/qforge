@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from rich.console import Console
 
-from src.cli.interactive import InteractiveCLI
+from src.cli.interactive_app import InteractiveCLI
 from src.cli.help import HelpManager
 
 

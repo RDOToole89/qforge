@@ -51,7 +51,7 @@ def import_core_modules():
 def run_interactive_mode():
     """Run the framework in interactive CLI mode."""
     try:
-        from src.cli.interactive import InteractiveCLI
+from src.cli.interactive_app import InteractiveCLI
         from src.cli.display import DisplayManager
 
         logger.info("🎮 Starting interactive CLI mode")
@@ -75,7 +75,12 @@ def run_experiment_by_name(exp_name: str):
         )
 
         # Feature-flagged engine path
-        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
+        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
         if use_engine:
             try:
                 em = get_experiment_manager()
@@ -109,11 +114,15 @@ def run_experiment_by_name(exp_name: str):
                 from src.engine.api import run as engine_run
                 from src.engine.context import AppContext
 
-                ctx = AppContext(base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results"))
+                ctx = AppContext(
+                    base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results")
+                )
                 res = engine_run(cfg, ctx)
                 # Log saved artifact path
                 if res.artifacts:
-                    logger.info(f"✅ Engine run completed. Saved analysis: {res.artifacts[0].path}")
+                    logger.info(
+                        f"✅ Engine run completed. Saved analysis: {res.artifacts[0].path}"
+                    )
                 else:
                     logger.info("✅ Engine run completed (no artifacts recorded)")
                 return
@@ -300,7 +309,12 @@ def run_sweep_from_manifest(manifest_path: str) -> None:
     rng_seed = data.get("rng_seed")
 
     # Feature-flagged engine path
-    use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
+    use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
     if use_engine:
         try:
             from src.experiments import get_experiment_manager
@@ -347,7 +361,9 @@ def run_sweep_from_manifest(manifest_path: str) -> None:
                 else:
                     norm_ranges[k] = vals
 
-            ctx = AppContext(base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results"))
+            ctx = AppContext(
+                base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results")
+            )
 
             # Honor runs_per_config by repeating sweeps with optional rng offset
             total_results = []
