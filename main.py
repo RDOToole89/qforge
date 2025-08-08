@@ -74,10 +74,54 @@ def run_experiment_by_name(exp_name: str):
             import_core_modules()
         )
 
-        # Get experiment manager
-        em = get_experiment_manager()
+        # Feature-flagged engine path
+        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
+        if use_engine:
+            try:
+                em = get_experiment_manager()
+                exp = em.get_experiment(exp_name)
+                if not exp:
+                    logger.error(f"❌ Experiment '{exp_name}' not found")
+                    sys.exit(1)
 
-        # Get experiment configuration
+                cfg = dict(exp.get("config", {}))
+                # Normalize config for engine model (extra=forbid)
+                allowed = {
+                    "num_qubits",
+                    "state_type",
+                    "noise_type",
+                    "noise_enabled",
+                    "shots",
+                    "sim_mode",
+                    "error_rate",
+                    "rng_seed",
+                    "custom_params",
+                }
+                cfg = {k: v for k, v in cfg.items() if k in allowed}
+                # Normalize values
+                if isinstance(cfg.get("noise_type"), str):
+                    cfg["noise_type"] = cfg["noise_type"].lower()
+                if isinstance(cfg.get("sim_mode"), str):
+                    cfg["sim_mode"] = cfg["sim_mode"].lower()
+                if isinstance(cfg.get("state_type"), str):
+                    cfg["state_type"] = cfg["state_type"].upper()
+
+                from src.engine.api import run as engine_run
+                from src.engine.context import AppContext
+
+                ctx = AppContext(base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results"))
+                res = engine_run(cfg, ctx)
+                # Log saved artifact path
+                if res.artifacts:
+                    logger.info(f"✅ Engine run completed. Saved analysis: {res.artifacts[0].path}")
+                else:
+                    logger.info("✅ Engine run completed (no artifacts recorded)")
+                return
+            except Exception as e:
+                logger.warning(f"Engine path failed, falling back to legacy: {e}")
+
+        # Legacy path
+        em = get_experiment_manager()
         experiment_config = em.get_experiment(exp_name)
         if not experiment_config:
             logger.error(f"❌ Experiment '{exp_name}' not found")
@@ -85,33 +129,12 @@ def run_experiment_by_name(exp_name: str):
 
         logger.info(f"🧪 Running experiment: {exp_name}")
 
-        # Run experiment using experiment manager
         experiment_result = em.run_experiment(exp_name)
-
         if experiment_result is None:
             logger.error(f"❌ Experiment '{exp_name}' failed to run")
             sys.exit(1)
 
-        # Extract results from tuple (circuit, result)
-        if isinstance(experiment_result, tuple) and len(experiment_result) == 2:
-            circuit, results = experiment_result
-        else:
-            results = experiment_result
-
-        # Convert results to the format expected by visualizers
-        if hasattr(results, "get_counts"):  # Qiskit Counts object
-            results = results.get_counts()
-        elif isinstance(results, dict) and "counts" in results:
-            results = results["counts"]
-
-            # For now, just log success without visualization
         logger.info(f"✅ Experiment '{exp_name}' completed successfully")
-        logger.info(f"📊 Results: {type(results)}")
-        if isinstance(results, dict):
-            logger.info(f"📊 Result keys: {list(results.keys())}")
-        elif hasattr(results, "get_counts"):
-            logger.info(f"📊 Counts: {results.get_counts()}")
-
     except Exception as e:
         logger.error(f"❌ Error running experiment '{exp_name}': {e}")
         sys.exit(1)
@@ -272,10 +295,80 @@ def run_sweep_from_manifest(manifest_path: str) -> None:
         sys.exit(2)
 
     base_preset = data["base_preset"]
-    parameter_ranges = data["parameter_ranges"]
-    runs_per_config = int(data.get("runs_per_config", 3))
-    # Optional override (not yet merged at engine-level; presets can be pre-edited accordingly)
+    parameter_ranges = dict(data["parameter_ranges"])  # shallow copy
+    runs_per_config = int(data.get("runs_per_config", 1))
+    rng_seed = data.get("rng_seed")
 
+    # Feature-flagged engine path
+    use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
+    if use_engine:
+        try:
+            from src.experiments import get_experiment_manager
+            from src.engine.api import sweep as engine_sweep, run as engine_run
+            from src.engine.context import AppContext
+
+            em = get_experiment_manager()
+            exp = em.get_experiment(base_preset)
+            if not exp:
+                logger.error(f"❌ Base preset '{base_preset}' not found")
+                sys.exit(1)
+            base_cfg = dict(exp.get("config", {}))
+            # Sanitize/normalize for engine
+            allowed = {
+                "num_qubits",
+                "state_type",
+                "noise_type",
+                "noise_enabled",
+                "shots",
+                "sim_mode",
+                "error_rate",
+                "rng_seed",
+                "custom_params",
+            }
+            base_cfg = {k: v for k, v in base_cfg.items() if k in allowed}
+            if isinstance(base_cfg.get("noise_type"), str):
+                base_cfg["noise_type"] = base_cfg["noise_type"].lower()
+            if isinstance(base_cfg.get("sim_mode"), str):
+                base_cfg["sim_mode"] = base_cfg["sim_mode"].lower()
+            if isinstance(base_cfg.get("state_type"), str):
+                base_cfg["state_type"] = base_cfg["state_type"].upper()
+            if rng_seed is not None:
+                base_cfg["rng_seed"] = int(rng_seed)
+
+            # Normalize parameter_ranges values
+            norm_ranges = {}
+            for k, vals in parameter_ranges.items():
+                if k == "noise_type":
+                    norm_ranges[k] = [str(v).lower() for v in vals]
+                elif k == "state_type":
+                    norm_ranges[k] = [str(v).upper() for v in vals]
+                elif k == "sim_mode":
+                    norm_ranges[k] = [str(v).lower() for v in vals]
+                else:
+                    norm_ranges[k] = vals
+
+            ctx = AppContext(base_results_dir=getattr(settings, "DEFAULT_RESULTS_DIR", "results"))
+
+            # Honor runs_per_config by repeating sweeps with optional rng offset
+            total_results = []
+            for i in range(max(1, runs_per_config)):
+                cfg_for_iter = dict(base_cfg)
+                if cfg_for_iter.get("rng_seed") is not None:
+                    cfg_for_iter["rng_seed"] = int(cfg_for_iter["rng_seed"]) + i
+                manifest_payload = {
+                    "base_config": cfg_for_iter,
+                    "parameter_ranges": norm_ranges,
+                    "runs_per_config": 1,
+                }
+                iter_results = engine_sweep(manifest_payload, ctx)
+                total_results.extend(iter_results)
+
+            logger.info(f"✅ Engine sweep completed: {len(total_results)} runs")
+            return
+        except Exception as e:
+            logger.warning(f"Engine sweep path failed, falling back to legacy: {e}")
+
+    # Legacy path
     try:
         from src.core.parameter_sweep import ParameterSweepEngine
 
@@ -320,7 +413,13 @@ Examples:
     )
 
 
-def visualize_from_json(json_path: str, viz_type: str = "histogram", *, backend: str | None = None, outdir: str | None = None) -> None:
+def visualize_from_json(
+    json_path: str,
+    viz_type: str = "histogram",
+    *,
+    backend: str | None = None,
+    outdir: str | None = None,
+) -> None:
     """Visualize results from a saved JSON analysis file.
 
     Args:
@@ -351,7 +450,11 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram", *, backend:
             )
 
             svc = VisualizationService(default_backend=(backend or "matplotlib"))
-            req = VisualizationRequest(viz_type=viz_type, backend=(backend or "matplotlib"), output_base_dir=outdir)
+            req = VisualizationRequest(
+                viz_type=viz_type,
+                backend=(backend or "matplotlib"),
+                output_base_dir=outdir,
+            )
             artifact = svc.render_from_json(json_path, req)
             logger.info(f"🖼️  Saved {viz_type} visualization to: {artifact.path}")
             return
