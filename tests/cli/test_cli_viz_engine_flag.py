@@ -40,3 +40,15 @@ def test_cli_viz_uses_engine_when_flag_set(tmp_path, monkeypatch):
     # We can't easily intercept the save path here, so check that at least one file exists in default dir
     base = Path("results/visualizations/histograms")
     assert any(base.glob("*.png")) or any((tmp_path / "viz_out").glob("*.png"))
+
+
+def test_cli_viz_outdir_flag(tmp_path, monkeypatch):
+    json_path = _write_dummy_analysis(tmp_path)
+    outdir = tmp_path / "custom_out"
+    monkeypatch.setenv("QEXP_USE_ENGINE_API", "1")
+
+    # Call visualize with explicit outdir
+    visualize_from_json(json_path, viz_type="histogram", backend=None, outdir=str(outdir))
+
+    # Expect artifact saved under outdir/histograms
+    assert any((outdir / "histograms").glob("*.png"))

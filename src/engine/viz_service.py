@@ -116,6 +116,35 @@ class VisualizationService:
         # Compute a save path using the save manager
         from src.visualization.save_manager import get_organized_save_path
 
+        if request.backend == "plotly":
+            # Try Plotly adapter
+            try:
+                from src.visualization.backends.plotly_backend import plot_interactive_histogram  # type: ignore
+
+                save_path = get_organized_save_path(
+                    viz_type="research",
+                    experiment_config={
+                        "state_type": params.get("state_type"),
+                        "noise_type": params.get("noise_type"),
+                        "num_qubits": params.get("num_qubits"),
+                    },
+                    custom_name="histogram_interactive",
+                    extension="html",
+                )
+                fig = plot_interactive_histogram(
+                    counts=counts,
+                    state_type=params.get("state_type"),
+                    noise_type=params.get("noise_type"),
+                    research_metrics=analysis.get("research_metrics"),
+                )
+                # If fig is available, persist it; otherwise fallback
+                if fig is not None and hasattr(fig, "write_html"):
+                    fig.write_html(save_path)
+                    return ArtifactRef(kind="histogram", path=save_path, metadata={"backend": "plotly"})
+            except Exception as e:
+                logger.warning(f"Plotly histogram fallback to matplotlib due to: {e}")
+
+        # Matplotlib fallback / default
         save_path = get_organized_save_path(
             viz_type="histogram",
             experiment_config={
@@ -128,10 +157,7 @@ class VisualizationService:
             custom_name=None,
             extension="png",
         )
-
-        # Render via matplotlib histogram module for persisted artifact
         from src.visualization.histogram import plot_histogram
-
         plot_histogram(
             counts=counts,
             state_type=params.get("state_type"),
@@ -141,10 +167,7 @@ class VisualizationService:
             research_metrics=analysis.get("research_metrics"),
             save_path=save_path,
         )
-
-        return ArtifactRef(
-            kind="histogram", path=save_path, metadata={"backend": "matplotlib"}
-        )
+        return ArtifactRef(kind="histogram", path=save_path, metadata={"backend": "matplotlib"})
 
     def _render_density_matrix(
         self, analysis: Dict[str, Any], request: VisualizationRequest
@@ -175,6 +198,32 @@ class VisualizationService:
 
         from src.visualization.save_manager import get_organized_save_path
 
+        if request.backend == "plotly":
+            try:
+                from src.visualization.backends.plotly_backend import plot_interactive_density_matrix  # type: ignore
+
+                save_path = get_organized_save_path(
+                    viz_type="research",
+                    experiment_config={
+                        "state_type": params.get("state_type"),
+                        "noise_type": params.get("noise_type"),
+                        "num_qubits": params.get("num_qubits"),
+                    },
+                    custom_name="density_matrix_interactive",
+                    extension="html",
+                )
+                fig = plot_interactive_density_matrix(
+                    density_matrix,
+                    state_type=params.get("state_type"),
+                    research_metrics=analysis.get("research_metrics"),
+                )
+                if fig is not None and hasattr(fig, "write_html"):
+                    fig.write_html(save_path)
+                    return ArtifactRef(kind="density_matrix", path=save_path, metadata={"backend": "plotly"})
+            except Exception as e:
+                logger.warning(f"Plotly density fallback to matplotlib due to: {e}")
+
+        # Matplotlib fallback / default
         save_path = get_organized_save_path(
             viz_type="density_matrix",
             experiment_config={
@@ -185,9 +234,7 @@ class VisualizationService:
             custom_name=None,
             extension="png",
         )
-
         from src.visualization.density_matrix import plot_density_matrix
-
         plot_density_matrix(
             density_matrix=density_matrix,
             state_type=params.get("state_type"),
@@ -195,12 +242,11 @@ class VisualizationService:
             research_metrics=analysis.get("research_metrics"),
             save_path=save_path,
         )
+        return ArtifactRef(kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"})
 
-        return ArtifactRef(
-            kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"}
-        )
-
-    def _render_hypergraph(self, analysis: Dict[str, Any], request: VisualizationRequest) -> ArtifactRef:
+    def _render_hypergraph(
+        self, analysis: Dict[str, Any], request: VisualizationRequest
+    ) -> ArtifactRef:
         self._resolve_paths(request)
 
         params = analysis.get("experiment_parameters", {})
@@ -210,7 +256,9 @@ class VisualizationService:
             or {}
         )
         if not counts:
-            raise ValueError("Analysis does not contain measurement counts required for hypergraph visualization")
+            raise ValueError(
+                "Analysis does not contain measurement counts required for hypergraph visualization"
+            )
 
         from src.visualization.save_manager import get_organized_save_path
 
@@ -239,6 +287,7 @@ class VisualizationService:
 
         # Ensure an artifact exists; if no significant correlations, the module may skip saving
         from pathlib import Path as _Path
+
         if not _Path(save_path).exists():
             try:
                 import matplotlib.pyplot as _plt
@@ -253,4 +302,6 @@ class VisualizationService:
             except Exception as e:
                 logger.warning(f"Failed to save placeholder hypergraph: {e}")
 
-        return ArtifactRef(kind="hypergraph", path=save_path, metadata={"backend": "matplotlib"})
+        return ArtifactRef(
+            kind="hypergraph", path=save_path, metadata={"backend": "matplotlib"}
+        )

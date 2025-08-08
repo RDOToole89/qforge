@@ -320,7 +320,7 @@ Examples:
     )
 
 
-def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
+def visualize_from_json(json_path: str, viz_type: str = "histogram", *, backend: str | None = None, outdir: str | None = None) -> None:
     """Visualize results from a saved JSON analysis file.
 
     Args:
@@ -338,12 +338,21 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
 
     # Engine-first path for visualization when enabled
     try:
-        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
-        if use_engine and viz_type in {"histogram", "density_matrix"}:
-            from src.engine.viz_service import VisualizationService, VisualizationRequest
+        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        if use_engine and viz_type in {"histogram", "density_matrix", "hypergraph"}:
+            from src.engine.viz_service import (
+                VisualizationService,
+                VisualizationRequest,
+            )
 
-            svc = VisualizationService()
-            artifact = svc.render_from_json(json_path, VisualizationRequest(viz_type=viz_type))
+            svc = VisualizationService(default_backend=(backend or "matplotlib"))
+            req = VisualizationRequest(viz_type=viz_type, backend=(backend or "matplotlib"), output_base_dir=outdir)
+            artifact = svc.render_from_json(json_path, req)
             logger.info(f"🖼️  Saved {viz_type} visualization to: {artifact.path}")
             return
     except Exception as e:
@@ -488,7 +497,20 @@ def main():
                 viz_type = args[args.index("--type") + 1]
             except Exception:
                 pass
-        visualize_from_json(args[1], viz_type)
+        # Optional backend and outdir flags
+        backend = None
+        outdir = None
+        if "--backend" in args:
+            try:
+                backend = args[args.index("--backend") + 1]
+            except Exception:
+                pass
+        if "--outdir" in args:
+            try:
+                outdir = args[args.index("--outdir") + 1]
+            except Exception:
+                pass
+        visualize_from_json(args[1], viz_type, backend=backend, outdir=outdir)
     elif args[0] == "viz" and len(args) > 2 and args[1] == "--from":
         # New subcommand: viz --from <file> [--type ...]
         viz_type = "histogram"
@@ -497,7 +519,19 @@ def main():
                 viz_type = args[args.index("--type") + 1]
             except Exception:
                 pass
-        visualize_from_json(args[2], viz_type)
+        backend = None
+        outdir = None
+        if "--backend" in args:
+            try:
+                backend = args[args.index("--backend") + 1]
+            except Exception:
+                pass
+        if "--outdir" in args:
+            try:
+                outdir = args[args.index("--outdir") + 1]
+            except Exception:
+                pass
+        visualize_from_json(args[2], viz_type, backend=backend, outdir=outdir)
     elif args[0] == "report" and len(args) > 2 and args[1] == "--from":
         # New subcommand: report --from <results.json> [--format md]
         fmt = "md"
