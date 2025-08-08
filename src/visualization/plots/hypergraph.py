@@ -66,7 +66,7 @@ def draw_hypergraph(
     nx.draw_networkx_edge_labels(
         G, pos=pos, edge_labels=edge_labels, font_size=9, ax=ax
     )
-    title = f"Correlation graph ({state_type or 'state'})"
+    title = f"Hypergraph — {state_type or 'state'}"
     if noise_type:
         title += f" with {noise_type} noise"
     if used_fallback:

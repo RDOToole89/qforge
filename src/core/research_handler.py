@@ -83,6 +83,8 @@ class ResearchExperimentHandler:
 
         # Extract counts from result (robust handling for different Qiskit result formats)
         try:
+            density_matrix_for_save = None
+            density_diag_probs = None
             if hasattr(result, "get_counts"):
                 counts_raw = result.get_counts()
             elif isinstance(result, dict) and "counts" in result:
@@ -95,15 +97,42 @@ class ResearchExperimentHandler:
                     "Density matrix result detected - generating placeholder counts for metrics analysis"
                 )
                 density_matrix = result["density_matrix"]
+                # Preserve density matrix for visualization saving later
+                try:
+                    import numpy as _np
+
+                    density_matrix_for_save = (
+                        density_matrix.data.tolist()
+                        if hasattr(density_matrix, "data")
+                        else _np.array(density_matrix).tolist()
+                    )
+                    dm_arr = (
+                        density_matrix.data
+                        if hasattr(density_matrix, "data")
+                        else _np.array(density_matrix)
+                    )
+                    # Use diagonal of density matrix as probabilities
+                    density_diag_probs = _np.real(_np.diag(dm_arr)).astype(float)
+                    s = float(density_diag_probs.sum())
+                    if s > 0:
+                        density_diag_probs = density_diag_probs / s
+                except Exception:
+                    density_matrix_for_save = None
                 if hasattr(density_matrix, "data"):
                     import numpy as np
 
                     matrix_size = density_matrix.data.shape[0]
                     num_qubits = int(np.log2(matrix_size))
-                    # Generate uniform distribution as placeholder
-                    placeholder_shots = 1024
+                    # Build counts directly from diagonal probabilities
+                    placeholder_shots = 4096
+                    if density_diag_probs is None:
+                        density_diag_probs = (
+                            np.ones(matrix_size, dtype=float) / matrix_size
+                        )
                     counts_raw = {
-                        format(i, f"0{num_qubits}b"): placeholder_shots // matrix_size
+                        format(i, f"0{num_qubits}b"): int(
+                            round(density_diag_probs[i] * placeholder_shots)
+                        )
                         for i in range(matrix_size)
                     }
                 else:
@@ -113,7 +142,31 @@ class ResearchExperimentHandler:
                 counts_raw = result
             else:
                 # Try direct conversion of Counts object
-                counts_raw = dict(result)
+                try:
+                    counts_raw = dict(result)
+                except Exception:
+                    # density mode may return a DensityMatrix object; capture it
+                    import numpy as _np
+
+                    if hasattr(result, "data"):
+                        density_matrix_for_save = result.data.tolist()
+                        dm_arr = result.data
+                        matrix_size = result.data.shape[0]
+                        num_qubits = int(_np.log2(matrix_size))
+                        # Probabilities from diagonal
+                        density_diag_probs = _np.real(_np.diag(dm_arr)).astype(float)
+                        s = float(density_diag_probs.sum())
+                        if s > 0:
+                            density_diag_probs = density_diag_probs / s
+                        placeholder_shots = 4096
+                        counts_raw = {
+                            format(i, f"0{num_qubits}b"): int(
+                                round(density_diag_probs[i] * placeholder_shots)
+                            )
+                            for i in range(matrix_size)
+                        }
+                    else:
+                        raise
         except Exception as e:
             logger.error(f"Failed to extract counts: {e}")
             return {}
@@ -215,6 +268,52 @@ class ResearchExperimentHandler:
                 "outcome_probabilities": self._compute_probabilities(counts),
             },
         }
+
+        # Attach state reconstruction if available (density mode)
+        if (
+            "sim_mode" in analysis["experiment_parameters"]
+            and analysis["experiment_parameters"]["sim_mode"] == "density"
+        ):
+            if density_matrix_for_save is not None:
+                # Ensure pure real/imag separation is serialized as magnitude for now
+                try:
+                    # Convert any complex entries to magnitude
+                    dm = density_matrix_for_save
+                    dm_mag = (
+                        [[abs(complex(v)) for v in row] for row in dm]
+                        if dm and isinstance(dm[0][0], (complex,))
+                        else dm
+                    )
+                except Exception:
+                    dm_mag = density_matrix_for_save
+                analysis.setdefault("state_reconstruction", {})[
+                    "density_matrix"
+                ] = dm_mag
+                # Also store real/imag components for accuracy
+                try:
+                    import numpy as _np
+
+                    dm_arr2 = _np.array(density_matrix_for_save, dtype=complex)
+                    analysis["state_reconstruction"]["density_matrix_real"] = _np.real(
+                        dm_arr2
+                    ).tolist()
+                    analysis["state_reconstruction"]["density_matrix_imag"] = _np.imag(
+                        dm_arr2
+                    ).tolist()
+                except Exception:
+                    pass
+            # Mark probability source and override probabilities if available
+            if density_diag_probs is not None:
+                labels = [
+                    format(i, f"0{analysis['experiment_parameters']['num_qubits']}b")
+                    for i in range(len(density_diag_probs))
+                ]
+                analysis["measurement_results"]["outcome_probabilities"] = {
+                    lbl: float(density_diag_probs[i]) for i, lbl in enumerate(labels)
+                }
+                analysis["measurement_results"][
+                    "probability_source"
+                ] = "density_diagonal"
 
         # Add comprehensive research metrics
         ideal_counts = None

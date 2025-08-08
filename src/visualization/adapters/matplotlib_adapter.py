@@ -55,7 +55,19 @@ class MatplotlibAdapter:
                 )
             )
         elif kind == VizKind.density_matrix:
-            dm_obj = analysis.get("state_reconstruction", {}).get("density_matrix")
+            sr = analysis.get("state_reconstruction", {})
+            dm_obj = sr.get("density_matrix")
+            if (
+                dm_obj is None
+                and "density_matrix_real" in sr
+                and "density_matrix_imag" in sr
+            ):
+                # Recompose complex matrix if available
+                import numpy as _np
+
+                dm_obj = _np.array(sr["density_matrix_real"]) + 1j * _np.array(
+                    sr["density_matrix_imag"]
+                )
             if dm_obj is None:
                 raise ValueError("No density matrix in analysis")
             from qiskit.quantum_info import DensityMatrix
