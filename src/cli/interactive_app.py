@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.config.params import apply_defaults, validate_parameters
-from src.utils.input_handler import InputHandler
+from src.cli.common import InputHandler
 from .interactive.help import HelpManager
 from src.utils.messages import MESSAGES
 from src.utils import logger as logger_utils
