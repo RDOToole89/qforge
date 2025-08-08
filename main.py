@@ -23,16 +23,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Feature flag: engine-first API
-_USE_ENGINE_API = False
-
-
-def _should_use_engine(args: list[str]) -> bool:
-    if "--use-engine" in args:
-        return True
-    env = os.environ.get("QEXP_USE_ENGINE_API", "0").lower()
-    return env in {"1", "true", "yes", "on"}
-
 
 def setup_environment() -> None:
     """Set up environment for quantum experiments."""
@@ -84,31 +74,10 @@ def run_experiment_by_name(exp_name: str):
             import_core_modules()
         )
 
-        # Engine-first path (feature-flagged)
-        if _USE_ENGINE_API:
-            em = get_experiment_manager()
-            exp = em.get_experiment(exp_name)
-            if not exp:
-                logger.error(f"❌ Experiment '{exp_name}' not found")
-                sys.exit(1)
-            cfg = exp.get("config", {})
-            try:
-                from src.engine.api import run as engine_run
-                from src.engine.context import AppContext
-
-                ctx = AppContext(base_results_dir=getattr(settings, "DEFAULT_SAVE_BASE_DIR", "results"))
-                res = engine_run(cfg, ctx)
-                if res.artifacts:
-                    logger.info(f"✅ Engine run saved to: {res.artifacts[0].path}")
-                else:
-                    logger.info("✅ Engine run completed (no artifacts)")
-                return
-            except Exception as e:
-                logger.error(f"❌ Engine run failed: {e}")
-                sys.exit(1)
-
-        # Legacy path
+        # Get experiment manager
         em = get_experiment_manager()
+
+        # Get experiment configuration
         experiment_config = em.get_experiment(exp_name)
         if not experiment_config:
             logger.error(f"❌ Experiment '{exp_name}' not found")
@@ -256,33 +225,6 @@ def run_from_config(config_path: str) -> None:
         logger.error(f"❌ Failed to load config: {e}")
         sys.exit(1)
 
-    # Engine-first path when enabled and config is a direct ExperimentConfig
-    if (
-        _USE_ENGINE_API
-        and isinstance(data, dict)
-        and "num_qubits" in data
-        and "state_type" in data
-    ):
-        try:
-            from src.engine.api import run as engine_run
-            from src.engine.context import AppContext
-            from src.config.settings import settings as _settings
-
-            ctx = AppContext(
-                base_results_dir=getattr(_settings, "DEFAULT_SAVE_BASE_DIR", "results")
-            )
-            res = engine_run(data, ctx)
-            # Assume first artifact is saved result JSON
-            if res.artifacts:
-                logger.info(f"✅ Engine run saved to: {res.artifacts[0].path}")
-            else:
-                logger.info("✅ Engine run completed (no artifacts)")
-            return
-        except Exception as e:
-            logger.error(f"❌ Engine run failed: {e}")
-            sys.exit(1)
-
-    # Legacy path (presets or manager-driven)
     try:
         get_experiment_manager, _, _, _ = import_core_modules()
         em = get_experiment_manager()
@@ -332,39 +274,8 @@ def run_sweep_from_manifest(manifest_path: str) -> None:
     base_preset = data["base_preset"]
     parameter_ranges = data["parameter_ranges"]
     runs_per_config = int(data.get("runs_per_config", 3))
-    rng_seed = data.get("rng_seed")
     # Optional override (not yet merged at engine-level; presets can be pre-edited accordingly)
 
-    # Engine-first path (feature-flagged)
-    if _USE_ENGINE_API:
-        try:
-            from src.engine.api import sweep as engine_sweep
-            from src.engine.context import AppContext
-            from src.experiments import get_experiment_manager
-            from src.config.settings import settings as _settings
-
-            em = get_experiment_manager()
-            exp = em.get_experiment(base_preset)
-            if not exp:
-                logger.error(f"❌ Base preset '{base_preset}' not found")
-                sys.exit(1)
-            base_config = exp.get("config", {})
-            manifest = {
-                "base_config": base_config,
-                "parameter_ranges": parameter_ranges,
-                "runs_per_config": runs_per_config,
-            }
-            if rng_seed is not None:
-                manifest["rng_seed"] = rng_seed
-            ctx = AppContext(base_results_dir=getattr(_settings, "DEFAULT_SAVE_BASE_DIR", "results"))
-            results = engine_sweep(manifest, ctx)
-            logger.info(f"✅ Engine sweep completed: {len(results)} runs")
-            return
-        except Exception as e:
-            logger.error(f"❌ Engine sweep failed: {e}")
-            sys.exit(1)
-
-    # Legacy path
     try:
         from src.core.parameter_sweep import ParameterSweepEngine
 
@@ -425,10 +336,23 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
         logger.error(f"❌ Failed to load JSON: {e}")
         sys.exit(1)
 
+    # Engine-first path for visualization when enabled
+    try:
+        use_engine = os.environ.get("QEXP_USE_ENGINE_API", "0").lower() in {"1", "true", "yes", "on"}
+        if use_engine and viz_type in {"histogram", "density_matrix"}:
+            from src.engine.viz_service import VisualizationService, VisualizationRequest
+
+            svc = VisualizationService()
+            artifact = svc.render_from_json(json_path, VisualizationRequest(viz_type=viz_type))
+            logger.info(f"🖼️  Saved {viz_type} visualization to: {artifact.path}")
+            return
+    except Exception as e:
+        logger.warning(f"Engine visualization path failed, falling back to legacy: {e}")
+
     params = analysis.get("experiment_parameters", {})
     counts = analysis.get("measurement_results", {}).get("raw_counts", {})
 
-    # Prepare visualization
+    # Prepare visualization (legacy)
     try:
         if viz_type == "histogram":
             from src.visualization import get_histogram_visualizer
@@ -537,13 +461,6 @@ def main():
                     args.remove(flag)
             except ValueError:
                 pass
-
-    # Feature flag for engine API
-    global _USE_ENGINE_API
-    _USE_ENGINE_API = _should_use_engine(args)
-    if "--use-engine" in args:
-        # Remove the flag from positional args
-        args = [a for a in args if a != "--use-engine"]
 
     if not args:
         # No arguments - run interactive mode
