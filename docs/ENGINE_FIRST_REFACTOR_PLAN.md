@@ -879,9 +879,10 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
   - Tests for parity on headless paths.
 - Phase 7: Visualization adapters + `VisualizationService`
   - DONE (initial): Added `src/engine/viz_service.py` with `VisualizationService` and `VisualizationRequest`.
-  - Adapters wrap existing matplotlib histogram/density functions and return `ArtifactRef`s.
-  - Test added: `tests/engine/test_viz_service.py` validates histogram rendering from analysis JSON and saved artifact presence.
-  - Next: expand adapters to hypergraph/plotly and wire CLI `viz --from` to use service when engine flag is on.
+  - Adapters wrap existing matplotlib histogram/density/hypergraph functions and return `ArtifactRef`s.
+  - Tests added: `tests/engine/test_viz_service.py` (histogram + hypergraph) and `tests/cli/test_cli_viz_engine_flag.py` for CLI wiring under engine flag.
+  - CLI: `viz --from` routed through service when `QEXP_USE_ENGINE_API=1`.
+  - Next: add Plotly adapter support and surface backend/output-dir flags on CLI.
 - Phase 8: Interactive simplification
   - Curated minimal presets; “Import config from file” for custom; shallow menus.
 - Phase 9: Profiles → `AppContext`

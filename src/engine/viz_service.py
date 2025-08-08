@@ -49,12 +49,16 @@ class VisualizationService:
         Returns:
             ArtifactRef pointing to the saved visualization artifact.
         """
-        request = request or VisualizationRequest(viz_type="histogram", backend=self.default_backend)
+        request = request or VisualizationRequest(
+            viz_type="histogram", backend=self.default_backend
+        )
 
         try:
             analysis = json.loads(Path(analysis_json_path).read_text(encoding="utf-8"))
         except Exception as e:
-            raise ValueError(f"Failed to read analysis JSON '{analysis_json_path}': {e}") from e
+            raise ValueError(
+                f"Failed to read analysis JSON '{analysis_json_path}': {e}"
+            ) from e
 
         return self.render_from_analysis(analysis, request=request)
 
@@ -65,13 +69,17 @@ class VisualizationService:
 
         Chooses the appropriate adapter based on request.viz_type.
         """
-        request = request or VisualizationRequest(viz_type="histogram", backend=self.default_backend)
+        request = request or VisualizationRequest(
+            viz_type="histogram", backend=self.default_backend
+        )
 
         viz_type = request.viz_type
         if viz_type == "histogram":
             return self._render_histogram(analysis, request)
         elif viz_type == "density_matrix":
             return self._render_density_matrix(analysis, request)
+        elif viz_type == "hypergraph":
+            return self._render_hypergraph(analysis, request)
         else:
             raise ValueError(f"Unsupported visualization type: {viz_type}")
 
@@ -85,9 +93,13 @@ class VisualizationService:
 
                 set_save_manager_base_dir(request.output_base_dir)
             except Exception as e:
-                logger.warning(f"Could not set save base dir to '{request.output_base_dir}': {e}")
+                logger.warning(
+                    f"Could not set save base dir to '{request.output_base_dir}': {e}"
+                )
 
-    def _render_histogram(self, analysis: Dict[str, Any], request: VisualizationRequest) -> ArtifactRef:
+    def _render_histogram(
+        self, analysis: Dict[str, Any], request: VisualizationRequest
+    ) -> ArtifactRef:
         self._resolve_paths(request)
 
         params = analysis.get("experiment_parameters", {})
@@ -97,7 +109,9 @@ class VisualizationService:
             or {}
         )
         if not counts:
-            raise ValueError("Analysis does not contain measurement counts for histogram visualization")
+            raise ValueError(
+                "Analysis does not contain measurement counts for histogram visualization"
+            )
 
         # Compute a save path using the save manager
         from src.visualization.save_manager import get_organized_save_path
@@ -128,7 +142,9 @@ class VisualizationService:
             save_path=save_path,
         )
 
-        return ArtifactRef(kind="histogram", path=save_path, metadata={"backend": "matplotlib"})
+        return ArtifactRef(
+            kind="histogram", path=save_path, metadata={"backend": "matplotlib"}
+        )
 
     def _render_density_matrix(
         self, analysis: Dict[str, Any], request: VisualizationRequest
@@ -138,7 +154,9 @@ class VisualizationService:
         # Expect a density matrix presence under a conventional key if available
         dm_obj = analysis.get("state_reconstruction", {}).get("density_matrix")
         if dm_obj is None:
-            raise ValueError("Analysis does not contain a density matrix for density_matrix visualization")
+            raise ValueError(
+                "Analysis does not contain a density matrix for density_matrix visualization"
+            )
 
         # Construct a DensityMatrix object if necessary
         density_matrix = dm_obj
@@ -149,7 +167,9 @@ class VisualizationService:
             if not isinstance(dm_obj, DensityMatrix):
                 density_matrix = DensityMatrix(np.array(dm_obj))
         except Exception as e:
-            raise ValueError(f"Failed to construct DensityMatrix from analysis: {e}") from e
+            raise ValueError(
+                f"Failed to construct DensityMatrix from analysis: {e}"
+            ) from e
 
         params = analysis.get("experiment_parameters", {})
 
@@ -176,4 +196,61 @@ class VisualizationService:
             save_path=save_path,
         )
 
-        return ArtifactRef(kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"})
+        return ArtifactRef(
+            kind="density_matrix", path=save_path, metadata={"backend": "matplotlib"}
+        )
+
+    def _render_hypergraph(self, analysis: Dict[str, Any], request: VisualizationRequest) -> ArtifactRef:
+        self._resolve_paths(request)
+
+        params = analysis.get("experiment_parameters", {})
+        counts = (
+            analysis.get("measurement_results", {}).get("raw_counts")
+            or analysis.get("measurement_results", {}).get("counts")
+            or {}
+        )
+        if not counts:
+            raise ValueError("Analysis does not contain measurement counts required for hypergraph visualization")
+
+        from src.visualization.save_manager import get_organized_save_path
+
+        save_path = get_organized_save_path(
+            viz_type="hypergraph",
+            experiment_config={
+                "state_type": params.get("state_type"),
+                "noise_type": params.get("noise_type"),
+                "num_qubits": params.get("num_qubits"),
+            },
+            custom_name=None,
+            extension="png",
+        )
+
+        from src.visualization.hypergraph import plot_hypergraph
+
+        # Minimal config; users can later pass more via request metadata if needed
+        plot_hypergraph(
+            correlation_data=counts,
+            state_type=params.get("state_type"),
+            noise_type=params.get("noise_type"),
+            save_path=save_path,
+            config={},
+            show_plot_nonblocking=None,
+        )
+
+        # Ensure an artifact exists; if no significant correlations, the module may skip saving
+        from pathlib import Path as _Path
+        if not _Path(save_path).exists():
+            try:
+                import matplotlib.pyplot as _plt
+
+                _plt.figure(figsize=(6, 4))
+                _plt.title("No significant correlations found")
+                _plt.text(0.5, 0.5, "No edges to plot", ha="center", va="center")
+                _plt.axis("off")
+                _plt.tight_layout()
+                _plt.savefig(save_path, dpi=200, bbox_inches="tight")
+                _plt.close()
+            except Exception as e:
+                logger.warning(f"Failed to save placeholder hypergraph: {e}")
+
+        return ArtifactRef(kind="hypergraph", path=save_path, metadata={"backend": "matplotlib"})

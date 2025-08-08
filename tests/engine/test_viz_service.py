@@ -15,9 +15,7 @@ def _dummy_analysis(tmp_path: Path) -> Path:
             "noise_enabled": True,
             "error_rate": 0.05,
         },
-        "measurement_results": {
-            "raw_counts": {"000": 500, "111": 500}
-        },
+        "measurement_results": {"raw_counts": {"000": 500, "111": 500}},
         "research_metrics": {
             "information_theory": {"shannon_entropy": 1.0, "normalized_entropy": 0.5}
         },
@@ -31,10 +29,24 @@ def test_viz_service_histogram_saves_artifact(tmp_path):
     json_path = _dummy_analysis(tmp_path)
 
     svc = VisualizationService()
-    req = VisualizationRequest(viz_type="histogram", output_base_dir=str(tmp_path / "viz_out"))
+    req = VisualizationRequest(
+        viz_type="histogram", output_base_dir=str(tmp_path / "viz_out")
+    )
     artifact = svc.render_from_json(str(json_path), request=req)
 
     assert artifact.kind == "histogram"
     assert artifact.path.endswith(".png")
     out = Path(artifact.path)
     assert out.exists(), f"Expected saved artifact at {artifact.path}"
+
+
+def test_viz_service_hypergraph_saves_artifact(tmp_path):
+    json_path = _dummy_analysis(tmp_path)
+
+    svc = VisualizationService()
+    req = VisualizationRequest(viz_type="hypergraph", output_base_dir=str(tmp_path / "viz_out"))
+    artifact = svc.render_from_json(str(json_path), request=req)
+
+    assert artifact.kind == "hypergraph"
+    assert artifact.path.endswith(".png")
+    assert Path(artifact.path).exists()
