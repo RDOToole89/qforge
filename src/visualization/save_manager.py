@@ -31,22 +31,11 @@ class VisualizationSaveManager:
             base_dir: Base directory for all visualizations
         """
         self.base_dir = Path(base_dir)
-        self._ensure_directories()
+        # Do not eagerly create all subdirectories. Create lazily on demand
 
-    def _ensure_directories(self):
-        """Create necessary directories if they don't exist."""
-        subdirs = [
-            "histograms",
-            "density_matrices",
-            "hypergraphs",
-            "animations",
-            "research_outputs",
-            "bloch_spheres",
-            "correlations",
-        ]
-
-        for subdir in subdirs:
-            (self.base_dir / subdir).mkdir(parents=True, exist_ok=True)
+    def _ensure_directory(self, subdir: str) -> None:
+        """Ensure a specific subdirectory exists under the base dir."""
+        (self.base_dir / subdir).mkdir(parents=True, exist_ok=True)
 
     def get_save_path(
         self,
@@ -81,6 +70,7 @@ class VisualizationSaveManager:
         # Get the appropriate subdirectory
         subdir = type_mapping.get(viz_type, "research_outputs")
         save_dir = self.base_dir / subdir
+        self._ensure_directory(subdir)
 
         # Generate filename
         if custom_name:
@@ -110,7 +100,7 @@ class VisualizationSaveManager:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if not config:
-            return f"{viz_type}_{timestamp}.{extension}"
+            return f"{timestamp}_{viz_type}.{extension}"
 
         # Extract key parameters for filename
         state_type = config.get("state_type", "unknown")
@@ -120,6 +110,7 @@ class VisualizationSaveManager:
 
         # Build descriptive filename
         parts = [
+            timestamp,
             viz_type,
             f"{state_type}_{num_qubits}q",
         ]
@@ -132,8 +123,6 @@ class VisualizationSaveManager:
                 parts.append(noise_type)
         else:
             parts.append("ideal")
-
-        parts.append(timestamp)
 
         filename = "_".join(str(part).lower().replace(" ", "_") for part in parts)
         return f"{filename}.{extension}"

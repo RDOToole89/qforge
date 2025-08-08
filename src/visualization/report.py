@@ -13,16 +13,17 @@ from src.visualization.reporting import (
 def save_report_from_json(json_path: str, fmt: str = "md") -> str:
     analysis = json.loads(Path(json_path).read_text(encoding="utf-8"))
     ctx = build_report_context(analysis)
+    reports_dir = Path("results/reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    stem = Path(json_path).stem
     if fmt == "md":
         content = render_markdown(ctx)
-        out = Path(json_path).with_suffix("")
-        out = out.as_posix() + "_report.md"
-        Path(out).write_text(content, encoding="utf-8")
-        return out
+        out = reports_dir / f"{stem}.md"
+        out.write_text(content, encoding="utf-8")
+        return str(out)
     if fmt == "html":
         content = render_html(ctx)
-        out = Path(json_path).with_suffix("")
-        out = out.as_posix() + "_report.html"
-        Path(out).write_text(content, encoding="utf-8")
-        return out
+        out = reports_dir / f"{stem}.html"
+        out.write_text(content, encoding="utf-8")
+        return str(out)
     raise ValueError(f"Unsupported report format: {fmt}")

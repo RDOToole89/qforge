@@ -12,6 +12,7 @@ from src.cli.headless.run import (
 )
 from src.cli.headless.sweep import run_from_manifest as headless_run_sweep
 from src.cli.headless.viz import render_from_json as headless_viz
+from src.visualization.pipeline.run import render_from_json as pipeline_viz
 
 app = typer.Typer(help="Quantum Experiment Framework CLI (Typer entrypoint)")
 
@@ -74,6 +75,24 @@ def viz(
         backend=backend,
         outdir=str(outdir) if outdir else None,
     )
+
+
+@app.command("viz-pipe")
+def viz_pipe(
+    from_path: Path = typer.Option(..., "--from", help="Path to results JSON"),
+    type: str = typer.Option("histogram", "--type", help="Visualization type"),
+    backend: Optional[str] = typer.Option(
+        "matplotlib", "--backend", help="Backend name"
+    ),
+    outdir: Optional[Path] = typer.Option(None, "--outdir", help="Output directory"),
+):
+    artifact = pipeline_viz(
+        str(from_path),
+        viz_type=type,
+        backend=backend or "matplotlib",
+        output_base_dir=str(outdir) if outdir else None,
+    )
+    typer.echo(artifact.path)
 
 
 def main() -> int:

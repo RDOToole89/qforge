@@ -53,32 +53,36 @@ class LocalStorage(Storage):
         return h.hexdigest()
 
     def save_analysis(self, analysis: Dict[str, Any]) -> str:
-        # Determine filename per legacy policy
+        """Persist analysis under a per-run directory and return absolute path.
+
+        New structure:
+        results/<YYYYMMDD>/<HHMMSS>_<slug>/analysis/analysis.json
+        """
+        from datetime import datetime
+
         meta = analysis.get("experiment_metadata", {})
-        timestamp = meta.get("timestamp") or analysis.get("timestamp")
-        exp_id = meta.get("experiment_id", "experiment")
-        research_type = meta.get("research_type", "experiment")
+        ts = meta.get("timestamp") or analysis.get("timestamp")
+        try:
+            # Normalize timestamps like 2025-08-08T16:34:38 to date/time
+            dt = datetime.fromisoformat(str(ts).replace("Z", "")) if ts else datetime.now()
+        except Exception:
+            dt = datetime.now()
+        date_str = dt.strftime("%Y%m%d")
+        time_str = dt.strftime("%H%M%S")
+
+        research_type = str(meta.get("research_type", "experiment")).lower()
+        state = str(analysis.get("experiment_parameters", {}).get("state_type", "state")).lower()
         prov = analysis.get("provenance", {})
-        cfg_hash = prov.get("config_hash", "")
-        hash_segment = f"_{cfg_hash}" if cfg_hash else ""
+        cfg_hash = prov.get("config_hash") or ""
+        slug = f"{state}_{research_type}"
+        if cfg_hash:
+            slug += f"_{cfg_hash[:8]}"
 
-        # Choose subdir
-        if "sweep" in str(research_type) or "batch" in str(research_type):
-            subdir = "parameter_sweeps"
-        elif "convergence" in str(research_type):
-            subdir = "convergence_tests"
-        else:
-            subdir = "structured_decoherence"
+        run_dir = self.base_dir / date_str / f"{time_str}_{slug}"
+        analysis_dir = run_dir / "analysis"
+        analysis_dir.mkdir(parents=True, exist_ok=True)
+        rel_path = analysis_dir.relative_to(self.base_dir) / "analysis.json"
 
-        filename = f"{research_type}_{exp_id[:8]}_{(timestamp or '').replace(':','-').replace('T','_')}{hash_segment}.json"
-        # Fallback name if timestamp missing
-        if not timestamp:
-            from datetime import datetime
-
-            filename = f"{research_type}_{exp_id[:8]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}{hash_segment}.json"
-
-        rel_path = f"{subdir}/{filename}"
-        abs_path = Path(self.save_json(rel_path, analysis))
-        # Compute checksum and optionally attach (not persisted back here)
+        abs_path = Path(self.save_json(str(rel_path), analysis))
         _ = self._checksum(abs_path)
         return str(abs_path)
