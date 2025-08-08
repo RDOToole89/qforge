@@ -13,7 +13,8 @@ def test_w_state_initialize_exact_norm():
     assert np.isclose((probs > 0).sum(), n)
     assert np.allclose(sorted([p for p in probs if p > 0]), [1 / n] * n)
 
+
 def test_w3_gate_based_has_no_initialize():
-    qc = prepare_state('W', 3, custom_params={'method': 'gate'})
+    qc = prepare_state("W", 3, custom_params={"method": "gate"})
     op_names = {inst.operation.name.lower() for inst in qc.data}
-    assert 'initialize' not in op_names
+    assert "initialize" not in op_names

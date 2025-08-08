@@ -102,7 +102,6 @@ MESSAGES = {
     "config_cancelled": "[bold yellow]Configuration cancelled. Returning to prompt...[/bold yellow]",
     # Experiment execution messages
     "running_with_defaults": "\n[bold blue]⚡ Running with default configuration...[/bold blue]\n",
-
     "experiment_completed": "[bold green]✅ Experiment completed successfully![/bold green]\n📁 Results saved in `{filename}`",
     "plot_closed_ctrl_c": "\n[bold yellow]Plot closed with Ctrl+C, returning to prompt...[/bold yellow]",
     "current_params": "\n[bold blue]🔄 Current parameters:[/bold blue] {params}",
@@ -114,7 +113,6 @@ MESSAGES = {
     "running_step": "Running step {step} of {total}: error_rate={error_rate}, z_prob={z_prob}, i_prob={i_prob}, t1={t1}, t2={t2}",
     "params_discarded": "[bold yellow]Parameters discarded. Returning to prompt...[/bold yellow]",
     "goodbye": "\n[bold yellow]👋 Exiting Quantum Experiment Runner. Goodbye![/bold yellow]",
-
     # Interactive parameter collection prompts
     "num_qubits_prompt": "🔢 Number of qubits [{default}]: ",
     "state_type_prompt": "🌀 Quantum state type (GHZ/W/CLUSTER/BELL/RANDOM) [{default}]: ",
@@ -125,4 +123,9 @@ MESSAGES = {
     "sim_mode_prompt": "💻 Simulation mode (qasm/statevector) [{default}]: ",
     "enable_visualization_prompt": "📊 Enable visualization? (y/n): ",
     "visualization_type_prompt": "🎨 Visualization type (histogram/density_matrix/hypergraph) [{default}]: ",
+    # Recent results menu
+    "recent_results_title": "Recent Results",
+    "no_results_found": "[bold yellow]No recent results found.[/bold yellow]",
+    # Presets browser prompts
+    "preset_search_prompt": "🔎 Search presets (Enter to skip) [{default}]: ",
 }

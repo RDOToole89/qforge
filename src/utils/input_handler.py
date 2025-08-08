@@ -98,9 +98,7 @@ class InputHandler:
                     input=user_input, options=[expected_type.__name__]
                 )
             )
-            raise ValueError(
-                f"Invalid numeric input: {user_input}. Expected type: {expected_type.__name__}"
-            )
+            # keep looping until valid input is provided
 
     def prompt_yes_no(self, key: str, default: str = "n") -> bool:
         """
@@ -117,3 +115,94 @@ class InputHandler:
             key, default, ["y", "yes", "t", "true", "n", "no", "f", "false"]
         )
         return self.validator.validate_yes_no(user_input)
+
+    def select_option(
+        self,
+        title: str,
+        options: list,
+        default_value: str,
+        hotkey_map: Optional[dict] = None,
+    ) -> str:
+        """Interactive selection helper with numbers, hotkeys, and defaults.
+
+        Args:
+            title: Heading for the selection menu.
+            options: List of tuples (value, label, hotkey) or (value, label).
+            default_value: The default option value if user presses Enter.
+            hotkey_map: Optional dict mapping hotkey -> value to override per-option hotkeys.
+
+        Returns:
+            The selected option value (string).
+        """
+        from rich.table import Table
+
+        # Normalize options to (value, label, hotkey)
+        normalized = []
+        for item in options:
+            if len(item) == 3:
+                value, label, hotkey = item
+            elif len(item) == 2:
+                value, label = item
+                hotkey = None
+            else:
+                raise ValueError("Each option must be (value,label[,hotkey])")
+            if hotkey_map and value in hotkey_map:
+                hotkey = hotkey_map[value]
+            normalized.append((str(value), str(label), (hotkey or "").lower()))
+
+        # Compute default index
+        values = [v for v, _l, _h in normalized]
+        try:
+            default_index = values.index(str(default_value))
+        except ValueError:
+            default_index = 0
+            default_value = values[0]
+
+        while True:
+            table = Table(title=title, show_header=True, header_style="bold magenta")
+            table.add_column("#", style="cyan", width=4)
+            table.add_column("Option", style="green")
+            table.add_column("Hotkey", style="yellow", width=8)
+            table.add_column("Value", style="blue")
+            for idx, (value, label, hotkey) in enumerate(normalized, start=1):
+                label_display = label
+                if idx - 1 == default_index:
+                    label_display = f"{label} [default]"
+                table.add_row(str(idx), label_display, hotkey or "-", value)
+
+            self.console.print(table)
+            self.console.print(
+                f"Select option number, hotkey, or value [{default_index+1}]: ", end=""
+            )
+            raw = input().strip()
+            if raw == "":
+                return values[default_index]
+
+            choice = raw.lower()
+
+            # Numeric index
+            if choice.isdigit():
+                idx = int(choice)
+                if 1 <= idx <= len(normalized):
+                    return normalized[idx - 1][0]
+
+            # Hotkey
+            # Build hotkey -> value map
+            hotkeys = {h: v for v, _l, h in normalized if h}
+            if hotkey_map:
+                # Merge additional hotkeys
+                for hk, val in hotkey_map.items():
+                    hotkeys[str(hk).lower()] = str(val)
+            if choice in hotkeys:
+                return hotkeys[choice]
+
+            # Direct value match (case-insensitive)
+            for v in values:
+                if v.lower() == choice:
+                    return v
+
+            self.console.print(
+                self.messages["invalid_input"].format(
+                    input=raw, options=[str(i) for i in range(1, len(normalized) + 1)]
+                )
+            )

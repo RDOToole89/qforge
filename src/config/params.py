@@ -171,7 +171,8 @@ def apply_defaults(args: Dict) -> Dict:
         "min_occurrences": 0,
         "show_real": False,
         "show_imag": False,
-        "error_rate": None,
+        # Always provide a numeric default for error_rate to avoid 'None' prompts
+        "error_rate": settings.DEFAULT_ERROR_RATE,
         "z_prob": None,
         "i_prob": None,
         "t1": None,
