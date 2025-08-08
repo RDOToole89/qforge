@@ -409,6 +409,7 @@ class InteractiveCLI:
             title="Filter by Category",
             options=[(c, c.title(), c[0] if c != "all" else "a") for c in categories],
             default_value="all",
+            show_value_column=False,
         )
         if cat_choice != "all":
             keys = [k for k in keys if unified[k].get("category") == cat_choice]
@@ -421,9 +422,19 @@ class InteractiveCLI:
             title="Filter by Difficulty",
             options=[(d, d.title(), d[0] if d != "all" else "a") for d in diffs],
             default_value="all",
+            show_value_column=False,
         )
         if diff_choice != "all":
             keys = [k for k in keys if unified[k].get("difficulty") == diff_choice]
+
+        # Show active filter chips and search hint
+        try:
+            chips = []
+            chips.append(f"Cat: {cat_choice}")
+            chips.append(f"Diff: {diff_choice}")
+            self.display_manager.display_footer_hints([" / = search", *chips])
+        except Exception:
+            pass
 
         # Free-text search
         search_text = self.input_handler.get_input("preset_search_prompt", "", None)
@@ -774,6 +785,7 @@ class InteractiveCLI:
                 ("compare", "Compare Two Results", "c"),
             ],
             default_value="back",
+            show_value_column=False,
         )
         if action == "back":
             return
@@ -783,6 +795,7 @@ class InteractiveCLI:
             title="Select Result",
             options=idx_map,
             default_value="1",
+            show_value_column=False,
         )
         try:
             sel = int(pick)
@@ -809,6 +822,7 @@ class InteractiveCLI:
                 title=MESSAGES.get("recent_compare_title", "Compare Results"),
                 options=idx_map,
                 default_value="2" if len(files) > 1 else "1",
+                show_value_column=False,
             )
             try:
                 sel2 = int(pick2)
@@ -1033,7 +1047,9 @@ class InteractiveCLI:
                 show_value_column=False,
             )
             try:
-                self.display_manager.display_footer_hints(["numbers=select", "enter=default", "?=help", "q=quit"])
+                self.display_manager.display_footer_hints(
+                    ["numbers=select", "enter=default", "?=help", "q=quit"]
+                )
             except Exception:
                 pass
 
