@@ -96,6 +96,9 @@ def validate_manifest_schema(data: Dict[str, Any]) -> bool:
     """
     # Try strict schema first
     if _validate_with_jsonschema(data, "manifest.schema.json"):
+        # Maintain backward-compatible requirement for base_preset
+        if "base_preset" not in data or not isinstance(data.get("base_preset"), str):
+            raise ValueError("Manifest missing 'base_preset' (str)")
         return True
 
     if not isinstance(data, dict):

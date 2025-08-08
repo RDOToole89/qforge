@@ -2,13 +2,16 @@
 
 These are the source of truth for JSON schemas.
 """
+
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 
 class ArtifactRef(BaseModel):
-    kind: Literal["histogram", "density_matrix", "hypergraph", "report", "other"] = "other"
+    kind: Literal["histogram", "density_matrix", "hypergraph", "report", "other"] = (
+        "other"
+    )
     path: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
@@ -33,9 +36,16 @@ class ExperimentConfig(BaseModel):
     shots: int = 1024
 
     noise_enabled: bool = False
-    noise_type: Optional[Literal[
-        "depolarizing", "amplitude_damping", "phase_damping", "bit_flip", "phase_flip", "thermal_relaxation"
-    ]] = None
+    noise_type: Optional[
+        Literal[
+            "depolarizing",
+            "amplitude_damping",
+            "phase_damping",
+            "bit_flip",
+            "phase_flip",
+            "thermal_relaxation",
+        ]
+    ] = None
     error_rate: Optional[float] = None
 
     rng_seed: Optional[int] = None
