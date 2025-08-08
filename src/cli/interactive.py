@@ -128,9 +128,11 @@ class InteractiveCLI:
 
             # Collect custom state parameters if needed
             if args["state_type"] == "CUSTOM":
-                args["custom_params"] = self._collect_custom_state_params(
-                    args["num_qubits"]
-                )  # may include its own num_qubits
+                args["custom_params"] = self._collect_custom_state_params(args["num_qubits"])  # may include its own num_qubits
+                # Optional preview and validation
+                if self.input_handler.prompt_yes_no("custom_preview_prompt", "y"):
+                    preview_nq = args["custom_params"].get("num_qubits", args["num_qubits"])
+                    self._preview_custom_circuit(preview_nq, args["custom_params"])
 
             # Noise configuration
             noise_enabled = self.input_handler.prompt_yes_no("enable_noise_prompt", "y")
@@ -287,6 +289,31 @@ class InteractiveCLI:
             custom_params["num_qubits"] = default_num_qubits
 
         return custom_params
+
+    def _preview_custom_circuit(self, num_qubits: int, custom_params: Dict[str, Any]) -> None:
+        """Validate and preview a CustomState circuit (basic summary)."""
+        from src.core.state_preparation.custom_state import CustomState
+        try:
+            cs = CustomState(num_qubits=num_qubits, custom_params=custom_params)
+            qc = cs.create(add_barrier=False)
+        except Exception as e:
+            self.console.print(
+                MESSAGES.get("custom_invalid_params", "Invalid custom parameters: {reason}").format(
+                    reason=str(e)
+                )
+            )
+            return
+        # Show brief summary
+        table = Table(title="Custom Circuit Preview")
+        table.add_column("Property", style="cyan")
+        table.add_column("Value", style="green")
+        table.add_row("Qubits", str(qc.num_qubits))
+        try:
+            table.add_row("Depth", str(qc.depth()))
+            table.add_row("Gates", str(len(qc.data)))
+        except Exception:
+            pass
+        self.console.print(table)
 
     def run_quick_experiment(self, choice: str) -> Dict[str, Any]:
         """
@@ -620,7 +647,9 @@ class InteractiveCLI:
             try:
                 self._open_visualization_from_result_json(str(chosen))
             except Exception as e:
-                self.display_manager.display_error_message(f"Failed to open visualization: {e}")
+                self.display_manager.display_error_message(
+                    f"Failed to open visualization: {e}"
+                )
         elif action == "rerun":
             self.console.print(f"Re-running from: {chosen}")
             try:
@@ -630,6 +659,7 @@ class InteractiveCLI:
 
     def _open_visualization_from_result_json(self, file_path: str) -> None:
         import json as _json
+
         with open(file_path, "r") as f:
             analysis = _json.load(f)
         self._last_research_analysis = analysis
@@ -656,6 +686,7 @@ class InteractiveCLI:
         import json as _json
         from src.experiments.manager import get_experiment_manager
         from src.core.research_handler import ResearchExperimentHandler
+
         with open(file_path, "r") as f:
             analysis = _json.load(f)
         params = analysis.get("experiment_parameters", {})
@@ -665,7 +696,11 @@ class InteractiveCLI:
             return
         self.display_manager.display_info_message("🚀 Running quantum experiment...")
         em = get_experiment_manager()
-        experiment_params = {k: v for k, v in args.items() if k not in ["name", "description", "category", "difficulty"]}
+        experiment_params = {
+            k: v
+            for k, v in args.items()
+            if k not in ["name", "description", "category", "difficulty"]
+        }
         result = em.run_experiment("ghz_basic", custom_params=experiment_params)
         if not result:
             self.display_manager.display_error_message("❌ Experiment failed")
@@ -692,7 +727,9 @@ class InteractiveCLI:
                 )
         else:
             self.display_manager.display_experiment_results(result)
-            self.display_manager.display_info_message("🔬 Density Matrix Mode: Displaying quantum state analysis")
+            self.display_manager.display_info_message(
+                "🔬 Density Matrix Mode: Displaying quantum state analysis"
+            )
             viz_type = experiment_params.get("visualization_type", "none")
             if viz_type and viz_type != "none":
                 if isinstance(result, tuple) and len(result) >= 2:
@@ -717,6 +754,35 @@ class InteractiveCLI:
         table.add_row("DEFAULT_ERROR_RATE", str(settings.DEFAULT_ERROR_RATE))
         table.add_row("RESULTS_DIR", str(settings.DEFAULT_RESULTS_DIR))
         table.add_row("LOGS_DIR", str(settings.DEFAULT_LOGS_DIR))
+        self.console.print(table)
+
+    def _show_help_menu(self) -> None:
+        # Minimal glossary stub
+        glossary = {
+            "depolarizing": "A noise channel that replaces the state with the maximally mixed state with probability p.",
+            "phase_flip": "A noise channel that flips the phase (Z error) with some probability.",
+            "density matrix": "Matrix representation of a quantum state supporting mixed states.",
+            "counts": "Measurement outcome frequencies from shot-based simulations/experiments.",
+            "fubini-study": "A distance measure on quantum states based on their projective Hilbert space geometry.",
+        }
+        term = self.input_handler.get_input("help_search_prompt", "")
+        table = Table(title=MESSAGES.get("help_title", "Help & Glossary"))
+        table.add_column("Term", style="cyan")
+        table.add_column("Definition", style="green")
+        items = (
+            glossary.items()
+            if not term
+            else [
+                (k, v)
+                for k, v in glossary.items()
+                if term.lower() in k.lower() or term.lower() in v.lower()
+            ]
+        )
+        if not items:
+            self.console.print("[yellow]No entries found.[/yellow]")
+            return
+        for k, v in items:
+            table.add_row(k, v)
         self.console.print(table)
 
     def run_interactive_session(self) -> None:
@@ -767,7 +833,20 @@ class InteractiveCLI:
                 self.show_recent_results()
                 continue
             elif choice == "5":
-                self.show_settings_stub()
+                # Settings or Help menu stub selection
+                sub = self.input_handler.select_option(
+                    title="Settings & Help",
+                    options=[
+                        ("settings", "Settings", "s"),
+                        ("help", "Help & Glossary", "h"),
+                        ("back", "Back", "b"),
+                    ],
+                    default_value="settings",
+                )
+                if sub == "settings":
+                    self.show_settings_stub()
+                elif sub == "help":
+                    self._show_help_menu()
                 continue
             elif choice == "q":
                 self.print_message("goodbye")

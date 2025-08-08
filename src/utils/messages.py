@@ -133,6 +133,12 @@ MESSAGES = {
     # Recent results actions
     "recent_action_title": "Result Actions",
     "recent_action_prompt": "Select action [{default}]: ",
+    # Help & glossary
+    "help_title": "Help & Glossary",
+    "help_search_prompt": "Search term (Enter to list all) [{default}]: ",
+    # Custom preview
+    "custom_preview_prompt": "Preview custom circuit? (y/n) [{default}]: ",
+    "custom_invalid_params": "[bold red]Invalid custom parameters: {reason}[/bold red]",
     # Presets browser prompts
     "preset_search_prompt": "🔎 Search presets (Enter to skip) [{default}]: ",
 }
