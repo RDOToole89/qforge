@@ -232,6 +232,7 @@ class InteractiveCLI:
                 ("bell_phi_plus", "Bell |Φ+> (2 qubits)", "1"),
                 ("w3_gate", "W(3) gate-based", "2"),
                 ("cluster_1d_3", "Cluster 1D (3)", "3"),
+                ("ghz_3", "GHZ (3) via gates", "4"),
             ],
             default_value="none",
         )
@@ -269,7 +270,20 @@ class InteractiveCLI:
                     {"name": "cz", "qargs": [1, 2]},
                 ],
             }
+        if template_choice == "ghz_3":
+            return {
+                "source": "gates",
+                "num_qubits": 3,
+                "gates": [
+                    {"name": "h", "qargs": [0]},
+                    {"name": "cx", "qargs": [0, 1]},
+                    {"name": "cx", "qargs": [1, 2]},
+                ],
+            }
         # Choose source
+        self.display_manager.display_info_message(
+            "Choose how to define your custom circuit: gates JSON, Python builder, or OpenQASM file."
+        )
         source = self.input_handler.get_input(
             "custom_state_source_prompt",
             "gates",
@@ -285,6 +299,9 @@ class InteractiveCLI:
         if source == "gates":
             # Require num_qubits and gates JSON
             custom_params["num_qubits"] = default_num_qubits
+            self.display_manager.display_info_message(
+                "Example: [{\"name\":\"h\",\"qargs\":[0]},{\"name\":\"cx\",\"qargs\":[0,1}]"
+            )
             gates_json = self.input_handler.get_input(
                 "custom_state_gates_json_prompt", "[{'name':'h','qargs':[0]}]"
             )
@@ -296,12 +313,18 @@ class InteractiveCLI:
                 gates = []
             custom_params["gates"] = gates
         elif source == "builder":
+            self.display_manager.display_info_message(
+                "Provide a dotted path to a callable that builds and returns a QuantumCircuit."
+            )
             builder = self.input_handler.get_input(
                 "custom_state_builder_prompt", "mypkg.builders:make_qc"
             )
             custom_params["builder"] = builder
             custom_params["num_qubits"] = default_num_qubits
         else:  # openqasm
+            self.display_manager.display_info_message(
+                "Enter a local path to a .qasm file compatible with Qiskit parser."
+            )
             qasm_path = self.input_handler.get_input(
                 "custom_state_qasm_path_prompt", "path/to/circuit.qasm"
             )
@@ -429,8 +452,15 @@ class InteractiveCLI:
         options = []
         for k in keys:
             meta = unified[k]
-            label = f"{meta['name']} [{meta.get('category','?')}/{meta.get('difficulty','?')}]"
+            cfg = meta.get("config", {})
+            noise = cfg.get("noise_type", "-")
+            sim = cfg.get("sim_mode", "-")
+            label = (
+                f"{meta['name']} | State={cfg.get('state_type','-')} Q={cfg.get('num_qubits','-')} "
+                f"Noise={noise} Shots={cfg.get('shots','-')} Sim={sim}"
+            )
             options.append((k, label, k))
+        options.append(("show_all", "Show all options/help", "?"))
         options.append(("c", "Custom Parameters", "c"))
         options.append(("q", "Back", "q"))
 
@@ -439,6 +469,18 @@ class InteractiveCLI:
             options=options,
             default_value=keys[0],
         )
+        if choice == "show_all":
+            # Helper panel with available categories, difficulties, noise types
+            from src.config.constants import VALID_NOISE_TYPES
+            help_table = Table(title="Options Overview")
+            help_table.add_column("Category", style="cyan")
+            help_table.add_column("Values", style="green")
+            help_table.add_row("Categories", ", ".join(sorted({unified[k].get("category","-") for k in unified})))
+            help_table.add_row("Difficulties", ", ".join(sorted({unified[k].get("difficulty","-") for k in unified})))
+            help_table.add_row("Noise Types", ", ".join(VALID_NOISE_TYPES))
+            self.console.print(help_table)
+            # Re-enter browser
+            return self.browse_presets(include_keys)
         if choice == "q":
             # Go back to main menu by raising to caller
             raise KeyboardInterrupt
@@ -449,6 +491,15 @@ class InteractiveCLI:
 
         # Detail pane
         self.show_preset_details(choice, selected)
+        # Offer quick help
+        if self.input_handler.prompt_yes_no("preset_show_options_help", "n"):
+            from src.config.constants import VALID_NOISE_TYPES
+            tips = Table(title="Preset Details: Options")
+            tips.add_column("Topic", style="cyan")
+            tips.add_column("Info", style="green")
+            tips.add_row("Noise Types", ", ".join(VALID_NOISE_TYPES))
+            tips.add_row("Sim Modes", "qasm, density")
+            self.console.print(tips)
         proceed = self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) == "y"
         if not proceed:
             # Offer clone & edit

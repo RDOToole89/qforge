@@ -30,7 +30,11 @@ def validate_parameters(args: Dict) -> Dict:
 
     # Check for missing required parameters
     required_base = ["num_qubits", "state_type", "shots", "sim_mode"]
-    missing = [key for key in required_base if key not in validated_args or validated_args[key] is None]
+    missing = [
+        key
+        for key in required_base
+        if key not in validated_args or validated_args[key] is None
+    ]
     # Conditionally require noise_type only if noise is enabled
     if validated_args.get("noise_enabled", False):
         if "noise_type" not in validated_args or validated_args["noise_type"] is None:

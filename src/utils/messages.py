@@ -121,9 +121,10 @@ MESSAGES = {
     # Custom state prompts
     "custom_state_source_prompt": "Custom source (gates/builder/openqasm) [{default}]: ",
     "custom_state_validate_prompt": "Validate custom state? (y/n) [{default}]: ",
-    "custom_state_gates_json_prompt": "Enter gates JSON (e.g., [{\"name\":\"h\",\"qargs\":[0]}]) [{default}]: ",
+    "custom_state_gates_json_prompt": 'Enter gates JSON (e.g., [{"name":"h","qargs":[0]}]) [{default}]: ',
     "custom_state_builder_prompt": "Enter builder dotted path (module:callable) [{default}]: ",
     "custom_state_qasm_path_prompt": "Enter OpenQASM file path [{default}]: ",
     # Presets browser prompts
     "preset_search_prompt": "🔎 Search presets (Enter to skip) [{default}]: ",
+    "preset_show_options_help": "Show preset options/help? (y/n) [{default}]: ",
 }
