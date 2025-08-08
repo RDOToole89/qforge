@@ -29,12 +29,12 @@ def validate_parameters(args: Dict) -> Dict:
     validated_args = args.copy()
 
     # Check for missing required parameters
-    required = ["num_qubits", "state_type", "noise_type", "shots", "sim_mode"]
-    missing = [
-        key
-        for key in required
-        if key not in validated_args or validated_args[key] is None
-    ]
+    required_base = ["num_qubits", "state_type", "shots", "sim_mode"]
+    missing = [key for key in required_base if key not in validated_args or validated_args[key] is None]
+    # Conditionally require noise_type only if noise is enabled
+    if validated_args.get("noise_enabled", False):
+        if "noise_type" not in validated_args or validated_args["noise_type"] is None:
+            missing.append("noise_type")
     if missing:
         console.print(
             f"[bold red]Error: Missing required parameters: {missing}[/bold red]"

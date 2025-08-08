@@ -830,6 +830,7 @@ class InteractiveCLI:
     def _compare_vs_ideal(self, file_path: str) -> None:
         import json as _json
         from src.visualization.histogram import get_ideal_quantum_distribution
+
         with open(file_path, "r") as f:
             data = _json.load(f)
         params = data.get("experiment_parameters", {})
@@ -844,6 +845,7 @@ class InteractiveCLI:
         tvd = 0.5 * sum(abs(probs.get(k, 0) - ideal.get(k, 0)) for k in keys)
         try:
             import math
+
             kl = sum(
                 probs[k] * math.log((probs[k] + 1e-12) / (ideal.get(k, 1e-12)))
                 for k in keys
