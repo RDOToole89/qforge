@@ -84,20 +84,28 @@ class PresetsBrowser:
 
             keys = [k for k in keys if match(unified[k])]
 
-        # Options table
+        # Options table (handle empty result set robustly)
         options: List[Tuple[str, str, str]] = []
-        for k in keys:
-            meta = unified[k]
-            cfg = meta.get("config", {})
-            name = meta.get("name", k)
-            state = cfg.get("state_type", "-")
-            q = cfg.get("num_qubits", "-")
-            noise = cfg.get("noise_type", "-")
-            sim = cfg.get("sim_mode", "-")
-            shots = cfg.get("shots", "-")
-            fam = meta.get("family", state)
-            label = f"{name}  |  Family={fam}  State={state}  Q={q}  Noise={noise}  Sim={sim}  Shots={shots}"
-            options.append((k, label, k))
+        if keys:
+            for k in keys:
+                meta = unified[k]
+                cfg = meta.get("config", {})
+                name = meta.get("name", k)
+                state = cfg.get("state_type", "-")
+                q = cfg.get("num_qubits", "-")
+                noise = cfg.get("noise_type", "-")
+                sim = cfg.get("sim_mode", "-")
+                shots = cfg.get("shots", "-")
+                fam = meta.get("family", state)
+                label = f"{name}  |  Family={fam}  State={state}  Q={q}  Noise={noise}  Sim={sim}  Shots={shots}"
+                options.append((k, label, k))
+            default_value = keys[0]
+        else:
+            # No matches after filters/search: offer helpful actions
+            self.display_manager.display_warning_message(
+                "No presets matched your filters/search."
+            )
+            default_value = "c"
         options.append(("show_all", "Show all options/help", "?"))
         options.append(("c", "Custom Parameters", "c"))
         options.append(("q", "Back", "q"))
@@ -105,7 +113,7 @@ class PresetsBrowser:
         choice = self.input_handler.select_option(
             title="Presets Browser",
             options=options,
-            default_value=keys[0],
+            default_value=default_value,
             show_value_column=False,
         )
         if choice == "show_all":

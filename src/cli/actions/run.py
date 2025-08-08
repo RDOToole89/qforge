@@ -2,60 +2,97 @@ from __future__ import annotations
 
 from typing import Dict, Any, Optional
 
-from src.core.research_handler import ResearchExperimentHandler
-from src.experiments.manager import get_experiment_manager
+from src.engine.api import run as engine_run
+from src.visualization.pipeline.run import render_from_json
+from src.visualization.report import save_report_from_json
 
 
 def execute_run(
     normalized_params: Dict[str, Any], display_manager, viz
 ) -> Optional[str]:
-    """Run an experiment using legacy ExperimentManager and return research file if saved."""
+    """Run an experiment via the engine and save artifacts consistently.
+
+    Returns the path to the saved analysis JSON for this run.
+    """
     display_manager.display_info_message("🚀 Running quantum experiment...")
-    em = get_experiment_manager()
-    experiment_params = {
-        k: v
-        for k, v in normalized_params.items()
-        if k not in ["name", "description", "category", "difficulty"]
+
+    # Prepare config for engine (normalize noise_type casing if present)
+    allowed_keys = {
+        "num_qubits",
+        "state_type",
+        "sim_mode",
+        "shots",
+        "noise_enabled",
+        "noise_type",
+        "error_rate",
+        "rng_seed",
+        "custom_params",
     }
-    result = em.run_experiment("ghz_basic", custom_params=experiment_params)
-    if not result:
-        display_manager.display_error_message("❌ Experiment failed")
+    experiment_params = {
+        k: v for k, v in normalized_params.items() if k in allowed_keys
+    }
+    if experiment_params.get("noise_type"):
+        try:
+            experiment_params["noise_type"] = str(
+                experiment_params["noise_type"]
+            ).lower()
+        except Exception:
+            pass
+
+    # Run through engine to get analysis + deterministic run directory
+    try:
+        eng_result = engine_run(experiment_params)
+    except Exception as e:
+        display_manager.display_error_message(f"Engine run failed: {e}")
         return None
 
-    is_density = experiment_params.get("sim_mode") == "density"
-    if not is_density:
-        research_handler = ResearchExperimentHandler()
-        if isinstance(result, tuple) and len(result) >= 2:
-            circuit, raw_results = result
-            research_analysis = research_handler.process_experiment_result(
-                circuit=circuit,
-                result=raw_results,
-                experiment_config=experiment_params,
-                experiment_id="cli_experiment",
-            )
-            research_file = research_handler.save_research_result(research_analysis)
-            display_manager.display_experiment_results(result)
-            viz_type = experiment_params.get("visualization_type", "none")
-            if viz_type and viz_type != "none":
-                viz.show(raw_results, experiment_params, viz_type)
-            display_manager.display_success_message(
-                f"📊 Research-grade analysis saved: {research_file}"
-            )
-            display_manager.display_success_message(
-                "✅ Experiment completed successfully!"
-            )
-            return str(research_file)
-    else:
-        display_manager.display_experiment_results(result)
-        display_manager.display_info_message(
-            "🔬 Density Matrix Mode: Displaying quantum state analysis"
+    # Prefer analysis path from artifacts
+    try:
+        analysis_json = next(
+            a.path for a in eng_result.artifacts if str(a.path).endswith(".json")
         )
-        viz_type = experiment_params.get("visualization_type", "none")
-        if viz_type and viz_type != "none":
-            if isinstance(result, tuple) and len(result) >= 2:
-                _c, raw_results = result
-                viz.show(raw_results, experiment_params, viz_type)
-            else:
-                viz.show(result, experiment_params, viz_type)
-        display_manager.display_success_message("✅ Experiment completed successfully!")
+    except StopIteration:
+        display_manager.display_error_message("No analysis JSON artifact found")
         return None
+
+    # Show insights in the console
+    try:
+        display_manager.display_research_report(eng_result.analysis)
+        display_manager.display_research_details(eng_result.analysis)
+    except Exception:
+        pass
+
+    # Render appropriate visualizations and reports into the run directory
+    sim_mode = experiment_params.get("sim_mode", "qasm")
+    try:
+        if sim_mode == "qasm":
+            art_hist = render_from_json(analysis_json, viz_type="histogram")
+            display_manager.display_success_message(f"Histogram saved: {art_hist.path}")
+            # Hypergraph only when counts are available
+            try:
+                art_hg = render_from_json(analysis_json, viz_type="hypergraph")
+                display_manager.display_success_message(
+                    f"Hypergraph saved: {art_hg.path}"
+                )
+            except Exception:
+                # Non-fatal if hypergraph is not applicable
+                pass
+        elif sim_mode == "density":
+            art_dm = render_from_json(analysis_json, viz_type="density_matrix")
+            display_manager.display_success_message(
+                f"Density matrix saved: {art_dm.path}"
+            )
+    except Exception as e:
+        display_manager.display_warning_message(f"Visualization step skipped: {e}")
+
+    # Write reports (md + html) into run_dir/reports
+    try:
+        rep_md = save_report_from_json(analysis_json, fmt="md")
+        rep_html = save_report_from_json(analysis_json, fmt="html")
+        display_manager.display_success_message(f"Report (md): {rep_md}")
+        display_manager.display_success_message(f"Report (html): {rep_html}")
+    except Exception as e:
+        display_manager.display_warning_message(f"Report generation skipped: {e}")
+
+    display_manager.display_success_message("✅ Experiment completed successfully!")
+    return str(analysis_json)

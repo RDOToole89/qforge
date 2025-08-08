@@ -123,10 +123,11 @@ class Router:
             self.ctx.display_manager.display_params_summary(normalized)
 
             # Confirm before running
-            if (
-                self.ctx.input_handler.get_input("proceed_prompt", "y", ["y", "n"])
-                != "y"
-            ):
+            proceed = self.ctx.input_handler.get_input(
+                "proceed_prompt", "y", ["y", "n"]
+            )
+            if proceed != "y":
+                # Allow user to adjust instead of discarding
                 try:
                     args = self.collector.collect_parameters(
                         interactive=True, base_args=normalized

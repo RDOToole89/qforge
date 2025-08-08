@@ -115,12 +115,12 @@ class ResultsManager:
 
     def open_visualization_from_result_json(self, file_path: str) -> None:
         import json as _json
+        from src.visualization.pipeline.run import render_from_json
 
         with open(file_path, "r") as f:
             analysis = _json.load(f)
         self._last_research_analysis = analysis
         params = analysis.get("experiment_parameters", {})
-        counts = analysis.get("measurement_results", {}).get("raw_counts", {})
         viz = self.input_handler.select_option(
             title="Visualization Type",
             options=[
@@ -133,79 +133,91 @@ class ResultsManager:
         )
         args = {**params, "visualization_type": viz}
         self.display_manager.display_params_summary(args)
-        from .viz import VisualizationOrchestrator
-
-        VisualizationOrchestrator(self.display_manager).show(
-            {"counts": counts}, args, viz
-        )
+        try:
+            art = render_from_json(file_path, viz_type=viz)
+            self.display_manager.display_success_message(
+                f"Visualization saved: {art.path}"
+            )
+        except Exception as e:
+            self.display_manager.display_error_message(f"Visualization failed: {e}")
 
     def rerun_from_result_json(self, file_path: str) -> None:
         import json as _json
-        from src.experiments.manager import get_experiment_manager
-        from src.core.research_handler import ResearchExperimentHandler
+        from src.engine.api import run as engine_run
+        from src.visualization.pipeline.run import render_from_json
+        from src.visualization.report import save_report_from_json
 
         with open(file_path, "r") as f:
             analysis = _json.load(f)
         params = analysis.get("experiment_parameters", {})
-        args = dict(params)
+        # Filter to engine-allowed keys
+        allowed_keys = {
+            "num_qubits",
+            "state_type",
+            "sim_mode",
+            "shots",
+            "noise_enabled",
+            "noise_type",
+            "error_rate",
+            "rng_seed",
+            "custom_params",
+        }
+        args = {k: v for k, v in params.items() if k in allowed_keys}
         self.display_manager.display_params_summary(args)
         if self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) != "y":
             return
+
         self.display_manager.display_info_message("🚀 Running quantum experiment...")
-        em = get_experiment_manager()
-        experiment_params = {
-            k: v
-            for k, v in args.items()
-            if k not in ["name", "description", "category", "difficulty"]
-        }
-        result = em.run_experiment("ghz_basic", custom_params=experiment_params)
-        if not result:
-            self.display_manager.display_error_message("❌ Experiment failed")
+        try:
+            res = engine_run(args)
+        except Exception as e:
+            self.display_manager.display_error_message(f"Engine run failed: {e}")
             return
-        is_density_experiment = experiment_params.get("sim_mode") == "density"
-        if not is_density_experiment:
-            research_handler = ResearchExperimentHandler()
-            if isinstance(result, tuple) and len(result) >= 2:
-                circuit, raw_results = result
-                research_analysis = research_handler.process_experiment_result(
-                    circuit=circuit,
-                    result=raw_results,
-                    experiment_config=experiment_params,
-                    experiment_id="cli_experiment",
-                )
-                self._last_research_analysis = research_analysis
-                research_file = research_handler.save_research_result(research_analysis)
-                self.display_manager.display_experiment_results(result)
-                viz_type = experiment_params.get("visualization_type", "none")
-                if viz_type and viz_type != "none":
-                    from .viz import VisualizationOrchestrator
 
-                    VisualizationOrchestrator(self.display_manager).show(
-                        raw_results, experiment_params, viz_type
-                    )
-                self.display_manager.display_success_message(
-                    f"📊 Research-grade analysis saved: {research_file}"
-                )
-        else:
-            self.display_manager.display_experiment_results(result)
-            self.display_manager.display_info_message(
-                "🔬 Density Matrix Mode: Displaying quantum state analysis"
+        try:
+            analysis_json = next(
+                a.path for a in res.artifacts if str(a.path).endswith(".json")
             )
-            viz_type = experiment_params.get("visualization_type", "none")
-            if viz_type and viz_type != "none":
-                if isinstance(result, tuple) and len(result) >= 2:
-                    _c, raw_results = result
-                    from .viz import VisualizationOrchestrator
+        except StopIteration:
+            self.display_manager.display_error_message(
+                "No analysis JSON artifact found"
+            )
+            return
 
-                    VisualizationOrchestrator(self.display_manager).show(
-                        raw_results, experiment_params, viz_type
+        # Visualizations
+        try:
+            if args.get("sim_mode") == "density":
+                art = render_from_json(analysis_json, viz_type="density_matrix")
+                self.display_manager.display_success_message(
+                    f"Density matrix saved: {art.path}"
+                )
+            else:
+                art1 = render_from_json(analysis_json, viz_type="histogram")
+                self.display_manager.display_success_message(
+                    f"Histogram saved: {art1.path}"
+                )
+                try:
+                    art2 = render_from_json(analysis_json, viz_type="hypergraph")
+                    self.display_manager.display_success_message(
+                        f"Hypergraph saved: {art2.path}"
                     )
-                else:
-                    from .viz import VisualizationOrchestrator
+                except Exception:
+                    pass
+        except Exception as e:
+            self.display_manager.display_warning_message(
+                f"Visualization step skipped: {e}"
+            )
 
-                    VisualizationOrchestrator(self.display_manager).show(
-                        result, experiment_params, viz_type
-                    )
+        # Reports
+        try:
+            rep_md = save_report_from_json(analysis_json, fmt="md")
+            rep_html = save_report_from_json(analysis_json, fmt="html")
+            self.display_manager.display_success_message(f"Report (md): {rep_md}")
+            self.display_manager.display_success_message(f"Report (html): {rep_html}")
+        except Exception as e:
+            self.display_manager.display_warning_message(
+                f"Report generation skipped: {e}"
+            )
 
     def compare_results(self, file_a: str, file_b: str) -> None:
         import json as _json
