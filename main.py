@@ -19,18 +19,19 @@ from typing import Optional, Dict, Any
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 def setup_environment() -> None:
     """Set up environment for quantum experiments."""
     # Set interactive mode for CLI
-    if not os.environ.get('QUANTUM_INTERACTIVE'):
-        os.environ['QUANTUM_INTERACTIVE'] = 'true'
+    if not os.environ.get("QUANTUM_INTERACTIVE"):
+        os.environ["QUANTUM_INTERACTIVE"] = "true"
 
     logger.info("🚀 Initializing Quantum Experiment Framework")
+
 
 def import_core_modules():
     """Import core modules with error handling."""
@@ -45,6 +46,7 @@ def import_core_modules():
     except ImportError as e:
         logger.error(f"❌ Failed to import core modules: {e}")
         sys.exit(1)
+
 
 def run_interactive_mode():
     """Run the framework in interactive CLI mode."""
@@ -64,10 +66,13 @@ def run_interactive_mode():
         logger.error(f"❌ Error in interactive mode: {e}")
         sys.exit(1)
 
+
 def run_experiment_by_name(exp_name: str):
     """Run a specific experiment by name."""
     try:
-        get_experiment_manager, ExperimentRunner, settings, get_all_visualizers = import_core_modules()
+        get_experiment_manager, ExperimentRunner, settings, get_all_visualizers = (
+            import_core_modules()
+        )
 
         # Get experiment manager
         em = get_experiment_manager()
@@ -80,7 +85,7 @@ def run_experiment_by_name(exp_name: str):
 
         logger.info(f"🧪 Running experiment: {exp_name}")
 
-                # Run experiment using experiment manager
+        # Run experiment using experiment manager
         experiment_result = em.run_experiment(exp_name)
 
         if experiment_result is None:
@@ -94,22 +99,23 @@ def run_experiment_by_name(exp_name: str):
             results = experiment_result
 
         # Convert results to the format expected by visualizers
-        if hasattr(results, 'get_counts'):  # Qiskit Counts object
+        if hasattr(results, "get_counts"):  # Qiskit Counts object
             results = results.get_counts()
-        elif isinstance(results, dict) and 'counts' in results:
-            results = results['counts']
+        elif isinstance(results, dict) and "counts" in results:
+            results = results["counts"]
 
-                # For now, just log success without visualization
+            # For now, just log success without visualization
         logger.info(f"✅ Experiment '{exp_name}' completed successfully")
         logger.info(f"📊 Results: {type(results)}")
         if isinstance(results, dict):
             logger.info(f"📊 Result keys: {list(results.keys())}")
-        elif hasattr(results, 'get_counts'):
+        elif hasattr(results, "get_counts"):
             logger.info(f"📊 Counts: {results.get_counts()}")
 
     except Exception as e:
         logger.error(f"❌ Error running experiment '{exp_name}': {e}")
         sys.exit(1)
+
 
 def list_experiments():
     """List all available experiments."""
@@ -130,9 +136,11 @@ def list_experiments():
             # Get experiments by category using list_experiments
             experiments = em.list_experiments(category=category)
             for exp_config in experiments:
-                exp_name = exp_config.get('id', 'Unknown')
-                difficulty = exp_config.get('metadata', {}).get('difficulty', 'Unknown')
-                description = exp_config.get('metadata', {}).get('description', 'No description')
+                exp_name = exp_config.get("id", "Unknown")
+                difficulty = exp_config.get("metadata", {}).get("difficulty", "Unknown")
+                description = exp_config.get("metadata", {}).get(
+                    "description", "No description"
+                )
                 print(f"  • {exp_name} ({difficulty}) - {description}")
 
         print(f"\n📊 Total experiments: {len(em.list_experiments())}")
@@ -141,13 +149,16 @@ def list_experiments():
         logger.error(f"❌ Error listing experiments: {e}")
         sys.exit(1)
 
+
 def run_parameter_sweep(experiment_name: str):
     """Run a parameter sweep on the specified experiment."""
     try:
         logger.info(f"🔄 Starting parameter sweep for experiment: {experiment_name}")
 
         # Import core modules
-        get_experiment_manager, ExperimentRunner, settings, get_all_visualizers = import_core_modules()
+        get_experiment_manager, ExperimentRunner, settings, get_all_visualizers = (
+            import_core_modules()
+        )
 
         # Import parameter sweep engine
         from src.core.parameter_sweep import ParameterSweepEngine
@@ -156,12 +167,15 @@ def run_parameter_sweep(experiment_name: str):
         sweep_engine = ParameterSweepEngine()
 
         # For structured decoherence experiments, run noise level sweep
-        if 'ghz_structured_decoherence' in experiment_name or 'structured_decoherence' in experiment_name:
+        if (
+            "ghz_structured_decoherence" in experiment_name
+            or "structured_decoherence" in experiment_name
+        ):
             logger.info("🔬 Running structured decoherence noise level sweep")
             results = sweep_engine.run_noise_level_sweep(
                 base_experiment_id=experiment_name,
                 noise_levels=[0.01, 0.05, 0.10, 0.20],
-                runs_per_level=3
+                runs_per_level=3,
             )
         else:
             # Generic parameter sweep for other experiments
@@ -170,28 +184,34 @@ def run_parameter_sweep(experiment_name: str):
                 base_experiment_id=experiment_name,
                 parameter_ranges={
                     "error_rate": [0.01, 0.05, 0.10],
-                    "shots": [1024, 4096]
+                    "shots": [1024, 4096],
                 },
-                runs_per_config=2
+                runs_per_config=2,
             )
 
         logger.info("✅ Parameter sweep completed successfully!")
-        logger.info(f"📊 Total experiments: {results['sweep_metadata']['total_experiments']}")
-        logger.info(f"📈 Success rate: {results['aggregated_analysis']['statistical_summary']['success_rate']:.2%}")
+        logger.info(
+            f"📊 Total experiments: {results['sweep_metadata']['total_experiments']}"
+        )
+        logger.info(
+            f"📈 Success rate: {results['aggregated_analysis']['statistical_summary']['success_rate']:.2%}"
+        )
 
         # Print key findings
-        if results['aggregated_analysis']['key_findings']:
+        if results["aggregated_analysis"]["key_findings"]:
             logger.info("🎯 Key findings:")
-            for finding in results['aggregated_analysis']['key_findings']:
+            for finding in results["aggregated_analysis"]["key_findings"]:
                 logger.info(f"   • {finding}")
 
     except Exception as e:
         logger.error(f"❌ Parameter sweep failed: {e}")
         sys.exit(1)
 
+
 def show_help():
     """Show help information."""
-    print("""
+    print(
+        """
 🚀 Quantum Experiment Framework - New Modular Entry Point
 
 Usage:
@@ -212,7 +232,9 @@ Examples:
     python3 main_new.py --sweep ghz_structured_decoherence_ref
     QUANTUM_INTERACTIVE=false python3 main_new.py --run w_phase_flip
     python3 main_new.py --viz results/.../structured_decoherence_xyz.json --type histogram
-    """)
+    """
+    )
+
 
 def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
     """Visualize results from a saved JSON analysis file.
@@ -222,6 +244,7 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
         viz_type: histogram | density_matrix | hypergraph
     """
     import json as _json
+
     try:
         with open(json_path, "r") as f:
             analysis = _json.load(f)
@@ -236,6 +259,7 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
     try:
         if viz_type == "histogram":
             from src.visualization import get_histogram_visualizer
+
             plot_fn = get_histogram_visualizer()
             plot_fn(
                 counts=counts,
@@ -248,6 +272,7 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
             )
         elif viz_type == "hypergraph":
             from src.visualization import get_hypergraph_visualizer
+
             plot_fn = get_hypergraph_visualizer()
             plot_fn(
                 correlation_data=counts,
@@ -256,7 +281,9 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
                 config={},
             )
         elif viz_type == "density_matrix":
-            logger.error("❌ Cannot reconstruct density matrix from saved counts; use during density runs.")
+            logger.error(
+                "❌ Cannot reconstruct density matrix from saved counts; use during density runs."
+            )
             sys.exit(2)
         else:
             logger.error(f"❌ Unsupported visualization type: {viz_type}")
@@ -264,6 +291,7 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
     except Exception as e:
         logger.error(f"❌ Visualization failed: {e}")
         sys.exit(1)
+
 
 def main():
     """Main entry point."""
@@ -276,25 +304,26 @@ def main():
     if not args:
         # No arguments - run interactive mode
         run_interactive_mode()
-    elif args[0] == '--help' or args[0] == '-h':
+    elif args[0] == "--help" or args[0] == "-h":
         show_help()
-    elif args[0] == '--list':
+    elif args[0] == "--list":
         list_experiments()
-    elif args[0] == '--run' and len(args) > 1:
+    elif args[0] == "--run" and len(args) > 1:
         run_experiment_by_name(args[1])
-    elif args[0] == '--sweep' and len(args) > 1:
+    elif args[0] == "--sweep" and len(args) > 1:
         run_parameter_sweep(args[1])
-    elif args[0] == '--viz' and len(args) > 1:
-        viz_type = 'histogram'
-        if '--type' in args:
+    elif args[0] == "--viz" and len(args) > 1:
+        viz_type = "histogram"
+        if "--type" in args:
             try:
-                viz_type = args[args.index('--type') + 1]
+                viz_type = args[args.index("--type") + 1]
             except Exception:
                 pass
         visualize_from_json(args[1], viz_type)
     else:
         print("❌ Invalid arguments. Use --help for usage information.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

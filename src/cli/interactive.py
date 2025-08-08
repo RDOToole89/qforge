@@ -75,6 +75,13 @@ class InteractiveCLI:
             )
 
         self.console.print(table)
+        # ASCII circuit (compact)
+        try:
+            ascii_circuit = qc.draw(output="text")
+            self.console.print("[bold]ASCII Circuit:[/bold]")
+            self.console.print(str(ascii_circuit))
+        except Exception:
+            pass
         self.console.print(
             "\n💡 Choose an option number or press 'c' for custom parameters"
         )
