@@ -80,6 +80,20 @@ class ExperimentRunner:
             ValueError: If invalid parameters are provided.
             Exception: If simulation fails.
         """
+        # Emit start event
+        logger_utils.log_with_experiment_id(
+            self.logger,
+            "info",
+            "experiment_start",
+            self.experiment_id,
+            extra_info={
+                "num_qubits": num_qubits,
+                "state_type": state_type,
+                "sim_mode": sim_mode,
+                "noise_enabled": noise_enabled,
+            },
+        )
+
         # Prepare the quantum circuit
         qc = self._prepare_circuit(state_type, num_qubits, custom_params)
 
@@ -103,6 +117,14 @@ class ExperimentRunner:
         circuit_compiled = self._transpile_circuit(qc, backend, rng_seed=rng_seed)
         result_data = self._run_simulation(
             circuit_compiled, backend, shots, noise_model, sim_mode
+        )
+
+        logger_utils.log_with_experiment_id(
+            self.logger,
+            "info",
+            "experiment_end",
+            self.experiment_id,
+            extra_info={"result_type": "qasm" if sim_mode == "qasm" else "density"},
         )
 
         return qc, result_data

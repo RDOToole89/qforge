@@ -33,10 +33,23 @@ def get_current_profile_dict() -> Dict[str, Any]:
     defaults = settings.get_experiment_defaults()
     logging_cfg = settings.get_logging_config()
     plugin_cfg = settings.get_plugin_config()
+    # Try to capture current visualization backend and save base dir
+    viz_backend = "matplotlib"
+    viz_base = str(Path(settings.DEFAULT_RESULTS_DIR) / "visualizations")
+    try:
+        from src.visualization.backends import get_backend_registry
+
+        viz_backend = getattr(get_backend_registry(), "_active_backend", viz_backend)
+    except Exception:
+        pass
     return {
         "experiment_defaults": defaults,
         "logging": logging_cfg,
         "plugins": plugin_cfg,
+        "visualization": {
+            "backend": viz_backend,
+            "save_base_dir": viz_base,
+        },
     }
 
 
@@ -110,5 +123,26 @@ def apply_profile(profile: Dict[str, Any]) -> None:
         settings.DEFAULT_LOGS_DIR = str(logging_cfg["logs_dir"])  # noqa: N815
     if "log_level" in logging_cfg:
         settings.DEFAULT_LOG_LEVEL = str(logging_cfg["log_level"])  # noqa: N815
+
+    # Visualization config (optional)
+    viz_cfg = profile.get("visualization", {})
+    try:
+        backend = viz_cfg.get("backend")
+        if backend:
+            from src.visualization.backends import set_visualization_backend
+
+            set_visualization_backend(str(backend))
+    except Exception:
+        pass
+    try:
+        base_dir = viz_cfg.get("save_base_dir")
+        if not base_dir and "results_dir" in logging_cfg:
+            base_dir = str(Path(logging_cfg["results_dir"]) / "visualizations")
+        if base_dir:
+            from src.visualization.save_manager import set_save_manager_base_dir
+
+            set_save_manager_base_dir(str(base_dir))
+    except Exception:
+        pass
 
     # No return; settings modified in place

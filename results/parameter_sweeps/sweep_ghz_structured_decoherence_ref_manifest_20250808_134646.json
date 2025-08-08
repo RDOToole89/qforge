@@ -1,0 +1,399 @@
+{
+  "sweep_metadata": {
+    "sweep_id": "0bcc270d",
+    "sweep_name": "ghz_structured_decoherence_ref_manifest",
+    "base_experiment_id": "ghz_structured_decoherence_ref",
+    "timestamp": "2025-08-08T13:46:46.463233",
+    "total_experiments": 2,
+    "parameter_ranges": {
+      "error_rate": [
+        0.01,
+        0.05
+      ]
+    },
+    "runs_per_config": 1
+  },
+  "experiment_results": [
+    {
+      "parameter_combination": {
+        "error_rate": 0.01
+      },
+      "runs": [
+        {
+          "run_number": 1,
+          "experiment_id": "ghz_structured_decoherence_ref_sweep_0bcc270d_1",
+          "success": true,
+          "research_analysis": {
+            "schema_version": "1.0.0",
+            "experiment_metadata": {
+              "experiment_id": "ghz_structured_decoherence_ref",
+              "timestamp": "2025-08-08T13:46:46.513700",
+              "framework_version": "2.0.0",
+              "research_type": "structured_decoherence"
+            },
+            "experiment_parameters": {
+              "num_qubits": 3,
+              "state_type": "GHZ",
+              "noise_type": "DEPOLARIZING",
+              "noise_enabled": true,
+              "error_rate": 0.01,
+              "shots": 4096,
+              "sim_mode": "qasm",
+              "multiple_runs": 3
+            },
+            "circuit_statistics": {
+              "depth": 4,
+              "num_gates": 7,
+              "num_qubits": 3,
+              "gate_types": {
+                "h": 1,
+                "cx": 2,
+                "barrier": 1,
+                "measure": 3
+              }
+            },
+            "measurement_results": {
+              "raw_counts": {
+                "101": 2,
+                "001": 18,
+                "100": 7,
+                "110": 14,
+                "111": 2001,
+                "011": 2,
+                "010": 2,
+                "000": 2050
+              },
+              "total_shots": 4096,
+              "unique_outcomes": 8,
+              "outcome_probabilities": {
+                "101": 0.00048828125,
+                "001": 0.00439453125,
+                "100": 0.001708984375,
+                "110": 0.00341796875,
+                "111": 0.488525390625,
+                "011": 0.00048828125,
+                "010": 0.00048828125,
+                "000": 0.50048828125
+              }
+            },
+            "research_metrics": {
+              "basic_stats": {
+                "total_shots": 4096,
+                "unique_outcomes": 8,
+                "num_qubits": 3
+              },
+              "information_theory": {
+                "shannon_entropy": 1.0989069064556112,
+                "normalized_entropy": 0.3663023021518704
+              },
+              "qubit_analysis": {
+                "qubit_wise_bias": {
+                  "q0": -0.01171875,
+                  "q1": -0.01416015625,
+                  "q2": -0.01220703125
+                }
+              },
+              "distribution_comparison": {
+                "kl_divergence": 0.26817907633980137,
+                "total_variation_distance": 0.011474609375
+              },
+              "entanglement_analysis": {
+                "mutual_information_matrix": {
+                  "I(0;1)": 0.9693120469750378,
+                  "I(0;2)": 0.9190441498426718,
+                  "I(1;2)": 0.9272987832071751
+                }
+              }
+            },
+            "provenance": {
+              "software_versions": {
+                "python": "3.13.5",
+                "platform": "macOS-15.5-arm64-arm-64bit-Mach-O"
+              },
+              "rng_seed": null,
+              "transpilation": {
+                "depth": 4,
+                "num_gates": 7
+              },
+              "simulator": "aer_qasm",
+              "config_hash": "9761a53f"
+            },
+            "decoherence_analysis": {
+              "probability_deviations": {
+                "000": 0.00048828125,
+                "110": 0.00341796875,
+                "010": 0.00048828125,
+                "111": -0.011474609375,
+                "001": 0.00439453125,
+                "101": 0.00048828125,
+                "011": 0.00048828125,
+                "100": 0.001708984375
+              },
+              "error_bitstring_frequencies": {
+                "110": 0.00341796875,
+                "001": 0.00439453125,
+                "100": 0.001708984375
+              },
+              "max_deviation": 0.011474609375,
+              "total_error_probability": 0.009521484375,
+              "structured_vs_random": {
+                "assessment": "structured_patterns_detected",
+                "confidence": 0.8,
+                "indicators": {
+                  "coefficient_of_variation": 0.3496969665893809,
+                  "uniformity_score": 0.6503030334106191,
+                  "pattern_concentration": 0.46153846153846156
+                }
+              }
+            },
+            "statistical_validation": {
+              "shot_count_adequacy": {
+                "total_shots": 4096,
+                "recommended_min_shots": 800,
+                "adequacy_ratio": 5.12,
+                "adequate": true
+              },
+              "sampling_quality": {
+                "outcome_coverage": 1.0,
+                "min_count_per_outcome": 2,
+                "max_count_per_outcome": 2050
+              },
+              "000_confidence_interval": {
+                "point_estimate": 0.50048828125,
+                "standard_error": 0.007812496274708813,
+                "ci_95_lower": 0.48517578855157073,
+                "ci_95_upper": 0.5158007739484293
+              },
+              "111_confidence_interval": {
+                "point_estimate": 0.488525390625,
+                "standard_error": 0.00781044243748461,
+                "ci_95_lower": 0.4732169234475302,
+                "ci_95_upper": 0.5038338578024698
+              }
+            },
+            "research_insights": {
+              "key_findings": [
+                "Low normalized entropy (0.366) suggests structured outcomes rather than random decoherence",
+                "Structured decoherence patterns detected - supports hypothesis of non-random quantum noise"
+              ],
+              "research_questions_addressed": [
+                "Evidence found for structured rather than purely stochastic decoherence"
+              ],
+              "recommendations": []
+            },
+            "parameters": {
+              "error_rate": 0.01
+            }
+          },
+          "research_file": "results/structured_decoherence/structured_decoherence_ghz_stru_20250808_134646_9761a53f.json"
+        }
+      ]
+    },
+    {
+      "parameter_combination": {
+        "error_rate": 0.05
+      },
+      "runs": [
+        {
+          "run_number": 1,
+          "experiment_id": "ghz_structured_decoherence_ref_sweep_0bcc270d_2",
+          "success": true,
+          "research_analysis": {
+            "schema_version": "1.0.0",
+            "experiment_metadata": {
+              "experiment_id": "ghz_structured_decoherence_ref",
+              "timestamp": "2025-08-08T13:46:46.559915",
+              "framework_version": "2.0.0",
+              "research_type": "structured_decoherence"
+            },
+            "experiment_parameters": {
+              "num_qubits": 3,
+              "state_type": "GHZ",
+              "noise_type": "DEPOLARIZING",
+              "noise_enabled": true,
+              "error_rate": 0.05,
+              "shots": 4096,
+              "sim_mode": "qasm",
+              "multiple_runs": 3
+            },
+            "circuit_statistics": {
+              "depth": 4,
+              "num_gates": 7,
+              "num_qubits": 3,
+              "gate_types": {
+                "h": 1,
+                "cx": 2,
+                "barrier": 1,
+                "measure": 3
+              }
+            },
+            "measurement_results": {
+              "raw_counts": {
+                "101": 9,
+                "100": 24,
+                "110": 75,
+                "001": 69,
+                "111": 1972,
+                "011": 21,
+                "010": 24,
+                "000": 1902
+              },
+              "total_shots": 4096,
+              "unique_outcomes": 8,
+              "outcome_probabilities": {
+                "101": 0.002197265625,
+                "100": 0.005859375,
+                "110": 0.018310546875,
+                "001": 0.016845703125,
+                "111": 0.4814453125,
+                "011": 0.005126953125,
+                "010": 0.005859375,
+                "000": 0.46435546875
+              }
+            },
+            "research_metrics": {
+              "basic_stats": {
+                "total_shots": 4096,
+                "unique_outcomes": 8,
+                "num_qubits": 3
+              },
+              "information_theory": {
+                "shannon_entropy": 1.3718333649255694,
+                "normalized_entropy": 0.4572777883085231
+              },
+              "qubit_analysis": {
+                "qubit_wise_bias": {
+                  "q0": 0.015625,
+                  "q1": 0.021484375,
+                  "q2": 0.01123046875
+                }
+              },
+              "distribution_comparison": {
+                "kl_divergence": 1.4034962752404514,
+                "total_variation_distance": 0.05419921875
+              },
+              "entanglement_analysis": {
+                "mutual_information_matrix": {
+                  "I(0;1)": 0.8640376575587112,
+                  "I(0;2)": 0.7301655513489376,
+                  "I(1;2)": 0.7433835437202685
+                }
+              }
+            },
+            "provenance": {
+              "software_versions": {
+                "python": "3.13.5",
+                "platform": "macOS-15.5-arm64-arm-64bit-Mach-O"
+              },
+              "rng_seed": null,
+              "transpilation": {
+                "depth": 4,
+                "num_gates": 7
+              },
+              "simulator": "aer_qasm",
+              "config_hash": "bad1757c"
+            },
+            "decoherence_analysis": {
+              "probability_deviations": {
+                "000": -0.03564453125,
+                "110": 0.018310546875,
+                "010": 0.005859375,
+                "111": -0.0185546875,
+                "100": 0.005859375,
+                "101": 0.002197265625,
+                "011": 0.005126953125,
+                "001": 0.016845703125
+              },
+              "error_bitstring_frequencies": {
+                "110": 0.018310546875,
+                "010": 0.005859375,
+                "100": 0.005859375,
+                "101": 0.002197265625,
+                "011": 0.005126953125,
+                "001": 0.016845703125
+              },
+              "max_deviation": 0.03564453125,
+              "total_error_probability": 0.05419921875,
+              "structured_vs_random": {
+                "assessment": "mixed_patterns",
+                "confidence": 0.5,
+                "indicators": {
+                  "coefficient_of_variation": 0.6842696703336305,
+                  "uniformity_score": 0.3157303296663695,
+                  "pattern_concentration": 0.33783783783783783
+                }
+              }
+            },
+            "statistical_validation": {
+              "shot_count_adequacy": {
+                "total_shots": 4096,
+                "recommended_min_shots": 800,
+                "adequacy_ratio": 5.12,
+                "adequate": true
+              },
+              "sampling_quality": {
+                "outcome_coverage": 1.0,
+                "min_count_per_outcome": 9,
+                "max_count_per_outcome": 1972
+              },
+              "000_confidence_interval": {
+                "point_estimate": 0.46435546875,
+                "standard_error": 0.007792622640997839,
+                "ci_95_lower": 0.44908192837364425,
+                "ci_95_upper": 0.47962900912635575
+              },
+              "111_confidence_interval": {
+                "point_estimate": 0.4814453125,
+                "standard_error": 0.007807118827559944,
+                "ci_95_lower": 0.46614335959798253,
+                "ci_95_upper": 0.49674726540201747
+              }
+            },
+            "research_insights": {
+              "key_findings": [
+                "Low normalized entropy (0.457) suggests structured outcomes rather than random decoherence"
+              ],
+              "research_questions_addressed": [],
+              "recommendations": []
+            },
+            "parameters": {
+              "error_rate": 0.05
+            }
+          },
+          "research_file": "results/structured_decoherence/structured_decoherence_ghz_stru_20250808_134646_bad1757c.json"
+        }
+      ]
+    }
+  ],
+  "aggregated_analysis": {
+    "parameter_analysis": {
+      "error_rate=0.01": {
+        "parameters": {
+          "error_rate": 0.01
+        },
+        "successful_runs": 1,
+        "average_normalized_entropy": 0.3663023021518704,
+        "average_kl_divergence": 0.26817907633980137,
+        "entropy_std": 0.0
+      },
+      "error_rate=0.05": {
+        "parameters": {
+          "error_rate": 0.05
+        },
+        "successful_runs": 1,
+        "average_normalized_entropy": 0.4572777883085231,
+        "average_kl_divergence": 1.4034962752404514,
+        "entropy_std": 0.0
+      }
+    },
+    "statistical_summary": {
+      "total_successful_runs": 2,
+      "total_parameter_combinations": 2,
+      "success_rate": 1.0
+    },
+    "trends": {},
+    "key_findings": [
+      "Entropy range: 0.366 - 0.457"
+    ]
+  }
+}

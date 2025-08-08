@@ -7,6 +7,7 @@ Avoids external dependencies by doing structural checks only.
 from __future__ import annotations
 
 from typing import Dict, Any
+from pathlib import Path
 
 
 REQUIRED_TOP_LEVEL = [
@@ -17,11 +18,38 @@ REQUIRED_TOP_LEVEL = [
 ]
 
 
+def _load_schema(path: Path) -> Dict[str, Any]:
+    import json
+
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def _validate_with_jsonschema(data: Dict[str, Any], schema_name: str) -> bool:
+    """Validate using fastjsonschema if available; fallback to minimal checks."""
+    try:
+        import fastjsonschema
+
+        root = Path(__file__).resolve().parents[2]
+        schema_path = root / "schemas" / schema_name
+        schema = _load_schema(schema_path)
+        validator = fastjsonschema.compile(schema)
+        validator(data)
+        return True
+    except Exception:
+        return False
+
+
 def validate_results_schema(data: Dict[str, Any]) -> bool:
     """Validate minimal structure of results JSON.
 
     Ensures the presence of core blocks and some required fields.
     """
+    # Try strict schema first
+    if _validate_with_jsonschema(data, "results.schema.json"):
+        return True
+
+    # Fallback minimal checks
     for key in REQUIRED_TOP_LEVEL:
         if key not in data:
             raise ValueError(f"Missing required top-level field: {key}")
@@ -66,6 +94,10 @@ def validate_manifest_schema(data: Dict[str, Any]) -> bool:
       - override: dict (applied to base preset)
       - rng_seed: int
     """
+    # Try strict schema first
+    if _validate_with_jsonschema(data, "manifest.schema.json"):
+        return True
+
     if not isinstance(data, dict):
         raise ValueError("Manifest must be an object")
     if "base_preset" not in data or not isinstance(data["base_preset"], str):

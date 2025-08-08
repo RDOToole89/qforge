@@ -377,6 +377,29 @@ def visualize_from_json(json_path: str, viz_type: str = "histogram") -> None:
         sys.exit(1)
 
 
+def apply_profile_from_args(args: list) -> list:
+    """Apply `--profile <name>` if present and return args with it removed."""
+    if "--profile" in args:
+        try:
+            idx = args.index("--profile")
+            name = args[idx + 1]
+        except Exception:
+            logger.error("❌ --profile flag requires a name")
+            sys.exit(2)
+        try:
+            from src.config import profiles as _profiles
+
+            prof = _profiles.load_profile(name)
+            _profiles.apply_profile(prof)
+            logger.info(f"👤 Applied profile: {name}")
+        except Exception as e:
+            logger.error(f"❌ Failed to apply profile '{name}': {e}")
+            sys.exit(2)
+        # remove flag and name from args
+        args = args[:idx] + args[idx + 2 :]
+    return args
+
+
 def main():
     """Main entry point."""
     # Set up environment
@@ -385,19 +408,46 @@ def main():
     # Parse command line arguments
     args = sys.argv[1:]
 
-    # Streaming structured logs for headless/server mode
-    if "--stream-logs" in args:
+    # Optional: apply profile early if provided
+    args = apply_profile_from_args(args)
+
+    # Streaming structured logs for headless/server mode and quiet/JSON/verbose flags
+    console_json = "-J" in args or "--json-only" in args
+    if "--stream-logs" in args or "-q" in args or "--quiet" in args or console_json:
         try:
             from src.utils import logger as logger_utils
+
             logger_utils.setup_logger(
                 log_level=os.environ.get("QUANTUM_LOG_LEVEL", "INFO"),
                 log_to_file=False,
                 log_to_console=True,
-                structured_log_file="logs/structured_logs.json",
+                structured_log_file=(
+                    "logs/structured_logs.json" if "--stream-logs" in args else None
+                ),
+                console_json_mode=console_json,
             )
-            logger.info("📡 Streaming structured logs enabled → logs/structured_logs.json")
+            logger.info(
+                "📡 Headless logging configured (stream=%s, json_console=%s)",
+                "on" if "--stream-logs" in args else "off",
+                str(console_json),
+            )
         except Exception as _e:
-            logger.warning(f"Failed to enable streaming logs: {_e}")
+            logger.warning(f"Failed to configure headless logging: {_e}")
+        # Remove flags from args for further parsing
+        for flag in [
+            "-q",
+            "--quiet",
+            "-J",
+            "--json-only",
+            "-v",
+            "--verbose",
+            "--stream-logs",
+        ]:
+            try:
+                while flag in args:
+                    args.remove(flag)
+            except ValueError:
+                pass
 
     if not args:
         # No arguments - run interactive mode
@@ -435,6 +485,22 @@ def main():
             except Exception:
                 pass
         visualize_from_json(args[2], viz_type)
+    elif args[0] == "report" and len(args) > 2 and args[1] == "--from":
+        # New subcommand: report --from <results.json> [--format md]
+        fmt = "md"
+        if "--format" in args:
+            try:
+                fmt = args[args.index("--format") + 1]
+            except Exception:
+                pass
+        try:
+            from src.visualization.report import save_report_from_json
+
+            out = save_report_from_json(args[2], fmt=fmt)
+            logger.info(f"📝 Report saved to: {out}")
+        except Exception as e:
+            logger.error(f"❌ Report generation failed: {e}")
+            sys.exit(2)
     else:
         print("❌ Invalid arguments. Use --help for usage information.")
         sys.exit(1)

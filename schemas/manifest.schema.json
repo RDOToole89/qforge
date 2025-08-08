@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qexp.local/schemas/manifest.schema.json",
+  "title": "Parameter Sweep Manifest",
+  "type": "object",
+  "required": ["base_preset", "parameter_ranges", "runs_per_config"],
+  "properties": {
+    "base_preset": { "type": "string" },
+    "parameter_ranges": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array"
+      }
+    },
+    "runs_per_config": { "type": "integer", "minimum": 1 },
+    "override": { "type": "object" },
+    "rng_seed": { "type": ["integer", "null"] }
+  },
+  "additionalProperties": true
+}

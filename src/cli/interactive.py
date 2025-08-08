@@ -977,7 +977,7 @@ class InteractiveCLI:
             b_h = b_info.get("normalized_entropy")
             if isinstance(a_h, (int, float)) and isinstance(b_h, (int, float)):
                 _plt.figure(figsize=(4, 3))
-                _plt.bar(["A", "B"], [a_h, b_h], color=["#1f77b4", "#ff7f0e"]) 
+                _plt.bar(["A", "B"], [a_h, b_h], color=["#1f77b4", "#ff7f0e"])
                 _plt.title("Normalized Entropy")
                 _plt.ylim(0, 1)
                 _plt.tight_layout()

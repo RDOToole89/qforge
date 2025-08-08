@@ -98,6 +98,7 @@ def setup_logger(
     log_to_file: bool = True,
     log_to_console: bool = True,
     structured_log_file: Optional[str] = None,
+    console_json_mode: bool = False,
 ) -> logging.Logger:
     """
     Configures logging with support for file, console, and structured JSON output.
@@ -130,11 +131,16 @@ def setup_logger(
         file_handler.setFormatter(StructuredFormatter(is_rich_handler=False))
         handlers.append(file_handler)
 
-    # Console handler with rich output
+    # Console handler: rich by default; JSON when console_json_mode
     if log_to_console:
-        console_handler = RichHandler()
-        console_handler.setFormatter(StructuredFormatter(is_rich_handler=True))
-        handlers.append(console_handler)
+        if console_json_mode:
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(StructuredFormatter(is_rich_handler=False))
+            handlers.append(stream_handler)
+        else:
+            console_handler = RichHandler()
+            console_handler.setFormatter(StructuredFormatter(is_rich_handler=True))
+            handlers.append(console_handler)
 
     # Structured JSON handler (optional)
     if structured_log_file:

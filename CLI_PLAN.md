@@ -80,11 +80,11 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ### Headless/Server alignment
 
-- [x] CLI subcommands: `run --preset`, `run --config`, `sweep --manifest`, `viz --from results.json`
+- [x] CLI subcommands: `run --preset`, `run --config`, `sweep --manifest`, `viz --from results.json`, `report --from`
 - [x] Visualize from saved JSON (`--viz <file> --type ...`)
 - [x] Streaming structured logs flag (`--stream-logs`) for headless/server
 - [ ] Manifest format (JSON/YAML) for batches/sweeps; deterministic runs with seeds
-- [ ] Streaming progress and structured logs for server use
+- [x] Streaming progress (TTY) and structured events for server use
 
 ### Results schema & provenance
 
@@ -94,7 +94,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 
 ### Visualization & Insights
 
-- [ ] Professional “Experiment Report” panel: Key Insights, expand Details, Save report
+- [x] “Experiment Report” (Markdown) from saved JSON; CLI `report --from`
 - [x] Footer key hints added in major screens
 - [x] Re-introduce Density Matrix sim mode and align viz prompts
 
