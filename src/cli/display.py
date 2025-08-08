@@ -149,8 +149,12 @@ class DisplayManager:
         if key_findings:
             for f in key_findings[:5]:
                 lines.append(f"• {f}")
-        info = research_analysis.get("research_metrics", {}).get("information_theory", {})
-        dist = research_analysis.get("research_metrics", {}).get("distribution_comparison", {})
+        info = research_analysis.get("research_metrics", {}).get(
+            "information_theory", {}
+        )
+        dist = research_analysis.get("research_metrics", {}).get(
+            "distribution_comparison", {}
+        )
         if info:
             lines.append(f"Entropy (norm): {info.get('normalized_entropy','-')}")
         if dist:
@@ -166,7 +170,11 @@ class DisplayManager:
         qubits = metrics.get("qubit_analysis", {}).get("qubit_wise_bias", {})
 
         if info:
-            t = Table(title="Information Theory", show_header=True, header_style="bold magenta")
+            t = Table(
+                title="Information Theory",
+                show_header=True,
+                header_style="bold magenta",
+            )
             t.add_column("Metric", style="cyan")
             t.add_column("Value", style="green")
             for k, v in info.items():
@@ -174,7 +182,11 @@ class DisplayManager:
             self.console.print(t)
 
         if dist:
-            t2 = Table(title="Distribution Comparison", show_header=True, header_style="bold magenta")
+            t2 = Table(
+                title="Distribution Comparison",
+                show_header=True,
+                header_style="bold magenta",
+            )
             t2.add_column("Metric", style="cyan")
             t2.add_column("Value", style="green")
             for k, v in dist.items():
@@ -182,7 +194,9 @@ class DisplayManager:
             self.console.print(t2)
 
         if qubits:
-            t3 = Table(title="Qubit-wise Bias", show_header=True, header_style="bold magenta")
+            t3 = Table(
+                title="Qubit-wise Bias", show_header=True, header_style="bold magenta"
+            )
             t3.add_column("Qubit", style="cyan")
             t3.add_column("Bias", style="green")
             for q, v in qubits.items():

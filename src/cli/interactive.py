@@ -711,6 +711,9 @@ class InteractiveCLI:
                 return
             try:
                 self._compare_results(str(chosen), str(chosen2))
+                # Offer ideal deltas if same state/qubits
+                if self.input_handler.prompt_yes_no("insights_details_prompt", "n"):
+                    self._compare_vs_ideal(str(chosen))
             except Exception as e:
                 self.display_manager.display_error_message(f"Failed to compare: {e}")
 
@@ -823,6 +826,37 @@ class InteractiveCLI:
             else:
                 table.add_row(key, str(av), str(bv), "-")
         self.console.print(table)
+
+    def _compare_vs_ideal(self, file_path: str) -> None:
+        import json as _json
+        from src.visualization.histogram import get_ideal_quantum_distribution
+        with open(file_path, "r") as f:
+            data = _json.load(f)
+        params = data.get("experiment_parameters", {})
+        state_type = params.get("state_type")
+        num_qubits = int(params.get("num_qubits", 0))
+        counts = data.get("measurement_results", {}).get("raw_counts", {})
+        shots = max(1, int(sum(int(v) for v in counts.values())))
+        probs = {k: int(v) / shots for k, v in counts.items()}
+        ideal = get_ideal_quantum_distribution(state_type, num_qubits)
+        # Align keys
+        keys = sorted(set(list(probs.keys()) + list(ideal.keys())))
+        tvd = 0.5 * sum(abs(probs.get(k, 0) - ideal.get(k, 0)) for k in keys)
+        try:
+            import math
+            kl = sum(
+                probs[k] * math.log((probs[k] + 1e-12) / (ideal.get(k, 1e-12)))
+                for k in keys
+                if probs.get(k, 0) > 0
+            )
+        except Exception:
+            kl = float("nan")
+        t = Table(title="Delta vs Ideal", show_header=True, header_style="bold magenta")
+        t.add_column("Metric", style="cyan")
+        t.add_column("Value", style="green")
+        t.add_row("Total Variation Distance", f"{tvd:.6f}")
+        t.add_row("KL Divergence", f"{kl:.6f}")
+        self.console.print(t)
 
     def show_settings_stub(self) -> None:
         # Display current defaults; editing will be added later

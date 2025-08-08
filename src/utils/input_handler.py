@@ -181,12 +181,18 @@ class InputHandler:
             if enable_arrow_navigation:
                 try:
                     import sys
+
                     if sys.stdin.isatty():
                         import questionary
+
                         choices = []
-                        for idx, (value, label, hotkey) in enumerate(normalized, start=1):
+                        for idx, (value, label, hotkey) in enumerate(
+                            normalized, start=1
+                        ):
                             is_default = (idx - 1) == default_index
-                            title_text = f"{label} ({value})" + (" [default]" if is_default else "")
+                            title_text = f"{label} ({value})" + (
+                                " [default]" if is_default else ""
+                            )
                             choices.append(questionary.Choice(title_text, value))
                         answer = questionary.select(
                             title,
