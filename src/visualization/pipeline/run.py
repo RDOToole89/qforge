@@ -14,13 +14,24 @@ def render_from_json(
     backend: str = "matplotlib",
     output_base_dir: Optional[str] = None,
 ):
-    configure_output_base_dir(output_base_dir)
+    # If no explicit outdir, infer run_dir/visualizations from analysis path
+    inferred_outdir: Optional[str] = None
+    if not output_base_dir:
+        from pathlib import Path as _P
+
+        p = _P(json_path)
+        try:
+            if p.parent.name == "analysis":
+                inferred_outdir = str(p.parent.parent / "visualizations")
+        except Exception:
+            inferred_outdir = None
+
+    final_outdir = output_base_dir or inferred_outdir
+    configure_output_base_dir(final_outdir)
     analysis = read_analysis_json(json_path)
     svc = VisualizationService(default_backend=backend)
     req = build_request(
-        ComposeContext(
-            viz_type=viz_type, backend=backend, output_base_dir=output_base_dir
-        )
+        ComposeContext(viz_type=viz_type, backend=backend, output_base_dir=final_outdir)
     )
     return svc.render_from_analysis(analysis, request=req)
 

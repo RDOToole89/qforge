@@ -64,14 +64,20 @@ class LocalStorage(Storage):
         ts = meta.get("timestamp") or analysis.get("timestamp")
         try:
             # Normalize timestamps like 2025-08-08T16:34:38 to date/time
-            dt = datetime.fromisoformat(str(ts).replace("Z", "")) if ts else datetime.now()
+            dt = (
+                datetime.fromisoformat(str(ts).replace("Z", ""))
+                if ts
+                else datetime.now()
+            )
         except Exception:
             dt = datetime.now()
         date_str = dt.strftime("%Y%m%d")
         time_str = dt.strftime("%H%M%S")
 
         research_type = str(meta.get("research_type", "experiment")).lower()
-        state = str(analysis.get("experiment_parameters", {}).get("state_type", "state")).lower()
+        state = str(
+            analysis.get("experiment_parameters", {}).get("state_type", "state")
+        ).lower()
         prov = analysis.get("provenance", {})
         cfg_hash = prov.get("config_hash") or ""
         slug = f"{state}_{research_type}"

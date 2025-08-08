@@ -53,12 +53,26 @@ class VisualizationService:
             viz_type="histogram", backend=self.default_backend
         )
 
+        path_obj = Path(analysis_json_path)
         try:
-            analysis = json.loads(Path(analysis_json_path).read_text(encoding="utf-8"))
+            analysis = json.loads(path_obj.read_text(encoding="utf-8"))
         except Exception as e:
             raise ValueError(
                 f"Failed to read analysis JSON '{analysis_json_path}': {e}"
             ) from e
+
+        # If no explicit output_base_dir, infer run_dir/visualizations from analysis path
+        if request and not request.output_base_dir:
+            try:
+                # Expect .../results/YYYYMMDD/HHMMSS_slug/analysis/analysis.json
+                if path_obj.parent.name == "analysis":
+                    run_dir = path_obj.parent.parent
+                    inferred = run_dir / "visualizations"
+                    from src.visualization.save_manager import set_save_manager_base_dir
+
+                    set_save_manager_base_dir(str(inferred))
+            except Exception:
+                pass
 
         return self.render_from_analysis(analysis, request=request)
 
