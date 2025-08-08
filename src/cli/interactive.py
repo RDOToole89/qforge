@@ -1003,6 +1003,23 @@ class InteractiveCLI:
         table.add_row("LOGS_DIR", str(settings.DEFAULT_LOGS_DIR))
         self.console.print(table)
 
+        # Actions stub (Profiles/Editing soon)
+        try:
+            self.display_manager.display_footer_hints(["p=profiles", "b=back"])
+        except Exception:
+            pass
+        action = self.input_handler.select_option(
+            title="Settings Actions",
+            options=[
+                ("back", "Back", "b"),
+                ("profiles", "Profiles (coming soon)", "p"),
+            ],
+            default_value="back",
+            show_value_column=False,
+        )
+        if action == "profiles":
+            self.console.print("[yellow]Profiles management will be added next.[/yellow]")
+
     def _show_help_menu(self) -> None:
         # Minimal glossary stub
         glossary = {
