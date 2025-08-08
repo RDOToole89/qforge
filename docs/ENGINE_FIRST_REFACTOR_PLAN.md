@@ -859,3 +859,32 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 - Keep `docs/ENGINE_FIRST_REFACTOR_PLAN.md` updated at each phase
 - Add ADR (Architecture Decision Record) for engine‑first and visualization adapters
 - Provide migration notes for contributors (presets, viz adapters)
+
+---
+
+## Progress Update (to date)
+- Phase 0: DONE — Engine skeleton (`api`, `context`, `events`, `storage`, `runner`, `hashing`) and minimal tests.
+- Phase 1: DONE — Pydantic models (`ExperimentConfig`, `SweepManifest`, `ExperimentResult`, `Provenance`, `ArtifactRef`), schema generator, `schemas/*.json` generated.
+- Phase 3: DONE — Engine facade wired to legacy core; `engine.api.run()` returns `ExperimentResult` parity with legacy metrics.
+- Phase 4: DONE — Unified storage; results saved via `LocalStorage.save_analysis` with legacy-compatible paths; artifact recorded in result.
+- Phase 5: DONE — Basic event bus; `run/sweep` emit `RUN_START/RUN_END` and `SWEEP_START/SWEEP_END`.
+- Tests: 44 passed.
+
+## Revised Next Steps
+- Phase 6: CLI adapter switch (feature-flagged)
+  - Headless subcommands build `ExperimentConfig` and call `engine.api.run/sweep`.
+  - Flag: `QEXP_USE_ENGINE_API=1` or `--use-engine` to toggle; keep interactive unchanged initially.
+  - Tests for parity on headless paths.
+- Phase 7: Visualization adapters + `VisualizationService`
+  - Wrap current backends as adapters; route via service; storage provides path policy.
+- Phase 8: Interactive simplification
+  - Curated minimal presets; “Import config from file” for custom; shallow menus.
+- Phase 9: Profiles → `AppContext`
+  - Profiles produce `AppContext`; remove core reads of globals.
+- Phase 10: Cleanup & deprecations
+  - Deprecate `quick_experiments`, archive legacy presets, purge artifacts, docs/examples, pre-commit tooling.
+- Phase 11: Flip default & release
+  - Default engine on; deprecate legacy paths with notice; changelog.
+
+### Cross-cutting additions
+- Packaging (`pyproject.toml`, extras), plugin entry points, deep provenance (env snapshot), artifact checksums in manifest, perf benchmarks in CI, and security posture for custom builders (off by default).
