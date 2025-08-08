@@ -792,7 +792,7 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 - Tasks
   - Create `visualization/adapters/base.py` (protocol, `VizKind`)
   - Wrap existing backends as adapters under `visualization/adapters/*`
-  - Add `VisualizationService` and route CLI visualization calls through it
+  - Add `VisualizationService` and route CLI `viz --from` to use service when engine flag is on.
   - Delegate all path policy to storage; adapters return `ArtifactRef`s
   - Tests: adapter registration, capability errors, artifact creation
 - Acceptance
@@ -863,6 +863,7 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 ---
 
 ## Progress Update (to date)
+
 - Phase 0: DONE — Engine skeleton (`api`, `context`, `events`, `storage`, `runner`, `hashing`) and minimal tests.
 - Phase 1: DONE — Pydantic models (`ExperimentConfig`, `SweepManifest`, `ExperimentResult`, `Provenance`, `ArtifactRef`), schema generator, `schemas/*.json` generated.
 - Phase 3: DONE — Engine facade wired to legacy core; `engine.api.run()` returns `ExperimentResult` parity with legacy metrics.
@@ -871,12 +872,16 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 - Tests: 44 passed.
 
 ## Revised Next Steps
+
 - Phase 6: CLI adapter switch (feature-flagged)
   - Headless subcommands build `ExperimentConfig` and call `engine.api.run/sweep`.
   - Flag: `QEXP_USE_ENGINE_API=1` or `--use-engine` to toggle; keep interactive unchanged initially.
   - Tests for parity on headless paths.
 - Phase 7: Visualization adapters + `VisualizationService`
-  - Wrap current backends as adapters; route via service; storage provides path policy.
+  - DONE (initial): Added `src/engine/viz_service.py` with `VisualizationService` and `VisualizationRequest`.
+  - Adapters wrap existing matplotlib histogram/density functions and return `ArtifactRef`s.
+  - Test added: `tests/engine/test_viz_service.py` validates histogram rendering from analysis JSON and saved artifact presence.
+  - Next: expand adapters to hypergraph/plotly and wire CLI `viz --from` to use service when engine flag is on.
 - Phase 8: Interactive simplification
   - Curated minimal presets; “Import config from file” for custom; shallow menus.
 - Phase 9: Profiles → `AppContext`
@@ -887,4 +892,5 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
   - Default engine on; deprecate legacy paths with notice; changelog.
 
 ### Cross-cutting additions
+
 - Packaging (`pyproject.toml`, extras), plugin entry points, deep provenance (env snapshot), artifact checksums in manifest, perf benchmarks in CI, and security posture for custom builders (off by default).
