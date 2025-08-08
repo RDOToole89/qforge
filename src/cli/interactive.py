@@ -859,6 +859,7 @@ class InteractiveCLI:
                 ("hypergraph", "Hypergraph", "g"),
             ],
             default_value="histogram",
+            show_value_column=False,
         )
         # Display params summary then viz
         args = apply_defaults(params)
@@ -1018,7 +1019,9 @@ class InteractiveCLI:
             show_value_column=False,
         )
         if action == "profiles":
-            self.console.print("[yellow]Profiles management will be added next.[/yellow]")
+            self.console.print(
+                "[yellow]Profiles management will be added next.[/yellow]"
+            )
 
     def _show_help_menu(self) -> None:
         # Minimal glossary stub
@@ -1114,6 +1117,7 @@ class InteractiveCLI:
                         ("back", "Back", "b"),
                     ],
                     default_value="settings",
+                    show_value_column=False,
                 )
                 if sub == "settings":
                     self.show_settings_stub()
