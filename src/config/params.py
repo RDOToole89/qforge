@@ -61,14 +61,25 @@ def validate_parameters(args: Dict) -> Dict:
         )
         raise ValueError("sim_mode must be either 'qasm' or 'density'")
 
-    # Noise type validation
-    noise_input = validated_args["noise_type"].lower()
-    validated_args["noise_type"] = NOISE_SHORTCUTS.get(noise_input, noise_input.upper())
-    if validated_args["noise_type"] not in VALID_NOISE_TYPES:
-        console.print(
-            f"[bold red]Error: Invalid noise type '{validated_args['noise_type']}'. Choose from {VALID_NOISE_TYPES}.[/bold red]"
+    # Normalize noise params when disabled
+    if not validated_args.get("noise_enabled", False):
+        validated_args["noise_type"] = None
+        validated_args["error_rate"] = None
+        validated_args["z_prob"] = None
+        validated_args["i_prob"] = None
+        validated_args["t1"] = None
+        validated_args["t2"] = None
+    else:
+        # Noise type validation (only when enabled)
+        noise_input = str(validated_args.get("noise_type", "")).lower()
+        validated_args["noise_type"] = NOISE_SHORTCUTS.get(
+            noise_input, noise_input.upper()
         )
-        raise ValueError(f"Invalid noise type: {validated_args['noise_type']}")
+        if validated_args["noise_type"] not in VALID_NOISE_TYPES:
+            console.print(
+                f"[bold red]Error: Invalid noise type '{validated_args['noise_type']}'. Choose from {VALID_NOISE_TYPES}.[/bold red]"
+            )
+            raise ValueError(f"Invalid noise type: {validated_args['noise_type']}")
 
     # State type validation
     validated_args["state_type"] = validated_args["state_type"].upper()
@@ -78,8 +89,8 @@ def validate_parameters(args: Dict) -> Dict:
         )
         raise ValueError(f"Invalid state type: {validated_args['state_type']}")
 
-    # Validate error_rate
-    if validated_args["error_rate"] is not None:
+    # Validate error_rate (only meaningful if noise enabled)
+    if validated_args.get("noise_enabled", False) and validated_args["error_rate"] is not None:
         if not (0 <= validated_args["error_rate"] <= 1):
             console.print(
                 "[bold red]Error: error_rate must be between 0 and 1[/bold red]"
@@ -91,8 +102,8 @@ def validate_parameters(args: Dict) -> Dict:
     density_noise_warning = False
     if (
         validated_args["sim_mode"] == "density"
-        and validated_args["noise_type"] in single_qubit_noise_types
-        and validated_args["noise_enabled"]
+        and validated_args.get("noise_enabled", False)
+        and validated_args.get("noise_type") in single_qubit_noise_types
     ):
         console.print(
             f"[bold yellow]⚠️ Warning: {validated_args['noise_type']} noise only applies to single-qubit gates, which are skipped in density matrix simulation mode. "
@@ -100,12 +111,13 @@ def validate_parameters(args: Dict) -> Dict:
             "Consider using multi-qubit noise types (e.g., DEPOLARIZING, PHASE_FLIP, THERMAL_RELAXATION) for density mode.[/bold yellow]"
         )
         validated_args["noise_enabled"] = False
+        validated_args["noise_type"] = None
         density_noise_warning = True
 
     # Warn about single-qubit noise with multi-qubit systems, but skip if density simulation warning applies
-    if not density_noise_warning:
+    if not density_noise_warning and validated_args.get("noise_enabled", False):
         if (
-            validated_args["noise_type"] in SINGLE_QUBIT_NOISE_TYPES
+            validated_args.get("noise_type") in SINGLE_QUBIT_NOISE_TYPES
             and validated_args["num_qubits"] > 1
         ):
             console.print(
@@ -116,7 +128,8 @@ def validate_parameters(args: Dict) -> Dict:
 
     # Validate Z/I probabilities for PHASE_FLIP
     if (
-        validated_args["noise_type"] == "PHASE_FLIP"
+        validated_args.get("noise_enabled", False)
+        and validated_args.get("noise_type") == "PHASE_FLIP"
         and validated_args["z_prob"] is not None
         and validated_args["i_prob"] is not None
     ):
@@ -132,7 +145,8 @@ def validate_parameters(args: Dict) -> Dict:
 
     # Validate T1/T2 for THERMAL_RELAXATION
     if (
-        validated_args["noise_type"] == "THERMAL_RELAXATION"
+        validated_args.get("noise_enabled", False)
+        and validated_args.get("noise_type") == "THERMAL_RELAXATION"
         and validated_args["t1"] is not None
         and validated_args["t2"] is not None
     ):

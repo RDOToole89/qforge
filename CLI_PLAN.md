@@ -51,7 +51,7 @@ Framework goals: research-grade, modular, extensible. CLI must be intuitive for 
 - [x] Validators & schema checks for gates/builder/qasm (via CustomState.create path)
 - [x] Preview (text circuit summary)
 - [ ] Parameter normalization: hide noise fields when disabled; set to None
-- [ ] Constraints: enforce state↔qubits, physics (T2 ≤ 2*T1), compatible sim/noise
+- [ ] Constraints: enforce state↔qubits, physics (T2 ≤ 2\*T1), compatible sim/noise
 
 #### Recent Results
 

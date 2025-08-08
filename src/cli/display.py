@@ -44,23 +44,38 @@ class DisplayManager:
         params_to_display = {
             "Number of Qubits": args["num_qubits"],
             "State Type": args["state_type"],
-            "Noise Type": args["noise_type"],
-            "Noise Enabled": args["noise_enabled"],
             "Shots": args["shots"],
             "Simulation Mode": args["sim_mode"],
-            "Error Rate": (
-                args["error_rate"] if args["error_rate"] is not None else "Default"
-            ),
-            "Z Probability": (
-                args["z_prob"] if args["z_prob"] is not None else "Default"
-            ),
-            "I Probability": (
-                args["i_prob"] if args["i_prob"] is not None else "Default"
-            ),
-            "T1": args["t1"] if args["t1"] is not None else "Default",
-            "T2": args["t2"] if args["t2"] is not None else "Default",
-            "Custom Params": args["custom_params"] if args["custom_params"] else "None",
+            "Noise Enabled": args["noise_enabled"],
         }
+
+        # Only include noise details when enabled
+        if args.get("noise_enabled", False):
+            params_to_display.update(
+                {
+                    "Noise Type": args.get("noise_type", "-") or "-",
+                    "Error Rate": (
+                        args.get("error_rate")
+                        if args.get("error_rate") is not None
+                        else "Default"
+                    ),
+                    "Z Probability": (
+                        args.get("z_prob") if args.get("z_prob") is not None else "Default"
+                    ),
+                    "I Probability": (
+                        args.get("i_prob") if args.get("i_prob") is not None else "Default"
+                    ),
+                    "T1": args.get("t1") if args.get("t1") is not None else "Default",
+                    "T2": args.get("t2") if args.get("t2") is not None else "Default",
+                }
+            )
+        else:
+            params_to_display["Noise Type"] = "-"
+
+        # Custom params row
+        params_to_display["Custom Params"] = (
+            args["custom_params"] if args.get("custom_params") else "None"
+        )
 
         # Add stepped noise parameters if present
         if args.get("noise_stepped", False):

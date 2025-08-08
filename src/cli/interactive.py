@@ -193,7 +193,7 @@ class InteractiveCLI:
                 title="Simulation Mode",
                 options=[
                     ("qasm", "QASM (shots)", "q"),
-                    ("statevector", "Statevector", "s"),
+                    ("density", "Density Matrix", "d"),
                 ],
                 default_value=args["sim_mode"],
                 help_context="sim_mode",
@@ -941,8 +941,9 @@ class InteractiveCLI:
                 self.print_message("invalid_choice")
                 continue
 
-            # Display parameter summary
-            self.display_manager.display_params_summary(args)
+            # Normalize and display parameter summary
+            normalized = validate_parameters(apply_defaults(args))
+            self.display_manager.display_params_summary(normalized)
 
             # Confirm before running
             if self.input_handler.get_input("proceed_prompt", "y", ["y", "n"]) != "y":
@@ -965,7 +966,7 @@ class InteractiveCLI:
                 # Filter out metadata that shouldn't go to the experiment runner
                 experiment_params = {
                     k: v
-                    for k, v in args.items()
+                    for k, v in normalized.items()
                     if k not in ["name", "description", "category", "difficulty"]
                 }
 
