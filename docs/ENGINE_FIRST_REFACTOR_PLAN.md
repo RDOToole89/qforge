@@ -800,13 +800,13 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 - Rollback
   - Keep service present but leave CLI pointing to legacy backends
 
-### 8. Interactive CLI simplification
+### 8. Interactive simplification (next)
 
 - Tasks
-  - Limit visible presets to the curated set; remove difficulty; keep family/tags
-  - Custom: “Import config from file” only; advanced modes moved to headless
-  - Ensure menu layers are shallow and hotkeys unique; keep copy concise
-  - Tests: smoke path for menus, non‑TTY behavior, unique hotkeys
+  - Curate minimal presets; remove difficulty in UI; keep family/tags.
+  - Custom flow: prefer “Import config from file”; keep advanced modes headless.
+  - Shallow menus; unique hotkeys; concise copy; ensure non‑TTY defaults.
+  - Add smoke tests for menus and non‑TTY behavior.
 - Acceptance
   - Simplified UX validated; tests green
 - Rollback
@@ -873,18 +873,21 @@ This is the definitive, ordered plan. Each step includes tasks, acceptance crite
 
 ## Revised Next Steps
 
-- Phase 6: CLI adapter switch (feature-flagged)
-  - Headless subcommands build `ExperimentConfig` and call `engine.api.run/sweep`.
-  - Flag: `QEXP_USE_ENGINE_API=1` or `--use-engine` to toggle; keep interactive unchanged initially.
-  - Tests for parity on headless paths.
+- Phase 6: DONE — CLI adapter switch (feature-flagged)
+  - Headless subcommands (`run --preset`, `sweep --manifest`, `viz --from`) call engine services with normalization and legacy fallback.
+  - Flag: `QEXP_USE_ENGINE_API=1` toggles; interactive unchanged.
+  - Focused tests added; green.
 - Phase 7: Visualization adapters + `VisualizationService`
   - DONE (initial): Added `src/engine/viz_service.py` with `VisualizationService` and `VisualizationRequest`.
   - Adapters wrap existing matplotlib histogram/density/hypergraph functions and return `ArtifactRef`s.
   - Tests added: `tests/engine/test_viz_service.py` (histogram + hypergraph) and `tests/cli/test_cli_viz_engine_flag.py` for CLI wiring under engine flag.
   - CLI: `viz --from` routed through service when `QEXP_USE_ENGINE_API=1`.
   - Next: add Plotly adapter support and surface backend/output-dir flags on CLI.
-- Phase 8: Interactive simplification
-  - Curated minimal presets; “Import config from file” for custom; shallow menus.
+- Phase 8: Interactive simplification (next)
+  - Curate minimal presets; remove difficulty in UI; keep family/tags.
+  - Custom flow: prefer “Import config from file”; keep advanced modes headless.
+  - Shallow menus; unique hotkeys; concise copy; ensure non‑TTY defaults.
+  - Add smoke tests for menus and non‑TTY behavior.
 - Phase 9: Profiles → `AppContext`
   - Profiles produce `AppContext`; remove core reads of globals.
 - Phase 10: Cleanup & deprecations
