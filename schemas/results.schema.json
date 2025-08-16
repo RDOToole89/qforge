@@ -1,25 +1,179 @@
 {
   "$defs": {
+    "AnalysisMetadata": {
+      "description": "Metadata about the structured decoherence analysis.",
+      "properties": {
+        "state_type": {
+          "description": "Quantum state type (GHZ, W, BELL, etc.)",
+          "title": "State Type",
+          "type": "string"
+        },
+        "num_qubits": {
+          "description": "Number of qubits in the system",
+          "minimum": 1,
+          "title": "Num Qubits",
+          "type": "integer"
+        },
+        "total_shots": {
+          "description": "Total measurement shots used",
+          "minimum": 1,
+          "title": "Total Shots",
+          "type": "integer"
+        },
+        "unique_outcomes": {
+          "description": "Number of unique measurement outcomes",
+          "minimum": 1,
+          "title": "Unique Outcomes",
+          "type": "integer"
+        },
+        "analysis_timestamp": {
+          "description": "When the analysis was performed",
+          "title": "Analysis Timestamp",
+          "type": "string"
+        },
+        "noise_conditions": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Noise model parameters used",
+          "title": "Noise Conditions"
+        },
+        "computation_time_ms": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Time taken to compute metrics in milliseconds",
+          "title": "Computation Time Ms"
+        }
+      },
+      "required": [
+        "state_type",
+        "num_qubits",
+        "total_shots",
+        "unique_outcomes"
+      ],
+      "title": "AnalysisMetadata",
+      "type": "object"
+    },
     "ArtifactRef": {
+      "additionalProperties": false,
+      "description": "Reference to a generated experiment artifact.\n\nArtifacts include plots, reports, raw data files, and any other\noutputs generated during experiment execution and analysis.",
       "properties": {
         "kind": {
           "default": "other",
+          "description": "Type of artifact for organization and processing",
           "enum": [
             "histogram",
             "density_matrix",
             "report",
+            "raw_data",
+            "analysis",
+            "visualization",
             "other"
           ],
           "title": "Kind",
           "type": "string"
         },
         "path": {
+          "description": "File path to the artifact (absolute or relative to results directory)",
           "title": "Path",
           "type": "string"
         },
         "metadata": {
+          "description": "Additional metadata about the artifact",
           "title": "Metadata",
           "type": "object"
+        },
+        "file_size_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "File size in bytes",
+          "title": "File Size Bytes"
+        },
+        "mime_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "MIME type of the file",
+          "title": "Mime Type"
+        },
+        "creation_timestamp": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "When the artifact was created",
+          "title": "Creation Timestamp"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable title for the artifact",
+          "title": "Title"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Detailed description of artifact contents",
+          "title": "Description"
+        },
+        "public": {
+          "default": false,
+          "description": "Whether artifact can be shared publicly",
+          "title": "Public",
+          "type": "boolean"
+        },
+        "publication_ready": {
+          "default": false,
+          "description": "Whether artifact meets publication quality standards",
+          "title": "Publication Ready",
+          "type": "boolean"
         }
       },
       "required": [
@@ -28,123 +182,358 @@
       "title": "ArtifactRef",
       "type": "object"
     },
-    "StructuredDecoherenceMetrics": {
+    "CircuitStatistics": {
+      "description": "Quantum circuit characteristics and statistics.",
       "properties": {
-        "asymmetry_index": {
-          "title": "Asymmetry Index (AI)",
-          "type": "number",
-          "description": "Deviation from uniform error distribution",
-          "minimum": 0
+        "depth": {
+          "description": "Circuit depth (number of time steps)",
+          "minimum": 0,
+          "title": "Depth",
+          "type": "integer"
         },
-        "pathway_concentration_ratio": {
-          "title": "Pathway Concentration Ratio (PCR)",
-          "type": "number", 
-          "description": "Concentration of errors in top pathways vs bottom pathways",
-          "minimum": 0
+        "num_gates": {
+          "description": "Total number of gates",
+          "minimum": 0,
+          "title": "Num Gates",
+          "type": "integer"
         },
-        "entanglement_error_correlation": {
-          "title": "Entanglement-Error Correlation (EEC)",
-          "type": "number",
-          "description": "Correlation between entanglement topology and error patterns",
-          "minimum": -1,
-          "maximum": 1
+        "num_qubits": {
+          "description": "Number of qubits",
+          "minimum": 1,
+          "title": "Num Qubits",
+          "type": "integer"
         },
-        "temporal_pathway_stability": {
+        "gate_types": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Count of each gate type used",
+          "title": "Gate Types",
+          "type": "object"
+        },
+        "two_qubit_gate_count": {
           "anyOf": [
             {
-              "type": "number",
               "minimum": 0,
-              "maximum": 1
+              "type": "integer"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Temporal Pathway Stability (TPS)",
-          "description": "Consistency of pathway rankings across conditions"
+          "default": null,
+          "description": "Number of two-qubit gates (entangling operations)",
+          "title": "Two Qubit Gate Count"
         },
-        "complexity_emergence_score": {
+        "connectivity_graph": {
           "anyOf": [
             {
-              "type": "number",
-              "minimum": 0
+              "items": {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Complexity Emergence Score (CES)",
-          "description": "Critical threshold where structured patterns emerge"
-        },
-        "metadata": {
-          "type": "object",
-          "properties": {
-            "state_type": {
-              "type": "string"
-            },
-            "num_qubits": {
-              "type": "integer"
-            },
-            "total_shots": {
-              "type": "integer"
-            },
-            "unique_outcomes": {
-              "type": "integer"
-            },
-            "analysis_timestamp": {
-              "type": "string"
-            }
-          }
-        },
-        "pathway_analysis": {
-          "type": "object",
-          "properties": {
-            "dominant_pathways": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": [
-                  {"type": "string"},
-                  {"type": "number"}
-                ]
-              }
-            },
-            "pathway_concentration": {
-              "type": "string"
-            },
-            "asymmetry_level": {
-              "type": "string",
-              "enum": ["very_uniform", "slight_asymmetry", "moderate_asymmetry", "high_asymmetry"]
-            },
-            "entanglement_influence": {
-              "type": "string", 
-              "enum": ["no_correlation", "weak_correlation", "moderate_correlation", "strong_correlation"]
-            },
-            "total_outcomes": {
-              "type": "integer"
-            },
-            "measurement_shots": {
-              "type": "integer"
-            }
-          }
+          "default": null,
+          "description": "Qubit connectivity graph for multi-qubit operations",
+          "title": "Connectivity Graph"
         }
       },
       "required": [
-        "asymmetry_index",
-        "pathway_concentration_ratio", 
-        "entanglement_error_correlation"
+        "depth",
+        "num_gates",
+        "num_qubits"
       ],
-      "title": "StructuredDecoherenceMetrics",
+      "title": "CircuitStatistics",
+      "type": "object"
+    },
+    "ExperimentAnalysis": {
+      "description": "Core experimental analysis data.\n\nThis captures the essential analysis outputs from quantum experiments,\nseparated from metadata for clean data access.",
+      "properties": {
+        "experiment_metadata": {
+          "$ref": "#/$defs/ExperimentMetadata",
+          "description": "Basic experiment identification and context"
+        },
+        "experiment_parameters": {
+          "description": "Complete experiment configuration parameters",
+          "title": "Experiment Parameters",
+          "type": "object"
+        },
+        "circuit_statistics": {
+          "$ref": "#/$defs/CircuitStatistics",
+          "description": "Quantum circuit characteristics and statistics"
+        },
+        "measurement_results": {
+          "$ref": "#/$defs/MeasurementResults",
+          "description": "Raw measurement data and basic statistics"
+        },
+        "information_theory_metrics": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Information-theoretic analysis (entropy, mutual information, etc.)",
+          "title": "Information Theory Metrics"
+        },
+        "correlation_analysis": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Quantum correlation and entanglement analysis",
+          "title": "Correlation Analysis"
+        },
+        "statistical_validation": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Statistical validation and confidence measures",
+          "title": "Statistical Validation"
+        }
+      },
+      "required": [
+        "experiment_metadata",
+        "experiment_parameters",
+        "circuit_statistics",
+        "measurement_results"
+      ],
+      "title": "ExperimentAnalysis",
+      "type": "object"
+    },
+    "ExperimentMetadata": {
+      "description": "Basic experiment identification and context.",
+      "properties": {
+        "experiment_id": {
+          "description": "Unique experiment identifier",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "When experiment was performed",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "framework_version": {
+          "description": "Quantum experiment framework version",
+          "title": "Framework Version",
+          "type": "string"
+        },
+        "research_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Type of research analysis performed",
+          "title": "Research Type"
+        },
+        "experiment_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable description of experiment purpose",
+          "title": "Experiment Description"
+        }
+      },
+      "required": [
+        "experiment_id",
+        "timestamp",
+        "framework_version"
+      ],
+      "title": "ExperimentMetadata",
+      "type": "object"
+    },
+    "MeasurementResults": {
+      "description": "Raw measurement data and basic statistics.",
+      "properties": {
+        "raw_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Raw measurement counts as {bitstring: count} pairs",
+          "title": "Raw Counts",
+          "type": "object"
+        },
+        "total_shots": {
+          "description": "Total number of measurement shots",
+          "minimum": 1,
+          "title": "Total Shots",
+          "type": "integer"
+        },
+        "unique_outcomes": {
+          "description": "Number of unique measurement outcomes observed",
+          "minimum": 1,
+          "title": "Unique Outcomes",
+          "type": "integer"
+        },
+        "outcome_probabilities": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Normalized probabilities for each outcome",
+          "title": "Outcome Probabilities",
+          "type": "object"
+        },
+        "density_matrix": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Reconstructed density matrix (for density simulation mode)",
+          "title": "Density Matrix"
+        },
+        "fidelity": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Fidelity with ideal state (if computed)",
+          "title": "Fidelity"
+        }
+      },
+      "required": [
+        "raw_counts",
+        "total_shots",
+        "unique_outcomes",
+        "outcome_probabilities"
+      ],
+      "title": "MeasurementResults",
+      "type": "object"
+    },
+    "PathwayAnalysis": {
+      "description": "Human-readable analysis of decoherence pathways.",
+      "properties": {
+        "dominant_pathways": {
+          "description": "Top error pathways as (bitstring, probability) pairs",
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Dominant Pathways",
+          "type": "array"
+        },
+        "pathway_concentration": {
+          "description": "Qualitative assessment of pathway concentration",
+          "title": "Pathway Concentration",
+          "type": "string"
+        },
+        "asymmetry_level": {
+          "description": "Qualitative level of asymmetry in error distribution",
+          "title": "Asymmetry Level",
+          "type": "string"
+        },
+        "entanglement_influence": {
+          "description": "Qualitative assessment of entanglement topology influence",
+          "title": "Entanglement Influence",
+          "type": "string"
+        },
+        "total_outcomes": {
+          "description": "Total possible outcomes",
+          "minimum": 1,
+          "title": "Total Outcomes",
+          "type": "integer"
+        },
+        "measurement_shots": {
+          "description": "Measurement shots used",
+          "minimum": 1,
+          "title": "Measurement Shots",
+          "type": "integer"
+        },
+        "research_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Additional research insights or observations",
+          "title": "Research Notes"
+        }
+      },
+      "required": [
+        "dominant_pathways",
+        "pathway_concentration",
+        "asymmetry_level",
+        "entanglement_influence",
+        "total_outcomes",
+        "measurement_shots"
+      ],
+      "title": "PathwayAnalysis",
       "type": "object"
     },
     "Provenance": {
+      "description": "Complete provenance information for experiment reproducibility.\n\nThis captures all information needed to exactly reproduce an experiment,\nfollowing research best practices for computational reproducibility.",
       "properties": {
         "schema_version": {
           "default": "1.0.0",
+          "description": "Provenance schema version",
           "title": "Schema Version",
           "type": "string"
         },
         "timestamp": {
+          "description": "Provenance record creation timestamp",
           "title": "Timestamp",
           "type": "string"
         },
@@ -152,6 +541,7 @@
           "additionalProperties": {
             "type": "string"
           },
+          "description": "Versions of all software dependencies",
           "title": "Software Versions",
           "type": "object"
         },
@@ -159,6 +549,7 @@
           "additionalProperties": {
             "type": "string"
           },
+          "description": "Host system information",
           "title": "Host Info",
           "type": "object"
         },
@@ -172,6 +563,7 @@
             }
           ],
           "default": null,
+          "description": "Git commit SHA for exact code version",
           "title": "Git Sha"
         },
         "rng_seed": {
@@ -184,15 +576,46 @@
             }
           ],
           "default": null,
+          "description": "Random number generator seed used",
           "title": "Rng Seed"
         },
         "simulator_info": {
+          "description": "Quantum simulator configuration and metadata",
           "title": "Simulator Info",
           "type": "object"
         },
         "transpilation_summary": {
+          "description": "Circuit transpilation details and optimizations",
           "title": "Transpilation Summary",
           "type": "object"
+        },
+        "execution_time_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Total execution time in seconds",
+          "title": "Execution Time Seconds"
+        },
+        "memory_usage_mb": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Peak memory usage in megabytes",
+          "title": "Memory Usage Mb"
         }
       },
       "required": [
@@ -200,74 +623,310 @@
       ],
       "title": "Provenance",
       "type": "object"
+    },
+    "QualityMetrics": {
+      "description": "Quality assessment of experiment results.",
+      "properties": {
+        "shot_adequacy": {
+          "description": "Adequacy of shot count for statistical significance",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Shot Adequacy",
+          "type": "number"
+        },
+        "outcome_coverage": {
+          "description": "Fraction of possible outcomes observed",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Outcome Coverage",
+          "type": "number"
+        },
+        "confidence_level": {
+          "description": "Statistical confidence in results",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "convergence_achieved": {
+          "description": "Whether statistical convergence was achieved",
+          "title": "Convergence Achieved",
+          "type": "boolean"
+        },
+        "research_significance": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Research significance score for structured decoherence studies",
+          "title": "Research Significance"
+        },
+        "publication_readiness": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Assessment of publication readiness",
+          "title": "Publication Readiness"
+        }
+      },
+      "required": [
+        "shot_adequacy",
+        "outcome_coverage",
+        "confidence_level",
+        "convergence_achieved"
+      ],
+      "title": "QualityMetrics",
+      "type": "object"
+    },
+    "ResearchMetadata": {
+      "description": "Metadata for research experiments and campaigns.\n\nPurpose: Track research context, hypotheses, and experimental conditions\nfor structured decoherence studies.",
+      "properties": {
+        "hypothesis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Research hypothesis being tested",
+          "title": "Hypothesis"
+        },
+        "research_phase": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Phase of research (threshold, characterization, validation, etc.)",
+          "title": "Research Phase"
+        },
+        "campaign_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Research campaign identifier for grouping related experiments",
+          "title": "Campaign Id"
+        },
+        "expected_outcomes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected experimental outcomes or predictions",
+          "title": "Expected Outcomes"
+        },
+        "control_experiment": {
+          "default": false,
+          "description": "Whether this is a control experiment",
+          "title": "Control Experiment",
+          "type": "boolean"
+        },
+        "publication_ready": {
+          "default": false,
+          "description": "Whether results meet publication quality standards",
+          "title": "Publication Ready",
+          "type": "boolean"
+        },
+        "figure_candidate": {
+          "default": false,
+          "description": "Whether results are suitable for publication figures",
+          "title": "Figure Candidate",
+          "type": "boolean"
+        }
+      },
+      "title": "ResearchMetadata",
+      "type": "object"
+    },
+    "StructuredDecoherenceMetrics": {
+      "additionalProperties": false,
+      "description": "Complete structured decoherence pathway metrics.\n\nThese metrics quantify whether quantum decoherence follows structured\npathways determined by entanglement topology vs purely random patterns.",
+      "properties": {
+        "asymmetry_index": {
+          "description": "AI: Deviation from uniform error distribution. Formula: (1/N) \u03a3\u1d62 |p\u1d62 - p_uniform| / p_uniform",
+          "minimum": 0.0,
+          "title": "Asymmetry Index",
+          "type": "number"
+        },
+        "pathway_concentration_ratio": {
+          "description": "PCR: Concentration of errors in top pathways vs bottom pathways. Formula: (Top 25% frequencies) / (Bottom 25% frequencies)",
+          "minimum": 0.0,
+          "title": "Pathway Concentration Ratio",
+          "type": "number"
+        },
+        "entanglement_error_correlation": {
+          "description": "EEC: Correlation between entanglement topology and error patterns. Range: [-1, 1]",
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "title": "Entanglement Error Correlation",
+          "type": "number"
+        },
+        "temporal_pathway_stability": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "TPS: Consistency of pathway rankings across noise levels. Range: [0, 1], None if single condition",
+          "title": "Temporal Pathway Stability"
+        },
+        "complexity_emergence_score": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CES: Critical threshold where structured patterns emerge. None if insufficient data",
+          "title": "Complexity Emergence Score"
+        },
+        "metadata": {
+          "$ref": "#/$defs/AnalysisMetadata",
+          "description": "Metadata about the analysis conditions and parameters"
+        },
+        "pathway_analysis": {
+          "$ref": "#/$defs/PathwayAnalysis",
+          "description": "Human-readable analysis of pathway characteristics"
+        }
+      },
+      "required": [
+        "asymmetry_index",
+        "pathway_concentration_ratio",
+        "entanglement_error_correlation",
+        "metadata",
+        "pathway_analysis"
+      ],
+      "title": "StructuredDecoherenceMetrics",
+      "type": "object"
     }
   },
   "additionalProperties": true,
+  "description": "Complete quantum experiment result.\n\nThis model captures everything needed to understand, reproduce,\nand build upon a quantum experiment result.",
   "properties": {
     "analysis": {
-      "title": "Analysis",
-      "type": "object",
-      "properties": {
-        "experiment_metadata": {
-          "type": "object",
-          "properties": {
-            "experiment_id": {"type": "string"},
-            "timestamp": {"type": "string"},
-            "framework_version": {"type": "string"},
-            "research_type": {"type": "string"}
-          }
-        },
-        "experiment_parameters": {
-          "type": "object"
-        },
-        "circuit_statistics": {
-          "type": "object"
-        },
-        "measurement_results": {
-          "type": "object"
-        },
-        "research_metrics": {
-          "type": "object"
-        },
-        "provenance": {
-          "type": "object"
-        }
-      }
+      "$ref": "#/$defs/ExperimentAnalysis",
+      "description": "Complete experimental analysis including raw data and metrics"
     },
-    "metrics": {
-      "title": "Metrics", 
-      "type": "object",
-      "properties": {
-        "structured_decoherence_metrics": {
+    "structured_decoherence_metrics": {
+      "anyOf": [
+        {
           "$ref": "#/$defs/StructuredDecoherenceMetrics"
+        },
+        {
+          "type": "null"
         }
-      }
+      ],
+      "default": null,
+      "description": "Structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)"
+    },
+    "research_metadata": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ResearchMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Research context and experimental metadata"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Complete provenance information for reproducibility"
     },
     "artifacts": {
+      "description": "References to generated files (plots, reports, etc.)",
       "items": {
         "$ref": "#/$defs/ArtifactRef"
       },
       "title": "Artifacts",
       "type": "array"
     },
-    "provenance": {
-      "$ref": "#/$defs/Provenance"
-    },
     "config_hash": {
+      "description": "Hash of experiment configuration for deduplication",
       "title": "Config Hash",
       "type": "string"
     },
     "timestamp": {
+      "description": "When the experiment was completed",
       "title": "Timestamp",
       "type": "string"
+    },
+    "status": {
+      "default": "completed",
+      "description": "Experiment execution status",
+      "enum": [
+        "pending",
+        "running",
+        "completed",
+        "failed",
+        "cancelled",
+        "timeout"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "quality_metrics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QualityMetrics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Quality assessment of experiment results"
     }
   },
   "required": [
     "analysis",
-    "metrics",
     "provenance",
-    "config_hash",
-    "timestamp"
+    "config_hash"
   ],
   "title": "ExperimentResult",
   "type": "object"
