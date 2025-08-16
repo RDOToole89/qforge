@@ -1,156 +1,222 @@
-# Schema Documentation
+Got it — here’s your **README.md** with the **Schema Freeze Notice + Future Nice-to-Haves** appended at the end.
 
-This directory contains JSON schemas for validating quantum experiment configurations, sweep manifests, and results data. All schemas have been updated to support structured decoherence research.
+---
 
-## Schema Files
+# Quantum Experiment Schema Suite (V1.0)
 
-### `experiment_config.schema.json`
-Validates individual experiment configurations with full research parameter support.
+This repo defines **five JSON Schemas** that form a coherent pipeline for running,
+storing, and analyzing quantum experiments. The schemas are versioned together (V1.0) and are **normalized** to avoid duplication.
 
-**New Research Parameters:**
-- `enable_research_metrics` (boolean) - Enable structured decoherence metrics computation
-- `research_type` (enum) - Type of research analysis: `structured_decoherence`, `parameter_sweep`, `noise_comparison`, `control`, `scaling`, `convergence`, `batch_sweep`
-- `multiple_runs` (integer) - Number of experimental runs for statistical validation
-- `track_convergence` (boolean) - Enable convergence tracking for high-precision experiments  
-- `visualization_type` (enum) - Visualization type: `histogram`, `density_matrix`, `research`, `plot`, `none`
+---
 
-**Example:**
-```json
-{
-  "num_qubits": 3,
-  "state_type": "GHZ", 
-  "noise_type": "depolarizing",
-  "noise_enabled": true,
-  "error_rate": 0.05,
-  "shots": 4096,
-  "enable_research_metrics": true,
-  "research_type": "structured_decoherence",
-  "multiple_runs": 1,
-  "visualization_type": "research"
-}
+## 📂 Folder Structure
+
+```
+schemas/
+├── core/
+│   ├── experiment_spec.schema.json
+│   ├── provenance.schema.json
+│   └── structure_metrics.schema.json
+│
+├── execution/
+│   ├── experiment_result.schema.json
+│   └── sweep_manifest.schema.json
+│
+├── analysis/
+│   └── analysis_result.schema.json
+│
+└── schema_index.json
 ```
 
-### `manifest.schema.json`
-Validates parameter sweep manifests with enhanced configurability.
+### Rationale
 
-**Key Features:**
-- Supports both `base_preset` (string) and `base_config` (object) for flexibility
-- Includes all research parameters from experiment config
-- `override` section for parameter overrides applied to base configuration
-- `parameter_ranges` for systematic parameter sweeps
+- **core/** → reusable building blocks (`experiment_spec`, `provenance`, `structure_metrics`).
+- **execution/** → results of actually running experiments (`experiment_result`, `sweep_manifest`).
+- **analysis/** → aggregated summaries (`analysis_result`).
+- **schema_index.json** → registry of all schemas and references.
 
-**Example:**
-```json
-{
-  "base_config": {
-    "num_qubits": 3,
-    "state_type": "GHZ",
-    "enable_research_metrics": true,
-    "research_type": "structured_decoherence"
-  },
-  "parameter_ranges": {
-    "num_qubits": [3, 4, 5],
-    "error_rate": [0.0, 0.05, 0.1, 0.2]
-  },
-  "runs_per_config": 1,
-  "override": {
-    "shots": 10000,
-    "track_convergence": false
-  }
-}
+This layout mirrors the workflow: **design → execution → analysis**.
+
+---
+
+## Schemas Overview
+
+### 1. **core/experiment_spec.schema.json**
+
+Planned configuration of a quantum experiment.
+
+- Defines state type, qubit count, noise model, shots, research metadata.
+- Acts as the **source of truth** for what was intended to run.
+- Referenced by: `experiment_result`, `sweep_manifest`.
+
+### 2. **core/structure_metrics.schema.json**
+
+Standardized set of decoherence and structure metrics.
+
+- Includes structure score, entanglement–error correlation, concentration index,
+  total correlation, persistence, and complexity emergence score.
+- All metrics carry values, 95% CIs, and validation status.
+- Referenced by: `experiment_result`.
+
+### 3. **execution/experiment_result.schema.json**
+
+Captures the outcome of a single experimental run.
+
+- Contains provenance (engine config hash, commit, backend).
+- Stores raw counts, empirical frequencies, ideal distribution.
+- Embeds `experiment_spec` (as snapshot) + `structure_metrics`.
+- Referenced by: `analysis_result`.
+
+### 4. **execution/sweep_manifest.schema.json**
+
+Describes a systematic parameter sweep.
+
+- Embeds a base `experiment_spec` and parameter ranges.
+- Supports research metadata (hypothesis, expected trends).
+- Controls execution (parallelism, seeds).
+- Referenced by: `analysis_result`.
+
+### 5. **analysis/analysis_result.schema.json**
+
+Aggregated analysis across sweeps or experiment sets.
+
+- Links back to the originating `sweep_manifest`.
+- Contains arrays of `experiment_result`.
+- Stores comparative metrics (trends, correlations, matrices).
+- Summarizes conclusions with timestamp.
+
+---
+
+## Schema Relationships
+
+```mermaid
+graph TD
+
+  spec[Experiment Spec] --> result[Experiment Result]
+  spec --> sweep[Sweep Manifest]
+  metrics[Structure Metrics] --> result
+  result --> analysis[Analysis Result]
+  sweep --> analysis
 ```
 
-### `results.schema.json`
-Validates experiment results including structured decoherence metrics.
+---
 
-**Structured Decoherence Metrics Schema:**
-- `asymmetry_index` (number, ≥0) - AI: Deviation from uniform error distribution
-- `pathway_concentration_ratio` (number, ≥0) - PCR: Concentration in top pathways  
-- `entanglement_error_correlation` (number, -1 to 1) - EEC: Topology-error correlation
-- `temporal_pathway_stability` (number, 0-1 or null) - TPS: Pathway consistency
-- `complexity_emergence_score` (number, ≥0 or null) - CES: Emergence threshold
-- `metadata` (object) - Analysis metadata (state_type, num_qubits, etc.)
-- `pathway_analysis` (object) - Human-readable pathway analysis summary
+## Usage Workflow
 
-**Updated Artifact Types:**
-- Removed: `hypergraph` (cleaned up)
-- Supported: `histogram`, `density_matrix`, `report`, `other`
+1. **Design** → Create `experiment_spec`.
+2. **Sweep** → Wrap specs into `sweep_manifest` if exploring parameters.
+3. **Run** → Execute and capture outputs in `experiment_result`.
+4. **Measure** → Compute and attach `structure_metrics`.
+5. **Aggregate** → Collect results in `analysis_result` for trends and conclusions.
 
-## Schema Usage in Code
+---
 
-### Validation Functions
-```python
-from src.utils.schema import validate_manifest_schema, validate_results_schema
+## Versioning
 
-# Validate sweep manifest
-validate_manifest_schema(manifest_data)
+- All schemas are currently at `schema_version: "1.0"`.
+- Breaking changes will bump the major version across all files.
+- Use the `engine_config_hash` to tie results back to simulator/hardware state.
 
-# Validate experiment results  
-validate_results_schema(results_data)
-```
+---
 
-### Research Metrics Integration
-The structured decoherence metrics are automatically computed when `enable_research_metrics: true` and included in the results under `metrics.structured_decoherence_metrics`.
+## Quick Links
 
-### Engine API Integration
-The schemas work seamlessly with both engine API and legacy execution paths, ensuring consistent data validation across all experiment workflows.
+- [core/experiment_spec.schema.json](core/experiment_spec.schema.json)
+- [core/structure_metrics.schema.json](core/structure_metrics.schema.json)
+- [execution/experiment_result.schema.json](execution/experiment_result.schema.json)
+- [execution/sweep_manifest.schema.json](execution/sweep_manifest.schema.json)
+- [analysis/analysis_result.schema.json](analysis/analysis_result.schema.json)
+- [schema_index.json](schema_index.json)
 
-## Research Configuration Patterns
+---
 
-### Basic Research Experiment
-```json
-{
-  "num_qubits": 3,
-  "state_type": "GHZ",
-  "noise_type": "depolarizing", 
-  "noise_enabled": true,
-  "error_rate": 0.05,
-  "enable_research_metrics": true,
-  "research_type": "structured_decoherence"
-}
-```
+✅ With this `schema_index.json` and `README.md`, you now have:
 
-### Parameter Sweep for Research
-```json
-{
-  "base_config": {
-    "state_type": "GHZ",
-    "enable_research_metrics": true,
-    "research_type": "parameter_sweep",
-    "shots": 10000
-  },
-  "parameter_ranges": {
-    "num_qubits": [3, 4, 5],
-    "error_rate": [0.005, 0.01, 0.02, 0.05, 0.1]
-  },
-  "runs_per_config": 5
-}
-```
+- A **map of dependencies**.
+- A **clear workflow** from spec → sweep → result → analysis.
+- No more “where does this belong?” confusion.
 
-### High-Precision Convergence Study  
-```json
-{
-  "num_qubits": 3,
-  "state_type": "GHZ",
-  "enable_research_metrics": true,
-  "research_type": "convergence",
-  "shots": 16384,
-  "multiple_runs": 1,
-  "track_convergence": true
-}
-```
+---
 
-## Schema Validation Benefits
+# 🚀 Schema Freeze Notice – Version 1.0
 
-1. **Data Integrity** - Ensures consistent data structures across all experiments
-2. **Research Compliance** - Validates that research parameters are properly configured
-3. **Error Prevention** - Catches configuration errors before experiments run
-4. **Documentation** - Serves as living documentation of supported parameters
-5. **Tool Integration** - Enables IDE autocompletion and validation in editors
+As of **2025-08-16**, the **Quantum Experiment Schema Suite (v1.0)** is declared **frozen**.
 
-## Future Enhancements
+This version is **research-ready** and **production-stable**. All five schemas have passed validation against the design checklist:
 
-- Additional research types as new analysis methods are developed
-- Enhanced validation rules for parameter combinations
-- Conditional validation based on research type
-- Integration with experiment design assistance tools
+- **experiment_spec.schema.json** – experiment planning & intent
+- **experiment_result.schema.json** – single-run outcomes & provenance
+- **structure_metrics.schema.json** – standardized structural/decoherence metrics
+- **sweep_manifest.schema.json** – parameterized sweeps & systematic exploration
+- **analysis_result.schema.json** – aggregation, trends, and conclusions
+
+✅ **Core coverage** – every stage of the workflow is represented
+✅ **Reproducibility** – full provenance (commit, backend, config hash, timestamp)
+✅ **Statistical rigor** – confidence intervals + validation status on all metrics
+✅ **Research alignment** – 5-phase structure (validation → predictive)
+✅ **Versioning discipline** – `"schema_version": "1.0"` enforced across suite
+
+---
+
+## 🔒 What this means
+
+- Version **1.0 is stable** and should be used for all experiments going forward.
+- **No further schema edits** will be made unless:
+
+  - A **breaking change** is required → bump to `2.0`
+  - A **non-breaking enhancement** (e.g. units, null models) is added → bump to `1.1`
+
+---
+
+## 🧪 Next Steps
+
+- Begin running experiments using these schemas as the canonical structure.
+- Generate validation + example JSON docs to verify real-world coverage.
+- Collect feedback during research; schedule schema revisions only if necessary.
+
+---
+
+## 🌱 Future Nice-to-Haves (post-1.0 roadmap)
+
+These are **not in v1.0** but may be considered for `1.1+` or `2.0`:
+
+### General
+
+- 🔧 **Units metadata** for all numeric metrics (`bits`, `probability`, etc.).
+- 🔗 **Cross-references** (`related_experiments`, `related_sweeps`) to support comparative studies.
+
+### structure_metrics
+
+- 📊 **Null model parameters** alongside structure scores for better statistical context.
+- 🧮 **Extra derived metrics** (e.g. spectral entropy, mutual info matrices).
+- 🔍 **Metric provenance**: which analysis method produced which metric.
+
+### experiment_spec
+
+- 🧑‍🔬 **Custom operator definitions** (e.g. JSON encoding of circuits or Hamiltonians).
+- 🔄 **Multiple noise models** combined (e.g. depolarizing + amplitude damping).
+- 📝 **Tags / labels** for quicker indexing of experiment families.
+
+### experiment_result
+
+- 🔗 **Cross-experiment links** (e.g. calibration runs, control experiments).
+- ⚡ **Raw snapshot storage** for backend configs (not just hash).
+- 📦 **Compression / storage metadata** for large count datasets.
+
+### sweep_manifest
+
+- 🎛️ **Composite sweeps** (multi-parameter grids with constraints).
+- 📐 **Adaptive sweeps** (where ranges depend on earlier results).
+- 🕸️ **Topology sweeps** (explicitly vary qubit connectivity graph).
+
+### analysis_result
+
+- 📂 **Hierarchical aggregation** (nested analyses of sweeps).
+- 🧭 **Confidence grading** of conclusions.
+- 🗄️ **Method provenance**: exact analysis pipeline + software version.
+
+---
+
+👉 **Important:** Locking schemas now reduces churn and lets us focus on actual research, not endless redesign. Any “nice-to-have” ideas above will be logged for **future versions**.
+
+---

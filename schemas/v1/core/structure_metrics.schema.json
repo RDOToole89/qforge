@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "structure_metrics.schema.json",
+  "title": "StructureMetrics",
+  "description": "Structured decoherence pathway metrics with confidence intervals",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Schema version identifier"
+    },
+    "structure_score": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "SS: Jensen-Shannon divergence from null model",
+      "properties": {
+        "value": { "type": "number", "minimum": 0.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    },
+    "entanglement_error_correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "EEC: Correlation between entanglement topology and error patterns",
+      "properties": {
+        "value": { "type": "number", "minimum": -1.0, "maximum": 1.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    },
+    "concentration_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "CI: Gini coefficient of error distribution",
+      "properties": {
+        "value": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    },
+    "total_correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "TC: Multi-information in bits",
+      "properties": {
+        "value": { "type": "number", "minimum": 0.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    },
+    "pathway_persistence": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "PP: Stability of error pathways across runs",
+      "properties": {
+        "value": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable", "insufficient_runs"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    },
+    "complexity_emergence_score": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "CES: Structure emergence threshold",
+      "properties": {
+        "value": { "type": "number", "minimum": 0.0 },
+        "ci95": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[lower, upper] 95% confidence interval"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["validated", "experimental", "unstable", "insufficient_data"]
+        }
+      },
+      "required": ["value", "ci95", "status"]
+    }
+  },
+  "required": [
+    "schema_version",
+    "structure_score",
+    "entanglement_error_correlation",
+    "concentration_index",
+    "total_correlation"
+  ]
+}

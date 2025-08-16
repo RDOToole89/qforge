@@ -44,7 +44,9 @@ shellingham==1.5.4
 pydantic==2.11.7
 
 # ==========================
-# ✅ Test Dependencies
+# ✅ Test & Validation Dependencies
 # ==========================
 
 pytest==8.3.2
+jsonschema==4.25.0
+referencing>=0.30
