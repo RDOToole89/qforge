@@ -145,6 +145,46 @@ results/
 
 **Descriptive Filenames**: Each result file includes all key experiment parameters for easy browsing and identification without opening the file.
 
+## Current Development Status
+
+### ✅ Completed Major Refactoring (December 2024)
+
+**State Preparation Framework - Educational & Research Excellence**
+- **LEAN Architecture**: Implemented Phase 1 safe abstractions in state preparation
+- **Code Quality**: Eliminated ~75 lines of duplicated AerSimulator boilerplate
+- **Educational Enhancement**: Added comprehensive framework documentation
+- **Hardware Integration**: Added `prepare_state_for_hardware()` for real quantum devices
+- **Research Functionality**: Maintained all research capabilities while improving code quality
+
+**Core Framework Cleanup**
+- **Dependency Elimination**: Removed legacy `utils/` directory and logger dependencies
+- **Architecture Simplification**: Deleted deprecated `parameter_sweep.py` from core
+- **LEAN Separation**: Clean interfaces between engine, core, and state preparation
+- **Documentation**: Complete README.md for state preparation framework
+
+### 🎯 Current Architecture Status
+
+**State Preparation (`src/core/state_preparation/`)** - ✅ **COMPLETE & PRODUCTION-READY**
+- **BaseState**: Foundation class with shared utilities for simulation and validation
+- **Factory Pattern**: Clean creation interface with hardware validation
+- **Registry System**: Dynamic state discovery and management
+- **Educational Masterpiece**: Each component teaches quantum mechanics while enabling research
+- **6 State Types**: GHZ, Bell, W, Cluster, Superposition, Custom - all research-grade
+
+**Engine Integration** - ✅ **STABLE**
+- Clean API through `run()` and `sweep()` functions
+- Type-safe Pydantic models for all data structures
+- Automated structured decoherence metrics computation
+
+### 🔄 Next Phase Candidates
+
+**Potential Areas for Future Enhancement:**
+1. **Analysis Modules**: Enhance information theory and correlation analysis
+2. **Visualization**: Improve quantum-aware plotting and educational diagrams  
+3. **Noise Models**: Extend physics-compliant noise model library
+4. **Hardware Integration**: Expand real device compatibility and optimization
+5. **Educational Tools**: Interactive tutorials and quantum mechanics demonstrations
+
 ## Architecture Principles
 
 1. **Engine-First**: All functionality accessible via clean Python API
@@ -153,6 +193,8 @@ results/
 4. **Research Focused**: Built specifically for structured decoherence studies
 5. **Reproducible**: Complete provenance tracking and deterministic results
 6. **Physics Compliant**: All noise models respect quantum mechanics constraints
+7. **Educational Excellence**: Every component serves both learning and research purposes
+8. **LEAN Design**: Single responsibility, separation of concerns, minimal duplication
 
 ## Research Workflow
 
