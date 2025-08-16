@@ -6,7 +6,7 @@ from typing import Optional, Mapping, Any
 from src.engine.models import ArtifactRef
 from src.visualization.adapters.base import VizKind, VisualizationAdapter
 from src.visualization.adapters.matplotlib_adapter import MatplotlibAdapter
-from src.visualization.adapters.plotly_adapter import PlotlyAdapter
+# PlotlyAdapter removed - using matplotlib only
 
 
 @dataclass
@@ -23,7 +23,6 @@ class VisualizationService:
         self._default_backend = default_backend
         self._adapters: dict[str, VisualizationAdapter] = {
             "matplotlib": MatplotlibAdapter(),
-            "plotly": PlotlyAdapter(),
         }
 
     def render_from_json(self, json_path: str, request: VizRequest) -> ArtifactRef:

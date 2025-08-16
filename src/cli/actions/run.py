@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Dict, Any, Optional
 
 from src.engine.api import run as engine_run
-from src.visualization.pipeline.run import render_from_json
+from src.visualization.service import VisualizationService
 from src.visualization.report import save_report_from_json
 
 
@@ -65,12 +65,13 @@ def execute_run(
     # Render appropriate visualizations and reports into the run directory
     sim_mode = experiment_params.get("sim_mode", "qasm")
     try:
+        svc = VisualizationService()
         if sim_mode == "qasm":
-            art_hist = render_from_json(analysis_json, viz_type="histogram")
+            art_hist = svc.render_from_json(analysis_json, viz_type="histogram")
             display_manager.display_success_message(f"Histogram saved: {art_hist.path}")
             # Hypergraph only when counts are available
             try:
-                art_hg = render_from_json(analysis_json, viz_type="hypergraph")
+                art_hg = svc.render_from_json(analysis_json, viz_type="hypergraph")
                 display_manager.display_success_message(
                     f"Hypergraph saved: {art_hg.path}"
                 )
@@ -78,7 +79,7 @@ def execute_run(
                 # Non-fatal if hypergraph is not applicable
                 pass
         elif sim_mode == "density":
-            art_dm = render_from_json(analysis_json, viz_type="density_matrix")
+            art_dm = svc.render_from_json(analysis_json, viz_type="density_matrix")
             display_manager.display_success_message(
                 f"Density matrix saved: {art_dm.path}"
             )

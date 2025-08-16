@@ -79,7 +79,7 @@ MESSAGES = {
     "shots_prompt": "🎯 Number of shots [{default}]: ",
     "sim_mode_prompt": "💻 Simulation mode (qasm/statevector) [{default}]: ",
     "enable_visualization_prompt": "📊 Enable visualization? (y/n): ",
-    "visualization_type_prompt": "🎨 Visualization type (histogram/density_matrix/hypergraph) [{default}]: ",
+    "visualization_type_prompt": "🎨 Visualization type (histogram/density_matrix) [{default}]: ",
     "insights_details_prompt": "Show detailed metrics? (y/n) [{default}]: ",
     # Recent results menu
     "recent_results_title": "Recent Results",

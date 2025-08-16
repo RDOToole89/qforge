@@ -7,7 +7,6 @@
           "enum": [
             "histogram",
             "density_matrix",
-            "hypergraph",
             "report",
             "other"
           ],
@@ -27,6 +26,115 @@
         "path"
       ],
       "title": "ArtifactRef",
+      "type": "object"
+    },
+    "StructuredDecoherenceMetrics": {
+      "properties": {
+        "asymmetry_index": {
+          "title": "Asymmetry Index (AI)",
+          "type": "number",
+          "description": "Deviation from uniform error distribution",
+          "minimum": 0
+        },
+        "pathway_concentration_ratio": {
+          "title": "Pathway Concentration Ratio (PCR)",
+          "type": "number", 
+          "description": "Concentration of errors in top pathways vs bottom pathways",
+          "minimum": 0
+        },
+        "entanglement_error_correlation": {
+          "title": "Entanglement-Error Correlation (EEC)",
+          "type": "number",
+          "description": "Correlation between entanglement topology and error patterns",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "temporal_pathway_stability": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temporal Pathway Stability (TPS)",
+          "description": "Consistency of pathway rankings across conditions"
+        },
+        "complexity_emergence_score": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complexity Emergence Score (CES)",
+          "description": "Critical threshold where structured patterns emerge"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "state_type": {
+              "type": "string"
+            },
+            "num_qubits": {
+              "type": "integer"
+            },
+            "total_shots": {
+              "type": "integer"
+            },
+            "unique_outcomes": {
+              "type": "integer"
+            },
+            "analysis_timestamp": {
+              "type": "string"
+            }
+          }
+        },
+        "pathway_analysis": {
+          "type": "object",
+          "properties": {
+            "dominant_pathways": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": [
+                  {"type": "string"},
+                  {"type": "number"}
+                ]
+              }
+            },
+            "pathway_concentration": {
+              "type": "string"
+            },
+            "asymmetry_level": {
+              "type": "string",
+              "enum": ["very_uniform", "slight_asymmetry", "moderate_asymmetry", "high_asymmetry"]
+            },
+            "entanglement_influence": {
+              "type": "string", 
+              "enum": ["no_correlation", "weak_correlation", "moderate_correlation", "strong_correlation"]
+            },
+            "total_outcomes": {
+              "type": "integer"
+            },
+            "measurement_shots": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "required": [
+        "asymmetry_index",
+        "pathway_concentration_ratio", 
+        "entanglement_error_correlation"
+      ],
+      "title": "StructuredDecoherenceMetrics",
       "type": "object"
     },
     "Provenance": {
@@ -98,11 +206,42 @@
   "properties": {
     "analysis": {
       "title": "Analysis",
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "experiment_metadata": {
+          "type": "object",
+          "properties": {
+            "experiment_id": {"type": "string"},
+            "timestamp": {"type": "string"},
+            "framework_version": {"type": "string"},
+            "research_type": {"type": "string"}
+          }
+        },
+        "experiment_parameters": {
+          "type": "object"
+        },
+        "circuit_statistics": {
+          "type": "object"
+        },
+        "measurement_results": {
+          "type": "object"
+        },
+        "research_metrics": {
+          "type": "object"
+        },
+        "provenance": {
+          "type": "object"
+        }
+      }
     },
     "metrics": {
-      "title": "Metrics",
-      "type": "object"
+      "title": "Metrics", 
+      "type": "object",
+      "properties": {
+        "structured_decoherence_metrics": {
+          "$ref": "#/$defs/StructuredDecoherenceMetrics"
+        }
+      }
     },
     "artifacts": {
       "items": {

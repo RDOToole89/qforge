@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_metadata": {
+    "experiment_id": "ghz_basic",
+    "timestamp": "2025-08-15T19:56:42.212736",
+    "framework_version": "2.0.0",
+    "research_type": "structured_decoherence"
+  },
+  "experiment_parameters": {
+    "num_qubits": 5,
+    "state_type": "GHZ",
+    "noise_type": "AMPLITUDE_DAMPING",
+    "noise_enabled": true,
+    "error_rate": 0.15,
+    "shots": 10000,
+    "sim_mode": "qasm",
+    "multiple_runs": 1
+  },
+  "circuit_statistics": {
+    "depth": 6,
+    "num_gates": 11,
+    "num_qubits": 5,
+    "gate_types": {
+      "h": 1,
+      "cx": 4,
+      "barrier": 1,
+      "measure": 5
+    }
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "11111": 5018,
+      "00000": 4982
+    },
+    "total_shots": 10000,
+    "unique_outcomes": 2,
+    "outcome_probabilities": {
+      "11111": 0.5018,
+      "00000": 0.4982
+    }
+  },
+  "research_metrics": {
+    "basic_stats": {
+      "total_shots": 10000,
+      "unique_outcomes": 2,
+      "num_qubits": 5
+    },
+    "information_theory": {
+      "shannon_entropy": 0.9999906513159419,
+      "normalized_entropy": 0.9999906513159419
+    },
+    "qubit_analysis": {
+      "qubit_wise_bias": {
+        "q0": 0.0036000000000000476,
+        "q1": 0.0036000000000000476,
+        "q2": 0.0036000000000000476,
+        "q3": 0.0036000000000000476,
+        "q4": 0.0036000000000000476
+      }
+    },
+    "distribution_comparison": {
+      "kl_divergence": 6.480013996925911e-06,
+      "total_variation_distance": 0.0018000000000000238
+    }
+  },
+  "decoherence_analysis": {
+    "probability_deviations": {
+      "10011": 0.0,
+      "01010": 0.0,
+      "11001": 0.0,
+      "01100": 0.0,
+      "00100": 0.0,
+      "11000": 0.0,
+      "11011": 0.0,
+      "10110": 0.0,
+      "11110": 0.0,
+      "01000": 0.0,
+      "01111": 0.0,
+      "11010": 0.0,
+      "10001": 0.0,
+      "01011": 0.0,
+      "10101": 0.0,
+      "11111": 0.0018000000000000238,
+      "00000": -0.0018000000000000238,
+      "00111": 0.0,
+      "00001": 0.0,
+      "10100": 0.0,
+      "00110": 0.0,
+      "10010": 0.0,
+      "00101": 0.0,
+      "10000": 0.0,
+      "01101": 0.0,
+      "00010": 0.0,
+      "10111": 0.0,
+      "01001": 0.0,
+      "00011": 0.0,
+      "11100": 0.0,
+      "01110": 0.0,
+      "11101": 0.0
+    },
+    "error_bitstring_frequencies": {
+      "11111": 0.0018000000000000238,
+      "00000": -0.0018000000000000238
+    },
+    "max_deviation": 0.0018000000000000238,
+    "total_error_probability": 1.0,
+    "structured_vs_random": {
+      "assessment": "uniform_random_like",
+      "confidence": 0.7,
+      "indicators": {
+        "coefficient_of_variation": 0,
+        "uniformity_score": 1,
+        "pattern_concentration": 0
+      }
+    }
+  },
+  "statistical_validation": {
+    "shot_count_adequacy": {
+      "total_shots": 10000,
+      "recommended_min_shots": 200,
+      "adequacy_ratio": 50.0,
+      "adequate": true
+    },
+    "sampling_quality": {
+      "outcome_coverage": 0.0625,
+      "min_count_per_outcome": 4982,
+      "max_count_per_outcome": 5018
+    }
+  },
+  "research_insights": {
+    "key_findings": [
+      "High normalized entropy (1.000) indicates near-random decoherence patterns"
+    ],
+    "research_questions_addressed": [],
+    "recommendations": []
+  }
+}

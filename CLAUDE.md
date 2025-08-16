@@ -4,7 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **research-grade quantum experiment framework** built on Qiskit for conducting quantum computing experiments with noise modeling, state preparation, and advanced analysis. The project is currently undergoing an "engine-first" refactor to decouple the core execution from the CLI and make it web-ready.
+This is a **research-grade quantum experiment framework** designed specifically for investigating **structured decoherence pathways** in quantum systems. The framework provides precision tools for testing the hypothesis that quantum decoherence follows structured pathways determined by entanglement network topology, rather than uniform random patterns.
+
+### Current Research Focus: Structured Decoherence Pathways
+
+**Core Hypothesis**: Quantum decoherence propagates along structured pathways determined by entanglement topology, emerging above a critical complexity threshold (≥3 qubits).
+
+**Key Experimental Goals**:
+- Map entanglement complexity thresholds where structured pathways emerge
+- Characterize pathway signatures across different quantum state topologies  
+- Validate pathway persistence across multiple noise models
+- Develop quantitative metrics for pathway detection and engineering
+
+The framework is currently undergoing targeted refactoring to optimize it specifically for this research while removing unnecessary complexity.
 
 ## Architecture Overview
 
@@ -17,11 +29,13 @@ The framework uses a modular architecture with clean separation of concerns:
 - **Visualization** (`src/visualization/`) - Multi-backend plotting and reporting
 - **Experiments** (`src/experiments/`) - Preset experiments and management
 
-### Key Components
-- **State Preparation**: GHZ, Bell, superposition, W-states, cluster states, custom states
-- **Noise Models**: Physics-compliant models with quantum constraints (T2≤2*T1)
-- **Analysis**: Information theory, correlations, decoherence dynamics, symmetry analysis
-- **Visualization**: Quantum-aware histograms, density matrices, hypergraphs, animations
+### Key Components for Structured Decoherence Research
+- **State Preparation**: GHZ (symmetric), W (asymmetric), cluster states (local), Bell pairs - essential for topology studies
+- **Noise Models**: All 5 physics-compliant models (depolarizing, amplitude damping, phase damping, bit flip, thermal relaxation)
+- **Quantitative Metrics**: Asymmetry Index (AI), Pathway Concentration Ratio (PCR), Entanglement-Error Correlation (EEC), Temporal Pathway Stability (TPS), Complexity Emergence Score (CES)
+- **Parameter Sweeps**: Systematic noise strength studies (p ∈ [0.005, 0.01, 0.02, 0.05, 0.1]) with statistical validation
+- **Precision Analysis**: 10,000-shot experiments with 5-run statistical validation
+- **Research Visualization**: Error pattern histograms, pathway analysis plots, publication-ready exports
 
 ## Development Commands
 
@@ -32,36 +46,43 @@ The framework uses a modular architecture with clean separation of concerns:
 python main.py                    # Start interactive CLI
 ```
 
-**Headless Mode:**
+**Research Experiments:**
 ```bash
-# Run specific experiments
-python main.py --run ghz_basic
-python main.py run --preset ghz_structured_decoherence_ref
+# Threshold mapping experiments (1-5 qubits)
+python main.py --run ghz_basic                    # 3-qubit GHZ baseline
+python main.py --run ghz_5q_decoherence           # 5-qubit complexity study
 
-# Run from config file
-python main.py run --config path/to/config.json
+# Topology comparison experiments  
+python main.py --run ghz_structured_decoherence_ref    # GHZ symmetric entanglement
+python main.py --run w_structured_decoherence          # W asymmetric entanglement
+python main.py --run bell_decoherence                  # Bell pair studies
 
-# List available experiments
-python main.py --list
+# Custom experiment configurations
+python main.py run --config experiments/threshold_study.json
 ```
 
-**Parameter Sweeps:**
+**Parameter Sweeps (Critical for Research):**
 ```bash
-# Run parameter sweep on experiment
+# Systematic noise strength studies
+python main.py sweep --manifest experiments/ghz_5q_sweep_manifest.json
 python main.py --sweep ghz_structured_decoherence_ref
 
-# Run from manifest file
-python main.py sweep --manifest path/to/manifest.json
+# Noise model comparison studies
+python main.py sweep --manifest experiments/noise_model_comparison.json
 ```
 
-**Visualization:**
+**Research Analysis & Visualization:**
 ```bash
-# Visualize saved results
-python main.py --viz results/analysis.json --type histogram
-python main.py viz --from results/analysis.json --type density_matrix --backend matplotlib
+# Error pattern analysis (essential for pathway detection)
+python main.py --viz results/structured_decoherence/latest.json --type histogram
 
-# Generate reports
-python main.py report --from results/analysis.json --format md
+# Quantitative pathway metrics
+python main.py analyze --results results/structured_decoherence/ --metrics all
+python main.py analyze --results results/ --metric asymmetry_index
+python main.py analyze --results results/ --metric pathway_concentration
+
+# Publication-ready exports
+python main.py export --results results/threshold_study/ --format paper
 ```
 
 ### Testing
@@ -168,15 +189,14 @@ results/
 
 ## Important Development Notes
 
-### Current Refactor Status
-The project is in the middle of an "engine-first" refactor (see `docs/ENGINE_FIRST_REFACTOR_PLAN.md`):
-- **Engine skeleton**: ✅ Complete
-- **Pydantic models**: ✅ Complete  
-- **Storage unification**: ✅ Complete
-- **CLI adapter switch**: ✅ Complete (feature-flagged)
-- **Visualization adapters**: ✅ Basic implementation complete
-- **Interactive simplification**: 🚧 Next phase
-- **Cleanup and release**: 📋 Planned
+### Current Refactor Status: Research Optimization
+The project is undergoing targeted refactoring to optimize for structured decoherence pathway research:
+- **Scientific Core**: ✅ All 5 noise models validated, parameter sweeps robust
+- **Quantitative Metrics**: 🚧 Implementing AI, PCR, EEC, TPS, CES metrics  
+- **Research Engine API**: 🚧 Clean scientific interface for systematic studies
+- **Visualization Simplification**: 📋 Remove bloat, keep essential error pattern analysis
+- **CLI Research Focus**: 📋 Streamline to research commands only
+- **Framework Cleanup**: 📋 Remove unnecessary complexity while preserving scientific rigor
 
 ### Testing Strategy
 - **Unit tests** for all core modules with physics validation
@@ -191,13 +211,20 @@ The project is in the middle of an "engine-first" refactor (see `docs/ENGINE_FIR
 - **Structured logging** with JSON output for analysis
 - **Strong typing** throughout with mypy validation
 
-## Research Features
+## Research Features: Structured Decoherence Pathways
 
-### Advanced Analysis
-- **Information theory**: Shannon entropy, mutual information, quantum discord
-- **Decoherence dynamics**: Cluster analysis, transition tracking
-- **Symmetry analysis**: SU(2)/SU(3) symmetries, parity distributions
-- **Correlations**: Quantum correlations and entanglement measures
+### Quantitative Pathway Metrics (Core Research Tools)
+- **Asymmetry Index (AI)**: Measures deviation from uniform error distribution
+- **Pathway Concentration Ratio (PCR)**: Quantifies error clustering in specific patterns  
+- **Entanglement-Error Correlation (EEC)**: Correlates entanglement topology with error patterns
+- **Temporal Pathway Stability (TPS)**: Measures pathway consistency across noise levels
+- **Complexity Emergence Score (CES)**: Quantifies entanglement threshold for pathway emergence
+
+### Advanced Analysis Infrastructure  
+- **Information theory**: Shannon entropy, mutual information for pathway characterization
+- **Decoherence dynamics**: Error pattern clustering, pathway transition tracking
+- **Topology mapping**: Network analysis of entanglement structure vs. error propagation
+- **Statistical validation**: Multi-run confidence intervals, significance testing
 
 ### Publication-Ready Output
 - **Structured JSON** results with complete metadata
@@ -212,28 +239,43 @@ Automated systematic exploration with:
 - **Convergence analysis** and significance testing
 - **Visualization** of parameter dependencies
 
-## Common Workflow Patterns
+## Research Workflow Patterns: Structured Decoherence Studies
 
-### Running a Research Experiment
+### Threshold Mapping Study (Phase 1)
 ```bash
-# 1. Run structured decoherence experiment
-python main.py --run ghz_structured_decoherence_ref
+# 1. Run systematic qubit complexity study
+python main.py --run single_qubit_superposition     # Baseline (no pathways expected)
+python main.py --run bell_pair_study                # 2-qubit (threshold test)
+python main.py --run ghz_3q_structured_decoherence  # 3-qubit (pathway emergence)
+python main.py --run ghz_4q_structured_decoherence  # 4-qubit (pathway confirmation)
+python main.py --run ghz_5q_structured_decoherence  # 5-qubit (scaling study)
 
-# 2. Visualize results
-python main.py --viz results/structured_decoherence/latest.json --type histogram
-
-# 3. Generate research report  
-python main.py report --from results/structured_decoherence/latest.json
+# 2. Analyze threshold patterns
+python main.py analyze --results results/threshold_study/ --metric complexity_emergence
 ```
 
-### Parameter Sweep Workflow
+### Topology Comparison Study (Phase 2)
 ```bash
-# 1. Create sweep manifest (JSON)
-# 2. Run sweep
-python main.py sweep --manifest sweeps/noise_analysis.json
+# 1. Run different entanglement topologies
+python main.py --run ghz_structured_decoherence_ref  # Symmetric entanglement
+python main.py --run w_structured_decoherence        # Asymmetric entanglement  
+python main.py --run cluster_structured_decoherence  # Local correlations
 
-# 3. Analyze aggregated results
-python main.py --viz results/parameter_sweeps/latest_manifest.json
+# 2. Analyze pathway signatures
+python main.py analyze --results results/topology_study/ --metric asymmetry_index
+python main.py analyze --results results/topology_study/ --metric pathway_concentration
+```
+
+### Parameter Sweep Studies (Critical)
+```bash
+# 1. Systematic noise strength sweeps (p ∈ [0.005, 0.01, 0.02, 0.05, 0.1])
+python main.py sweep --manifest experiments/ghz_5q_sweep_manifest.json
+
+# 2. Multi-noise model validation
+python main.py sweep --manifest experiments/noise_model_comparison.json
+
+# 3. Statistical analysis across sweeps  
+python main.py analyze --results results/parameter_sweeps/ --metric temporal_pathway_stability
 ```
 
 ### Interactive Development
@@ -248,4 +290,4 @@ python main.py
 # - Manage settings and profiles
 ```
 
-This framework is designed for serious quantum computing research while remaining accessible for education and exploration.
+This framework is specifically optimized for structured decoherence pathway research - a potentially groundbreaking investigation into whether quantum decoherence follows predictable network patterns rather than random distributions. The framework maintains research-grade rigor while providing clear, focused tools for this specific scientific hypothesis.

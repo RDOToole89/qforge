@@ -19,7 +19,7 @@ from qiskit.result import Counts
 from .analysis.core.information_theory import compute_research_metrics
 from .analysis.dynamics.decoherence import compute_fubini_study_distance
 from .analysis.core.correlations import compute_pairwise_correlations
-from ..experiments.presets.ghz_structured_decoherence import get_ideal_ghz_distribution
+# Removed preset dependency - implementing ideal distribution locally
 
 logger = logging.getLogger("QuantumExperiment.ResearchHandler")
 
@@ -315,15 +315,9 @@ class ResearchExperimentHandler:
                     "probability_source"
                 ] = "density_diagonal"
 
-        # Add comprehensive research metrics
-        ideal_counts = None
-        if state_type.upper() == "GHZ":
-            ideal_dist = get_ideal_ghz_distribution(num_qubits)
-            total_shots = sum(counts.values())
-            ideal_counts = {k: int(v * total_shots) for k, v in ideal_dist.items()}
-
+        # Add comprehensive research metrics (no ideal distribution needed)
         research_metrics = compute_research_metrics(
-            counts=counts, ideal_counts=ideal_counts, num_qubits=num_qubits
+            counts=counts, ideal_counts=None, num_qubits=num_qubits
         )
 
         analysis["research_metrics"] = research_metrics

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class ArtifactRef(BaseModel):
-    kind: Literal["histogram", "density_matrix", "hypergraph", "report", "other"] = (
+    kind: Literal["histogram", "density_matrix", "report", "other"] = (
         "other"
     )
     path: str

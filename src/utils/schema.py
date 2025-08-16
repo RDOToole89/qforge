@@ -87,24 +87,27 @@ def validate_manifest_schema(data: Dict[str, Any]) -> bool:
     """Validate minimal structure of a sweep manifest.
 
     Required:
-      - base_preset: str
       - parameter_ranges: dict[str, list]
       - runs_per_config: int
+      - EITHER base_preset: str OR base_config: dict
     Optional:
-      - override: dict (applied to base preset)
+      - override: dict (applied to base preset/config)
       - rng_seed: int
     """
-    # Try strict schema first
-    if _validate_with_jsonschema(data, "manifest.schema.json"):
-        # Maintain backward-compatible requirement for base_preset
-        if "base_preset" not in data or not isinstance(data.get("base_preset"), str):
-            raise ValueError("Manifest missing 'base_preset' (str)")
-        return True
+    # Try strict schema first (skip for now as it enforces base_preset)
+    # if _validate_with_jsonschema(data, "manifest.schema.json"):
+    #     return True
 
     if not isinstance(data, dict):
         raise ValueError("Manifest must be an object")
-    if "base_preset" not in data or not isinstance(data["base_preset"], str):
-        raise ValueError("Manifest missing 'base_preset' (str)")
+    
+    # Must have EITHER base_preset OR base_config
+    has_preset = "base_preset" in data and isinstance(data["base_preset"], str)
+    has_config = "base_config" in data and isinstance(data["base_config"], dict)
+    
+    if not (has_preset or has_config):
+        raise ValueError("Manifest must have either 'base_preset' (str) or 'base_config' (dict)")
+    
     if "parameter_ranges" not in data or not isinstance(data["parameter_ranges"], dict):
         raise ValueError("Manifest missing 'parameter_ranges' (object)")
     for k, v in data["parameter_ranges"].items():

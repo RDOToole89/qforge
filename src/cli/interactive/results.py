@@ -115,7 +115,7 @@ class ResultsManager:
 
     def open_visualization_from_result_json(self, file_path: str) -> None:
         import json as _json
-        from src.visualization.pipeline.run import render_from_json
+        from src.visualization.service import VisualizationService
 
         with open(file_path, "r") as f:
             analysis = _json.load(f)
@@ -134,7 +134,8 @@ class ResultsManager:
         args = {**params, "visualization_type": viz}
         self.display_manager.display_params_summary(args)
         try:
-            art = render_from_json(file_path, viz_type=viz)
+            svc = VisualizationService()
+            art = svc.render_from_json(file_path, viz_type=viz)
             self.display_manager.display_success_message(
                 f"Visualization saved: {art.path}"
             )
@@ -144,7 +145,7 @@ class ResultsManager:
     def rerun_from_result_json(self, file_path: str) -> None:
         import json as _json
         from src.engine.api import run as engine_run
-        from src.visualization.pipeline.run import render_from_json
+        from src.visualization.service import VisualizationService
         from src.visualization.report import save_report_from_json
 
         with open(file_path, "r") as f:
@@ -186,18 +187,19 @@ class ResultsManager:
 
         # Visualizations
         try:
+            svc = VisualizationService()
             if args.get("sim_mode") == "density":
-                art = render_from_json(analysis_json, viz_type="density_matrix")
+                art = svc.render_from_json(analysis_json, viz_type="density_matrix")
                 self.display_manager.display_success_message(
                     f"Density matrix saved: {art.path}"
                 )
             else:
-                art1 = render_from_json(analysis_json, viz_type="histogram")
+                art1 = svc.render_from_json(analysis_json, viz_type="histogram")
                 self.display_manager.display_success_message(
                     f"Histogram saved: {art1.path}"
                 )
                 try:
-                    art2 = render_from_json(analysis_json, viz_type="hypergraph")
+                    art2 = svc.render_from_json(analysis_json, viz_type="hypergraph")
                     self.display_manager.display_success_message(
                         f"Hypergraph saved: {art2.path}"
                     )

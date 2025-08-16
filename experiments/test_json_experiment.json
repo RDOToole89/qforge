@@ -1,1 +1,0 @@
-{"name": "My JSON Experiment", "description": "Test JSON experiment", "category": "custom", "difficulty": "beginner", "config": {"num_qubits": 2, "state_type": "GHZ", "shots": 512}}

@@ -311,5 +311,26 @@ def compute_research_metrics(counts: Dict[str, int],
             'mutual_information_matrix': mi_matrix
         }
 
+    # Add structured decoherence pathway metrics  
+    try:
+        from ..structured_decoherence import compute_all_pathway_metrics
+        
+        # Determine state type from config context (if available)
+        # For now, default to GHZ - can be enhanced with config parameter
+        state_type = "GHZ"  # TODO: Get from experiment config
+        
+        pathway_metrics = compute_all_pathway_metrics(
+            counts=counts,
+            state_type=state_type,
+            num_qubits=num_qubits
+        )
+        
+        metrics['structured_decoherence_metrics'] = pathway_metrics
+        logger.info(f"Added structured decoherence metrics: AI={pathway_metrics.get('asymmetry_index', 0):.3f}")
+        
+    except Exception as e:
+        logger.warning(f"Failed to compute structured decoherence metrics: {e}")
+        metrics['structured_decoherence_metrics'] = {}
+
     logger.info(f"Computed research metrics for {num_qubits}-qubit system")
     return metrics

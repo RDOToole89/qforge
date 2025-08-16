@@ -91,6 +91,60 @@
       ],
       "default": null,
       "title": "Custom Params"
+    },
+    "enable_research_metrics": {
+      "default": false,
+      "title": "Enable Research Metrics",
+      "type": "boolean",
+      "description": "Enable computation of structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)"
+    },
+    "research_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "structured_decoherence",
+            "parameter_sweep",
+            "noise_comparison",
+            "control",
+            "scaling",
+            "convergence",
+            "batch_sweep"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Research Type",
+      "description": "Type of research analysis to perform"
+    },
+    "multiple_runs": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Multiple Runs",
+      "type": "integer",
+      "description": "Number of experimental runs for statistical validation"
+    },
+    "track_convergence": {
+      "default": false,
+      "title": "Track Convergence",
+      "type": "boolean",
+      "description": "Enable convergence tracking for high-precision experiments"
+    },
+    "visualization_type": {
+      "default": "histogram",
+      "enum": [
+        "histogram",
+        "density_matrix",
+        "research",
+        "plot",
+        "none"
+      ],
+      "title": "Visualization Type",
+      "type": "string",
+      "description": "Type of visualization to generate"
     }
   },
   "required": [

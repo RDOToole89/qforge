@@ -12,7 +12,8 @@ from src.cli.headless.run import (
 )
 from src.cli.headless.sweep import run_from_manifest as headless_run_sweep
 from src.cli.headless.viz import render_from_json as headless_viz
-from src.visualization.pipeline.run import render_from_json as pipeline_viz
+
+# Pipeline removed for simplification
 from pathlib import Path as _Path
 import json as _json
 
@@ -79,22 +80,7 @@ def viz(
     )
 
 
-@app.command("viz-pipe")
-def viz_pipe(
-    from_path: Path = typer.Option(..., "--from", help="Path to results JSON"),
-    type: str = typer.Option("histogram", "--type", help="Visualization type"),
-    backend: Optional[str] = typer.Option(
-        "matplotlib", "--backend", help="Backend name"
-    ),
-    outdir: Optional[Path] = typer.Option(None, "--outdir", help="Output directory"),
-):
-    artifact = pipeline_viz(
-        str(from_path),
-        viz_type=type,
-        backend=backend or "matplotlib",
-        output_base_dir=str(outdir) if outdir else None,
-    )
-    typer.echo(artifact.path)
+# viz-pipe command removed - use viz instead
 
 
 @app.command("results-clean")

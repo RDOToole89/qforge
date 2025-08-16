@@ -9,7 +9,6 @@ from src.engine.models import ArtifactRef
 class VizKind(str, Enum):
     histogram = "histogram"
     density_matrix = "density_matrix"
-    hypergraph = "hypergraph"
 
 
 class VisualizationAdapter(Protocol):

@@ -30,7 +30,9 @@ def run_from_manifest(manifest_path: str) -> None:
 
     validate_manifest_schema(data)
 
-    base_preset = data["base_preset"]
+    # Handle either base_preset or base_config
+    base_preset = data.get("base_preset")
+    base_config = data.get("base_config")
     parameter_ranges = dict(data["parameter_ranges"])  # shallow copy
     runs_per_config = int(data.get("runs_per_config", 1))
     rng_seed = data.get("rng_seed")
@@ -41,11 +43,22 @@ def run_from_manifest(manifest_path: str) -> None:
             from src.engine.context import AppContext
             from src.config.settings import settings
 
-            em = get_experiment_manager()
-            exp = em.get_experiment(base_preset)
-            if not exp:
-                raise ValueError(f"Base preset '{base_preset}' not found")
-            base_cfg = dict(exp.get("config", {}))
+            # Get base configuration from either preset or direct config
+            if base_preset:
+                em = get_experiment_manager()
+                exp = em.get_experiment(base_preset)
+                if not exp:
+                    raise ValueError(f"Base preset '{base_preset}' not found")
+                base_cfg = dict(exp.get("config", {}))
+            elif base_config:
+                base_cfg = dict(base_config)
+            else:
+                raise ValueError("Must have either base_preset or base_config")
+            
+            # Apply overrides if present
+            override_params = data.get("override", {})
+            if override_params:
+                base_cfg.update(override_params)
             allowed = {
                 "num_qubits",
                 "state_type",
@@ -100,10 +113,17 @@ def run_from_manifest(manifest_path: str) -> None:
     # Legacy fallback
     from src.core.parameter_sweep import ParameterSweepEngine
 
-    engine = ParameterSweepEngine()
-    engine.run_parameter_sweep(
-        base_experiment_id=base_preset,
-        parameter_ranges=parameter_ranges,
-        runs_per_config=runs_per_config,
-        sweep_name=f"{base_preset}_manifest",
-    )
+    if base_preset:
+        # Use preset-based sweep for legacy path
+        engine = ParameterSweepEngine()
+        engine.run_parameter_sweep(
+            base_experiment_id=base_preset,
+            parameter_ranges=parameter_ranges,
+            runs_per_config=runs_per_config,
+            sweep_name=f"{base_preset}_manifest",
+        )
+    else:
+        # Direct config not supported in legacy path - create temporary preset
+        raise NotImplementedError(
+            "Direct base_config requires engine API (set QEXP_USE_ENGINE_API=1)"
+        )

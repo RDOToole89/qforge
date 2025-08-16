@@ -9,7 +9,7 @@ from src.visualization.save_manager import get_organized_save_path
 
 class MatplotlibAdapter:
     name = "matplotlib"
-    supported_kinds = {VizKind.histogram, VizKind.density_matrix, VizKind.hypergraph}
+    supported_kinds = {VizKind.histogram, VizKind.density_matrix}
 
     def render_from_analysis(
         self,
@@ -101,39 +101,7 @@ class MatplotlibAdapter:
                     metadata={"backend": "matplotlib"},
                 )
             )
-        elif kind == VizKind.hypergraph:
-            counts = (
-                analysis.get("measurement_results", {}).get("raw_counts")
-                or analysis.get("measurement_results", {}).get("counts")
-                or {}
-            )
-            save_path = get_organized_save_path(
-                viz_type="hypergraph",
-                experiment_config={
-                    "state_type": params.get("state_type"),
-                    "noise_type": params.get("noise_type"),
-                    "num_qubits": params.get("num_qubits"),
-                },
-                custom_name=None,
-                extension="png",
-            )
-            # Use new hypergraphs drawer which delegates to monolith for now
-            from src.visualization.plots.hypergraph import draw_hypergraph
-
-            draw_hypergraph(
-                correlation_data=counts,
-                state_type=params.get("state_type"),
-                noise_type=params.get("noise_type"),
-                save_path=save_path,
-                config={},
-            )
-            artifacts.append(
-                ArtifactRef(
-                    kind="hypergraph",
-                    path=save_path,
-                    metadata={"backend": "matplotlib"},
-                )
-            )
+        # Hypergraph support removed for cleanup
         else:
             raise ValueError(f"Unsupported kind: {kind}")
         return artifacts

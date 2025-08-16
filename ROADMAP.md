@@ -1,102 +1,78 @@
-# 🚀 Quantum Experiment Framework - Research-Grade Architecture v2.0
+# 🚀 Structured Decoherence Pathway Research Framework v3.0
 
-## 🎯 **Vision & Philosophy**
+## 🎯 **Research Mission & Focus**
 
-### **Core Mission**
-Transform the quantum experiment framework into a **research-grade, modular, and extensible** system that serves both **independent researchers** and the **broader quantum computing community**.
+### **Primary Research Hypothesis**
+**Quantum decoherence follows structured pathways determined by entanglement network topology**, rather than uniform random patterns. These pathways emerge above a critical complexity threshold (≥3 qubits) and can be characterized, predicted, and engineered.
+
+### **Scientific Goals**
+- **Threshold Discovery**: Map entanglement complexity thresholds where structured pathways emerge
+- **Topology Characterization**: Compare pathway signatures across different quantum state topologies (GHZ, W, cluster)
+- **Noise Model Validation**: Demonstrate pathway persistence across all major noise models
+- **Quantitative Framework**: Develop metrics for pathway detection and engineering
+- **Engineering Applications**: Use pathway knowledge for error correction and mitigation
 
 ### **Design Philosophy**
-- **Science-First**: Every architectural decision must enhance scientific value and research capabilities
-- **Modular Excellence**: Clean separation of concerns with pluggable components
-- **User Empowerment**: Researchers should be able to extend the system without touching core code
-- **Research Integrity**: Maintain rigorous validation and reproducibility standards
-- **Educational Value**: Clear documentation and examples for learning and teaching
+- **Research-First**: Every component optimized for structured decoherence pathway investigation
+- **Scientific Rigor**: Physics-compliant models with rigorous validation and reproducibility
+- **Quantitative Precision**: 10,000-shot experiments with statistical validation across parameter sweeps
+- **Minimal Complexity**: Remove all non-essential components to focus on core research capabilities
+- **Publication-Ready**: Generate publication-quality results and visualizations
 
 ---
 
-## 🏗️ **CURRENT ARCHITECTURE** ✅ **FULLY IMPLEMENTED**
+## 🏗️ **RESEARCH-OPTIMIZED ARCHITECTURE** 🚧 **REFACTORING IN PROGRESS**
+
+### **Target Architecture: Research-First Design**
 
 ```
 qiskit-experiments/
 ├── src/
-│   ├── core/                           # 🧠 Core quantum logic
-│   │   ├── __init__.py
-│   │   ├── experiment_runner.py        # Main experiment execution
-│   │   ├── research_handler.py         # Research-grade analysis
-│   │   ├── state_preparation/          # Quantum state preparation
-│   │   │   ├── __init__.py
-│   │   │   ├── ghz_states.py          # GHZ state preparation
-│   │   │   ├── bell_states.py         # Bell state preparation
-│   │   │   ├── superposition.py       # Superposition states
-│   │   │   └── custom_states.py       # Custom quantum states
-│   │   ├── noise_models/              # 🎯 ENHANCED: Physics-compliant noise
-│   │   │   ├── __init__.py            # Clean exports
-│   │   │   ├── base_noise.py          # Enhanced base class
-│   │   │   ├── noise_factory.py       # Comprehensive factory
-│   │   │   ├── depolarizing.py        # 🚀 Enhanced multi-qubit support
-│   │   │   ├── phase_flip.py          # ✅ Optimal implementation
-│   │   │   ├── amplitude_damping.py   # 🚀 Enhanced T1 physics
-│   │   │   ├── phase_damping.py       # 🚀 Enhanced T2* physics
-│   │   │   ├── thermal_relaxation.py  # 🚀 Enhanced gate timing
-│   │   │   └── bit_flip.py            # 🚀 Enhanced sensitivity
-│   │   └── analysis/                  # 🧪 RESTRUCTURED: Modular analysis
-│   │       ├── __init__.py            # Central exports
-│   │       ├── core/                  # Fundamental analysis
-│   │       │   ├── __init__.py
-│   │       │   ├── correlations.py    # Correlation calculations
-│   │       │   ├── information_theory.py # Information theory metrics
-│   │       │   └── bloch.py           # Bloch sphere analysis
-│   │       ├── dynamics/              # Time-dependent analysis
-│   │       │   ├── __init__.py
-│   │       │   ├── decoherence.py     # Decoherence analysis
-│   │       │   ├── transitions.py     # State transitions
-│   │       │   └── clustering.py      # 🚀 Enhanced for decoherence
-│   │       └── symmetry/              # Symmetry analysis
-│   │           ├── __init__.py
-│   │           └── symmetry.py        # Symmetry breaking
-│   ├── cli/                           # 🖥️ Enhanced command-line interface
-│   │   ├── __init__.py
-│   │   ├── main.py                    # Entry point
-│   │   ├── interactive.py             # ✅ Fully functional CLI
-│   │   ├── display.py                 # Rich terminal output
-│   │   └── utils.py                   # CLI utilities
-│   ├── experiments/                   # 🧪 Experiment management
-│   │   ├── __init__.py
-│   │   ├── manager.py                 # ✅ Robust experiment manager
-│   │   ├── components/                # 🏗️ COMPOSABLE: Building blocks
-│   │   │   ├── __init__.py
-│   │   │   ├── base.py               # Base experiment classes
-│   │   │   ├── mixins.py             # Noise, analysis, visualization mixins
-│   │   │   ├── metadata.py           # Experiment metadata
-│   │   │   ├── templates.py          # Composable templates
-│   │   │   └── factory.py            # Component factories
-│   │   ├── presets/                  # ✅ Organized preset experiments
-│   │   │   ├── __init__.py
-│   │   │   ├── beginner.py           # Beginner experiments
-│   │   │   ├── intermediate.py       # Intermediate experiments
-│   │   │   ├── advanced.py           # Advanced experiments
-│   │   │   └── research.py           # 🔬 Research experiments
-│   │   └── validator.py              # Configuration validation
-│   ├── visualization/                # 📊 ENHANCED: Multi-backend visualization
-│   │   ├── __init__.py
-│   │   ├── histogram.py              # 🚀 Quantum-aware histograms
-│   │   ├── density_matrix.py         # 🚀 Enhanced density matrix plots
-│   │   ├── hypergraph.py             # 🚀 Quantum layouts & adaptive thresholds
-│   │   ├── pipeline.py               # 🎯 Comprehensive pipeline system
-│   │   ├── animations.py             # 🎬 Bloch sphere animations
-│   │   ├── save_manager.py           # 📁 Organized save paths
-│   │   └── backends/                 # Multi-backend support
-│   │       ├── __init__.py
-│   │       ├── matplotlib_backend.py
-│   │       └── plotly_backend.py
-│   ├── utils/                        # 🔧 Enhanced utilities
-│   │   ├── __init__.py
-│   │   ├── logger.py                 # ✅ Structured logging
-│   │   ├── input_handler.py          # Robust input collection
-│   │   └── helpers.py                # General utilities
-│   └── config/                       # ⚙️ Configuration
-│       ├── __init__.py
-│       └── settings.py               # Application settings
+│   ├── core/                           # 🧠 RESEARCH ENGINE: Quantum pathway analysis
+│   │   ├── __init__.py                 # Clean research API exports
+│   │   ├── experiment_runner.py        # ✅ High-precision experiment execution
+│   │   ├── research_handler.py         # 🎯 ENHANCED: 5 pathway metrics (AI, PCR, EEC, TPS, CES)
+│   │   ├── parameter_sweep.py          # 🚀 CRITICAL: Systematic noise studies
+│   │   ├── state_preparation/          # 🏗️ ESSENTIAL: Topology variety
+│   │   │   ├── ghz_state.py           # ✅ Symmetric entanglement (critical)
+│   │   │   ├── bell_state.py          # ✅ 2-qubit threshold tests
+│   │   │   ├── w_state.py             # ✅ Asymmetric entanglement
+│   │   │   ├── cluster_state.py       # ✅ Local correlation topology
+│   │   │   ├── superposition_state.py # ✅ Single-qubit baseline
+│   │   │   └── custom_state.py        # ✅ Research flexibility
+│   │   ├── noise_models/              # 🎯 VALIDATED: All 5 physics-compliant models
+│   │   │   ├── depolarizing.py        # ✅ Isotropic decoherence
+│   │   │   ├── amplitude_damping.py   # ✅ Energy dissipation (T1)
+│   │   │   ├── phase_damping.py       # ✅ Phase decoherence (T2*)  
+│   │   │   ├── bit_flip.py            # ✅ Classical error model
+│   │   │   ├── thermal_relaxation.py  # ✅ Combined T1/T2 physics
+│   │   │   └── noise_factory.py       # ✅ Unified interface
+│   │   ├── analysis/                  # 🔬 RESEARCH METRICS: Pathway detection
+│   │   │   ├── pathway_metrics.py     # 🚀 NEW: AI, PCR, EEC, TPS, CES
+│   │   │   ├── information_theory.py  # ✅ Shannon entropy, mutual information
+│   │   │   ├── decoherence_dynamics.py# ✅ Error clustering analysis
+│   │   │   └── correlations.py        # ✅ Entanglement-error mapping
+│   │   └── models.py                  # 🎯 UNIFIED: Clean data structures
+│   ├── cli/                           # 🖥️ SIMPLIFIED: Research-focused commands
+│   │   ├── __init__.py                # Streamlined entry points
+│   │   ├── commands.py                # Core research commands (run, sweep, analyze)
+│   │   └── interactive.py             # Basic interactive mode
+│   ├── engine/                        # 🚀 CLEAN API: Decoupled from CLI
+│   │   ├── api.py                     # Main entry: run(), sweep(), analyze()
+│   │   ├── models.py                  # Research data structures  
+│   │   └── storage.py                 # Deterministic result paths
+│   ├── experiments/                   # 🧪 RESEARCH PRESETS: Pathway studies
+│   │   ├── presets/
+│   │   │   ├── threshold_studies.py   # 🎯 1-5 qubit complexity mapping
+│   │   │   ├── topology_comparison.py # 🎯 GHZ vs W vs cluster studies
+│   │   │   └── noise_validation.py    # 🎯 Multi-noise pathway persistence
+│   │   └── manager.py                 # Experiment orchestration
+│   ├── visualization/                 # 📊 MINIMAL: Essential research plots
+│   │   ├── histogram.py               # ✅ Error pattern distributions
+│   │   ├── pathway_plots.py           # 🚀 NEW: Custom pathway visualizations
+│   │   └── save_manager.py            # 📁 Clean export management
+│   └── config/                        # ⚙️ Research-optimized settings
+│       └── settings.py                # Pathway research defaults
 ├── results/                          # 📊 Organized results
 │   ├── structured_json/              # Research-grade JSON output
 │   ├── parameter_sweeps/             # Parameter sweep results
@@ -311,6 +287,82 @@ qiskit-experiments/
 
 ---
 
-**Status**: 🚀 **RESEARCH-GRADE QUANTUM FRAMEWORK v2.0 COMPLETE** 🚀
+## 🎯 **REFACTORING GOALS: STRUCTURED DECOHERENCE RESEARCH OPTIMIZATION**
 
-**The framework is now ready for serious quantum decoherence research and community adoption!** ✨🧪⚡
+### **Phase 1: Scientific Core Validation (Week 1)**
+
+#### **Research Metrics Implementation**
+- **Asymmetry Index (AI)**: `(1/N) Σᵢ |pᵢ - p_uniform| / p_uniform`
+- **Pathway Concentration Ratio (PCR)**: `(Top 25% frequencies) / (Bottom 25% frequencies)`  
+- **Entanglement-Error Correlation (EEC)**: Correlate entanglement topology with error patterns
+- **Temporal Pathway Stability (TPS)**: Pathway consistency across noise levels
+- **Complexity Emergence Score (CES)**: Quantify entanglement threshold for pathway emergence
+
+#### **Parameter Sweep Robustness**
+- Validate systematic noise studies: p ∈ [0.005, 0.01, 0.02, 0.05, 0.1]
+- 10,000-shot precision with 5-run statistical validation
+- All 5 noise models tested across parameter ranges
+
+### **Phase 2: Framework Simplification (Week 2)**
+
+#### **Remove Non-Essential Complexity**
+- **Animations** - Remove 454+ lines of animation code
+- **Hypergraph visualization** - Remove complex graph theory components
+- **Over-engineered pipelines** - Simplify to histogram + basic density plots
+- **Multiple backend abstractions** - Standardize on matplotlib
+
+#### **Preserve Research Capabilities**
+- ✅ All 5 noise models (depolarizing, amplitude damping, phase damping, bit flip, thermal)
+- ✅ All quantum state topologies (GHZ, W, Bell, cluster, superposition)
+- ✅ Parameter sweep infrastructure
+- ✅ High-precision statistical validation
+- ✅ Physics compliance (T2≤2*T1, CPTP channels)
+
+### **Phase 3: API Optimization (Week 2-3)**
+
+#### **Clean Research Interface**
+```python
+# Target API for structured decoherence research
+from qiskit_experiments import Engine
+
+# Single experiment with pathway metrics  
+result = Engine.run(
+    state_type="GHZ", qubits=3,
+    noise="depolarizing", noise_strength=0.01,
+    shots=10000, metrics=["AI", "PCR", "EEC"]
+)
+
+# Parameter sweeps for systematic studies
+results = Engine.sweep(
+    base_config=base,
+    parameters={"noise_strength": [0.005, 0.01, 0.02, 0.05, 0.1]},
+    runs_per_config=5,
+    statistical_validation=True
+)
+```
+
+### **Success Criteria**
+
+#### **Scientific Integrity**
+- ✅ All research capabilities preserved
+- ✅ 5 pathway metrics implemented and validated
+- ✅ Parameter sweep robustness maintained
+- ✅ Physics compliance verified across all models
+
+#### **Simplification Goals**
+- 🎯 Reduce from 118 to ~60 Python files (50% reduction)
+- 🎯 Remove 8000+ lines of non-essential code  
+- 🎯 Eliminate 3+ abstraction layers
+- 🎯 Focus visualization on error pattern analysis only
+
+#### **Research Readiness**
+- 🎯 Threshold mapping studies (1-5 qubits) validated
+- 🎯 Topology comparison workflows (GHZ vs W vs cluster) ready
+- 🎯 Noise model validation across all 5 models completed
+- 🎯 Publication-quality data export and visualization
+
+---
+
+**Status**: 🚧 **RESEARCH-FOCUSED REFACTORING IN PROGRESS** 🚧
+
+**Goal**: Transform into the optimal tool for structured decoherence pathway research while maintaining scientific rigor and removing unnecessary complexity. ✨🔬⚡
