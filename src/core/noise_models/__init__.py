@@ -15,7 +15,7 @@ from .amplitude_damping import AmplitudeDampingNoise
 from .phase_damping import PhaseDampingNoise
 from .thermal_relaxation import ThermalRelaxationNoise
 from .bit_flip import BitFlipNoise
-from .noise_factory import create_noise_model, NOISE_CLASSES, NOISE_CONFIG
+from .noise_factory import create_noise_model, NOISE_CLASSES, get_available_noise_types
 
 __all__ = [
     "BaseNoise",
@@ -27,5 +27,5 @@ __all__ = [
     "BitFlipNoise",
     "create_noise_model",
     "NOISE_CLASSES",
-    "NOISE_CONFIG",
+    "get_available_noise_types",
 ]
