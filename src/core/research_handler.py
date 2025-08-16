@@ -390,6 +390,7 @@ class ResearchExperimentHandler:
             pass
 
         # Add decoherence-specific analysis
+        ideal_counts = None  # TODO: Implement ideal state computation if needed
         if ideal_counts:
             analysis["decoherence_analysis"] = self._compute_decoherence_metrics(
                 counts, ideal_counts, experiment_config

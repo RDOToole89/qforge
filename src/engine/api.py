@@ -18,6 +18,7 @@ from src.engine.models import (
     ArtifactRef,
 )
 from src.core.research_handler import ResearchExperimentHandler
+from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 from src.engine.events import (
     SimpleEventBus,
     make_event,
@@ -59,6 +60,12 @@ def run(
         experiment_id=cfg_model.state_type + "_engine",
     )
 
+    # NEW: Compute structured decoherence metrics if enabled
+    structured_decoherence_metrics = None
+    if cfg_model.enable_research_metrics:
+        counts = extract_counts_from_result(raw)
+        structured_decoherence_metrics = compute_research_metrics(counts, cfg_model)
+    
     metrics = analysis.get("research_metrics", {})
     prov = Provenance(
         schema_version="1.0.0",
@@ -79,6 +86,7 @@ def run(
 
     result = ExperimentResult(
         analysis=analysis,
+        structured_decoherence_metrics=structured_decoherence_metrics,
         metrics=metrics,
         artifacts=[ArtifactRef(kind="other", path=saved_path, metadata={})],
         provenance=prov,

@@ -53,17 +53,20 @@ class LocalStorage(Storage):
         return h.hexdigest()
 
     def save_analysis(self, analysis: Dict[str, Any]) -> str:
-        """Persist analysis under a per-run directory and return absolute path.
+        """Persist analysis with descriptive filename for easy browsing.
 
         New structure:
-        results/<YYYYMMDD>/<HHMMSS>_<slug>/analysis/analysis.json
+        results/<YYYYMMDD>/<HHMMSS>_<STATE>_<QUBITS>q_<NOISE>_<SHOTS>shots_<RESEARCH>_<HASH>.json
+        
+        Example:
+        results/20250816/185601_GHZ_3q_clean_1024shots_baseline_a1b2c3d4.json
         """
         from datetime import datetime
 
+        # Extract timestamp
         meta = analysis.get("experiment_metadata", {})
         ts = meta.get("timestamp") or analysis.get("timestamp")
         try:
-            # Normalize timestamps like 2025-08-08T16:34:38 to date/time
             dt = (
                 datetime.fromisoformat(str(ts).replace("Z", ""))
                 if ts
@@ -74,21 +77,46 @@ class LocalStorage(Storage):
         date_str = dt.strftime("%Y%m%d")
         time_str = dt.strftime("%H%M%S")
 
-        research_type = str(meta.get("research_type", "experiment")).lower()
-        state = str(
-            analysis.get("experiment_parameters", {}).get("state_type", "state")
-        ).lower()
+        # Extract experiment parameters
+        params = analysis.get("experiment_parameters", {})
+        state = str(params.get("state_type", "UNKNOWN")).upper()
+        num_qubits = params.get("num_qubits", 0)
+        shots = params.get("shots", 1024)
+        
+        # Build noise description
+        noise_enabled = params.get("noise_enabled", False)
+        if not noise_enabled:
+            noise_desc = "clean"
+        else:
+            noise_type = params.get("noise_type", "unknown")
+            error_rate = params.get("error_rate")
+            t1 = params.get("t1")
+            t2 = params.get("t2")
+            
+            if noise_type == "thermal_relaxation" and t1 and t2:
+                noise_desc = f"thermal_T1_{int(t1*1e6)}us_T2_{int(t2*1e6)}us"
+            elif error_rate is not None:
+                noise_desc = f"{noise_type}_{error_rate}"
+            else:
+                noise_desc = noise_type
+        
+        # Research type
+        research_type = str(meta.get("research_type") or "baseline").lower()
+        if research_type == "none" or research_type == "null":
+            research_type = "baseline"
+        
+        # Config hash for uniqueness
         prov = analysis.get("provenance", {})
-        cfg_hash = prov.get("config_hash") or ""
-        slug = f"{state}_{research_type}"
-        if cfg_hash:
-            slug += f"_{cfg_hash[:8]}"
-
-        run_dir = self.base_dir / date_str / f"{time_str}_{slug}"
-        analysis_dir = run_dir / "analysis"
-        analysis_dir.mkdir(parents=True, exist_ok=True)
-        rel_path = analysis_dir.relative_to(self.base_dir) / "analysis.json"
-
-        abs_path = Path(self.save_json(str(rel_path), analysis))
+        cfg_hash = prov.get("config_hash", "")[:8] or "00000000"
+        
+        # Build descriptive filename
+        filename = f"{time_str}_{state}_{num_qubits}q_{noise_desc}_{shots}shots_{research_type}_{cfg_hash}.json"
+        
+        # Save directly to date directory (no subdirectory)
+        date_dir = self.base_dir / date_str
+        date_dir.mkdir(parents=True, exist_ok=True)
+        rel_path = date_str + "/" + filename
+        
+        abs_path = Path(self.save_json(rel_path, analysis))
         _ = self._checksum(abs_path)
         return str(abs_path)

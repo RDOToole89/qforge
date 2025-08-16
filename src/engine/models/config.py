@@ -120,13 +120,10 @@ class ExperimentConfig(BaseModel):
     # ===== Output Parameters =====
     visualization_type: Literal[
         "histogram",
-        "density_matrix", 
-        "research",
-        "plot",
         "none"
     ] = Field(
-        default="histogram",
-        description="Type of visualization to generate"
+        default="histogram", 
+        description="Type of visualization to generate (research-focused)"
     )
     
     # ===== System Parameters =====
