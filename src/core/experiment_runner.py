@@ -8,7 +8,6 @@ quantum circuit preparation, noise application, simulation, and measurement.
 import time
 import logging
 from typing import Optional, Dict, Union, Tuple
-import numpy as np
 
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import Aer, AerSimulator
@@ -16,7 +15,6 @@ from qiskit.quantum_info import DensityMatrix
 
 from .state_preparation import prepare_state
 from .noise_models import create_noise_model
-from src.utils import logger as logger_utils
 
 # Initialize logger for this module
 logger = logging.getLogger("QuantumExperiment.ExperimentRunner")
@@ -81,18 +79,7 @@ class ExperimentRunner:
             Exception: If simulation fails.
         """
         # Emit start event
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            "experiment_start",
-            self.experiment_id,
-            extra_info={
-                "num_qubits": num_qubits,
-                "state_type": state_type,
-                "sim_mode": sim_mode,
-                "noise_enabled": noise_enabled,
-            },
-        )
+        logger.info(f"Starting experiment (id: {self.experiment_id}, qubits: {num_qubits}, state: {state_type})")
 
         # Prepare the quantum circuit
         qc = self._prepare_circuit(state_type, num_qubits, custom_params)
@@ -119,13 +106,7 @@ class ExperimentRunner:
             circuit_compiled, backend, shots, noise_model, sim_mode
         )
 
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            "experiment_end",
-            self.experiment_id,
-            extra_info={"result_type": "qasm" if sim_mode == "qasm" else "density"},
-        )
+        logger.info(f"Experiment completed (id: {self.experiment_id})")
 
         return qc, result_data
 
@@ -151,28 +132,7 @@ class ExperimentRunner:
             experiment_id=self.experiment_id,
         )
 
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            f"Prepared {state_type} state with {num_qubits} qubits",
-            self.experiment_id,
-            extra_info={
-                "num_qubits": num_qubits,
-                "state_type": state_type,
-                "circuit_depth": qc.depth(),
-                "num_gates": sum(qc.count_ops().values()),
-            },
-        )
-
-        if custom_params:
-            logger_utils.log_with_experiment_id(
-                self.logger,
-                "debug",
-                f"Applied custom parameters: {custom_params}",
-                self.experiment_id,
-                extra_info={"custom_params": custom_params},
-            )
-
+        logger.debug(f"Prepared {state_type} state with {num_qubits} qubits (id: {self.experiment_id})")
         return qc
 
     def _apply_noise(
@@ -220,33 +180,11 @@ class ExperimentRunner:
                 experiment_id=self.experiment_id,
             )
 
-            logger_utils.log_with_experiment_id(
-                self.logger,
-                "info",
-                (
-                    f"Applied {noise_type} noise with params: error_rate={error_rate}, "
-                    f"z_prob={z_prob}, i_prob={i_prob}, t1={t1}, t2={t2}"
-                ),
-                self.experiment_id,
-                extra_info={
-                    "noise_type": noise_type,
-                    "error_rate": error_rate,
-                    "z_prob": z_prob,
-                    "i_prob": i_prob,
-                    "t1": t1,
-                    "t2": t2,
-                },
-            )
-
+            logger.debug(f"Applied {noise_type} noise (id: {self.experiment_id})")
             return noise_model
 
         except Exception as e:
-            logger_utils.log_with_experiment_id(
-                self.logger,
-                "error",
-                f"Failed to apply noise model: {str(e)}",
-                self.experiment_id,
-            )
+            logger.error(f"Failed to apply noise model: {str(e)} (id: {self.experiment_id})")
             raise
 
     def _configure_simulation(
@@ -263,24 +201,13 @@ class ExperimentRunner:
             Tuple[object, QuantumCircuit]: Backend and configured circuit.
         """
         if sim_mode == "density":
-            # TODO: Revert to method="density_matrix" once Qiskit-Aer bug is fixed
             backend = AerSimulator(method="statevector")
             qc.save_statevector()
-            logger_utils.log_with_experiment_id(
-                self.logger,
-                "debug",
-                "Configured circuit for density simulation using statevector workaround",
-                self.experiment_id,
-            )
+            logger.debug(f"Configured density simulation (id: {self.experiment_id})")
         else:
             backend = Aer.get_backend("qasm_simulator")
             qc.measure_all()
-            logger_utils.log_with_experiment_id(
-                self.logger,
-                "debug",
-                "Added measurements for qasm simulation",
-                self.experiment_id,
-            )
+            logger.debug(f"Configured qasm simulation (id: {self.experiment_id})")
 
         # Apply RNG seed if provided
         try:
@@ -304,9 +231,7 @@ class ExperimentRunner:
         Returns:
             QuantumCircuit: The transpiled circuit.
         """
-        logger_utils.log_with_experiment_id(
-            self.logger, "info", "Transpiling circuit", self.experiment_id
-        )
+        logger.debug(f"Transpiling circuit (id: {self.experiment_id})")
 
         start_time = time.time()
         try:
@@ -319,19 +244,7 @@ class ExperimentRunner:
             circuit_compiled = transpile(qc, backend)
         transpile_time = time.time() - start_time
 
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            f"Transpilation completed in {transpile_time:.3f} seconds",
-            self.experiment_id,
-            extra_info={
-                "transpile_time": transpile_time,
-                "compiled_circuit_depth": circuit_compiled.depth(),
-                "compiled_num_gates": sum(circuit_compiled.count_ops().values()),
-            },
-        )
-
-        logger.info("Circuit transpilation completed")
+        logger.debug(f"Transpilation completed in {transpile_time:.3f}s (id: {self.experiment_id})")
         return circuit_compiled
 
     def _run_simulation(
@@ -365,19 +278,11 @@ class ExperimentRunner:
             )
             result = job.result()
         except Exception as e:
-            logger_utils.log_with_experiment_id(
-                self.logger, "error", f"Simulation failed: {str(e)}", self.experiment_id
-            )
+            logger.error(f"Simulation failed: {str(e)} (id: {self.experiment_id})")
             raise
 
         simulation_time = time.time() - start_time
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            f"Simulation completed in {simulation_time:.3f} seconds",
-            self.experiment_id,
-            extra_info={"simulation_time": simulation_time},
-        )
+        logger.debug(f"Simulation completed in {simulation_time:.3f}s (id: {self.experiment_id})")
 
         # Process results
         if sim_mode == "qasm":
@@ -396,21 +301,7 @@ class ExperimentRunner:
             Dict: Processed results.
         """
         counts = result.get_counts()
-        total_counts = sum(counts.values())
-        probabilities = {state: count / total_counts for state, count in counts.items()}
-
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            "Qasm simulation completed",
-            self.experiment_id,
-            extra_info={
-                "counts": counts,
-                "probabilities": probabilities,
-                "total_shots": total_counts,
-            },
-        )
-
+        logger.debug(f"Processed qasm results: {len(counts)} outcomes (id: {self.experiment_id})")
         return {"counts": counts, "metadata_file": "results_placeholder"}
 
     def _process_density_results(self, result: object) -> DensityMatrix:
@@ -425,18 +316,7 @@ class ExperimentRunner:
         """
         statevector = result.get_statevector()
         density_matrix = DensityMatrix(statevector)
-
-        logger_utils.log_with_experiment_id(
-            self.logger,
-            "info",
-            "Density simulation completed via statevector workaround",
-            self.experiment_id,
-            extra_info={
-                "density_matrix_shape": density_matrix.data.shape,
-                "trace": float(np.real(np.trace(density_matrix.data))),
-            },
-        )
-
+        logger.debug(f"Processed density results (id: {self.experiment_id})")
         return density_matrix
 
 

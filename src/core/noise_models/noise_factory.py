@@ -3,7 +3,6 @@
 import logging
 from typing import Optional, List
 from qiskit_aer.noise import NoiseModel
-from src.utils import logger as logger_utils
 from .base_noise import BaseNoise
 from .depolarizing import DepolarizingNoise
 from .phase_flip import PhaseFlipNoise
@@ -236,20 +235,11 @@ def create_noise_model(
 
         # Skip if the noise type is single-qubit but the gate requires more qubits (for non-single-qubit noise types)
         if noise_type in single_qubit_noise_types and qubits > 1:
-            logger_utils.log_with_experiment_id(
-                logger,
-                "info",
-                (
-                    f"Skipping {noise_type} noise for {qubits}-qubit gates {gate_list}: "
-                    "This noise type only supports single-qubit gates. "
-                    "Use a multi-qubit noise type like DEPOLARIZING for these gates."
-                ),
-                experiment_id,
-                extra_info={
-                    "noise_type": noise_type,
-                    "qubits": qubits,
-                    "gates": gate_list,
-                },
+            logger.info(
+                f"Skipping {noise_type} noise for {qubits}-qubit gates {gate_list}: "
+                f"This noise type only supports single-qubit gates. "
+                f"Use a multi-qubit noise type like DEPOLARIZING for these gates. "
+                f"(experiment: {experiment_id})"
             )
             continue
 
@@ -262,47 +252,23 @@ def create_noise_model(
                     qubits_for_error=qubits,
                     specific_qubits=target_qubits,
                 )
-                logger_utils.log_with_experiment_id(
-                    logger,
-                    "info",
-                    f"Applied {noise_type} noise to qubit {target_qubits} on gates: {gate_list}",
-                    experiment_id,
-                    extra_info={
-                        "noise_type": noise_type,
-                        "qubits": target_qubits,
-                        "gates": gate_list,
-                    },
+                logger.info(
+                    f"Applied {noise_type} noise to qubit {target_qubits} on gates: {gate_list} "
+                    f"(experiment: {experiment_id})"
                 )
             else:
                 # Apply noise to gates with specified qubit count
                 noise.apply(noise_model, gate_list, qubits_for_error=qubits)
-                logger_utils.log_with_experiment_id(
-                    logger,
-                    "info",
-                    f"Applied {noise_type} noise to {qubits}-qubit gates: {gate_list}",
-                    experiment_id,
-                    extra_info={
-                        "noise_type": noise_type,
-                        "qubits": qubits,
-                        "gates": gate_list,
-                    },
+                logger.info(
+                    f"Applied {noise_type} noise to {qubits}-qubit gates: {gate_list} "
+                    f"(experiment: {experiment_id})"
                 )
         except Exception as e:
-            logger_utils.log_with_experiment_id(
-                logger,
-                "warning",
-                (
-                    f"Failed to apply {noise_type} noise to {qubits}-qubit gates {gate_list}. "
-                    f"Error: {str(e)}. This may be due to an incompatible qubit count. "
-                    "Ensure the noise type matches the gate's qubit requirements."
-                ),
-                experiment_id,
-                extra_info={
-                    "noise_type": noise_type,
-                    "qubits": qubits,
-                    "gates": gate_list,
-                    "error": str(e),
-                },
+            logger.warning(
+                f"Failed to apply {noise_type} noise to {qubits}-qubit gates {gate_list}. "
+                f"Error: {str(e)}. This may be due to an incompatible qubit count. "
+                f"Ensure the noise type matches the gate's qubit requirements. "
+                f"(experiment: {experiment_id})"
             )
 
     return noise_model

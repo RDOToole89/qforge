@@ -2,7 +2,7 @@
 
 from qiskit_aer.noise import NoiseModel
 import logging
-from src.utils import logger as logger_utils
+# Logger utils removed - using standard Python logging
 from typing import Optional
 
 logger = logging.getLogger("QuantumExperiment.NoiseModels")
@@ -47,12 +47,10 @@ class BaseNoise:
             gates (list): List of gates to which noise was applied.
             extra_info (dict, optional): Additional metadata to include in the log.
         """
-        base_info = {"noise_type": noise_type, "gates": gates}
+        base_info = {"noise_type": noise_type, "gates": gates, "experiment_id": self.experiment_id}
         if extra_info:
             base_info.update(extra_info)
-        logger_utils.log_with_experiment_id(
-            logger, "debug",
+        logger.debug(
             f"Applied {noise_type} noise to {gates}",
-            self.experiment_id,
-            extra_info=base_info
+            extra=base_info
         )
