@@ -137,11 +137,13 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### Results Structure
 ```
 results/
-├── YYYYMMDD/HHMMSS_<slug>/
-│   ├── analysis.json          # Complete experiment result
-│   ├── visualization/         # Research plots and figures
-│   └── reports/              # Publication-ready outputs
+├── YYYYMMDD/
+│   ├── HHMMSS_STATE_Nq_NOISE_SHOTSshots_RESEARCH_HASH.json
+│   ├── 190743_GHZ_3q_clean_1024shots_structured_decoherence_*.json
+│   └── 190744_BELL_2q_depolarizing_0.05_2048shots_control_*.json
 ```
+
+**Descriptive Filenames**: Each result file includes all key experiment parameters for easy browsing and identification without opening the file.
 
 ## Architecture Principles
 
