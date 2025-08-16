@@ -220,3 +220,94 @@ class BaseExperiment(ABC):
         to define their specific component pipeline.
         """
         pass
+
+    def to_experiment_spec(self) -> Dict[str, Any]:
+        """
+        Convert experiment to experiment_spec format.
+        
+        Returns:
+            Dictionary in current experiment_spec schema format
+        """
+        from ..validation import SchemaValidator
+        from datetime import datetime
+        import uuid
+        
+        # Get current schema version dynamically
+        validator = SchemaValidator()
+        
+        experiment_spec = {
+            "$schema": f"../../../{validator.version}/core/experiment_spec.schema.json",
+            "experiment_metadata": {
+                "experiment_id": self.experiment_id,
+                "name": self.metadata.name,
+                "description": self.metadata.description,
+                "phase": "planning",
+                "created_timestamp": datetime.now().isoformat(),
+                "tags": getattr(self.metadata, 'tags', []),
+                "difficulty_level": getattr(self.metadata, 'difficulty_level', 'intermediate')
+            },
+            "quantum_configuration": {
+                "num_qubits": self.config.get("num_qubits", 3),
+                "state_type": self.config.get("state_type", "GHZ"),
+                "shots": self.config.get("shots", 1024)
+            },
+            "noise_configuration": {
+                "noise_enabled": self.config.get("noise_enabled", False)
+            },
+            "research_configuration": {
+                "research_type": getattr(self.metadata, 'research_type', 'general'),
+                "enable_research_metrics": self.config.get("enable_research_metrics", False),
+                "statistical_validation": True
+            },
+            "provenance": {
+                "created_by": "base_experiment",
+                "creation_method": "component_system",
+                "framework_version": validator.version,
+                "experiment_class": self.__class__.__name__
+            }
+        }
+        
+        # Add noise configuration details if enabled
+        if self.config.get("noise_enabled", False):
+            experiment_spec["noise_configuration"].update({
+                "noise_type": self.config.get("noise_type", "depolarizing"),
+                "error_rate": self.config.get("error_rate", 0.01)
+            })
+            
+            # Add noise-specific parameters
+            for param in ["t1", "t2", "z_prob", "i_prob", "gamma"]:
+                if param in self.config:
+                    experiment_spec["noise_configuration"][param] = self.config[param]
+        
+        return experiment_spec
+
+    def validate_schema_compatibility(self) -> bool:
+        """
+        Validate that this experiment is compatible with current schemas.
+        
+        Returns:
+            True if compatible, False otherwise
+        """
+        try:
+            experiment_spec = self.to_experiment_spec()
+            from ..validation import SchemaValidator
+            validator = SchemaValidator()
+            return validator.validate(experiment_spec)
+        except Exception as e:
+            self.logger.error(f"Schema validation failed: {e}")
+            return False
+
+    def get_validation_errors(self) -> List[str]:
+        """
+        Get schema validation errors for this experiment.
+        
+        Returns:
+            List of validation error messages
+        """
+        try:
+            experiment_spec = self.to_experiment_spec()
+            from ..validation import SchemaValidator
+            validator = SchemaValidator()
+            return validator.get_validation_errors(experiment_spec)
+        except Exception as e:
+            return [f"Failed to generate experiment spec: {e}"]

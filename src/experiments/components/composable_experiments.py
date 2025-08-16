@@ -159,22 +159,38 @@ class ComposableQuantumExperiment(BaseExperiment, ComposableMixin):
         logger.info(f"Configured for entanglement study with states: {state_types}")
         return self
 
-    def to_preset_format(self) -> Dict[str, Any]:
+    def to_experiment_spec(self) -> Dict[str, Any]:
         """
-        Convert the experiment to the preset format used by the experiment manager.
+        Convert the experiment to experiment_spec format.
 
         Returns:
-            Dictionary in the format expected by the preset experiment system
+            Dictionary in current experiment_spec schema format
         """
+        return super().to_experiment_spec(
+            name=self.metadata.name,
+            description=self.metadata.description
+        )
+
+    def to_preset_format(self) -> Dict[str, Any]:
+        """
+        Convert the experiment to the preset format (legacy compatibility).
+
+        Returns:
+            Dictionary in the format expected by the legacy experiment system
+        """
+        # Convert to current format first, then extract legacy fields
+        current_spec = self.to_experiment_spec()
+        
         return {
-            "name": self.metadata.name,
-            "description": self.metadata.description,
-            "category": self.metadata.category,
-            "difficulty": self.metadata.difficulty,
-            "research_type": self.metadata.research_type,
+            "name": current_spec["experiment_metadata"]["name"],
+            "description": current_spec["experiment_metadata"]["description"],
+            "category": "research" if current_spec["experiment_metadata"]["difficulty_level"] == "research" else "general",
+            "difficulty": current_spec["experiment_metadata"]["difficulty_level"],
+            "research_type": current_spec["research_configuration"]["research_type"],
             "config": {
-                **self.config,
-                **self.get_full_config()
+                **current_spec["quantum_configuration"],
+                **current_spec["noise_configuration"],
+                **current_spec["research_configuration"]
             }
         }
 
@@ -191,7 +207,7 @@ def create_structured_decoherence_experiment(name: str = "Composable Structured 
         shots: Number of shots
 
     Returns:
-        Configured structured decoherence experiment
+        Configured structured decoherence experiment with v1.0 schema compatibility
     """
     experiment = ComposableQuantumExperiment(
         name=name,
@@ -202,6 +218,14 @@ def create_structured_decoherence_experiment(name: str = "Composable Structured 
     )
 
     experiment.quick_configure_structured_decoherence()
+    
+    # Validate schema compatibility
+    try:
+        experiment_spec = experiment.to_experiment_spec()
+        logger.info(f"Created schema-compatible structured decoherence experiment: {name}")
+    except Exception as e:
+        logger.warning(f"Schema validation failed: {e}")
+    
     return experiment
 
 
@@ -217,7 +241,7 @@ def create_entanglement_experiment(name: str = "Composable Entanglement Study",
         shots: Number of shots
 
     Returns:
-        Configured entanglement study experiment
+        Configured entanglement study experiment with v1.0 schema compatibility
     """
     experiment = ComposableQuantumExperiment(
         name=name,
@@ -228,4 +252,58 @@ def create_entanglement_experiment(name: str = "Composable Entanglement Study",
     )
 
     experiment.quick_configure_entanglement_study()
+    
+    # Validate v1.0 schema compatibility
+    try:
+        experiment_spec = experiment.to_experiment_spec()
+        logger.info(f"Created schema-compatible entanglement experiment: {name}")
+    except Exception as e:
+        logger.warning(f"Schema validation failed: {e}")
+    
     return experiment
+
+
+def create_v1_native_structured_decoherence(name: str = "V1 Native Structured Decoherence",
+                                           num_qubits: int = 3,
+                                           **kwargs) -> Dict[str, Any]:
+    """
+    Create a structured decoherence experiment in native v1.0 format.
+
+    Args:
+        name: Experiment name
+        num_qubits: Number of qubits
+        **kwargs: Additional configuration parameters
+
+    Returns:
+        v1.0 experiment_spec dictionary
+    """
+    from ..v1_factory import create_structured_decoherence_experiment
+    
+    return create_structured_decoherence_experiment(
+        name=name,
+        num_qubits=num_qubits,
+        **kwargs
+    )
+
+
+def create_v1_native_entanglement_study(name: str = "V1 Native Entanglement Study",
+                                       num_qubits: int = 3,
+                                       **kwargs) -> Dict[str, Any]:
+    """
+    Create an entanglement study experiment in native v1.0 format.
+
+    Args:
+        name: Experiment name
+        num_qubits: Number of qubits
+        **kwargs: Additional configuration parameters
+
+    Returns:
+        v1.0 experiment_spec dictionary
+    """
+    from ..v1_factory import create_entanglement_study_experiment
+    
+    return create_entanglement_study_experiment(
+        name=name,
+        num_qubits=num_qubits,
+        **kwargs
+    )

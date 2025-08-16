@@ -193,11 +193,10 @@ class ExperimentManager:
             bool: True if added successfully.
         """
         try:
-            # Validate experiment configuration
-            from .validator import ExperimentValidator
+            # Validate experiment configuration using version-agnostic schemas
+            from .validation import validate_experiment
 
-            validator = ExperimentValidator()
-            if not validator.validate_experiment(experiment_config):
+            if not validate_experiment(experiment_config):
                 return False
 
             # Add experiment

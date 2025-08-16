@@ -249,3 +249,128 @@ class ComposableMixin(NoiseMixin, AnalysisMixin, VisualizationMixin, ResearchMix
             config["research"] = self.get_research_config()
 
         return config
+
+    def to_experiment_spec(self, experiment_id: str = None, name: str = None, description: str = None) -> Dict[str, Any]:
+        """
+        Export experiment configuration to experiment_spec format.
+        
+        Args:
+            experiment_id: Experiment ID (defaults to generated ID)
+            name: Experiment name (required)
+            description: Experiment description (required)
+            
+        Returns:
+            Dictionary in current experiment_spec schema format
+        """
+        import uuid
+        from datetime import datetime
+        
+        if not name:
+            raise ValueError("Experiment name is required for v1.0 export")
+        if not description:
+            raise ValueError("Experiment description is required for v1.0 export")
+            
+        experiment_id = experiment_id or str(uuid.uuid4())[:8]
+        
+        # Get current schema version dynamically
+        from ..validation import SchemaValidator
+        validator = SchemaValidator()
+        
+        # Build base experiment_spec structure
+        experiment_spec = {
+            "$schema": f"../../../{validator.version}/core/experiment_spec.schema.json",
+            "experiment_metadata": {
+                "experiment_id": experiment_id,
+                "name": name,
+                "description": description,
+                "phase": "planning",
+                "created_timestamp": datetime.now().isoformat(),
+                "tags": [],
+                "difficulty_level": "intermediate"
+            },
+            "quantum_configuration": {
+                "num_qubits": getattr(self, 'num_qubits', 3),
+                "state_type": getattr(self, 'state_type', 'GHZ'),  
+                "shots": getattr(self, 'shots', 1024)
+            }
+        }
+        
+        # Add noise configuration from mixin
+        if hasattr(self, 'noise_config') and self.noise_config:
+            if self.noise_config.get("noise_enabled", False):
+                experiment_spec["noise_configuration"] = {
+                    "noise_enabled": True,
+                    "noise_type": self.noise_config.get("noise_type", "depolarizing"),
+                    "error_rate": self.noise_config.get("error_rate", 0.01)
+                }
+                
+                # Add noise-specific parameters
+                for param in ["t1", "t2", "z_prob", "i_prob"]:
+                    if param in self.noise_config:
+                        experiment_spec["noise_configuration"][param] = self.noise_config[param]
+            else:
+                experiment_spec["noise_configuration"] = {"noise_enabled": False}
+        else:
+            experiment_spec["noise_configuration"] = {"noise_enabled": False}
+            
+        # Add research configuration from mixin
+        if hasattr(self, 'research_config') and self.research_config:
+            experiment_spec["research_configuration"] = {
+                "research_type": self.research_config.get("research_type", "general"),
+                "enable_research_metrics": self.research_config.get("enable_research_metrics", False),
+                "statistical_validation": self.research_config.get("statistical_validation", True)
+            }
+            
+            # Add structured decoherence specific config
+            if self.research_config.get("research_type") == "structured_decoherence":
+                experiment_spec["research_configuration"]["null_models"] = [
+                    "independent_bitflip", "independent_pauli", "readout_confusion"
+                ]
+                experiment_spec["research_configuration"]["bootstrap_samples"] = 1000
+        else:
+            experiment_spec["research_configuration"] = {
+                "research_type": "general",
+                "enable_research_metrics": False,
+                "statistical_validation": True
+            }
+        
+        # Add analysis configuration from mixin  
+        if hasattr(self, 'enabled_metrics') and self.enabled_metrics:
+            experiment_spec["analysis_configuration"] = {
+                "enabled_metrics": self.enabled_metrics,
+                "analysis_parameters": getattr(self, 'analysis_config', {})
+            }
+        
+        # Add provenance information
+        experiment_spec["provenance"] = {
+            "created_by": "component_system",
+            "creation_method": "composable_mixin_export",
+            "framework_version": validator.version,
+            "component_source": self.__class__.__name__
+        }
+        
+        return experiment_spec
+
+    def to_execution_config(self) -> Dict[str, Any]:
+        """
+        Export execution configuration for engine API.
+        
+        Returns:
+            Dictionary suitable for engine API execution
+        """
+        # Convert to experiment_spec first
+        experiment_spec = self.to_experiment_spec(
+            name=getattr(self, 'name', 'Component Experiment'),
+            description=getattr(self, 'description', 'Generated from component system')
+        )
+        
+        # Validate before returning
+        from ..validation import SchemaValidator
+        validator = SchemaValidator()
+        if not validator.validate(experiment_spec):
+            logger.warning("Generated experiment_spec failed validation")
+            errors = validator.get_validation_errors(experiment_spec)
+            for error in errors[:3]:
+                logger.warning(f"Validation error: {error}")
+        
+        return experiment_spec

@@ -1,98 +1,137 @@
 """
-Metadata management for experiments and components.
+Schema-aligned metadata management for experiments and components.
 
-Provides structured metadata tracking for experiments and their components,
-including versioning, timestamps, and configuration information.
+Built directly from the actual schema definitions rather than legacy concepts.
 """
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 import json
 
 
 @dataclass
-class ComponentMetadata:
-    """Metadata for an experiment component."""
-
-    name: str
-    version: str
-    component_type: str
-    created_at: datetime
-    description: str = ""
-    author: str = ""
-    tags: List[str] = field(default_factory=list)
-    parameters: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert metadata to dictionary format."""
-        return {
-            "name": self.name,
-            "version": self.version,
-            "component_type": self.component_type,
-            "created_at": self.created_at.isoformat(),
-            "description": self.description,
-            "author": self.author,
-            "tags": self.tags,
-            "parameters": self.parameters
-        }
-
-    def to_json(self) -> str:
-        """Convert metadata to JSON string."""
-        return json.dumps(self.to_dict(), indent=2)
-
-
-@dataclass
 class ExperimentMetadata:
-    """Metadata for a complete experiment."""
-
-    name: str
+    """
+    Experiment metadata based on the actual experiment_spec schema.
+    
+    Maps directly to schema fields rather than legacy concepts.
+    """
+    
+    # Core schema fields
     experiment_id: str
-    created_at: datetime
+    state_type: str = "GHZ"
+    n_qubits: int = 3
+    shots: int = 1024
+    noise_model: Optional[str] = None
+    error_rate: Optional[float] = None
+    seed: Optional[int] = None
+    engine_config_hash: str = "default"
+    
+    # Research context (required by schema)
+    research_phase: str = "structure_validation"
+    research_hypothesis: str = ""
+    research_notes: str = ""
+    
+    # Component metadata (not in schema but useful for components)
+    name: str = ""
     description: str = ""
-    category: str = "custom"
-    difficulty: str = "intermediate"
-    author: str = ""
-    version: str = "1.0.0"
+    created_at: datetime = field(default_factory=datetime.now)
     tags: List[str] = field(default_factory=list)
-    research_type: Optional[str] = None
-    parameters: Dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert metadata to dictionary format."""
+    def to_schema_dict(self) -> Dict[str, Any]:
+        """Convert to experiment_spec schema format."""
+        data = {
+            "schema_version": "1.0",
+            "experiment_id": self.experiment_id,
+            "state_type": self.state_type,
+            "n_qubits": self.n_qubits,
+            "shots": self.shots,
+            "engine_config_hash": self.engine_config_hash,
+            "research": {
+                "phase": self.research_phase,
+                "hypothesis": self.research_hypothesis,
+                "notes": self.research_notes
+            }
+        }
+        
+        # Add optional fields if they exist
+        if self.noise_model is not None:
+            data["noise_model"] = self.noise_model
+        if self.error_rate is not None:
+            data["error_rate"] = self.error_rate
+        if self.seed is not None:
+            data["seed"] = self.seed
+            
+        return data
+    
+    def to_component_dict(self) -> Dict[str, Any]:
+        """Convert to component metadata format (includes non-schema fields)."""
         return {
             "name": self.name,
             "experiment_id": self.experiment_id,
-            "created_at": self.created_at.isoformat(),
             "description": self.description,
-            "category": self.category,
-            "difficulty": self.difficulty,
-            "author": self.author,
-            "version": self.version,
+            "created_at": self.created_at.isoformat(),
             "tags": self.tags,
-            "research_type": self.research_type,
-            "parameters": self.parameters
+            "quantum_config": {
+                "state_type": self.state_type,
+                "n_qubits": self.n_qubits,
+                "shots": self.shots,
+                "noise_model": self.noise_model,
+                "error_rate": self.error_rate,
+                "seed": self.seed
+            },
+            "research": {
+                "phase": self.research_phase,
+                "hypothesis": self.research_hypothesis,
+                "notes": self.research_notes
+            }
         }
 
-    def to_json(self) -> str:
-        """Convert metadata to JSON string."""
-        return json.dumps(self.to_dict(), indent=2)
-
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ExperimentMetadata':
-        """Create metadata from dictionary."""
-        created_at = datetime.fromisoformat(data["created_at"]) if isinstance(data["created_at"], str) else data["created_at"]
-
+    def from_schema_dict(cls, data: Dict[str, Any]) -> 'ExperimentMetadata':
+        """Create from experiment_spec schema format."""
+        research = data.get("research", {})
+        
         return cls(
-            name=data["name"],
             experiment_id=data["experiment_id"],
-            created_at=created_at,
-            description=data.get("description", ""),
-            category=data.get("category", "custom"),
-            difficulty=data.get("difficulty", "intermediate"),
-            author=data.get("author", ""),
-            version=data.get("version", "1.0.0"),
-            tags=data.get("tags", []),
-            research_type=data.get("research_type"),
-            parameters=data.get("parameters", {})
+            state_type=data["state_type"],
+            n_qubits=data["n_qubits"],
+            shots=data["shots"],
+            noise_model=data.get("noise_model"),
+            error_rate=data.get("error_rate"),
+            seed=data.get("seed"),
+            engine_config_hash=data.get("engine_config_hash", "default"),
+            research_phase=research.get("phase", "structure_validation"),
+            research_hypothesis=research.get("hypothesis", ""),
+            research_notes=research.get("notes", ""),
+            name=f"Experiment {data['experiment_id']}",
+            description="Generated from schema"
         )
+
+
+@dataclass
+class ComponentMetadata:
+    """
+    Simple component metadata for internal component system use.
+    
+    This is for the component framework itself, not tied to schemas.
+    """
+    
+    name: str
+    component_type: str
+    version: str = "1.0.0"
+    created_at: datetime = field(default_factory=datetime.now)
+    description: str = ""
+    parameters: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary format."""
+        return {
+            "name": self.name,
+            "component_type": self.component_type,
+            "version": self.version,
+            "created_at": self.created_at.isoformat(),
+            "description": self.description,
+            "parameters": self.parameters
+        }
