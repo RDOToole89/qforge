@@ -26,7 +26,7 @@ def get_visualizer():
     """Get visualization functions (lazy import)."""
     from .visualization import get_all_visualizers
     return get_all_visualizers()
-from .config.settings import settings  # Application settings
+# from .config.settings import settings  # Application settings
 
 # Expose key functions and classes for easier package imports
 __all__ = [
@@ -34,5 +34,5 @@ __all__ = [
     "create_noise_model",
     "ExperimentRunner",
     "get_visualizer",
-    "settings",
+    # "settings",
 ]

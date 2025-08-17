@@ -15,12 +15,12 @@ from .correlations import (
     compute_correlations_for_hypergraph,
 )
 from .information_theory import (
-    compute_shannon_entropy,
-    compute_kl_divergence,
-    compute_total_variation_distance,
-    compute_mutual_information,
-    compute_qubit_wise_bias,
-    compute_research_metrics,
+    entropy,
+    counts_to_probabilities,
+    marginal_distribution,
+    mutual_information,
+    total_correlation,
+    jensen_shannon_divergence,
 )
 from .bloch import (
     compute_bloch_vector,
@@ -39,12 +39,12 @@ __all__ = [
     "compute_adaptive_threshold",
     "compute_correlations_for_hypergraph",
     # Information Theory
-    "compute_shannon_entropy",
-    "compute_kl_divergence",
-    "compute_total_variation_distance",
-    "compute_mutual_information",
-    "compute_qubit_wise_bias",
-    "compute_research_metrics",
+    "entropy",
+    "counts_to_probabilities",
+    "marginal_distribution",
+    "mutual_information",
+    "total_correlation",
+    "jensen_shannon_divergence",
     # Bloch sphere
     "compute_bloch_vector",
     "compute_bloch_vectors_for_all_qubits",

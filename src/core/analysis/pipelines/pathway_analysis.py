@@ -18,7 +18,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
-from .pathway_metrics import (
+from ..metrics.pathway_metrics import (
     compute_asymmetry_index,
     compute_pathway_concentration_ratio,
     compute_entanglement_error_correlation,
