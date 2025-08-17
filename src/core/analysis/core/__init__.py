@@ -1,19 +1,12 @@
 """
-Core quantum analysis functions.
+Core analysis utilities for structured decoherence research.
 
-This module provides fundamental quantum state analysis functions:
-- Correlation analysis (pairwise, conditional, permutation-symmetric)
-- Information theory metrics (Shannon entropy, KL divergence, etc.)
-- Bloch sphere computations and analysis
+This module provides essential functions for quantum measurement analysis:
+- Information theory metrics (Shannon entropy, mutual information, etc.)
+- Bootstrap confidence intervals and statistical validation
+- Null model framework for hypothesis testing
 """
 
-from .correlations import (
-    compute_pairwise_correlations,
-    compute_conditional_correlations,
-    compute_permutation_symmetric_correlations,
-    compute_adaptive_threshold,
-    compute_correlations_for_hypergraph,
-)
 from .information_theory import (
     entropy,
     counts_to_probabilities,
@@ -22,22 +15,16 @@ from .information_theory import (
     total_correlation,
     jensen_shannon_divergence,
 )
-from .bloch import (
-    compute_bloch_vector,
-    compute_bloch_vectors_for_all_qubits,
-    compute_bloch_trajectories,
-    analyze_bloch_purity,
-    compute_bloch_distance,
-    analyze_bloch_evolution,
+from .bootstrap import (
+    bootstrap_confidence_interval,
+    compute_metric_with_confidence,
+    MetricWithConfidence,
+)
+from .null_models import (
+    factorized_null_model,
 )
 
 __all__ = [
-    # Correlations
-    "compute_pairwise_correlations",
-    "compute_conditional_correlations",
-    "compute_permutation_symmetric_correlations",
-    "compute_adaptive_threshold",
-    "compute_correlations_for_hypergraph",
     # Information Theory
     "entropy",
     "counts_to_probabilities",
@@ -45,11 +32,10 @@ __all__ = [
     "mutual_information",
     "total_correlation",
     "jensen_shannon_divergence",
-    # Bloch sphere
-    "compute_bloch_vector",
-    "compute_bloch_vectors_for_all_qubits",
-    "compute_bloch_trajectories",
-    "analyze_bloch_purity",
-    "compute_bloch_distance",
-    "analyze_bloch_evolution",
+    # Bootstrap Statistics
+    "bootstrap_confidence_interval",
+    "compute_metric_with_confidence",
+    "MetricWithConfidence",
+    # Null Models
+    "factorized_null_model",
 ]

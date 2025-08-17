@@ -17,9 +17,7 @@ import numpy as np
 from qiskit.result import Counts
 
 from .analysis.core.information_theory import compute_research_metrics
-from .analysis.dynamics.decoherence import compute_fubini_study_distance
-from .analysis.core.correlations import compute_pairwise_correlations
-# Removed preset dependency - implementing ideal distribution locally
+# Legacy analysis imports removed - focusing on structured decoherence research
 
 logger = logging.getLogger("QuantumExperiment.ResearchHandler")
 
@@ -374,6 +372,7 @@ class ResearchExperimentHandler:
             # Deterministic short hash of normalized config for filenames/tracking
             import json as _json
             import hashlib
+            import os
 
             normalized = {
                 k: v
