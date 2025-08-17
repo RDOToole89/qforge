@@ -1,0 +1,3810 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Research-grade quantum experiment framework for structured decoherence analysis">
+      
+      
+      
+        <link rel="canonical" href="https://github.com/your-org/qiskit-experiments/api/constants/">
+      
+      
+        <link rel="prev" href="../../getting-started/installation/">
+      
+      
+        <link rel="next" href="../metrics/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+    
+    
+      
+        <title>Constants - Quantum Decoherence Analysis Framework</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#constants" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Quantum Decoherence Analysis Framework" class="md-header__button md-logo" aria-label="Quantum Decoherence Analysis Framework" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Quantum Decoherence Analysis Framework
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Constants
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/your-org/qiskit-experiments" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    qiskit-experiments
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../user-guide/overview.md" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/basic-analysis.md" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/contributing.md" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Quantum Decoherence Analysis Framework" class="md-nav__button md-logo" aria-label="Quantum Decoherence Analysis Framework" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Quantum Decoherence Analysis Framework
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/your-org/qiskit-experiments" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    qiskit-experiments
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/basic-usage.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/overview.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/metrics.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Analysis Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/information-theory.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Information Theory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/statistical-methods.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Statistical Methods
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/pipelines.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipeline Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Constants
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Constants
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.core.analysis.constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      constants
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--central-configuration-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Central Configuration &amp; Defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--research-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research Standards
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--educational-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Educational Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attributes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ALPHA" class="md-nav__link">
+    <span class="md-ellipsis">
+      ALPHA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EPS" class="md-nav__link">
+    <span class="md-ellipsis">
+      EPS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LOG_BASE" class="md-nav__link">
+    <span class="md-ellipsis">
+      LOG_BASE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.FAST_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      FAST_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SLOW_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      SLOW_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CONFIDENCE_LEVEL" class="md-nav__link">
+    <span class="md-ellipsis">
+      CONFIDENCE_LEVEL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ALPHA_LEVEL" class="md-nav__link">
+    <span class="md-ellipsis">
+      ALPHA_LEVEL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CONF_INT_DEFAULT" class="md-nav__link">
+    <span class="md-ellipsis">
+      CONF_INT_DEFAULT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EEC_LAMBDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      EEC_LAMBDA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_TOP_K_MIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_TOP_K_MIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_TOP_K_MAX" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_TOP_K_MAX
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_MASS_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_MASS_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_MIN_RUNS" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_MIN_RUNS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CES_MIN_POINTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      CES_MIN_POINTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CES_MAX_QUBITS" class="md-nav__link">
+    <span class="md-ellipsis">
+      CES_MAX_QUBITS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.TIKHONOV_LAMBDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      TIKHONOV_LAMBDA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.VALIDATED_CV_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      VALIDATED_CV_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STATUS_BAND_WIDTH" class="md-nav__link">
+    <span class="md-ellipsis">
+      STATUS_BAND_WIDTH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EXPERIMENTAL_CV_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXPERIMENTAL_CV_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.VALIDATED_MIN_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      VALIDATED_MIN_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EXPERIMENTAL_MIN_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXPERIMENTAL_MIN_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.UNSTABLE_MAX_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNSTABLE_MAX_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SIGNIFICANCE_P_VALUE" class="md-nav__link">
+    <span class="md-ellipsis">
+      SIGNIFICANCE_P_VALUE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_QUBITS_EXACT" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_QUBITS_EXACT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_OUTCOMES_EXACT" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_OUTCOMES_EXACT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.GHZ_EXACT_TC_2QUBIT" class="md-nav__link">
+    <span class="md-ellipsis">
+      GHZ_EXACT_TC_2QUBIT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.GHZ_EXACT_TC_3QUBIT" class="md-nav__link">
+    <span class="md-ellipsis">
+      GHZ_EXACT_TC_3QUBIT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_WEAK_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_WEAK_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_MODERATE_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_MODERATE_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_STRONG_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_STRONG_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_WEAK_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_WEAK_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_MODERATE_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_MODERATE_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_STRONG_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_STRONG_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SCHEMA_VERSION" class="md-nav__link">
+    <span class="md-ellipsis">
+      SCHEMA_VERSION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_TEST_SEED" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_TEST_SEED
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PERFORMANCE_TEST_SEED" class="md-nav__link">
+    <span class="md-ellipsis">
+      PERFORMANCE_TEST_SEED
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.NUMERICAL_TOLERANCE" class="md-nav__link">
+    <span class="md-ellipsis">
+      NUMERICAL_TOLERANCE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STATISTICAL_TOLERANCE" class="md-nav__link">
+    <span class="md-ellipsis">
+      STATISTICAL_TOLERANCE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SMALL_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMALL_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MEDIUM_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      MEDIUM_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LARGE_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      LARGE_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SMALL_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMALL_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MEDIUM_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      MEDIUM_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LARGE_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      LARGE_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_COUNTS_DICT_SIZE" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_COUNTS_DICT_SIZE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_N_JOBS" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_N_JOBS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ENABLE_RESULT_CACHING" class="md-nav__link">
+    <span class="md-ellipsis">
+      ENABLE_RESULT_CACHING
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.validate_probability_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_probability_array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.validate_counts_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_counts_dict
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.get_status_thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_status_thresholds
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validating-measurement-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating Measurement Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-bitstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Bitstrings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-framework-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Framework Constants
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mathematical-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical Background
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mathematical Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jeffreys-prior-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jeffreys Prior Smoothing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confidence-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confidence Intervals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-k-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Top-K Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Core Modules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../registry.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Registry System
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../schema-bridge.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Schema Bridge
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipelines.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pipelines
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/basic-analysis.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/temporal-analysis.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Temporal Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/emergence-analysis.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Emergence Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/custom-metrics.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Custom Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/testing.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/releases.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.core.analysis.constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      constants
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--central-configuration-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Central Configuration &amp; Defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--research-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research Standards
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants--educational-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Educational Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants-attributes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attributes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attributes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ALPHA" class="md-nav__link">
+    <span class="md-ellipsis">
+      ALPHA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EPS" class="md-nav__link">
+    <span class="md-ellipsis">
+      EPS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LOG_BASE" class="md-nav__link">
+    <span class="md-ellipsis">
+      LOG_BASE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.FAST_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      FAST_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SLOW_BOOTSTRAP_B" class="md-nav__link">
+    <span class="md-ellipsis">
+      SLOW_BOOTSTRAP_B
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CONFIDENCE_LEVEL" class="md-nav__link">
+    <span class="md-ellipsis">
+      CONFIDENCE_LEVEL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ALPHA_LEVEL" class="md-nav__link">
+    <span class="md-ellipsis">
+      ALPHA_LEVEL
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CONF_INT_DEFAULT" class="md-nav__link">
+    <span class="md-ellipsis">
+      CONF_INT_DEFAULT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EEC_LAMBDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      EEC_LAMBDA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_TOP_K_MIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_TOP_K_MIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_TOP_K_MAX" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_TOP_K_MAX
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_MASS_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_MASS_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PP_MIN_RUNS" class="md-nav__link">
+    <span class="md-ellipsis">
+      PP_MIN_RUNS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CES_MIN_POINTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      CES_MIN_POINTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CES_MAX_QUBITS" class="md-nav__link">
+    <span class="md-ellipsis">
+      CES_MAX_QUBITS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.TIKHONOV_LAMBDA" class="md-nav__link">
+    <span class="md-ellipsis">
+      TIKHONOV_LAMBDA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.VALIDATED_CV_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      VALIDATED_CV_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STATUS_BAND_WIDTH" class="md-nav__link">
+    <span class="md-ellipsis">
+      STATUS_BAND_WIDTH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EXPERIMENTAL_CV_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXPERIMENTAL_CV_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.VALIDATED_MIN_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      VALIDATED_MIN_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.EXPERIMENTAL_MIN_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      EXPERIMENTAL_MIN_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.UNSTABLE_MAX_SAMPLES" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNSTABLE_MAX_SAMPLES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SIGNIFICANCE_P_VALUE" class="md-nav__link">
+    <span class="md-ellipsis">
+      SIGNIFICANCE_P_VALUE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_QUBITS_EXACT" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_QUBITS_EXACT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_OUTCOMES_EXACT" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_OUTCOMES_EXACT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.GHZ_EXACT_TC_2QUBIT" class="md-nav__link">
+    <span class="md-ellipsis">
+      GHZ_EXACT_TC_2QUBIT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.GHZ_EXACT_TC_3QUBIT" class="md-nav__link">
+    <span class="md-ellipsis">
+      GHZ_EXACT_TC_3QUBIT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_WEAK_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_WEAK_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_MODERATE_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_MODERATE_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STRUCTURE_STRONG_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      STRUCTURE_STRONG_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_WEAK_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_WEAK_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_MODERATE_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_MODERATE_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.CORRELATION_STRONG_THRESHOLD" class="md-nav__link">
+    <span class="md-ellipsis">
+      CORRELATION_STRONG_THRESHOLD
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SCHEMA_VERSION" class="md-nav__link">
+    <span class="md-ellipsis">
+      SCHEMA_VERSION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_TEST_SEED" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_TEST_SEED
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.PERFORMANCE_TEST_SEED" class="md-nav__link">
+    <span class="md-ellipsis">
+      PERFORMANCE_TEST_SEED
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.NUMERICAL_TOLERANCE" class="md-nav__link">
+    <span class="md-ellipsis">
+      NUMERICAL_TOLERANCE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.STATISTICAL_TOLERANCE" class="md-nav__link">
+    <span class="md-ellipsis">
+      STATISTICAL_TOLERANCE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SMALL_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMALL_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MEDIUM_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      MEDIUM_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LARGE_TEST_N" class="md-nav__link">
+    <span class="md-ellipsis">
+      LARGE_TEST_N
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.SMALL_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMALL_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MEDIUM_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      MEDIUM_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.LARGE_TEST_SHOTS" class="md-nav__link">
+    <span class="md-ellipsis">
+      LARGE_TEST_SHOTS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.MAX_COUNTS_DICT_SIZE" class="md-nav__link">
+    <span class="md-ellipsis">
+      MAX_COUNTS_DICT_SIZE
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.DEFAULT_N_JOBS" class="md-nav__link">
+    <span class="md-ellipsis">
+      DEFAULT_N_JOBS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.ENABLE_RESULT_CACHING" class="md-nav__link">
+    <span class="md-ellipsis">
+      ENABLE_RESULT_CACHING
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.validate_probability_array" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_probability_array
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.validate_counts_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      validate_counts_dict
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.core.analysis.constants.get_status_thresholds" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_status_thresholds
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validating-measurement-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating Measurement Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-bitstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Bitstrings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-framework-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Framework Constants
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mathematical-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical Background
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mathematical Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jeffreys-prior-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jeffreys Prior Smoothing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confidence-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Confidence Intervals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-k-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Top-K Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h1>
+<p>Core constants and validation functions for the quantum decoherence analysis framework.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.core.analysis.constants" class="doc doc-heading">
+            <code>src.core.analysis.constants</code>
+
+
+<a href="#src.core.analysis.constants" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Analysis Constants for Structured Decoherence Research</p>
+<h3 id="src.core.analysis.constants--central-configuration-defaults">Central Configuration &amp; Defaults<a class="headerlink" href="#src.core.analysis.constants--central-configuration-defaults" title="Permanent link">&para;</a></h3>
+<p>This module defines all numerical constants, tolerances, and default parameters
+used throughout the quantum decoherence analysis framework. Centralizing these
+values ensures consistency and makes the framework easy to tune.</p>
+<h3 id="src.core.analysis.constants--research-standards">Research Standards<a class="headerlink" href="#src.core.analysis.constants--research-standards" title="Permanent link">&para;</a></h3>
+<p>All constants are chosen based on:
+- Statistical best practices (Jeffreys prior for uninformative priors)
+- Numerical stability (epsilon values for log safety)
+- Computational efficiency (bootstrap sample sizes)
+- Research reproducibility (fixed random seeds)</p>
+<h3 id="src.core.analysis.constants--educational-framework">Educational Framework<a class="headerlink" href="#src.core.analysis.constants--educational-framework" title="Permanent link">&para;</a></h3>
+<p>These constants embody key principles from:
+- Bayesian statistics (prior selection)
+- Information theory (base-2 logarithms) 
+- Bootstrap theory (sample size recommendations)
+- Quantum measurement theory (smoothing for shot noise)</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+<h3 id="src.core.analysis.constants-attributes">Attributes<a href="#src.core.analysis.constants-attributes" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.ALPHA" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ALPHA</span> <span class="o">=</span> <span class="mf">0.5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.ALPHA" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Jeffreys prior parameter for categorical distributions.
+α = 0.5 provides uninformative prior for Bernoulli/categorical parameters.
+Used for smoothing probability distributions before entropy calculations.
+Reference: Jeffreys (1946), "An Invariant Form for the Prior Probability"</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.EPS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">EPS</span> <span class="o">=</span> <span class="mf">1e-12</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.EPS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum probability value for numerical stability.
+Probabilities are clamped to [EPS, 1] before logarithmic operations.
+Chosen to avoid underflow in 64-bit floating point calculations.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.LOG_BASE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">LOG_BASE</span> <span class="o">=</span> <span class="mf">2.0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.LOG_BASE" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Base for all logarithmic operations in information theory.
+Base-2 ensures all entropy measures are in bits.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.DEFAULT_BOOTSTRAP_B" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DEFAULT_BOOTSTRAP_B</span> <span class="o">=</span> <span class="mi">1000</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.DEFAULT_BOOTSTRAP_B" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Default number of bootstrap samples for confidence intervals.
+B = 1000 provides good balance between accuracy and computation time.
+For publication-quality results, consider B = 5000-10000.
+Reference: Efron &amp; Tibshirani (1993), "An Introduction to the Bootstrap"</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.FAST_BOOTSTRAP_B" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">FAST_BOOTSTRAP_B</span> <span class="o">=</span> <span class="mi">300</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.FAST_BOOTSTRAP_B" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fast bootstrap sample count for testing and development.
+Used in unit tests to maintain reasonable execution times.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.SLOW_BOOTSTRAP_B" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SLOW_BOOTSTRAP_B</span> <span class="o">=</span> <span class="mi">5000</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.SLOW_BOOTSTRAP_B" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>High-precision bootstrap for critical research results.
+Use for final publication numbers and important hypothesis tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CONFIDENCE_LEVEL" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CONFIDENCE_LEVEL</span> <span class="o">=</span> <span class="mf">0.95</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CONFIDENCE_LEVEL" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Standard confidence level for interval estimation.
+95% corresponds to α = 0.05 significance level.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.ALPHA_LEVEL" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ALPHA_LEVEL</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">CONFIDENCE_LEVEL</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.ALPHA_LEVEL" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Significance level for hypothesis testing (α = 0.05).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CONF_INT_DEFAULT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CONF_INT_DEFAULT</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CONF_INT_DEFAULT" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Default (lower, upper) percentile bounds for bootstrap confidence intervals.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.EEC_LAMBDA" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">EEC_LAMBDA</span> <span class="o">=</span> <span class="mf">1.0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.EEC_LAMBDA" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Distance decay parameter for topology adjacency matrix.
+A_ij = exp(-λ * d_ij) where d_ij is physical/logical distance.
+λ = 1.0 provides reasonable decay for typical qubit layouts.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.PP_TOP_K_MIN" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">PP_TOP_K_MIN</span> <span class="o">=</span> <span class="mi">5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.PP_TOP_K_MIN" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum number of top pathways to track for persistence.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.PP_TOP_K_MAX" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">PP_TOP_K_MAX</span> <span class="o">=</span> <span class="mi">32</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.PP_TOP_K_MAX" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum number of top pathways to avoid exponential explosion.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.PP_MASS_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">PP_MASS_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.8</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.PP_MASS_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Probability mass threshold for adaptive top-k selection.
+Choose k such that top-k pathways capture ≥80% of total probability.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.PP_MIN_RUNS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">PP_MIN_RUNS</span> <span class="o">=</span> <span class="mi">3</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.PP_MIN_RUNS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum number of runs required for meaningful persistence calculation.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CES_MIN_POINTS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CES_MIN_POINTS</span> <span class="o">=</span> <span class="mi">4</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CES_MIN_POINTS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum number of (n, SS) points needed for logistic fit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CES_MAX_QUBITS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CES_MAX_QUBITS</span> <span class="o">=</span> <span class="mi">10</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CES_MAX_QUBITS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum qubit count for complexity emergence analysis.
+Beyond this, 2^n becomes computationally prohibitive.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.TIKHONOV_LAMBDA" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">TIKHONOV_LAMBDA</span> <span class="o">=</span> <span class="mf">0.001</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.TIKHONOV_LAMBDA" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Tikhonov regularization parameter for readout confusion inversion.
+Prevents numerical instability when inverting near-singular matrices.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.VALIDATED_CV_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">VALIDATED_CV_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.33</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.VALIDATED_CV_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Coefficient of variation threshold for 'validated' status.
+CI half-width ≤ 0.33 * metric_value indicates high precision.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.STATUS_BAND_WIDTH" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STATUS_BAND_WIDTH</span> <span class="o">=</span> <span class="mf">0.33</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.STATUS_BAND_WIDTH" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Status band width for validated status determination.
+Alias for VALIDATED_CV_THRESHOLD for registry compatibility.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.EXPERIMENTAL_CV_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">EXPERIMENTAL_CV_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.EXPERIMENTAL_CV_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Coefficient of variation threshold for 'experimental' status.
+Above this threshold, results are marked as 'unstable'.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.VALIDATED_MIN_SAMPLES" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">VALIDATED_MIN_SAMPLES</span> <span class="o">=</span> <span class="mi">100</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.VALIDATED_MIN_SAMPLES" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum number of samples for 'validated' status.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.EXPERIMENTAL_MIN_SAMPLES" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">EXPERIMENTAL_MIN_SAMPLES</span> <span class="o">=</span> <span class="mi">50</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.EXPERIMENTAL_MIN_SAMPLES" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum number of samples for 'experimental' status.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.UNSTABLE_MAX_SAMPLES" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">UNSTABLE_MAX_SAMPLES</span> <span class="o">=</span> <span class="mi">20</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.UNSTABLE_MAX_SAMPLES" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Below this sample count, automatically mark as 'unstable'.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.SIGNIFICANCE_P_VALUE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SIGNIFICANCE_P_VALUE</span> <span class="o">=</span> <span class="mf">0.05</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.SIGNIFICANCE_P_VALUE" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>P-value threshold for statistical significance.
+Used in null hypothesis testing for structure detection.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.MAX_QUBITS_EXACT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MAX_QUBITS_EXACT</span> <span class="o">=</span> <span class="mi">20</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.MAX_QUBITS_EXACT" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum qubits for exact state vector calculations.
+Beyond this, use sampling approximations or specialized algorithms.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.MAX_OUTCOMES_EXACT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MAX_OUTCOMES_EXACT</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">16</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.MAX_OUTCOMES_EXACT" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum number of measurement outcomes for exact calculations.
+Corresponds to 16 qubits for binary measurements.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.GHZ_EXACT_TC_2QUBIT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">GHZ_EXACT_TC_2QUBIT</span> <span class="o">=</span> <span class="mf">1.0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.GHZ_EXACT_TC_2QUBIT" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Exact total correlation for 2-qubit GHZ (Bell) state.
+TC = H(X₁) + H(X₂) - H(X₁,X₂) = 1 + 1 - 1 = 1 bit.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.GHZ_EXACT_TC_3QUBIT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">GHZ_EXACT_TC_3QUBIT</span> <span class="o">=</span> <span class="mf">2.0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.GHZ_EXACT_TC_3QUBIT" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Exact total correlation for 3-qubit GHZ state.
+TC = 3 * 1 - 1 = 2 bits for ideal case.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.STRUCTURE_WEAK_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STRUCTURE_WEAK_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.1</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.STRUCTURE_WEAK_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Weak evidence threshold for structured decoherence.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.STRUCTURE_MODERATE_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STRUCTURE_MODERATE_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.3</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.STRUCTURE_MODERATE_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Moderate evidence threshold for structured decoherence.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.STRUCTURE_STRONG_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STRUCTURE_STRONG_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.STRUCTURE_STRONG_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Strong evidence threshold for structured decoherence.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CORRELATION_WEAK_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CORRELATION_WEAK_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.2</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CORRELATION_WEAK_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Weak correlation threshold for EEC and other correlation metrics.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CORRELATION_MODERATE_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CORRELATION_MODERATE_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CORRELATION_MODERATE_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Moderate correlation threshold for EEC and other correlation metrics.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.CORRELATION_STRONG_THRESHOLD" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">CORRELATION_STRONG_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.8</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.CORRELATION_STRONG_THRESHOLD" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Strong correlation threshold for EEC and other correlation metrics.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.SCHEMA_VERSION" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SCHEMA_VERSION</span> <span class="o">=</span> <span class="s1">&#39;1.0&#39;</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.SCHEMA_VERSION" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Current schema version for all outputs.
+Must match the frozen v1.0 schema suite exactly.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.DEFAULT_TEST_SEED" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DEFAULT_TEST_SEED</span> <span class="o">=</span> <span class="mi">123456789</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.DEFAULT_TEST_SEED" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Default random seed for reproducible testing.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.PERFORMANCE_TEST_SEED" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">PERFORMANCE_TEST_SEED</span> <span class="o">=</span> <span class="mi">987654321</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.PERFORMANCE_TEST_SEED" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Separate seed for performance benchmarking.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.NUMERICAL_TOLERANCE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">NUMERICAL_TOLERANCE</span> <span class="o">=</span> <span class="mf">1e-10</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.NUMERICAL_TOLERANCE" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Tolerance for numerical equality comparisons in tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.STATISTICAL_TOLERANCE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">STATISTICAL_TOLERANCE</span> <span class="o">=</span> <span class="mf">0.01</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.STATISTICAL_TOLERANCE" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Tolerance for statistical property tests (entropy bounds, etc.).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.SMALL_TEST_N" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SMALL_TEST_N</span> <span class="o">=</span> <span class="mi">3</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.SMALL_TEST_N" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Small qubit count for fast unit tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.MEDIUM_TEST_N" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MEDIUM_TEST_N</span> <span class="o">=</span> <span class="mi">5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.MEDIUM_TEST_N" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Medium qubit count for integration tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.LARGE_TEST_N" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">LARGE_TEST_N</span> <span class="o">=</span> <span class="mi">8</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.LARGE_TEST_N" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Large qubit count for stress tests (marked as slow).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.SMALL_TEST_SHOTS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SMALL_TEST_SHOTS</span> <span class="o">=</span> <span class="mi">1000</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.SMALL_TEST_SHOTS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Small shot count for fast tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.MEDIUM_TEST_SHOTS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MEDIUM_TEST_SHOTS</span> <span class="o">=</span> <span class="mi">10000</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.MEDIUM_TEST_SHOTS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Medium shot count for accuracy tests.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.LARGE_TEST_SHOTS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">LARGE_TEST_SHOTS</span> <span class="o">=</span> <span class="mi">100000</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.LARGE_TEST_SHOTS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Large shot count for high-precision validation.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.MAX_COUNTS_DICT_SIZE" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">MAX_COUNTS_DICT_SIZE</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">16</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.MAX_COUNTS_DICT_SIZE" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum size for counts dictionaries before warning.
+Helps detect exponential memory explosion.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.DEFAULT_N_JOBS" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DEFAULT_N_JOBS</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.DEFAULT_N_JOBS" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Default number of parallel jobs (-1 = use all cores).</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="src.core.analysis.constants.ENABLE_RESULT_CACHING" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ENABLE_RESULT_CACHING</span> <span class="o">=</span> <span class="kc">False</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-module-attribute"><code>module-attribute</code></small>
+  </span>
+
+<a href="#src.core.analysis.constants.ENABLE_RESULT_CACHING" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Whether to enable result caching (disable for research to ensure freshness).</p>
+
+    </div>
+
+</div>
+
+<h3 id="src.core.analysis.constants-functions">Functions<a href="#src.core.analysis.constants-functions" class="headerlink" title="Permanent link">&para;</a></h3>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.core.analysis.constants.validate_probability_array" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">validate_probability_array</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;probability&#39;</span><span class="p">)</span></code>
+
+<a href="#src.core.analysis.constants.validate_probability_array" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate and normalize probability array with safety checks.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.core.analysis.constants.validate_counts_dict" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">validate_counts_dict</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;counts&#39;</span><span class="p">)</span></code>
+
+<a href="#src.core.analysis.constants.validate_counts_dict" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate counts dictionary for binary strings and positive counts.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.core.analysis.constants.get_status_thresholds" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_status_thresholds</span><span class="p">()</span></code>
+
+<a href="#src.core.analysis.constants.get_status_thresholds" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get status determination thresholds as a dictionary.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<h3 id="validating-measurement-data">Validating Measurement Data<a class="headerlink" href="#validating-measurement-data" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">src.core.analysis.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_counts_dict</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Valid measurement counts</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;00&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">&quot;11&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">validated</span> <span class="o">=</span> <span class="n">validate_counts_dict</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">validated</span><span class="p">)</span>  <span class="c1"># {&quot;00&quot;: 100, &quot;01&quot;: 200, &quot;10&quot;: 150, &quot;11&quot;: 50}</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Invalid counts (will raise ValueError)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">invalid_counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;00&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="s2">&quot;01&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">validate_counts_dict</span><span class="p">(</span><span class="n">invalid_counts</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="working-with-bitstrings">Working with Bitstrings<a class="headerlink" href="#working-with-bitstrings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">src.core.analysis.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">n_qubits_from_counts</span><span class="p">,</span> <span class="n">all_bitstrings</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Detect number of qubits</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;000&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;111&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;001&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">n_qubits</span> <span class="o">=</span> <span class="n">n_qubits_from_counts</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of qubits: </span><span class="si">{</span><span class="n">n_qubits</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># 3</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Generate all possible bitstrings</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">all_outcomes</span> <span class="o">=</span> <span class="n">all_bitstrings</span><span class="p">(</span><span class="n">n_qubits</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All possible outcomes: </span><span class="si">{</span><span class="n">all_outcomes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># [&quot;000&quot;, &quot;001&quot;, &quot;010&quot;, &quot;011&quot;, &quot;100&quot;, &quot;101&quot;, &quot;110&quot;, &quot;111&quot;]</span>
+</code></pre></div>
+<h3 id="using-framework-constants">Using Framework Constants<a class="headerlink" href="#using-framework-constants" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">src.core.analysis.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">ALPHA</span><span class="p">,</span> <span class="n">CONF_INT_DEFAULT</span><span class="p">,</span> <span class="n">MAX_TOP_K</span><span class="p">,</span> <span class="n">TOPK_MASS_TARGET</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jeffreys prior: </span><span class="si">{</span><span class="n">ALPHA</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># 0.5</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Default CI bounds: </span><span class="si">{</span><span class="n">CONF_INT_DEFAULT</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (2.5, 97.5)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max top-k pathways: </span><span class="si">{</span><span class="n">MAX_TOP_K</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mass threshold: </span><span class="si">{</span><span class="n">TOPK_MASS_TARGET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="mathematical-background">Mathematical Background<a class="headerlink" href="#mathematical-background" title="Permanent link">&para;</a></h2>
+<h3 id="jeffreys-prior-smoothing">Jeffreys Prior Smoothing<a class="headerlink" href="#jeffreys-prior-smoothing" title="Permanent link">&para;</a></h3>
+<p>The framework uses Jeffreys prior smoothing with α = 0.5 to ensure:</p>
+<ul>
+<li><strong>Full Support</strong>: All 2^n possible outcomes have non-zero probability</li>
+<li><strong>Bias Reduction</strong>: Eliminates bias when many outcomes are unobserved  </li>
+<li><strong>Deterministic Ordering</strong>: Lexicographic ordering prevents run-to-run drift</li>
+</ul>
+<h3 id="confidence-intervals">Confidence Intervals<a class="headerlink" href="#confidence-intervals" title="Permanent link">&para;</a></h3>
+<p>Default confidence intervals use the (2.5, 97.5) percentile range, providing 95% coverage for bootstrap distributions.</p>
+<h3 id="top-k-analysis">Top-K Analysis<a class="headerlink" href="#top-k-analysis" title="Permanent link">&para;</a></h3>
+<p>Top-k pathway analysis focuses on outcomes with significant probability mass, filtering noise from rare events while preserving structural information.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

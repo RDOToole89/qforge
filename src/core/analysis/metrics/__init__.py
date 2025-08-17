@@ -33,7 +33,6 @@ from .registry import (
     compute_metric,
     compute_all,
     determine_status,
-    get_registered_metrics,
 )
 from .schema_bridge import (
     metrics_to_schema,
@@ -108,7 +107,6 @@ __all__ = (
     "compute_all",
     "metrics_to_schema",
     "determine_status",
-    "get_registered_metrics",
     "validate_schema_output",
     "get_schema_field_mapping",
     # Canonical Metric Names (Aliases)

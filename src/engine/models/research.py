@@ -18,7 +18,7 @@ Used by: Engine analysis pipeline, research result storage, publications
 
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from datetime import datetime
 
 
@@ -111,6 +111,19 @@ class StructuredDecoherenceMetrics(BaseModel):
 
         return ai_score * 0.4 + pcr_score * 0.3 + eec_score * 0.3
 
+    # ===== Field Normalization / Safety =====
+    @field_validator("entanglement_error_correlation")
+    @classmethod
+    def _clip_eec(cls, v: float) -> float:
+        """Clip to [-1, 1] to survive floating-point noise from upstream computations."""
+        if v is None:
+            return v
+        if v > 1.0:
+            return 1.0
+        if v < -1.0:
+            return -1.0
+        return float(v)
+
 
 class AnalysisMetadata(BaseModel):
     """Metadata about the structured decoherence analysis."""
@@ -166,6 +179,19 @@ class PathwayAnalysis(BaseModel):
     research_notes: Optional[str] = Field(
         default=None, description="Additional research insights or observations"
     )
+
+    @field_validator("dominant_pathways")
+    @classmethod
+    def _validate_dominant_probabilities(
+        cls, v: List[Tuple[str, float]]
+    ) -> List[Tuple[str, float]]:
+        """Ensure probabilities are within [0, 1]."""
+        for bitstring, p in v:
+            if p < 0.0 or p > 1.0:
+                raise ValueError(
+                    f"dominant_pathways probability for '{bitstring}' must be within [0, 1], got {p}"
+                )
+        return v
 
     @field_validator("pathway_concentration")
     @classmethod
@@ -305,3 +331,11 @@ class ComparisonMetrics(BaseModel):
             if v not in valid_trends:
                 raise ValueError(f"trend_direction must be one of {valid_trends}")
         return v
+
+
+# Resolve forward references defensively (Pydantic v2 is usually fine, this makes it bulletproof)
+StructuredDecoherenceMetrics.model_rebuild()
+PathwayAnalysis.model_rebuild()
+AnalysisMetadata.model_rebuild()
+ResearchMetadata.model_rebuild()
+ComparisonMetrics.model_rebuild()

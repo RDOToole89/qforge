@@ -18,7 +18,7 @@ Used by: Engine API, CLI parsers, validation layers
 
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Literal
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 
 
 class ExperimentConfig(BaseModel):
@@ -130,11 +130,27 @@ class ExperimentConfig(BaseModel):
         description="Custom parameters for advanced state preparation or noise models",
     )
 
-    # ===== Validators =====
+    # ===== Field normalizers / validators =====
+    @field_validator("state_type", mode="before")
+    @classmethod
+    def _normalize_state_type(cls, v: str) -> str:
+        """Normalize state_type to UPPERCASE for engine compatibility."""
+        if isinstance(v, str):
+            return v.strip().upper()
+        return v
+
+    @field_validator("noise_type", mode="before")
+    @classmethod
+    def _normalize_noise_type(cls, v: Optional[str]) -> Optional[str]:
+        """Normalize noise_type to lowercase to match enum."""
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
+
     @field_validator("t2")
     @classmethod
     def validate_t2_constraint(cls, v: Optional[float], info) -> Optional[float]:
-        """Validate T2 ≤ 2*T1 constraint for thermal relaxation."""
+        """Validate T2 ≤ 2*T1 constraint (field-level guard; model-level check also present)."""
         if v is not None and "t1" in info.data and info.data["t1"] is not None:
             t1 = info.data["t1"]
             if v > 2 * t1:
@@ -160,6 +176,17 @@ class ExperimentConfig(BaseModel):
         if info.data.get("enable_research_metrics", False) and v is None:
             return "structured_decoherence"  # Default research type
         return v
+
+    @model_validator(mode="after")
+    def _cross_field_checks(self) -> "ExperimentConfig":
+        """
+        Model-level cross-field validations that are safer after all fields are parsed.
+        Currently re-enforces T2 ≤ 2*T1 for robustness when values are set/updated together.
+        """
+        if self.t1 is not None and self.t2 is not None:
+            if self.t2 > 2 * self.t1:
+                raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2*self.t1})")
+        return self
 
 
 class AdvancedNoiseConfig(BaseModel):
