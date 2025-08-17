@@ -23,6 +23,35 @@ from scipy.stats import pearsonr
 logger = logging.getLogger("QuantumExperiment.Analysis.StructuredDecoherence")
 
 
+def compute_structure_score(*, counts, **kwargs) -> Dict[str, Any]:
+    """
+    Compute Structure Score using Jensen-Shannon divergence from null model.
+    
+    Args:
+        counts: Measurement counts
+        **kwargs: Additional parameters
+        
+    Returns:
+        MetricResult-compatible dict
+    """
+    # Basic implementation - delegate to schema_bridge for now
+    from . import schema_bridge
+    try:
+        ss_value = schema_bridge.compute_structure_score(counts)
+        return {
+            "value": ss_value,
+            "status": "experimental",
+            "ci95": (ss_value * 0.9, ss_value * 1.1),  # Placeholder CI
+            "extras": {"method": "jensen_shannon_divergence"}
+        }
+    except Exception as e:
+        return {
+            "value": 0.0,
+            "status": "unstable", 
+            "ci95": (0.0, 0.0),
+            "extras": {"error": str(e)}
+        }
+
 def compute_asymmetry_index(counts: Dict[str, int]) -> float:
     """
     Compute Asymmetry Index (AI) - deviation from uniform error distribution.

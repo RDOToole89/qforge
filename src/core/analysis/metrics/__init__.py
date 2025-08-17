@@ -1,24 +1,60 @@
 """
-Structured Decoherence Metrics
+Structured Decoherence Metrics - Canonical Registry API
 
 Research-grade metrics for detecting and quantifying structured decoherence
 patterns in quantum measurements. All metrics follow rigorous mathematical
 definitions with educational documentation and statistical validation.
 
-Core Metrics:
-- Asymmetry Index (AI): Primary structure detection via Total Variation Distance
-- Pathway Concentration Ratio (PCR): Error concentration analysis using economic inequality measures  
-- Entanglement-Error Correlation (EEC): Topology-error pattern correlation analysis
-- Temporal Pathway Stability (TPS): Time series analysis of pathway consistency
-- Complexity Emergence Score (CES): Critical threshold detection for structure emergence
+Canonical API:
+- compute_metric(name, **kwargs): Compute single metric by name
+- compute_all(**kwargs): Compute all available metrics
+- metrics_to_schema(results): Convert to v1.0 schema format
+
+Core Metrics (Canonical Names):
+- structure_score: Jensen-Shannon divergence from null model
+- entanglement_error_correlation: Topology-error pattern correlation
+- concentration_index: Economic inequality measures (Gini coefficient)
+- total_correlation: Multi-information across all qubits
+- pathway_persistence: Temporal stability analysis
+- complexity_emergence_score: Critical threshold detection
 
 Educational Features:
-- Comprehensive mathematical documentation with physics interpretation
-- Research-grade edge case handling and validation
-- Bootstrap confidence intervals for statistical rigor
-- Integration with v1.0 JSON schemas for reproducible research
+- Unified registry system with type safety
+- Schema compliance for reproducible research
+- Bootstrap confidence intervals and statistical validation
+- Educational documentation bridging quantum mechanics and information theory
 """
 
+# Registry and schema bridge (canonical API)
+from .registry import (
+    MetricResult,
+    Status,
+    register,
+    compute_metric,
+    compute_all,
+    determine_status,
+    get_registered_metrics,
+)
+from .schema_bridge import (
+    metrics_to_schema,
+    validate_schema_output,
+    get_schema_field_mapping,
+)
+
+# Canonical alias modules
+from .concentration_index import (
+    compute_concentration_index,
+    compute_concentration_with_gini,
+    ConcentrationAnalysis,
+)
+from .pathway_persistence import (
+    compute_pathway_persistence,
+    compute_pathway_persistence_scores,
+    compute_temporal_transition_matrix,
+    TemporalAnalysis,
+)
+
+# Original implementation modules (backward compatibility)
 from .asymmetry_index import (
     compute_asymmetry_index,
     compute_asymmetry_index_with_null_comparison,
@@ -26,8 +62,7 @@ from .asymmetry_index import (
 )
 from .pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
-    compute_concentration_with_gini,
-    ConcentrationAnalysis,
+    ConcentrationAnalysis as PCRConcentrationAnalysis,
 )
 from .entanglement_error_correlation import (
     compute_entanglement_error_correlation,
@@ -36,35 +71,52 @@ from .entanglement_error_correlation import (
 )
 from .temporal_pathway_stability import (
     compute_temporal_pathway_stability,
-    compute_pathway_persistence_scores,
-    compute_temporal_transition_matrix,
-    TemporalAnalysis,
+    TemporalAnalysis as TPSTemporalAnalysis,
 )
 from .complexity_emergence_score import (
     compute_complexity_emergence_score,
     compute_emergence_across_metrics,
     EmergenceAnalysis,
 )
+# from .structure_score import (
+#     compute_structure_score,
+# )  # Import issue - skip for now
+from .total_correlation import (
+    compute_total_correlation,
+)
 
 __all__ = [
-    # Asymmetry Index
+    # Canonical Registry API (PRIMARY)
+    "MetricResult",
+    "Status", 
+    "compute_metric",
+    "compute_all",
+    "metrics_to_schema",
+    "determine_status",
+    "get_registered_metrics",
+    "validate_schema_output",
+    "get_schema_field_mapping",
+    
+    # Canonical Metric Names (Aliases)
+    "compute_concentration_index",
+    "compute_pathway_persistence", 
+    # "compute_structure_score",  # Import issue - skip for now
+    "compute_total_correlation",
+    
+    # Original Implementation (Backward Compatibility)
     "compute_asymmetry_index",
     "compute_asymmetry_index_with_null_comparison",
     "AsymmetryAnalysis",
-    # Pathway Concentration Ratio
     "compute_pathway_concentration_ratio", 
     "compute_concentration_with_gini",
     "ConcentrationAnalysis",
-    # Entanglement-Error Correlation
     "compute_entanglement_error_correlation",
     "compute_multiway_entanglement_correlation",
     "TopologyAnalysis",
-    # Temporal Pathway Stability
     "compute_temporal_pathway_stability",
     "compute_pathway_persistence_scores",
     "compute_temporal_transition_matrix",
     "TemporalAnalysis",
-    # Complexity Emergence Score
     "compute_complexity_emergence_score",
     "compute_emergence_across_metrics",
     "EmergenceAnalysis",

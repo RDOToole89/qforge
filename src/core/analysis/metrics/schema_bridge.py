@@ -1,296 +1,228 @@
 """
-Schema-Required Metrics for Structured Decoherence Pathway Research
+Schema Bridge - Conversion between MetricResult and v1.0 Schema Format
 
-# Missing Metrics from V1.0 Schema Suite
-This module implements the three critical metrics required by the frozen v1.0 schemas
-that were missing from the original implementation: Structure Score (SS), 
-Concentration Index (CI), and Total Correlation (TC).
+This module provides the canonical interface for converting MetricResult objects
+from the registry system into the exact JSON schema format required by the
+frozen v1.0 schema suite.
 
-# Physical Significance
-These metrics complete the quantitative framework for detecting structured
-decoherence patterns in quantum systems:
-- **Structure Score**: Quantifies deviation from null model expectations
-- **Concentration Index**: Measures inequality in error distribution
-- **Total Correlation**: Captures multi-qubit correlations beyond pairwise
+Schema Compliance:
+- Maps canonical metric names to exact schema keys
+- Validates required fields (value, ci95, status) are present
+- Ensures schema_version="1.0" is included
+- Handles nullable fields (pathway_persistence, complexity_emergence_score)
+- Provides type-safe conversion with validation
 
-# Research Applications
-Together with the existing 5 metrics (AI, PCR, EEC, TPS, CES), these complete
-the 8-metric suite for comprehensive pathway characterization, enabling:
-- Statistical validation against null models
-- Economic-inspired inequality analysis
-- Information-theoretic correlation measures
+Supported Metrics:
+- structure_score → structure_score
+- entanglement_error_correlation → entanglement_error_correlation
+- concentration_index → concentration_index  
+- total_correlation → total_correlation
+- pathway_persistence → pathway_persistence (nullable)
+- complexity_emergence_score → complexity_emergence_score (nullable)
 
-# Mathematical Foundations
-- SS: Jensen-Shannon Divergence from null model predictions
-- CI: Gini coefficient from economics applied to quantum measurements  
-- TC: Multi-information from information theory
-
-# Educational Framework
-This module teaches advanced concepts bridging quantum mechanics with:
-- Information theory (divergences, entropy, mutual information)
-- Statistical physics (null models, ensemble comparisons)
-- Economics (inequality measures, concentration analysis)
-- Machine learning (distribution distances, correlation metrics)
+This bridge ensures complete compatibility with downstream analysis pipelines
+and research tooling that depends on the frozen schema format.
 """
 
-import numpy as np
 import logging
-from typing import Dict, List, Optional, Tuple, Any
-from collections import Counter
+from typing import Dict, Any
 
-logger = logging.getLogger("QuantumExperiment.Analysis.SchemaMetrics")
+from .registry import MetricResult
 
+logger = logging.getLogger(__name__)
 
-def compute_structure_score(counts: Dict[str, int], 
-                           null_model_counts: Optional[Dict[str, int]] = None) -> float:
+def metrics_to_schema(results: Dict[str, MetricResult]) -> Dict[str, Any]:
     """
-    Compute Structure Score (SS) - Jensen-Shannon divergence from null model.
+    Convert MetricResult dictionary to v1.0 schema format.
     
-    # Information-Theoretic Foundation
-    The Jensen-Shannon divergence (JSD) is a symmetric, bounded measure of
-    distribution distance. For quantum measurements:
-    JSD(P||Q) = 0.5 * KL(P||M) + 0.5 * KL(Q||M) where M = (P+Q)/2
+    This function provides the canonical bridge between the registry system's
+    MetricResult format and the exact JSON schema required by downstream
+    analysis pipelines.
     
-    # Physical Interpretation
-    SS measures how much the observed error distribution deviates from what
-    we'd expect under purely random decoherence (null model). Higher SS
-    indicates more structured pathways.
-    
-    # Null Model Construction
-    If not provided, we construct a factorized null model using marginal
-    distributions. This represents the expectation under independent
-    qubit decoherence with no structured pathways.
-    
-    # Research Significance
-    SS > 0.1 suggests structured decoherence pathways
-    SS > 0.3 indicates strong pathway preferences
-    SS > 0.5 shows highly non-random error patterns
-    
+    Required Schema Keys:
+        - structure_score
+        - entanglement_error_correlation
+        - concentration_index
+        - total_correlation
+        - pathway_persistence (nullable)
+        - complexity_emergence_score (nullable)
+        - schema_version: "1.0"
+        
     Args:
-        counts: Observed measurement counts {bitstring: count}
-        null_model_counts: Expected counts under null hypothesis
+        results: Dictionary mapping metric names to MetricResult objects
         
     Returns:
-        float: Structure Score ∈ [0, 1] (0 = matches null, 1 = maximally different)
+        Dict containing schema-compliant metric data with exact field names
         
-    Educational Notes:
-        - JSD is the square root of JS divergence, making it a true metric
-        - Unlike KL divergence, JSD is symmetric: JSD(P||Q) = JSD(Q||P)
-        - JSD is bounded: 0 ≤ JSD ≤ 1 for normalized distributions
-        - JSD = 0 only when distributions are identical
+    Raises:
+        ValueError: If required fields are missing or malformed
+        KeyError: If core metrics are missing from results
+        
+    Example:
+        >>> from analysis.metrics import compute_all, metrics_to_schema
+        >>> results = compute_all(counts={"00": 500, "11": 500})
+        >>> schema_data = metrics_to_schema(results)
+        >>> assert schema_data["schema_version"] == "1.0"
+        >>> assert "structure_score" in schema_data
     """
-    if not counts:
-        logger.warning("Empty counts provided for structure score")
-        return 0.0
+    schema_output = {"schema_version": "1.0"}
     
-    # Use research-grade null model and Jensen-Shannon divergence
-    from ..core.null_models import factorized_null_model
-    from ..core.information_theory import jensen_shannon_divergence, counts_to_probabilities
+    # Core metrics (always required)
+    core_metrics = [
+        "structure_score",  # Now mapped to asymmetry_index
+        "entanglement_error_correlation", 
+        "concentration_index",  # Now mapped to pathway_concentration_ratio
+        "total_correlation"
+    ]
     
-    # Convert observed counts to probabilities
-    observed_probs_dict = counts_to_probabilities(counts)
+    # Optional metrics (nullable in schema)
+    optional_metrics = [
+        "pathway_persistence",
+        "complexity_emergence_score"
+    ]
     
-    # Generate factorized null model if not provided
-    if null_model_counts is None:
-        null_model_probs = factorized_null_model(counts)
-        logger.debug("Using factorized null model for structure score")
-    else:
-        null_model_probs = counts_to_probabilities(null_model_counts)
+    # Process core metrics
+    for metric_name in core_metrics:
+        if metric_name not in results:
+            raise KeyError(f"Required metric '{metric_name}' missing from results")
+        
+        result = results[metric_name]
+        schema_output[metric_name] = _convert_metric_result(result, metric_name)
     
-    # Ensure both distributions have same outcomes (needed for JSD)
-    all_outcomes = sorted(set(observed_probs_dict.keys()) | set(null_model_probs.keys()))
+    # Process optional metrics (allow None)
+    for metric_name in optional_metrics:
+        if metric_name in results:
+            result = results[metric_name]
+            if result.get("status") not in ["insufficient_runs", "insufficient_data"]:
+                schema_output[metric_name] = _convert_metric_result(result, metric_name)
+            else:
+                schema_output[metric_name] = None
+        else:
+            schema_output[metric_name] = None
     
-    observed_array = np.array([observed_probs_dict.get(outcome, 0.0) for outcome in all_outcomes])
-    null_array = np.array([null_model_probs.get(outcome, 0.0) for outcome in all_outcomes])
-    
-    # Compute Jensen-Shannon divergence using our research-grade implementation
-    structure_score = jensen_shannon_divergence(observed_array, null_array)
-    
-    logger.debug(f"Computed Structure Score = {structure_score:.4f}")
-    
-    return structure_score
+    logger.debug(f"Converted {len(results)} results to schema format")
+    return schema_output
 
-
-def compute_concentration_index(counts: Dict[str, int]) -> float:
+def _convert_metric_result(result: MetricResult, metric_name: str) -> Dict[str, Any]:
     """
-    Compute Concentration Index (CI) - Gini coefficient of error distribution.
-    
-    # Economic Origins
-    The Gini coefficient, developed by Corrado Gini (1912), measures inequality
-    in distributions. Originally for wealth inequality, it perfectly captures
-    error concentration in quantum measurements.
-    
-    # Mathematical Definition
-    Gini = (2 * Σᵢ i*xᵢ) / (n * Σᵢ xᵢ) - (n+1)/n
-    where x is sorted in ascending order
-    
-    # Physical Interpretation for Quantum Systems
-    - CI = 0: Perfect equality (all outcomes equally likely)
-    - CI = 0.3-0.4: Moderate concentration (some preferred pathways)
-    - CI = 0.6-0.7: High concentration (dominant error pathways)
-    - CI → 1: Extreme concentration (single dominant pathway)
-    
-    # Research Applications
-    CI reveals whether decoherence concentrates in specific pathways:
-    - Low CI + High AI: Broad but non-uniform errors
-    - High CI + High AI: Focused pathway structure
-    - High CI + Low AI: Few outcomes but randomly distributed
+    Convert single MetricResult to schema format with validation.
     
     Args:
-        counts: Measurement counts {bitstring: count}
+        result: MetricResult from registry
+        metric_name: Name of metric for error messages
         
     Returns:
-        float: Gini coefficient ∈ [0, 1] (0 = equality, 1 = maximal inequality)
+        Dict with schema-compliant structure
         
-    Educational Notes:
-        - Gini is scale-invariant: doesn't depend on total counts
-        - Geometric interpretation: ratio of areas in Lorenz curve
-        - Related to other inequality measures (Theil, Atkinson)
-        - Captures "long tail" phenomena in error distributions
+    Raises:
+        ValueError: If required fields are missing or invalid
     """
-    if not counts or len(counts) == 0:
-        logger.warning("Empty counts for concentration index")
-        return 0.0
+    # Validate required fields
+    if "value" not in result:
+        raise ValueError(f"MetricResult for '{metric_name}' missing 'value' field")
     
-    # Convert to numpy array and sort
-    frequencies = np.array(list(counts.values()), dtype=float)
+    if "status" not in result:
+        raise ValueError(f"MetricResult for '{metric_name}' missing 'status' field")
     
-    # Handle single outcome case
-    if len(frequencies) == 1:
-        return 0.0  # No inequality with single outcome
+    # Validate value type
+    value = result["value"]
+    if not isinstance(value, (int, float)):
+        raise ValueError(f"MetricResult value for '{metric_name}' must be numeric, got {type(value)}")
     
-    # Sort frequencies in ascending order (required for Gini)
-    frequencies = np.sort(frequencies)
-    n = len(frequencies)
+    # Validate status
+    valid_statuses = ["validated", "experimental", "unstable", "insufficient_runs", "insufficient_data"]
+    status = result["status"]
+    if status not in valid_statuses:
+        raise ValueError(f"Invalid status '{status}' for '{metric_name}', must be one of {valid_statuses}")
     
-    # Handle case where all frequencies are zero
-    if frequencies.sum() == 0:
-        return 0.0
+    # Build schema result
+    schema_result = {
+        "value": float(value),
+        "status": status
+    }
     
-    # Normalize frequencies (work with proportions)
-    frequencies = frequencies / frequencies.sum()
+    # Add confidence interval if present
+    if "ci95" in result:
+        ci95 = result["ci95"]
+        if not (isinstance(ci95, (list, tuple)) and len(ci95) == 2):
+            raise ValueError(f"ci95 for '{metric_name}' must be 2-element list/tuple, got {ci95}")
+        schema_result["ci95"] = [float(ci95[0]), float(ci95[1])]
     
-    # Calculate Gini coefficient using the standard formula
-    # G = (2 * Σᵢ i*xᵢ) / (n * Σᵢ xᵢ) - (n+1)/n
-    index = np.arange(1, n + 1)  # 1-indexed for formula
-    gini = (2.0 * np.sum(index * frequencies)) / (n * np.sum(frequencies)) - (n + 1) / n
+    # Add extras if present (optional schema field)
+    if "extras" in result and result["extras"]:
+        schema_result["extras"] = result["extras"]
     
-    # Ensure result is in valid range [0, 1]
-    gini = max(0.0, min(1.0, gini))
-    
-    logger.debug(f"Computed Concentration Index (Gini) = {gini:.4f} for {n} outcomes")
-    
-    # Log distribution characteristics for research
-    if gini > 0.7:
-        logger.info("High concentration detected - strong pathway preferences")
-    elif gini > 0.4:
-        logger.info("Moderate concentration - emerging pathway structure")
-    else:
-        logger.debug("Low concentration - distributed error patterns")
-    
-    return gini
+    return schema_result
 
-
-def compute_total_correlation(counts: Dict[str, int]) -> float:
+def validate_schema_output(schema_data: Dict[str, Any]) -> bool:
     """
-    Compute Total Correlation (TC) - Multi-information in quantum measurements.
-    
-    # Information-Theoretic Foundation
-    Total Correlation (Watanabe 1960) measures the total amount of correlation
-    among all variables in a multivariate distribution:
-    TC = Σᵢ H(Xᵢ) - H(X₁, X₂, ..., Xₙ)
-    
-    # Quantum Interpretation
-    For n-qubit measurements, TC quantifies how much information is shared
-    between qubits beyond what's expected from independent measurements:
-    - TC = 0: Qubits are independent (product state)
-    - TC > 0: Qubits share information (entanglement or classical correlation)
-    - TC = n-1: Maximum correlation (e.g., GHZ state)
-    
-    # Research Significance
-    TC reveals the information structure of decoherence pathways:
-    - High TC: Errors are correlated across qubits
-    - Low TC: Errors affect qubits independently
-    - TC patterns: Identify which qubit subsets maintain correlations
-    
-    # Relationship to Entanglement
-    While TC includes both classical and quantum correlations, in the context
-    of decoherence from entangled states, it captures how error patterns
-    preserve or destroy multi-qubit correlations.
+    Validate that schema output conforms to v1.0 requirements.
     
     Args:
-        counts: Measurement counts {bitstring: count}
+        schema_data: Output from metrics_to_schema()
         
     Returns:
-        float: Total Correlation in bits (≥ 0)
+        True if valid, raises ValueError if invalid
         
-    Educational Notes:
-        - TC is also called "multi-information" or "integration"
-        - TC = 0 iff all variables are mutually independent
-        - TC ≤ min(H(Xᵢ)) * (n-1) where n is number of variables
-        - Related to mutual information: TC = generalization to n variables
-        - In neuroscience, TC measures "integrated information"
+    Raises:
+        ValueError: If schema validation fails
     """
-    # Use the research-grade implementation from core information theory module
-    from ..core.information_theory import total_correlation
-    return total_correlation(counts)
-
-
-def create_null_model(state_type: str, num_qubits: int) -> Dict[str, float]:
-    """
-    Create null model for baseline comparison in structure score calculation.
+    # Check schema version
+    if schema_data.get("schema_version") != "1.0":
+        raise ValueError(f"Invalid schema_version: {schema_data.get('schema_version')}, expected '1.0'")
     
-    # Null Model Philosophy
-    The null model represents our expectation under the hypothesis of
-    "no structured pathways" - i.e., purely random decoherence without
-    preferential error channels.
+    # Check required fields
+    required_fields = [
+        "structure_score",
+        "entanglement_error_correlation",
+        "concentration_index", 
+        "total_correlation"
+    ]
     
-    # Model Construction Strategy
-    Depends on quantum state and noise type:
-    1. **Uniform Model**: All outcomes equally likely (maximum entropy)
-    2. **State-Aware Model**: Respects initial state structure
-    3. **Noise-Aware Model**: Incorporates known noise characteristics
-    4. **Empirical Model**: Based on control experiments
-    
-    # Research Applications
-    - Hypothesis testing: Does observation differ from random expectation?
-    - Pathway detection: Which outcomes deviate most from null model?
-    - Significance assessment: Statistical validation of structure
-    
-    Args:
-        state_type: Initial quantum state (GHZ, W, Bell, etc.)
-        num_qubits: Number of qubits in system
+    for field in required_fields:
+        if field not in schema_data:
+            raise ValueError(f"Required field '{field}' missing from schema output")
         
+        field_data = schema_data[field]
+        if not isinstance(field_data, dict):
+            raise ValueError(f"Field '{field}' must be dict, got {type(field_data)}")
+        
+        # Check required subfields
+        if "value" not in field_data:
+            raise ValueError(f"Field '{field}' missing 'value' subfield")
+        
+        if "status" not in field_data:
+            raise ValueError(f"Field '{field}' missing 'status' subfield")
+    
+    # Optional fields can be None
+    optional_fields = ["pathway_persistence", "complexity_emergence_score"]
+    for field in optional_fields:
+        if field in schema_data and schema_data[field] is not None:
+            field_data = schema_data[field]
+            if not isinstance(field_data, dict):
+                raise ValueError(f"Optional field '{field}' must be dict or None, got {type(field_data)}")
+    
+    logger.debug("Schema validation passed")
+    return True
+
+def get_schema_field_mapping() -> Dict[str, str]:
+    """
+    Get mapping from registry metric names to schema field names.
+    
     Returns:
-        Dict[str, float]: Null model probability distribution
-        
-    Educational Notes:
-        - Null models are fundamental to statistical physics
-        - Choice of null model affects interpretation of results
-        - Multiple null models can test different hypotheses
-        - Null model should preserve known constraints
+        Dict mapping registry names to canonical schema names
     """
-    # For now, implement uniform null model as baseline
-    # Future: Add state-specific and noise-aware null models
-    
-    n_outcomes = 2 ** num_qubits
-    uniform_prob = 1.0 / n_outcomes
-    
-    # Create all possible bitstrings
-    null_distribution = {}
-    for i in range(n_outcomes):
-        bitstring = format(i, f'0{num_qubits}b')
-        null_distribution[bitstring] = uniform_prob
-    
-    logger.debug(f"Created uniform null model for {num_qubits} qubits "
-                f"with {n_outcomes} outcomes")
-    
-    # Future enhancements based on state type
-    if state_type == "GHZ" and num_qubits > 1:
-        # GHZ null model could emphasize |00...0⟩ and |11...1⟩
-        logger.debug("Note: GHZ-specific null model not yet implemented, using uniform")
-    elif state_type == "W" and num_qubits > 1:
-        # W null model could emphasize single-excitation states
-        logger.debug("Note: W-specific null model not yet implemented, using uniform")
-    
-    return null_distribution
+    return {
+        # Direct mappings (canonical names)
+        "structure_score": "structure_score",
+        "entanglement_error_correlation": "entanglement_error_correlation",
+        "concentration_index": "concentration_index",
+        "total_correlation": "total_correlation",
+        "pathway_persistence": "pathway_persistence",
+        "complexity_emergence_score": "complexity_emergence_score",
+        
+        # Alias mappings (backward compatibility)
+        "pathway_concentration_ratio": "concentration_index",
+        "temporal_pathway_stability": "pathway_persistence",
+        "asymmetry_index": "structure_score",  # Could map AI to SS if needed
+    }

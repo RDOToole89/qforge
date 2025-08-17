@@ -126,6 +126,11 @@ VALIDATED_CV_THRESHOLD: Final[float] = 0.33
 CI half-width ≤ 0.33 * metric_value indicates high precision.
 """
 
+STATUS_BAND_WIDTH: Final[float] = 0.33
+"""Status band width for validated status determination.
+Alias for VALIDATED_CV_THRESHOLD for registry compatibility.
+"""
+
 EXPERIMENTAL_CV_THRESHOLD: Final[float] = 0.50
 """Coefficient of variation threshold for 'experimental' status.
 Above this threshold, results are marked as 'unstable'.
