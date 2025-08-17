@@ -22,7 +22,7 @@ These constants embody key principles from:
 """
 
 import numpy as np
-from typing import Final
+from typing import Final, Mapping
 
 # =============================================================================
 # STATISTICAL CONSTANTS
@@ -75,6 +75,9 @@ CONFIDENCE_LEVEL: Final[float] = 0.95
 ALPHA_LEVEL: Final[float] = 1 - CONFIDENCE_LEVEL
 """Significance level for hypothesis testing (α = 0.05)."""
 
+CONF_INT_DEFAULT: Final[tuple[float, float]] = (2.5, 97.5)
+"""Default (lower, upper) percentile bounds for bootstrap confidence intervals."""
+
 # =============================================================================
 # METRIC-SPECIFIC CONSTANTS
 # =============================================================================
@@ -100,6 +103,10 @@ Choose k such that top-k pathways capture ≥80% of total probability.
 
 PP_MIN_RUNS: Final[int] = 3
 """Minimum number of runs required for meaningful persistence calculation."""
+
+# Canonical aliases for PP constants
+MAX_TOP_K: Final[int] = PP_TOP_K_MAX
+TOPK_MASS_TARGET: Final[float] = PP_MASS_THRESHOLD
 
 # Complexity Emergence Score (CES)
 CES_MIN_POINTS: Final[int] = 4
@@ -290,7 +297,7 @@ def validate_probability_array(p: np.ndarray, name: str = "probability") -> np.n
     return p
 
 
-def validate_counts_dict(counts: dict, name: str = "counts") -> dict:
+def validate_counts_dict(counts: Mapping[str, int], name: str = "counts") -> dict[str, int]:
     """Validate counts dictionary for binary strings and positive counts."""
     if not counts:
         raise ValueError(f"{name} dictionary is empty")
@@ -301,16 +308,16 @@ def validate_counts_dict(counts: dict, name: str = "counts") -> dict:
             raise ValueError(f"{name}['{bitstring}'] = {count} is not a non-negative integer")
     
     # Check bitstring consistency
-    lengths = [len(bs) for bs in counts.keys()]
-    if len(set(lengths)) > 1:
-        raise ValueError(f"{name} contains bitstrings of inconsistent lengths: {set(lengths)}")
+    lengths = {len(bs) for bs in counts.keys()}
+    if len(lengths) > 1:
+        raise ValueError(f"{name} contains bitstrings of inconsistent lengths: {lengths}")
     
     # Check binary format
     for bitstring in counts.keys():
         if not all(c in '01' for c in bitstring):
             raise ValueError(f"{name} contains non-binary bitstring: '{bitstring}'")
     
-    return counts
+    return dict(counts)
 
 
 def get_status_thresholds() -> dict:
@@ -322,3 +329,33 @@ def get_status_thresholds() -> dict:
         "experimental_min_samples": EXPERIMENTAL_MIN_SAMPLES,
         "significance_p": SIGNIFICANCE_P_VALUE
     }
+
+
+# Public exports
+__all__ = [
+    # Core knobs
+    "ALPHA", "EPS", "LOG_BASE", "SCHEMA_VERSION",
+    "DEFAULT_BOOTSTRAP_B", "FAST_BOOTSTRAP_B", "SLOW_BOOTSTRAP_B",
+    "CONFIDENCE_LEVEL", "ALPHA_LEVEL", "CONF_INT_DEFAULT",
+    # Metric-specific
+    "EEC_LAMBDA", "PP_TOP_K_MIN", "PP_TOP_K_MAX", "PP_MASS_THRESHOLD",
+    "PP_MIN_RUNS", "CES_MIN_POINTS", "CES_MAX_QUBITS", "TIKHONOV_LAMBDA",
+    # Canonical aliases for public API
+    "MAX_TOP_K", "TOPK_MASS_TARGET",
+    # Status thresholds
+    "VALIDATED_CV_THRESHOLD", "STATUS_BAND_WIDTH", "EXPERIMENTAL_CV_THRESHOLD",
+    "VALIDATED_MIN_SAMPLES", "EXPERIMENTAL_MIN_SAMPLES", "UNSTABLE_MAX_SAMPLES",
+    "SIGNIFICANCE_P_VALUE",
+    # Physical/reference values
+    "MAX_QUBITS_EXACT", "MAX_OUTCOMES_EXACT",
+    "GHZ_EXACT_TC_2QUBIT", "GHZ_EXACT_TC_3QUBIT",
+    # Dev & testing
+    "DEFAULT_TEST_SEED", "PERFORMANCE_TEST_SEED",
+    "NUMERICAL_TOLERANCE", "STATISTICAL_TOLERANCE",
+    "SMALL_TEST_N", "MEDIUM_TEST_N", "LARGE_TEST_N",
+    "SMALL_TEST_SHOTS", "MEDIUM_TEST_SHOTS", "LARGE_TEST_SHOTS",
+    # Performance & execution
+    "MAX_COUNTS_DICT_SIZE", "DEFAULT_N_JOBS", "ENABLE_RESULT_CACHING",
+    # Validators / helpers
+    "validate_probability_array", "validate_counts_dict", "get_status_thresholds",
+]

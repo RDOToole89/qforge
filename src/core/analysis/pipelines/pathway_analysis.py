@@ -1,32 +1,37 @@
 """
-High-Level Structured Decoherence Analysis
+Pathway Analysis Pipeline - Orchestration and Convenience Functions
 
-This module provides comprehensive analysis functions that combine all 5 
-structured decoherence metrics for complete pathway characterization.
+This module provides high-level orchestration for structured decoherence analysis,
+keeping the core modules focused and avoiding tight coupling.
 
 Usage:
-    from src.core.analysis.structured_decoherence import compute_all_pathway_metrics
+    from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
     
-    metrics = compute_all_pathway_metrics(
-        counts=measurement_data,
-        state_type="GHZ", 
-        num_qubits=3
-    )
+    schema_result = run_all_to_schema(counts=measurement_data, rng=rng)
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any, Tuple, Mapping
 import numpy as np
 
-from ..metrics.pathway_metrics import (
-    compute_asymmetry_index,
-    compute_pathway_concentration_ratio,
-    compute_entanglement_error_correlation,
-    compute_temporal_pathway_stability,
-    compute_complexity_emergence_score,
-)
+from ..metrics.registry import compute_all
+from ..metrics.schema_bridge import metrics_to_schema
+from ..metrics.asymmetry_index import compute_asymmetry_index
+from ..metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
+from ..metrics.entanglement_error_correlation import compute_entanglement_error_correlation
+from ..metrics.temporal_pathway_stability import compute_temporal_pathway_stability
+from ..metrics.complexity_emergence_score import compute_complexity_emergence_score
 
 logger = logging.getLogger("QuantumExperiment.Analysis.StructuredDecoherence")
+
+
+def run_all_to_schema(
+    counts: Mapping[str, int],
+    rng: Optional[np.random.Generator] = None
+) -> dict:
+    """Convenience pipeline: compute all registered metrics and convert to schema."""
+    results = compute_all(counts=counts, rng=rng)
+    return metrics_to_schema(results)
 
 
 def compute_all_pathway_metrics(counts: Dict[str, int], 
