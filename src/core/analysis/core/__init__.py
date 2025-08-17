@@ -24,7 +24,7 @@ from .null_models import (
     factorized_null_model,
 )
 
-__all__ = [
+__all__ = (
     # Information Theory
     "entropy",
     "counts_to_probabilities",
@@ -38,4 +38,4 @@ __all__ = [
     "MetricWithConfidence",
     # Null Models
     "factorized_null_model",
-]
+)

@@ -55,40 +55,55 @@ from .pathway_persistence import (
 )
 
 # Original implementation modules (backward compatibility)
-from .asymmetry_index import (
-    compute_asymmetry_index,
-    compute_asymmetry_index_with_null_comparison,
-    AsymmetryAnalysis,
-)
+# Asymmetry Index (with graceful fallback if extras aren't present)
+try:
+    from .asymmetry_index import (
+        compute_asymmetry_index,
+        compute_asymmetry_index_with_null_comparison,
+        AsymmetryAnalysis,
+    )
+except Exception:  # pragma: no cover
+    from .asymmetry_index import compute_asymmetry_index  # required
+
+    compute_asymmetry_index_with_null_comparison = None  # type: ignore[assignment]
+    AsymmetryAnalysis = None  # type: ignore[assignment]
+
+# PCR original module (also expose original dataclass alias for clarity)
 from .pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
     ConcentrationAnalysis as PCRConcentrationAnalysis,
 )
+
+# EEC
 from .entanglement_error_correlation import (
     compute_entanglement_error_correlation,
     compute_multiway_entanglement_correlation,
     TopologyAnalysis,
 )
+
+# TPS original (expose original dataclass alias too)
 from .temporal_pathway_stability import (
     compute_temporal_pathway_stability,
     TemporalAnalysis as TPSTemporalAnalysis,
 )
+
+# CES
 from .complexity_emergence_score import (
     compute_complexity_emergence_score,
     compute_emergence_across_metrics,
     EmergenceAnalysis,
 )
-# from .structure_score import (
-#     compute_structure_score,
-# )  # Import issue - skip for now
-from .total_correlation import (
-    compute_total_correlation,
-)
 
-__all__ = [
+# Total Correlation (canonical implementation)
+from .total_correlation import compute_total_correlation
+
+# ---- Public API surface -----------------------------------------------------
+
+__all__ = (
     # Canonical Registry API (PRIMARY)
     "MetricResult",
-    "Status", 
+    "Status",
+    "register",
     "compute_metric",
     "compute_all",
     "metrics_to_schema",
@@ -96,28 +111,31 @@ __all__ = [
     "get_registered_metrics",
     "validate_schema_output",
     "get_schema_field_mapping",
-    
     # Canonical Metric Names (Aliases)
     "compute_concentration_index",
-    "compute_pathway_persistence", 
-    # "compute_structure_score",  # Import issue - skip for now
+    "compute_pathway_persistence",
     "compute_total_correlation",
-    
     # Original Implementation (Backward Compatibility)
     "compute_asymmetry_index",
-    "compute_asymmetry_index_with_null_comparison",
-    "AsymmetryAnalysis",
-    "compute_pathway_concentration_ratio", 
+    "compute_pathway_concentration_ratio",
     "compute_concentration_with_gini",
-    "ConcentrationAnalysis",
+    "ConcentrationAnalysis",  # canonical CI dataclass
+    "PCRConcentrationAnalysis",  # original PCR dataclass alias
     "compute_entanglement_error_correlation",
     "compute_multiway_entanglement_correlation",
     "TopologyAnalysis",
     "compute_temporal_pathway_stability",
     "compute_pathway_persistence_scores",
     "compute_temporal_transition_matrix",
-    "TemporalAnalysis",
+    "TemporalAnalysis",  # canonical PP dataclass
+    "TPSTemporalAnalysis",  # original TPS dataclass alias
     "compute_complexity_emergence_score",
     "compute_emergence_across_metrics",
     "EmergenceAnalysis",
-]
+)
+
+# Optionally expose these only if available (keeps imports safe in partial installs)
+if AsymmetryAnalysis is not None:
+    __all__ += ("AsymmetryAnalysis",)
+if compute_asymmetry_index_with_null_comparison is not None:
+    __all__ += ("compute_asymmetry_index_with_null_comparison",)

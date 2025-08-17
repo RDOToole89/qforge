@@ -17,7 +17,7 @@ from src.engine.models import (
     SweepManifest,
     ArtifactRef,
 )
-from src.core.research_handler import ResearchExperimentHandler
+from .research_handler import EngineResearchHandler
 from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 from src.engine.events import (
     SimpleEventBus,
@@ -52,7 +52,7 @@ def run(
     )
     circuit, raw = run_raw(cfg_model.model_dump())
 
-    rh = ResearchExperimentHandler(results_dir=ctx.base_results_dir)
+    rh = EngineResearchHandler(results_dir=ctx.base_results_dir)
     analysis = rh.process_experiment_result(
         circuit=circuit,
         result=raw,
@@ -65,7 +65,13 @@ def run(
     if cfg_model.enable_research_metrics:
         counts = extract_counts_from_result(raw)
         structured_decoherence_metrics = compute_research_metrics(counts, cfg_model)
-    
+
+        # Add structured decoherence metrics to analysis for storage
+        if structured_decoherence_metrics:
+            analysis["structured_decoherence_metrics"] = (
+                structured_decoherence_metrics.model_dump()
+            )
+
     metrics = analysis.get("research_metrics", {})
     prov = Provenance(
         schema_version="1.0.0",

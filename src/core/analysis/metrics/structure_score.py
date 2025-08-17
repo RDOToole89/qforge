@@ -1,358 +1,212 @@
 """
 Core Implementation of Structured Decoherence Pathway Metrics
 
-This module implements the 5 quantitative metrics for detecting structured 
+This module implements the 5 quantitative metrics for detecting structured
 decoherence patterns in quantum measurement data.
 
-Mathematical Definitions:
-    AI = (1/N) Σᵢ |pᵢ - p_uniform| / p_uniform
-    PCR = (Top 25% frequencies) / (Bottom 25% frequencies)  
-    EEC = Correlation coefficient between entanglement topology and error patterns
-    TPS = 1 - σ(pathway_rankings) / mean(pathway_rankings)
-    CES = Critical threshold where structured patterns emerge (≥3 qubits)
+Mathematical Definitions (project-standard):
+
+    AI  (Asymmetry Index)
+        TVD from uniform on the full support K = 2^n with Jeffreys prior:
+        AI = 0.5 * Σ_i |p̃_i - 1/K|,  where  p̃_i = (c_i + α) / (N + αK)
+
+    PCR (Pathway Concentration Ratio)
+        PCR = (Σ frequencies in top 25%) / (Σ frequencies in bottom 25%)
+        (uses adaptive quartiles for small numbers of outcomes)
+
+    EEC (Entanglement–Error Correlation)
+        EEC = corr( vec(W), vec(E) )
+        where W is the entanglement/topology weight matrix for the chosen state
+        and E is the error-correlation matrix (pairwise MI-based)
+
+    TPS (Temporal Pathway Stability)
+        Average pairwise Spearman rank correlation across runs/conditions,
+        mapped to [0, 1] as (ρ̄ + 1)/2 for interpretability.
+
+    CES (Complexity Emergence Score)
+        Score derived from fitting emergence vs. qubit count (e.g., logistic),
+        combining sharpness and amplitude to quantify a critical threshold.
 
 Author: Structured Decoherence Research
 """
 
-import numpy as np
+from __future__ import annotations
+
 import logging
-from typing import Dict, List, Tuple, Optional, Any
-from collections import Counter
-from scipy.stats import pearsonr
+from typing import Dict, List, Tuple, Any
 
-logger = logging.getLogger("QuantumExperiment.Analysis.StructuredDecoherence")
+import numpy as np
+from scipy.stats import spearmanr
+
+# Delegate to rigorously implemented metric modules to avoid duplication and drift.
+from .asymmetry_index import compute_asymmetry_index as _ai_compute
+from .pathway_concentration_ratio import compute_pathway_concentration_ratio as _pcr_compute
+from .entanglement_error_correlation import compute_entanglement_error_correlation as _eec_compute
+from .complexity_emergence_score import compute_complexity_emergence_score as _ces_compute
+from . import schema_bridge as _schema_bridge
+
+logger = logging.getLogger(__name__)
 
 
-def compute_structure_score(*, counts, **kwargs) -> Dict[str, Any]:
+def compute_structure_score(*, counts: Dict[str, int], **kwargs) -> Dict[str, Any]:
     """
-    Compute Structure Score using Jensen-Shannon divergence from null model.
-    
+    Compute Structure Score using Jensen–Shannon divergence from a null model.
+
+    This is a thin wrapper around the canonical implementation in `schema_bridge`.
+    Confidence intervals and validation status are handled by higher-level
+    pipelines (e.g., bootstrap module) and not in this core wrapper.
+
     Args:
-        counts: Measurement counts
-        **kwargs: Additional parameters
-        
+        counts: Measurement counts {bitstring: count}
+        **kwargs: Forwarded to the underlying implementation (if supported)
+
     Returns:
-        MetricResult-compatible dict
+        dict: Minimal MetricResult-like payload:
+              {
+                "value": <float>,
+                "status": "computed",
+                "extras": {"method": "jensen_shannon_divergence"}
+              }
+              (CI and final status should be attached by the bootstrap pipeline.)
+
+    Notes:
+        - Keeps this "core" file lightweight and in sync with schema specs.
     """
-    # Basic implementation - delegate to schema_bridge for now
-    from . import schema_bridge
     try:
-        ss_value = schema_bridge.compute_structure_score(counts)
+        value = _schema_bridge.compute_structure_score(counts, **kwargs)
         return {
-            "value": ss_value,
-            "status": "experimental",
-            "ci95": (ss_value * 0.9, ss_value * 1.1),  # Placeholder CI
-            "extras": {"method": "jensen_shannon_divergence"}
+            "value": float(value),
+            "status": "computed",
+            "extras": {"method": "jensen_shannon_divergence"},
         }
     except Exception as e:
+        logger.error("Structure Score computation failed: %s", e)
         return {
             "value": 0.0,
-            "status": "unstable", 
-            "ci95": (0.0, 0.0),
-            "extras": {"error": str(e)}
+            "status": "unstable",
+            "extras": {"error": str(e)},
         }
+
 
 def compute_asymmetry_index(counts: Dict[str, int]) -> float:
     """
-    Compute Asymmetry Index (AI) - deviation from uniform error distribution.
-    
-    AI quantifies how much the observed distribution deviates from a uniform
-    distribution across all possible measurement outcomes.
-    
-    Formula: AI = (1/N) Σᵢ |pᵢ - p_uniform| / p_uniform
-    
-    Args:
-        counts: Dictionary mapping bitstrings to measurement counts
-        
+    Compute Asymmetry Index (AI) — deviation from a uniform error distribution.
+
+    This function delegates to the project’s canonical `asymmetry_index` module,
+    which implements the TVD-from-uniform definition on the full 2^n support
+    with Jeffreys prior smoothing.
+
     Returns:
-        float: Asymmetry index (0 = perfectly uniform, higher = more structured)
+        float: Asymmetry Index in [0, 0.5]
     """
-    if not counts:
-        return 0.0
-        
-    total_shots = sum(counts.values())
-    num_outcomes = len(counts)
-    
-    # Expected uniform probability for each outcome
-    p_uniform = 1.0 / num_outcomes
-    
-    # Calculate asymmetry
-    asymmetry_sum = 0.0
-    for bitstring, count in counts.items():
-        p_observed = count / total_shots
-        asymmetry_sum += abs(p_observed - p_uniform) / p_uniform
-    
-    ai = asymmetry_sum / num_outcomes
-    
-    logger.debug(f"Computed AI = {ai:.4f} for {num_outcomes} outcomes")
-    return ai
+    return float(_ai_compute(counts))
 
 
 def compute_pathway_concentration_ratio(counts: Dict[str, int]) -> float:
     """
-    Compute Pathway Concentration Ratio (PCR) - concentration in top error pathways.
-    
-    PCR measures how much the decoherence is concentrated in the most frequent
-    error pathways compared to the least frequent ones.
-    
-    Formula: PCR = (Top 25% frequencies) / (Bottom 25% frequencies)
-    
-    Args:
-        counts: Dictionary mapping bitstrings to measurement counts
-        
+    Compute Pathway Concentration Ratio (PCR) — concentration in top error pathways.
+
+    Delegates to the vetted `pathway_concentration` implementation, which uses
+    adaptive quartiles for small n and handles edge cases robustly.
+
     Returns:
-        float: Pathway concentration ratio (higher = more concentrated)
+        float: PCR (≥ 1.0, or ∞ in extreme single-pathway cases)
     """
-    if not counts or len(counts) < 4:
-        return 1.0  # Not enough data for meaningful quartiles
-        
-    # Sort outcomes by frequency
-    sorted_counts = sorted(counts.values(), reverse=True)
-    n = len(sorted_counts)
-    
-    # Calculate quartile boundaries
-    top_25_idx = max(1, n // 4)
-    bottom_25_idx = max(1, n // 4)
-    
-    # Sum top and bottom quartiles
-    top_25_sum = sum(sorted_counts[:top_25_idx])
-    bottom_25_sum = sum(sorted_counts[-bottom_25_idx:])
-    
-    # Avoid division by zero
-    if bottom_25_sum == 0:
-        return float('inf') if top_25_sum > 0 else 1.0
-        
-    pcr = top_25_sum / bottom_25_sum
-    
-    logger.debug(f"Computed PCR = {pcr:.4f} (top {top_25_idx} vs bottom {bottom_25_idx})")
-    return pcr
+    return float(_pcr_compute(counts))
 
 
-def compute_entanglement_error_correlation(counts: Dict[str, int], 
-                                         state_type: str = "GHZ") -> float:
+def compute_entanglement_error_correlation(
+    counts: Dict[str, int],
+    state_type: str = "GHZ",
+) -> float:
     """
-    Compute Entanglement-Error Correlation (EEC) - correlation between topology and errors.
-    
-    EEC measures how well the error patterns correlate with the expected
-    entanglement structure of the quantum state.
-    
+    Compute Entanglement–Error Correlation (EEC) — correlation between topology and errors.
+
+    Delegates to the canonical `eec` implementation, which builds the state-specific
+    topology matrix W, computes the error-correlation matrix E from pairwise MI, and
+    returns the Pearson correlation between vec(W) and vec(E).
+
     Args:
-        counts: Dictionary mapping bitstrings to measurement counts
-        state_type: Type of quantum state ("GHZ", "W", "BELL", "CLUSTER")
-        
+        counts: {bitstring: count}
+        state_type: "GHZ", "W", "Bell", "Cluster", or "Custom"
+
     Returns:
-        float: Correlation coefficient (-1 to 1, higher = stronger correlation)
+        float: EEC in [-1, 1]
     """
-    if not counts:
-        return 0.0
-        
-    # Extract bitstrings and their frequencies
-    bitstrings = list(counts.keys())
-    frequencies = list(counts.values())
-    
-    if len(bitstrings) < 2:
-        return 0.0
-        
-    # Compute entanglement scores based on state type
-    entanglement_scores = []
-    
-    for bitstring in bitstrings:
-        if state_type.upper() == "GHZ":
-            # For GHZ states, highest entanglement for |000⟩ and |111⟩
-            score = _compute_ghz_entanglement_score(bitstring)
-        elif state_type.upper() == "W":
-            # For W states, highest entanglement for single-excitation states
-            score = _compute_w_entanglement_score(bitstring)
-        elif state_type.upper() == "BELL":
-            # For Bell states, highest entanglement for |00⟩ and |11⟩
-            score = _compute_bell_entanglement_score(bitstring)
-        else:
-            # Default: uniform scoring
-            score = 1.0
-            
-        entanglement_scores.append(score)
-    
-    # Compute correlation between entanglement scores and error frequencies
-    if len(set(entanglement_scores)) > 1 and len(set(frequencies)) > 1:
-        correlation, _ = pearsonr(entanglement_scores, frequencies)
-        eec = correlation if not np.isnan(correlation) else 0.0
-    else:
-        eec = 0.0
-    
-    logger.debug(f"Computed EEC = {eec:.4f} for {state_type} state")
-    return eec
+    return float(_eec_compute(counts, state_type=state_type))
 
 
-def compute_temporal_pathway_stability(pathway_rankings: List[List[str]]) -> float:
+def compute_temporal_pathway_stability(pathway_rankings: List[List]) -> float:
     """
-    Compute Temporal Pathway Stability (TPS) - consistency across noise levels.
-    
-    TPS measures how stable the ranking of error pathways remains across
-    different noise levels or experimental runs.
-    
-    Formula: TPS = 1 - σ(pathway_rankings) / mean(pathway_rankings)
-    
+    Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
+
+    TPS is computed as the average pairwise Spearman rank correlation ρ across all
+    provided rankings, mapped to [0, 1] via (ρ̄ + 1)/2 for interpretability.
+
     Args:
-        pathway_rankings: List of pathway rankings for different conditions
-        
+        pathway_rankings: A list of pathway orderings (each ordering is a list of IDs)
+
     Returns:
-        float: Temporal stability (0-1, higher = more stable)
+        float: TPS in [0, 1] (higher = more stable)
+
+    Notes:
+        - Only elements common to a pair of rankings contribute to that pair’s ρ.
+        - If there are fewer than two rankings, returns 1.0 by convention.
+        - If no pair has ≥2 elements in common, returns 0.0.
     """
     if not pathway_rankings or len(pathway_rankings) < 2:
-        return 1.0  # Perfect stability with insufficient data
-        
-    # Convert rankings to numerical stability scores
-    stability_scores = []
-    
-    # Use first ranking as reference
-    reference_ranking = pathway_rankings[0]
-    
-    for ranking in pathway_rankings[1:]:
-        # Compute rank correlation with reference
-        stability = _compute_ranking_similarity(reference_ranking, ranking)
-        stability_scores.append(stability)
-    
-    if not stability_scores:
         return 1.0
-        
-    # Calculate temporal stability
-    mean_stability = np.mean(stability_scores)
-    std_stability = np.std(stability_scores)
-    
-    # TPS formula: higher stability = lower variance
-    if mean_stability > 0:
-        tps = 1 - (std_stability / mean_stability)
-        tps = max(0.0, min(1.0, tps))  # Clamp to [0,1]
-    else:
-        tps = 0.0
-    
-    logger.debug(f"Computed TPS = {tps:.4f} across {len(pathway_rankings)} rankings")
-    return tps
+
+    def _to_rank_map(r: List) -> Dict[Any, int]:
+        return {k: i for i, k in enumerate(r)}
+
+    maps = [_to_rank_map(r) for r in pathway_rankings]
+
+    rhos: List[float] = []
+    for i in range(len(maps)):
+        for j in range(i + 1, len(maps)):
+            common = sorted(set(maps[i]) & set(maps[j]))
+            if len(common) < 2:
+                continue
+            a = [maps[i][k] for k in common]
+            b = [maps[j][k] for k in common]
+            rho, _ = spearmanr(a, b)
+            if np.isnan(rho):
+                continue
+            rhos.append(float(rho))
+
+    if not rhos:
+        return 0.0
+
+    # Map average Spearman ρ from [-1, 1] to [0, 1]
+    tps = (float(np.mean(rhos)) + 1.0) / 2.0
+    return float(np.clip(tps, 0.0, 1.0))
 
 
-def compute_complexity_emergence_score(multi_qubit_data: Dict[int, Dict[str, int]]) -> float:
+def compute_complexity_emergence_score(
+    multi_qubit_data: Dict[int, Dict[str, int]],
+) -> float:
     """
-    Compute Complexity Emergence Score (CES) - threshold for structured emergence.
-    
-    CES quantifies at what complexity level (number of qubits) structured
-    decoherence patterns begin to emerge clearly above noise.
-    
+    Compute Complexity Emergence Score (CES) — threshold for structured emergence.
+
+    Delegates to the canonical `complexity_emergence` implementation, which fits
+    emergence curves (e.g., logistic) to structure vs. qubit-count data and
+    combines sharpness and amplitude.
+
     Args:
-        multi_qubit_data: Dictionary mapping num_qubits to measurement counts
-        
+        multi_qubit_data: {n_qubits: counts_dict}
+
     Returns:
-        float: Emergence score (higher = clearer emergence at higher complexity)
+        float: CES (higher = clearer, sharper emergence)
     """
-    if not multi_qubit_data or len(multi_qubit_data) < 2:
-        return 0.0
-        
-    qubit_counts = sorted(multi_qubit_data.keys())
-    asymmetry_progression = []
-    
-    # Compute AI for each qubit count
-    for num_qubits in qubit_counts:
-        counts = multi_qubit_data[num_qubits]
-        ai = compute_asymmetry_index(counts)
-        asymmetry_progression.append(ai)
-    
-    # Find the emergence threshold (where AI starts increasing significantly)
-    if len(asymmetry_progression) < 2:
-        return 0.0
-        
-    # Compute rate of change in asymmetry
-    emergence_indicators = []
-    for i in range(1, len(asymmetry_progression)):
-        rate_of_change = asymmetry_progression[i] - asymmetry_progression[i-1]
-        emergence_indicators.append(rate_of_change)
-    
-    # CES is the magnitude of emergence above the 3-qubit threshold
-    if len(qubit_counts) >= 2 and qubit_counts[0] <= 3:
-        # Focus on emergence at 3+ qubits (research hypothesis)
-        threshold_idx = next((i for i, q in enumerate(qubit_counts) if q >= 3), 0)
-        if threshold_idx < len(emergence_indicators):
-            ces = max(0.0, emergence_indicators[threshold_idx])
-        else:
-            ces = 0.0
-    else:
-        ces = np.mean(emergence_indicators) if emergence_indicators else 0.0
-    
-    logger.debug(f"Computed CES = {ces:.4f} across {len(qubit_counts)} qubit counts")
-    return ces
+    return float(_ces_compute(multi_qubit_data))
 
 
-# Helper functions for entanglement scoring
-
-def _compute_ghz_entanglement_score(bitstring: str) -> float:
-    """Compute entanglement score for GHZ state topology."""
-    n = len(bitstring)
-    
-    # Highest score for |000...⟩ and |111...⟩ (GHZ computational basis)
-    if bitstring == '0' * n or bitstring == '1' * n:
-        return 1.0
-    
-    # Medium score for single bit-flip errors (preserve some entanglement)
-    hamming_from_00 = sum(c == '1' for c in bitstring)
-    hamming_from_11 = sum(c == '0' for c in bitstring)
-    min_hamming = min(hamming_from_00, hamming_from_11)
-    
-    if min_hamming == 1:
-        return 0.7  # Single bit-flip
-    elif min_hamming == 2:
-        return 0.4  # Two bit-flips
-    else:
-        return 0.1  # Complete decoherence
-
-
-def _compute_w_entanglement_score(bitstring: str) -> float:
-    """Compute entanglement score for W state topology."""
-    ones_count = bitstring.count('1')
-    
-    # W state has exactly one excitation
-    if ones_count == 1:
-        return 1.0
-    elif ones_count == 0 or ones_count == len(bitstring):
-        return 0.3  # All ground or all excited  
-    else:
-        return 0.1  # Multiple excitations
-
-
-def _compute_bell_entanglement_score(bitstring: str) -> float:
-    """Compute entanglement score for Bell state topology."""
-    if len(bitstring) != 2:
-        return 0.0
-        
-    # Bell states: |00⟩, |01⟩, |10⟩, |11⟩
-    if bitstring in ['00', '11']:
-        return 1.0  # Perfect correlation
-    elif bitstring in ['01', '10']:
-        return 0.8  # Anti-correlation
-    else:
-        return 0.0
-
-
-def _compute_ranking_similarity(ranking1: List[str], ranking2: List[str]) -> float:
-    """Compute similarity between two pathway rankings."""
-    # Simple rank correlation approximation
-    common_elements = set(ranking1) & set(ranking2)
-    if not common_elements:
-        return 0.0
-        
-    # Compute Spearman-like correlation for common elements
-    rank_diffs = []
-    for element in common_elements:
-        try:
-            rank1 = ranking1.index(element)
-            rank2 = ranking2.index(element)
-            rank_diffs.append(abs(rank1 - rank2))
-        except ValueError:
-            continue
-    
-    if not rank_diffs:
-        return 0.0
-        
-    # Convert to similarity score (lower differences = higher similarity)
-    max_possible_diff = max(len(ranking1), len(ranking2))
-    avg_diff = np.mean(rank_diffs)
-    similarity = 1.0 - (avg_diff / max_possible_diff)
-    
-    return max(0.0, similarity)
+__all__ = [
+    "compute_structure_score",
+    "compute_asymmetry_index",
+    "compute_pathway_concentration_ratio",
+    "compute_entanglement_error_correlation",
+    "compute_temporal_pathway_stability",
+    "compute_complexity_emergence_score",
+]
