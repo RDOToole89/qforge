@@ -19,6 +19,27 @@ result = exp.run()
 print(f"Asymmetry Index: {result.structured_decoherence_metrics.asymmetry_index:.4f}")
 ```
 
+## CLI Usage
+
+The `qxf` command-line tool provides quick access to experiments:
+
+```bash
+# List all available experiments
+qxf list
+
+# Run an experiment with defaults
+qxf run sst_q1
+
+# Run with custom parameters
+qxf run bell_correlation -s error_rate=0.1 -s shots=2048
+
+# Get JSON output for scripting
+qxf run sst_q1 --json
+
+# Run from a JSON config file
+qxf run-config my_config.json
+```
+
 ## Available Experiments
 
 | Name | Description | Noise Type |

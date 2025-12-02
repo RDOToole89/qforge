@@ -188,13 +188,13 @@ Make explicit that SST is one use case, not the framework's identity.
 
 - **Objective**: Provide command-line access without bloating the core.
 - **Tasks**:
-  - [ ] **Create CLI**: Add `src/cli.py` using `typer`
-  - [ ] **Commands**:
-    - `run-config <path>` — Run from JSON config file
-    - `run-experiment <name>` — Run predefined experiment by name
-    - `list-experiments` — List available experiment programs
-  - [ ] **Entry Point**: Add `qxf` command in `pyproject.toml`
-  - [ ] **Keep It Thin**: CLI = parser + caller + printer, no domain logic
+  - [x] **Create CLI**: Add `src/cli.py` using `typer`
+  - [x] **Commands**:
+    - `qxf run <name>` — Run predefined experiment by name with `-s key=value` overrides
+    - `qxf run-config <path>` — Run from JSON config file
+    - `qxf list` — List available experiment programs
+  - [x] **Entry Point**: Add `qxf` command in `pyproject.toml`
+  - [x] **Keep It Thin**: CLI = parser + caller + printer, no domain logic
 
 ### 7.4. Documentation Updates
 

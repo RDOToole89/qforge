@@ -37,6 +37,21 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 
 ## Quick Start
 
+**Using the CLI:**
+
+```bash
+# List available experiments
+qxf list
+
+# Run an experiment
+qxf run sst_q1
+
+# With custom parameters
+qxf run sst_q1 -s error_rate=0.1 -s num_qubits=3
+```
+
+See [CLI Reference](cli.md) for full documentation.
+
 **Using ExperimentProgram (Recommended):**
 
 ```python
@@ -98,6 +113,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed design blueprint and [FR
 ## Documentation Structure
 
 - **[Design Document](DESIGN_DOCUMENT.md)**: Comprehensive framework design (metrics, architecture, roadmap)
+- **[CLI Reference](cli.md)**: Command-line tool usage and examples
+- **[Experiments Guide](../src/experiments/README.md)**: How to run and create experiments
 - **Getting Started**: Installation, quickstart, and basic usage
 - **User Guide**: Comprehensive analysis workflows and metric explanations
 - **API Reference**: Complete function and class documentation
