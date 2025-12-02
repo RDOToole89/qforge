@@ -6,14 +6,19 @@
 
 ```python
 # Programmatic Usage (Python scripts, Jupyter notebooks)
-from qiskit_experiments.engine import run_experiment, run_sweep
+from src.engine.api import run, sweep
 
-result = run_experiment({
+result = run({
     "num_qubits": 3,
     "state_type": "GHZ",
     "enable_research_metrics": True,
     "research_type": "structured_decoherence"
 })
+
+# Or use the ExperimentProgram abstraction
+from src.experiments import get_experiment
+exp = get_experiment("sst_q1")
+result = exp.run()
 
 # CLI Usage (unchanged externally)
 python main.py --config config.json
@@ -574,16 +579,21 @@ src/
 **Research Scientist (Python):**
 
 ```python
-from qiskit_experiments.engine import run_experiment
+# Using the ExperimentProgram abstraction (recommended)
+from src.experiments import sst_q1
 
-result = run_experiment({
+result = sst_q1.run({"num_qubits": 5, "shots": 10000})
+print(f"Asymmetry Index: {result.structured_decoherence_metrics.asymmetry_index}")
+
+# Or using the engine API directly
+from src.engine.api import run
+
+result = run({
     "num_qubits": 5,
     "state_type": "GHZ",
     "enable_research_metrics": True,
     "shots": 10000
 })
-
-print(f"Asymmetry Index: {result.structured_decoherence_metrics.asymmetry_index}")
 ```
 
 **CLI User (unchanged):**

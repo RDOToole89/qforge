@@ -332,6 +332,23 @@ The engine routes via `research_type`:
 - Turn this into a product-like framework with web UI, auth, etc.
 - Move physics or metric logic into CLI/UI layers
 
+### Breaking Changes Policy
+
+**We are at Beta v0.2, NOT v1.0.** Breaking changes are allowed and preferred over:
+
+- Backward compatibility shims
+- Legacy function wrappers
+- Dead code accumulation
+- Deprecation warnings that never get resolved
+
+**Rule:** Remove old code, don't wrap it. Clean breaks > cruft.
+
+When refactoring:
+- Delete procedural code, replace with class-based implementations
+- Don't keep old function signatures "for compatibility"
+- Don't add `# deprecated` comments — just remove the code
+- Update imports and tests to use new patterns
+
 ## Research Workflow
 
 1. **Design Experiment**: Configure quantum state, noise model, research parameters

@@ -168,9 +168,10 @@ Make explicit that SST is one use case, not the framework's identity.
 
 - **Objective**: Formalize the "pluggable experiment" pattern.
 - **Tasks**:
-  - [ ] **Create Protocol**: Add `src/experiments/base.py` with `ExperimentProgram` protocol
-  - [ ] **Refactor SST Experiments**: Wrap existing `sst_hypothesis_q1.py` to implement the protocol
-  - [ ] **Add Registry**: Create `EXPERIMENT_REGISTRY` in `src/experiments/__init__.py`
+  - [x] **Create Protocol**: Add `src/experiments/base.py` with `ExperimentProgram` protocol
+  - [x] **Refactor SST Experiments**: Refactored `sst_hypothesis_q1.py` and `sst_hypothesis_q1_structured.py` to implement the protocol
+  - [x] **Add Registry**: Create `EXPERIMENT_REGISTRY` in `src/experiments/__init__.py`
+  - [x] **Add README**: Created `src/experiments/README.md` with usage guide
 
 ### 7.2. Non-SST Experiment (Proof of Generality)
 
@@ -199,8 +200,9 @@ Make explicit that SST is one use case, not the framework's identity.
 - **Objective**: Make generalizability obvious to users and contributors.
 - **Tasks**:
   - [ ] **Architecture Doc**: Add "Experiments as Modular Programs" section
-  - [ ] **Tutorial**: How to add a new experiment using `ExperimentProgram`
-  - [ ] **CLAUDE.md**: Document the abstraction pattern (✅ Done)
+  - [x] **Tutorial**: How to add a new experiment using `ExperimentProgram` (see `src/experiments/README.md`)
+  - [x] **CLAUDE.md**: Document the abstraction pattern
+  - [x] **AGENTS.md**: Updated `src/experiments/AGENTS.md` with new pattern
 
 ---
 

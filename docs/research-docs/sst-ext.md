@@ -608,9 +608,10 @@ Using my refactored Qiskit experiment framework (`refactor/simplify-codebase`), 
 
 The framework separates physics from orchestration:
 
-- `src/engine` – execution engine (`EngineExperimentRunner`)
+- `src/engine` – execution engine (API: `run()`, `sweep()`)
+- `src/experiments` – pluggable experiment programs (`ExperimentProgram` protocol)
 - `src/core/noise_models` – physics-first noise factory (enforcing constraints like \(T_2 \le 2T_1\))
-- `src/analysis` – metric library (PCR, Gini, entropy, etc.)
+- `src/core/analysis` – metric library (PCR, Gini, entropy, etc.)
 
 ### 12.2 Depolarizing Noise: The Fog
 

@@ -37,11 +37,28 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 
 ## Quick Start
 
+**Using ExperimentProgram (Recommended):**
+
+```python
+from src.experiments import sst_q1
+
+# Run with defaults
+result = sst_q1.run()
+
+# Or customize parameters
+result = sst_q1.run({"num_qubits": 3, "error_rate": 0.1})
+
+# Access metrics
+metrics = result.structured_decoherence_metrics
+print(f"Asymmetry Index: {metrics.asymmetry_index:.4f}")
+```
+
+**Using Engine API Directly:**
+
 ```python
 from src.engine.api import run
 from src.engine.models import ExperimentConfig
 
-# Configure quantum decoherence experiment
 config = ExperimentConfig(
     num_qubits=3,
     state_type="GHZ",
@@ -53,15 +70,12 @@ config = ExperimentConfig(
     error_rate=0.05
 )
 
-# Run experiment and analyze results
 result = run(config)
-
-# Access structured decoherence metrics
 metrics = result.structured_decoherence_metrics
 print(f"Asymmetry Index: {metrics.asymmetry_index:.4f}")
-print(f"Pathway Concentration: {metrics.pathway_concentration_ratio:.4f}")
-print(f"Topology Correlation: {metrics.entanglement_error_correlation:.4f}")
 ```
+
+See [src/experiments/README.md](../src/experiments/README.md) for the complete experiments guide.
 
 ## Research Applications
 

@@ -1,214 +1,190 @@
-# AGENTS.md — Experiment Implementations
+# AGENTS.md — Experiment Programs
 
 Owner: Research Engineering (Roibín O'Toole)
 Last updated: 2025-12-02
-Token budget: 350
+Token budget: 400
 
 ## Purpose
 
-This layer contains **concrete experiment implementations** and research notebooks. It is where scientific hypotheses are tested using the core physics primitives and engine orchestration.
+This module contains **experiment programs** - pluggable, discoverable experiment implementations that use the engine API. Each experiment encapsulates a specific research question with its default configuration.
 
-This layer should:
+## Architecture Pattern: ExperimentProgram
 
-- Define specific research questions and hypotheses
-- Compose core and engine components to run experiments
-- Document experimental methodology and results
-- Provide reproducible scripts and notebooks
+All experiments follow the `ExperimentProgram` protocol:
 
-## Local Boundaries
+```python
+class ExperimentProgram(Protocol):
+    name: str           # Short identifier (e.g., "sst_q1")
+    description: str    # Human-readable description
 
-### Allowed Imports
+    def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
+        ...
 
-- `src.core.*` — Physics primitives, metrics, analysis
-- `src.engine.*` — Execution API, configs, storage
-- `qiskit` — Direct usage for custom experiments
-- `numpy`, `scipy`, `matplotlib` — Analysis and visualization
-- `pandas` — Data manipulation for large sweeps
-- Standard library
-
-### Forbidden Imports
-
-- None — Experiments sit at the top of the dependency graph
-- However, experiments should **not define new abstractions** that would belong in core/engine
+    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
+        """Run the experiment with optional config overrides."""
+        ...
+```
 
 ## Structure
 
 ```
 src/experiments/
-├── sst_hypothesis_q1.py              # Structured decoherence research
-├── sst_hypothesis_q1_structured.py   # Alternative implementation
-└── notebooks/                         # Jupyter notebooks (future)
-    ├── exploratory/
-    └── published/
+├── __init__.py                      # Registry and exports
+├── base.py                          # Protocol + BaseExperiment
+├── sst_hypothesis_q1.py             # SST Q1 (depolarizing noise)
+├── sst_hypothesis_q1_structured.py  # SST Q1 (amplitude damping)
+└── AGENTS.md                        # This file
 ```
+
+## Key Design Decisions
+
+### 1. Use Engine API, Not Internals
+
+Experiments MUST use `src/engine/api.py` functions (`run()`, `sweep()`), NOT internal components like `EngineExperimentRunner`.
+
+**Why**: The engine API is the stable interface. It handles metrics computation, storage, and validation automatically.
+
+### 2. BaseExperiment Helper
+
+Most experiments should inherit from `BaseExperiment` which provides:
+- `run(overrides)` - Single experiment execution via engine API
+- `sweep(parameter_ranges)` - Parameter sweep via engine API
+
+### 3. Metrics via Config, Not Manual
+
+Enable research metrics through configuration:
+
+```python
+ExperimentConfig(
+    enable_research_metrics=True,
+    research_type="structured_decoherence",  # or "benchmark", etc.
+)
+```
+
+**Don't** compute metrics manually in experiment code.
+
+### 4. Module-Level Instances
+
+Each experiment module provides a convenience instance:
+
+```python
+# In sst_hypothesis_q1.py
+sst_q1 = SSTHypothesisQ1()
+```
+
+This enables quick usage: `from src.experiments import sst_q1; sst_q1.run()`
+
+## Local Boundaries
+
+### Allowed Imports
+
+- `src.engine.api` — `run()`, `sweep()` functions
+- `src.engine.models` — `ExperimentConfig`, `ExperimentResult`, `SweepManifest`
+- `src.experiments.base` — `BaseExperiment`, `ExperimentProgram`
+- `numpy` — For parameter generation (e.g., `linspace`)
+- Standard library
+
+### Forbidden Imports
+
+- `src.engine.execution.*` — Use engine API, not internals
+- `src.core.*` — Let engine handle core integration
+- Direct Qiskit imports — Let engine handle execution
 
 ## Do Not
 
-- **Create new physics primitives** — Add them to `src.core` instead
-- **Create new orchestration logic** — Add it to `src.engine` instead
-- **Duplicate code between experiments** — Extract to core/engine
-- **Hardcode paths or configurations** — Use config files or CLI arguments
-- **Commit large result files** — Use `.gitignore` for results/
-- **Mix multiple hypotheses in one file** — Keep experiments focused
-- **Skip documentation** — Each experiment needs a docstring explaining its purpose
+- **Use `EngineExperimentRunner` directly** — Use engine API
+- **Compute metrics manually** — Enable via `research_type` config
+- **Serialize results manually** — Engine handles storage
+- **Create backward-compatibility wrappers** — Breaking changes are fine (Beta v0.2)
+- **Define new abstractions** — Add them to `core/` or `engine/`
+- **Hardcode paths** — Let engine handle storage
 
 ## Always
 
-- **Document the research question** at the top of each experiment file
-- **Use the engine API** (`run_experiment`, `run_sweep`) instead of raw Qiskit
-- **Include reproducibility metadata** — Seeds, versions, timestamps
-- **Save results to standard locations** — Use `results/<experiment_name>/`
-- **Reference related papers or theory** — Link to `docs/research-docs/`
-- **Provide clear success criteria** — What does a "positive" result look like?
-- **Use descriptive variable names** — `entanglement_map` not `em`
+- **Inherit from `BaseExperiment`** or implement `ExperimentProgram`
+- **Document the hypothesis** in module and class docstrings
+- **Provide `default_config()`** with sensible defaults
+- **Register in `EXPERIMENT_REGISTRY`** in `__init__.py`
+- **Provide module-level instance** for convenience
+- **Include pass criteria** — What defines success?
 
-## Key Patterns
+## Adding a New Experiment
 
-### Experiment Script Pattern
+1. **Create the file** (e.g., `bell_chsh.py`):
 
 ```python
-"""
-SST Hypothesis Q1: Entanglement Topology Influences Decoherence Pathways
-
-Research Question:
-    Does the geometric structure of entanglement (GHZ vs W vs Cluster)
-    correlate with the spatial distribution of decoherence errors?
-
-Methodology:
-    1. Prepare different entangled states (same qubit count)
-    2. Apply identical noise models
-    3. Measure EEC (Entanglement-Error Correlation) for each state
-    4. Compare EEC values to determine if topology matters
-
-Expected Outcome:
-    If SST hypothesis is correct, EEC should vary significantly
-    across different topologies under identical noise conditions.
-
-References:
-    - docs/research-docs/sst-ext.md
-    - docs/research-docs/RESEARCH_PLAN.md
-"""
-
-from src.engine.api import run_sweep
+from src.experiments.base import BaseExperiment
 from src.engine.models import ExperimentConfig
 
-def run_sst_hypothesis_q1():
-    base_config = ExperimentConfig(
-        num_qubits=4,
-        state_type="GHZ",  # Will sweep over different states
-        noise_model_type="depolarizing",
-        error_rate=0.01,
-        shots=2048,
-        seed=42
-    )
+class BellCHSH(BaseExperiment):
+    """Bell/CHSH inequality violation test."""
 
-    results = run_sweep(
-        base_config=base_config,
-        sweep_params={
-            "state_type": ["GHZ", "W", "Cluster"],
-            "error_rate": [0.001, 0.01, 0.05]
-        },
-        output_dir="results/sst_hypothesis_q1/"
-    )
+    name = "bell_chsh"
+    description = "Bell/CHSH inequality violation test"
 
-    # Analysis
-    for result in results:
-        print(f"{result.config.state_type} @ {result.config.error_rate}: "
-              f"EEC = {result.metrics.eec:.3f}")
+    def default_config(self) -> ExperimentConfig:
+        return ExperimentConfig(
+            num_qubits=2,
+            state_type="Bell",
+            shots=4096,
+            # ... other config
+        )
 
-if __name__ == "__main__":
-    run_sst_hypothesis_q1()
+# Module-level instance
+bell_chsh = BellCHSH()
 ```
 
-### Notebook Pattern
+1. **Register in `__init__.py`**:
 
 ```python
-# Good: Structured notebook with clear sections
-"""
-# SST Hypothesis Q1 — Interactive Exploration
+from src.experiments.bell_chsh import BellCHSH, bell_chsh
 
-This notebook allows interactive investigation of the SST hypothesis
-using the qiskit-experiment-framework.
+EXPERIMENT_REGISTRY["bell_chsh"] = bell_chsh
 
-## Setup
-"""
+__all__ = [
+    # ... existing exports
+    "BellCHSH",
+    "bell_chsh",
+]
+```
 
-from src.engine.api import run_experiment
-from src.engine.models import ExperimentConfig
-import matplotlib.pyplot as plt
+## Usage Examples
 
-"""
-## Experiment Configuration
-"""
+```python
+from src.experiments import get_experiment, list_experiments
 
-config = ExperimentConfig(...)
+# List available experiments
+for name, desc in list_experiments():
+    print(f"{name}: {desc}")
 
-"""
-## Results & Analysis
-"""
+# Run experiment with defaults
+exp = get_experiment("sst_q1")
+result = exp.run()
+print(result.structured_decoherence_metrics.asymmetry_index)
 
-result = run_experiment(config)
-# ... visualization ...
+# Run with overrides
+result = exp.run({"num_qubits": 3, "error_rate": 0.1})
 
-"""
-## Conclusions
+# Run parameter sweep
+results = exp.sweep({"error_rate": [0.01, 0.05, 0.1, 0.2]})
 
-Based on the results above, we observe that...
-[Document findings here]
-"""
+# Use convenience methods
+from src.experiments import sst_q1
+results = sst_q1.run_noise_sweep(noise_steps=10, max_error_rate=0.3)
 ```
 
 ## Research Documentation
 
-Each experiment should have:
+Each experiment docstring should include:
 
 1. **Research question** — What are you testing?
 2. **Hypothesis** — What do you expect to find?
-3. **Methodology** — How are you testing it?
-4. **Expected outcomes** — What would confirm/refute the hypothesis?
-5. **References** — Links to theory docs or papers
+3. **Protocol** — What states, noise, metrics?
+4. **Pass criteria** — What thresholds define success?
+5. **References** — Links to `docs/research-docs/`
 
-## Reproducibility Requirements
+## Dependencies
 
-All experiments must be reproducible:
-
-- **Explicit seeds** for random number generation
-- **Version tracking** — Document Qiskit, Python versions
-- **Config files** — Save experimental parameters
-- **Result provenance** — Use engine's built-in tracking
-- **Environment specs** — Use `requirements.txt` or `pyproject.toml`
-
-## Naming Conventions
-
-- **Scripts**: `<hypothesis>_<variant>.py` (e.g., `sst_hypothesis_q1.py`)
-- **Notebooks**: `<hypothesis>_<date>_<author>.ipynb` (e.g., `sst_q1_2025_12_02_rob.ipynb`)
-- **Results**: `results/<experiment_name>/<timestamp>/`
-
-## Integration with Engine
-
-```python
-# Good: Use high-level API
-from src.engine.api import run_experiment, run_sweep
-
-result = run_experiment(config)  # Handles everything
-
-# Acceptable: Direct runner usage for custom needs
-from src.engine.execution.runner import EngineExperimentRunner
-
-runner = EngineExperimentRunner(experiment_id="custom")
-circuit, counts = runner.run_to_counts(...)
-
-# Bad: Reimplementing engine logic
-circuit = create_state(...)
-noise = create_noise(...)
-backend = AerSimulator()
-result = backend.run(circuit).result()  # Bypasses validation, provenance
-```
-
-## Examples
-
-See canonical implementations:
-
-- `src/experiments/sst_hypothesis_q1.py` — Research hypothesis testing
-- `tests/integration/test_end_to_end.py` — Full workflow example
-- `docs/guides/getting-started/` — Tutorial for new experiments
+- `src/engine/api.py` — Execution entry points
+- `src/engine/models/` — Pydantic models for config and results

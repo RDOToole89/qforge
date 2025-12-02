@@ -1,99 +1,92 @@
-import json
-import logging
-from datetime import datetime
-from pathlib import Path
+"""
+SST Hypothesis Q1: Does entanglement topology influence decoherence pathways?
 
-import numpy as np
+This experiment tests the first operational hypothesis of the Structured Substrate
+Thesis (SST): that entanglement topology creates preferential decoherence pathways.
 
-from src.core.analysis.metrics.pathway_concentration_ratio import (
-    compute_concentration_with_gini,
-)
-from src.engine.execution.runner import EngineExperimentRunner
+Test Protocol:
+- Prepare GHZ states (global entanglement topology)
+- Apply depolarizing noise at various error rates
+- Measure structured decoherence metrics (EEC, AI, PCR)
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("SST_Experiment")
+Pass Criterion:
+- EEC > 0.3 for entangled states vs EEC ≈ 0 for product states
+- AI > 0.1 indicating deviation from uniform distribution
+- PCR > 1.5 indicating pathway concentration
+
+This provides evidence for the "River" (structured) vs "Fog" (random) phenomenon.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from src.engine.models import ExperimentConfig, ExperimentResult
+from src.experiments.base import BaseExperiment
 
 
-def run_sst_hypothesis_q1(
-    num_qubits: int = 4,
-    noise_steps: int = 20,
-    max_error_rate: float = 0.5,
-    shots: int = 4096,
-    output_dir: str = "results/sst_q1",
-):
+class SSTHypothesisQ1(BaseExperiment):
     """
-    Executes the protocol for H_Q1: Structured Decoherence Pathways.
+    SST Hypothesis Q1: Entanglement topology influences decoherence pathways.
 
-    Hypothesis:
-    Realistic quantum noise produces distributions with higher Pathway Concentration Ratio (PCR)
-    and lower Entropy than maximal ignorance models, indicating structured decoherence.
+    This is the primary SST experiment testing whether GHZ states under
+    depolarizing noise exhibit structured decoherence patterns.
+
+    Example:
+        exp = SSTHypothesisQ1()
+
+        # Single run with defaults
+        result = exp.run()
+        print(result.structured_decoherence_metrics.asymmetry_index)
+
+        # Run with overrides
+        result = exp.run({"num_qubits": 3, "error_rate": 0.1})
+
+        # Parameter sweep over error rates
+        results = exp.sweep({"error_rate": [0.01, 0.05, 0.1, 0.2]})
     """
-    runner = EngineExperimentRunner(experiment_id="sst-h-q1")
 
-    # Ensure output directory exists
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    name = "sst_q1"
+    description = "Test whether entanglement topology influences decoherence pathways"
 
-    results_data = []
-    error_rates = np.linspace(0.0, max_error_rate, noise_steps)
-
-    logger.info(f"Starting H_Q1 Experiment: GHZ-{num_qubits}, {noise_steps} steps")
-
-    for error_rate in error_rates:
-        logger.info(f"Running step: error_rate={error_rate:.3f}")
-
-        # 1. Run Experiment (GHZ + Depolarizing Noise)
-        # Note: We use 'DEPOLARIZING' as a proxy for generic environmental noise
-        # In a real hardware run, we would just measure the hardware.
-        circuit, counts = runner.run_to_counts(
-            num_qubits=num_qubits,
+    def default_config(self) -> ExperimentConfig:
+        """Default configuration for SST Q1 experiment."""
+        return ExperimentConfig(
+            num_qubits=4,
             state_type="GHZ",
-            noise_type="DEPOLARIZING",
             noise_enabled=True,
-            error_rate=error_rate,
-            shots=shots,
-            sim_mode="qasm",
+            noise_type="depolarizing",
+            error_rate=0.05,
+            shots=4096,
+            enable_research_metrics=True,
+            research_type="structured_decoherence",
         )
 
-        # 2. Compute Metrics
-        pcr, gini = compute_concentration_with_gini(counts)
+    def run_noise_sweep(
+        self,
+        noise_steps: int = 20,
+        max_error_rate: float = 0.5,
+        **overrides: Any,
+    ) -> list[ExperimentResult]:
+        """
+        Run a noise sweep experiment varying error_rate.
 
-        # Compute Entropy (manual implementation if module missing)
-        probs = np.array(list(counts.values())) / sum(counts.values())
-        entropy = -np.sum(probs * np.log2(probs + 1e-10))
+        This is the canonical SST Q1 protocol: sweep error rates from 0 to max
+        and observe how structured decoherence metrics evolve.
 
-        # 3. Store Data
-        step_result = {
-            "error_rate": float(error_rate),
-            "pcr": float(pcr),
-            "gini": float(gini),
-            "entropy": float(entropy),
-            "counts": counts,
-        }
-        results_data.append(step_result)
+        Args:
+            noise_steps: Number of error rate steps
+            max_error_rate: Maximum error rate to test
+            **overrides: Additional config overrides (e.g., num_qubits=3)
 
-    # 4. Save Results
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{output_dir}/sst_h_q1_ghz{num_qubits}_{timestamp}.json"
+        Returns:
+            List of ExperimentResult, one per error rate
+        """
+        import numpy as np
 
-    with open(filename, "w") as f:
-        json.dump(
-            {
-                "meta": {
-                    "hypothesis": "H_Q1",
-                    "num_qubits": num_qubits,
-                    "shots": shots,
-                    "noise_model": "DEPOLARIZING",
-                },
-                "data": results_data,
-            },
-            f,
-            indent=2,
-        )
-
-    logger.info(f"Experiment complete. Results saved to {filename}")
-    return filename
+        error_rates = np.linspace(0.0, max_error_rate, noise_steps).tolist()
+        return self.sweep(parameter_ranges={"error_rate": error_rates}, **overrides)
 
 
-if __name__ == "__main__":
-    run_sst_hypothesis_q1()
+# Module-level instance for convenience
+sst_q1 = SSTHypothesisQ1()
