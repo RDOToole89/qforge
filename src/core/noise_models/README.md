@@ -7,10 +7,13 @@ This framework provides a comprehensive, educational, and research-focused quant
 ## 🎯 **Research Mission**
 
 ### The Structured Decoherence Hypothesis
+
 **Central Question**: Do quantum systems exhibit structured decoherence pathways determined by environmental coupling mechanisms, rather than uniform random noise patterns?
 
 ### Experimental Strategy
+
 Different noise models test different aspects of this hypothesis:
+
 - **Depolarizing Noise**: Uniform baseline → study random pathway degradation
 - **Amplitude Damping**: Energy relaxation → study T1-limited pathway structures
 - **Phase Damping**: Pure dephasing → study coherence-loss pathway patterns
@@ -23,6 +26,7 @@ Different noise models test different aspects of this hypothesis:
 ## 🏗️ **Framework Architecture**
 
 ### LEAN Design Principles
+
 - **Single Responsibility**: Each noise model represents one environmental coupling mechanism
 - **Separation of Concerns**: Noise generation cleanly separated from pathway analysis
 - **Educational Value**: Every component teaches quantum decoherence physics
@@ -30,6 +34,7 @@ Different noise models test different aspects of this hypothesis:
 - **Engine Integration**: Clean interfaces with experiment execution engine
 
 ### Data Flow Architecture
+
 ```
 User Request → Factory → Noise.apply() → NoiseModel → Engine → PathwayAnalysis
                 ↑              ↑               ↑
@@ -43,18 +48,21 @@ User Request → Factory → Noise.apply() → NoiseModel → Engine → Pathway
 ### Core Components
 
 #### 1. `base_noise.py` - **Foundation Class**
+
 ```python
 class BaseNoise(ABC):
     """Abstract base for all quantum noise models"""
 ```
 
-**Purpose**: 
+**Purpose**:
+
 - Provides common interface for all noise types
 - Implements shared utilities (validation, logging, hardware compatibility)
 - Enforces consistent behavior across framework
 - Teaches fundamental quantum decoherence concepts
 
 **Key Methods**:
+
 - `apply()`: Abstract method each noise implements
 - `get_basic_properties()`: Common noise metadata
 - `validate_for_hardware()`: Check real device compatibility
@@ -67,18 +75,21 @@ class BaseNoise(ABC):
 ---
 
 #### 2. `noise_factory.py` - **Creation Interface**
+
 ```python
 def create_noise_model(noise_type: str, num_qubits: int, ...) -> NoiseModel
 def create_noise_model_for_hardware(noise_type: str, backend=None, ...) -> NoiseModel
 ```
 
 **Purpose**:
+
 - Implements Factory Pattern for unified noise creation
 - Provides hardware validation for real quantum devices
 - Validates inputs before noise instantiation
 - Serves as main interface between engine and noise models
 
 **Key Functions**:
+
 - `create_noise_model()`: Standard factory function
 - `create_noise_model_for_hardware()`: Hardware-aware creation
 - `create_noise_instance()`: Direct noise object creation
@@ -95,36 +106,42 @@ def create_noise_model_for_hardware(noise_type: str, backend=None, ...) -> Noise
 Each noise model implements specific environmental coupling mechanisms:
 
 ##### **`depolarizing.py` - Uniform Random Errors**
+
 - **Physics**: Random Pauli X, Y, Z errors with equal probability
 - **Research Role**: Baseline for uniform pathway degradation studies
 - **Educational Focus**: Worst-case noise, channel unitality, Pauli decomposition
 - **Hardware Origin**: High-temperature environments, multiple error sources
 
 ##### **`amplitude_damping.py` - Energy Relaxation**
+
 - **Physics**: T1 processes with spontaneous emission and thermal excitation
 - **Research Role**: Energy flow pathway analysis and T1-limited studies
 - **Educational Focus**: Non-unital channels, energy conservation, master equations
 - **Hardware Origin**: Electromagnetic coupling, finite temperature effects
 
 ##### **`phase_damping.py` - Pure Dephasing**
-- **Physics**: T2* processes with elastic environmental scattering
+
+- **Physics**: T2\* processes with elastic environmental scattering
 - **Research Role**: Coherence-loss pathway investigation without energy exchange
-- **Educational Focus**: T2* measurements, elastic coupling, coherence preservation
+- **Educational Focus**: T2\* measurements, elastic coupling, coherence preservation
 - **Hardware Origin**: Charge noise, magnetic field fluctuations
 
 ##### **`bit_flip.py` - Classical Digital Errors**
+
 - **Physics**: Random X rotations preserving computational basis structure
 - **Research Role**: Digital error pathway investigation and classical comparisons
 - **Educational Focus**: Classical error generalization, transverse coupling
 - **Hardware Origin**: Drive field errors, crosstalk, amplitude noise
 
 ##### **`phase_flip.py` - Longitudinal Coupling**
+
 - **Physics**: Random Z rotations preserving measurement statistics
 - **Research Role**: Classical measurement preservation pathway studies
 - **Educational Focus**: Longitudinal coupling, interference destruction
 - **Hardware Origin**: Magnetic flux noise, charge fluctuations
 
 ##### **`thermal_relaxation.py` - Realistic Hardware**
+
 - **Physics**: Combined T1/T2 processes with finite temperature effects
 - **Research Role**: Most realistic hardware pathway modeling
 - **Educational Focus**: Master equations, thermal equilibrium, T1/T2 relationship
@@ -176,6 +193,7 @@ Pathway Hypothesis Testing
 ## 🛠️ **Implementation Patterns**
 
 ### Consistent Interface Pattern
+
 Every noise model implements the same interface:
 
 ```python
@@ -186,24 +204,25 @@ class NoiseModel(BaseNoise):
         # Calculate derived properties
         # Initialize BaseNoise
         # Log creation with context
-        
+
     def apply(self, noise_model, gate_list, qubits_for_error=None):
         # Gate sensitivity analysis
         # Create Qiskit error channels
         # Apply to noise model
         # Log application results
-        
+
     def get_physics_description(self) -> Dict[str, str]:
         # Educational physics content
-        
+
     def get_theoretical_properties(self) -> Dict[str, Any]:
         # Quantum channel properties
-        
+
     def get_research_context(self) -> Dict[str, Any]:
         # Research applications and predictions
 ```
 
 ### Educational Documentation Pattern
+
 Every component includes comprehensive educational content:
 
 - **Module docstrings**: Physical mechanism explanation
@@ -213,6 +232,7 @@ Every component includes comprehensive educational content:
 - **Research context**: Pathway hypothesis predictions and test methods
 
 ### Physics Validation Pattern
+
 All models enforce physics constraints:
 
 - **Parameter bounds**: Probabilities ∈ [0,1], times > 0
@@ -221,6 +241,7 @@ All models enforce physics constraints:
 - **Consistency checks**: Cross-parameter validation
 
 ### Hardware Integration Pattern
+
 Consistent hardware compatibility checking:
 
 - **Device constraints**: Max qubits, supported gates, error rate limits
@@ -233,6 +254,7 @@ Consistent hardware compatibility checking:
 ## 🔗 **Framework Integration**
 
 ### Engine Integration
+
 The noise models integrate seamlessly with the experiment engine:
 
 ```python
@@ -253,6 +275,7 @@ experiment_runner.run_with_noise(circuit, noise_model)
 ```
 
 ### State Preparation Separation
+
 Clean separation between quantum state creation and noise application:
 
 - **State Preparation**: Creates ideal quantum states
@@ -261,6 +284,7 @@ Clean separation between quantum state creation and noise application:
 - **Analysis**: Studies resulting pathway patterns
 
 ### Research Metrics Integration
+
 Noise models provide metadata for pathway analysis:
 
 ```python
@@ -278,6 +302,7 @@ metrics = pathway_analyzer.compute_structured_decoherence_metrics(results)
 ## 🎓 **Educational Usage Examples**
 
 ### Basic Noise Modeling
+
 ```python
 from src.core.noise_models.noise_factory import create_noise_model
 
@@ -292,6 +317,7 @@ print(f"Origin: {physics['origin']}")
 ```
 
 ### Research Experiment Setup
+
 ```python
 from src.core.noise_models.noise_factory import create_noise_model
 from src.engine.api import run
@@ -314,6 +340,7 @@ pathway_metrics = result.structured_decoherence_metrics
 ```
 
 ### Hardware Validation
+
 ```python
 from qiskit import IBMQ
 from src.core.noise_models.noise_factory import create_noise_model_for_hardware
@@ -334,18 +361,21 @@ noise_model = create_noise_model_for_hardware(
 ## 🧪 **Research Applications**
 
 ### Pathway Hypothesis Testing
+
 1. **Baseline Studies**: Use depolarizing noise for uniform degradation baseline
 2. **Mechanism Studies**: Compare different environmental coupling types
 3. **Hardware Studies**: Use thermal relaxation for realistic device behavior
 4. **Comparative Analysis**: Study pathway differences across noise types
 
 ### Educational Progression
+
 1. **Classical Foundations**: Start with bit flip and phase flip
 2. **Quantum Channels**: Progress to depolarizing and pure dephasing
 3. **Energy Dynamics**: Study amplitude damping and thermal effects
 4. **Hardware Reality**: Complete with thermal relaxation studies
 
 ### Experimental Design
+
 - **Control Studies**: No noise vs specific noise types
 - **Parameter Sweeps**: Error rates, timescales, temperatures
 - **State Comparisons**: Different entanglement topologies
@@ -356,6 +386,7 @@ noise_model = create_noise_model_for_hardware(
 ## 🔧 **Development Guidelines**
 
 ### Adding New Noise Models
+
 1. **Inherit from BaseNoise**: Use established patterns
 2. **Physics First**: Start with physical mechanism understanding
 3. **Educational Focus**: Comprehensive documentation required
@@ -363,6 +394,7 @@ noise_model = create_noise_model_for_hardware(
 5. **Hardware Validation**: Include realistic parameter constraints
 
 ### Code Quality Standards
+
 - **Physics Accuracy**: All parameters must respect quantum constraints
 - **Educational Value**: Every component teaches quantum mechanics
 - **Research Relevance**: Clear connection to pathway hypothesis
@@ -370,6 +402,7 @@ noise_model = create_noise_model_for_hardware(
 - **Interface Consistency**: Follow established patterns exactly
 
 ### Testing Requirements
+
 - **Physics Validation**: Parameter constraint testing
 - **Interface Compliance**: BaseNoise contract fulfillment
 - **Educational Content**: Documentation completeness
@@ -393,6 +426,7 @@ noise_model = create_noise_model_for_hardware(
 ## 🚀 **Future Enhancements**
 
 ### Potential Extensions
+
 1. **Correlated Noise**: Multi-qubit environmental correlations
 2. **Non-Markovian**: Memory effects and non-exponential decay
 3. **Gate-Dependent**: Noise that depends on specific gate operations
@@ -400,6 +434,7 @@ noise_model = create_noise_model_for_hardware(
 5. **Dynamic Noise**: Time-varying environmental coupling
 
 ### Research Opportunities
+
 1. **Machine Learning**: Noise model parameter optimization
 2. **Quantum Error Correction**: Integration with error correction codes
 3. **Device Characterization**: Automated parameter extraction

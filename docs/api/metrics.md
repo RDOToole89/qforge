@@ -77,7 +77,7 @@ from src.core.analysis.metrics.temporal_pathway_stability import compute_tempora
 # Pathway rankings across different noise levels
 rankings = [
     ["000", "111", "001", "110"],  # Low noise
-    ["000", "111", "001", "110"],  # Medium noise  
+    ["000", "111", "001", "110"],  # Medium noise
     ["000", "111", "110", "001"]   # High noise
 ]
 
@@ -113,7 +113,7 @@ Asymmetry Index is based on Total Variation Distance from uniform distribution:
 
 $$AI = \frac{1}{2} \sum_i |p(x_i) - p_{uniform}|$$
 
-### Economic Inequality Measures  
+### Economic Inequality Measures
 
 Pathway Concentration Ratio uses Palma ratio from economic inequality:
 

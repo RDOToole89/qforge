@@ -123,17 +123,20 @@ qiskit-experiments/
 ### Common Issues
 
 **ImportError: No module named 'qiskit'**
+
 ```bash
 pip install qiskit>=0.45.0
 ```
 
 **ModuleNotFoundError: No module named 'src'**
+
 ```bash
 # Ensure you're in the project root and installed in editable mode
 pip install -e .
 ```
 
 **Test failures related to coverage**
+
 ```bash
 # Install coverage dependencies
 pip install pytest-cov coverage
@@ -142,18 +145,21 @@ pip install pytest-cov coverage
 ### Platform-Specific Notes
 
 #### macOS
+
 ```bash
 # May need to install Xcode command line tools
 xcode-select --install
 ```
 
 #### Windows
+
 ```bash
 # Use Windows Subsystem for Linux (WSL) for best compatibility
 # Or ensure Microsoft Visual C++ Build Tools are installed
 ```
 
 #### Linux
+
 ```bash
 # Install development headers if needed
 sudo apt-get install python3-dev

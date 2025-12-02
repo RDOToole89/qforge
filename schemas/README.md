@@ -162,7 +162,6 @@ This version is **research-ready** and **production-stable**. All five schemas h
 
 - Version **1.0 is stable** and should be used for all experiments going forward.
 - **No further schema edits** will be made unless:
-
   - A **breaking change** is required → bump to `2.0`
   - A **non-breaking enhancement** (e.g. units, null models) is added → bump to `1.1`
 

@@ -1,5 +1,7 @@
 # **Structured Substrate Thesis (SST)**
-### *A Unified View of Physics, Mind, Computation & Representation*
+
+### _A Unified View of Physics, Mind, Computation & Representation_
+
 **Draft 1 – Roibín O’Toole**
 
 ---
@@ -22,7 +24,9 @@ Across quantum mechanics (SQM), decoherence experiments, cognitive science, AI l
 # **2. Core Claims of SST**
 
 ## **2.1 There is an underlying substrate**
+
 A high-dimensional, constraint-structured manifold:
+
 - not material
 - not mystical
 - not purely observational
@@ -35,7 +39,7 @@ This is the arena where reality actually happens.
 
 ---
 
-## **2.2 Quantum mechanics is a *projection* of this substrate**
+## **2.2 Quantum mechanics is a _projection_ of this substrate**
 
 **Structured Quantum Mechanics (SQM)** provides the interpretation:
 
@@ -49,7 +53,7 @@ Decoherence is not random decay but **channelled turbulence**.
 
 ---
 
-## **2.3 Observers and models are *decoders* of the substrate**
+## **2.3 Observers and models are _decoders_ of the substrate**
 
 Brains, cells, dolphins, dogs, LLMs, and morphogenetic systems:
 
@@ -91,7 +95,7 @@ It’s **embedded structuralism**: experience as what structural traversal feels
 - Turing: no shortcut around irreducible processes
 - Wolfram: complexity emerges at the boundary of simple rules
 - Deutsch: open-ended knowledge is structural
-- *The Infinite Machine*: infinity as unfolding, not endpoint
+- _The Infinite Machine_: infinity as unfolding, not endpoint
 
 The substrate is infinite → all observers have necessarily partial projections.
 
@@ -140,7 +144,7 @@ graph TD
     Open-ended knowledge"]
     E --> E1["Observer as local slice
     Modality-limited decoding"]
-````
+```
 
 ---
 
@@ -203,19 +207,19 @@ This section merges the “reconfiguration space” view with SST.
 
 The **structured substrate** is:
 
-* a high-dimensional relational manifold
-* defined by constraints, not objects
-* evolving deterministically
-* generating classicality via boundary reconfigurations
-* sampled by observers as limited projections
+- a high-dimensional relational manifold
+- defined by constraints, not objects
+- evolving deterministically
+- generating classicality via boundary reconfigurations
+- sampled by observers as limited projections
 
 Mathematically it looks like Hilbert space, **plus**:
 
-* topology of entanglement
-* constraint networks
-* decoherence flow geometry
-* amplitude flow dynamics
-* irreducible recursive evolution
+- topology of entanglement
+- constraint networks
+- decoherence flow geometry
+- amplitude flow dynamics
+- irreducible recursive evolution
 
 Not “Hilbert as abstraction”;
 **Hilbert + structure + dynamics + topology** as the real arena.
@@ -226,22 +230,22 @@ Not “Hilbert as abstraction”;
 
 Fluid model:
 
-* Hamiltonian = riverbed
-* Wavefunction = quantum fluid
-* Gates = poles that split and redirect amplitude
-* Decoherence = turbulence / channeling
-* Error correction = dams and stabilizers
-* Measurement = basin where channels converge
-* Entanglement = coupled flow constraints across subsystems
+- Hamiltonian = riverbed
+- Wavefunction = quantum fluid
+- Gates = poles that split and redirect amplitude
+- Decoherence = turbulence / channeling
+- Error correction = dams and stabilizers
+- Measurement = basin where channels converge
+- Entanglement = coupled flow constraints across subsystems
 
 This is a **structural ontology**, not just a metaphor.
 
 Supported by:
 
-* GHZ decoherence experiments
-* structured noise pathways
-* non-uniform mutual information decay
-* topological quantum matter (Majoranas, anyons)
+- GHZ decoherence experiments
+- structured noise pathways
+- non-uniform mutual information decay
+- topological quantum matter (Majoranas, anyons)
 
 ---
 
@@ -254,17 +258,17 @@ Key empirical intuition:
 
 Patterns seen:
 
-* Biases in bitstring frequencies
-* Non-maximal entropy plateaus
-* Persistent cross-qubit correlations
-* Divergence from naive i.i.d. noise models
-* Robustness of certain classical configurations
+- Biases in bitstring frequencies
+- Non-maximal entropy plateaus
+- Persistent cross-qubit correlations
+- Divergence from naive i.i.d. noise models
+- Robustness of certain classical configurations
 
 Thus:
 
-* “collapse” ≈ local loss of access to global constraints
-* classicality ≈ projection onto stable submanifolds
-* noise ≈ structured reconfiguration, not pure chaos
+- “collapse” ≈ local loss of access to global constraints
+- classicality ≈ projection onto stable submanifolds
+- noise ≈ structured reconfiguration, not pure chaos
 
 ---
 
@@ -272,12 +276,12 @@ Thus:
 
 In reconfiguration space:
 
-* “state at t” = one configuration
-* “dynamics” = reconfiguration rules
-* “laws” = stable transformation constraints
-* “measurement” = selecting a compatible configuration under boundary conditions
-* “irreversibility” = information dispersion across constraints
-* “randomness” = observer ignorance of full structure
+- “state at t” = one configuration
+- “dynamics” = reconfiguration rules
+- “laws” = stable transformation constraints
+- “measurement” = selecting a compatible configuration under boundary conditions
+- “irreversibility” = information dispersion across constraints
+- “randomness” = observer ignorance of full structure
 
 Time is a **bookkeeping axis** emergent from these reconfigurations, not a primitive variable of the substrate.
 
@@ -289,22 +293,22 @@ Particles are not fundamental things.
 
 They are:
 
-* localized stable patterns
-* whirlpools in a relational field
-* emergent boundary-locked configurations
-* manifestations of deeper constraint structure
+- localized stable patterns
+- whirlpools in a relational field
+- emergent boundary-locked configurations
+- manifestations of deeper constraint structure
 
 Reality is **relation-based**, not object-based.
 
 We see this in:
 
-* configuration-space wavefunctions
-* entanglement
-* topological modes (Majoranas, anyons)
-* LLM representational geometry
-* morphogenesis (bioelectric attractors)
-* phenomenology of awareness
-* recursion in computation and knowledge
+- configuration-space wavefunctions
+- entanglement
+- topological modes (Majoranas, anyons)
+- LLM representational geometry
+- morphogenesis (bioelectric attractors)
+- phenomenology of awareness
+- recursion in computation and knowledge
 
 ---
 
@@ -312,18 +316,18 @@ We see this in:
 
 LLMs, brains, cells, and evolutionary processes all converge toward:
 
-* low-dimensional manifolds
-* stable invariants
-* cross-platform representational similarity
-* geometry-encoded content
+- low-dimensional manifolds
+- stable invariants
+- cross-platform representational similarity
+- geometry-encoded content
 
 This aligns with:
 
-* PRH (Platonic Representation Hypothesis)
-* geometrization of learning
-* Levin’s morphogenetic landscapes
-* category-theoretic ideas (functors between domains)
-* convergent architecture in AI (transformers, embeddings)
+- PRH (Platonic Representation Hypothesis)
+- geometrization of learning
+- Levin’s morphogenetic landscapes
+- category-theoretic ideas (functors between domains)
+- convergent architecture in AI (transformers, embeddings)
 
 Forms are not “in the mind”.
 They are **stable attractors in the structured substrate**.
@@ -336,40 +340,40 @@ Representational systems just learn to **land on them**.
 
 Meditation and phenomenology contribute the experiential layer:
 
-* No-self = recognition that “self” is a model, not an entity
-* Awareness = field-like, prior to specific content
-* Experience = structured boundary in the substrate
-* Thought = recursive reconfiguration of that structure
-* Consciousness = what it feels like when a decoder traverses the substrate from within
-* Self-model = constraint-stabilized narrative loop
+- No-self = recognition that “self” is a model, not an entity
+- Awareness = field-like, prior to specific content
+- Experience = structured boundary in the substrate
+- Thought = recursive reconfiguration of that structure
+- Consciousness = what it feels like when a decoder traverses the substrate from within
+- Self-model = constraint-stabilized narrative loop
 
 The structure of subjective experience rhymes with:
 
-* decoherence boundary formation
-* relationalism
-* recursive knowledge generation
-* graph traversal (over simple loops)
-* phenomenology of time as change, not as absolute axis
+- decoherence boundary formation
+- relationalism
+- recursive knowledge generation
+- graph traversal (over simple loops)
+- phenomenology of time as change, not as absolute axis
 
 Consciousness is not fundamental.
 **Structure is fundamental.**
-Consciousness is what *structure-with-a-self-model* feels like.
+Consciousness is what _structure-with-a-self-model_ feels like.
 
 ---
 
 # **8. Recursion, Gödel, Irreducibility, Infinity**
 
-*The Infinite Machine* and related notes form the computation layer:
+_The Infinite Machine_ and related notes form the computation layer:
 
-* Gödel: embedded systems cannot see whole structure from within
-* Turing: some processes are irreducible; no shortcut exists
-* Deutsch: explanations are open-ended
-* Wolfram: complexity from simple rules at the boundary
-* Hofstadter: strange loops and self-reference
-* Physics: recursive evolution in reconfiguration space
-* Awareness: recursion in thought and self-modeling
-* LLMs: structural inference without explicit enumeration
-* Infinity: an ongoing process, not a finished object
+- Gödel: embedded systems cannot see whole structure from within
+- Turing: some processes are irreducible; no shortcut exists
+- Deutsch: explanations are open-ended
+- Wolfram: complexity from simple rules at the boundary
+- Hofstadter: strange loops and self-reference
+- Physics: recursive evolution in reconfiguration space
+- Awareness: recursion in thought and self-modeling
+- LLMs: structural inference without explicit enumeration
+- Infinity: an ongoing process, not a finished object
 
 Infinity is the **unboundedness of structural unfolding**, not a number.
 
@@ -415,20 +419,19 @@ I’ll name them so you can reference them later (H_Q1 etc).
 
 > When a maximally entangled GHZ state is exposed to realistic noise, decoherence does not spread probability mass uniformly through the computational basis. Instead, it follows a small number of **preferred structural pathways** in reconfiguration space, producing:
 >
-> * non-maximal entropy plateaus,
-> * persistent multi-qubit correlations,
-> * and a bitstring distribution that is better explained by a *low-dimensional pathway model* than by simple i.i.d. noise.
+> - non-maximal entropy plateaus,
+> - persistent multi-qubit correlations,
+> - and a bitstring distribution that is better explained by a _low-dimensional pathway model_ than by simple i.i.d. noise.
 
 **System**
 
-* (n = 3) or (n = 4) qubit GHZ state:
-  (|\text{GHZ}_n\rangle = (|0...0\rangle + |1...1\rangle)/\sqrt{2})
-* Noise models you can control in your framework:
-
-  * local depolarizing
-  * local dephasing
-  * amplitude damping
-  * correlated noise (if supported)
+- (n = 3) or (n = 4) qubit GHZ state:
+  (|\text{GHZ}\_n\rangle = (|0...0\rangle + |1...1\rangle)/\sqrt{2})
+- Noise models you can control in your framework:
+  - local depolarizing
+  - local dephasing
+  - amplitude damping
+  - correlated noise (if supported)
 
 **Protocol (simulation or hardware)**
 
@@ -436,28 +439,26 @@ I’ll name them so you can reference them later (H_Q1 etc).
 2. Apply a parameterized noise channel (\Lambda(p)) for various noise strengths (p).
 3. Measure in the computational basis, collecting (N) shots per configuration (e.g. 4096+).
 4. For each noise setting, compute:
-
-   * bitstring frequencies (P(\mathbf{x}))
-   * Shannon entropy (H(P))
-   * pairwise mutual information (I(q_i : q_j)) and possibly multi-information
-   * KL divergence (D_{\text{KL}}(P | P_{\text{model}})) for various baseline models.
+   - bitstring frequencies (P(\mathbf{x}))
+   - Shannon entropy (H(P))
+   - pairwise mutual information (I(q_i : q_j)) and possibly multi-information
+   - KL divergence (D*{\text{KL}}(P | P*{\text{model}})) for various baseline models.
 
 **Baseline models**
 
-* **M1: Ideal GHZ + i.i.d. bit-flip noise**
-  Start from ideal GHZ outcomes ({000..., 111...}) and then apply independent classical bit flips with probability (p_{\text{eff}}). This yields a binomial-like distribution over Hamming weights.
-* **M2: Maximal ignorance model**
+- **M1: Ideal GHZ + i.i.d. bit-flip noise**
+  Start from ideal GHZ outcomes ({000..., 111...}) and then apply independent classical bit flips with probability (p\_{\text{eff}}). This yields a binomial-like distribution over Hamming weights.
+- **M2: Maximal ignorance model**
   Uniform distribution over all (2^n) bitstrings (max entropy).
-* **M3: Generic diagonal Lindblad model**
+- **M3: Generic diagonal Lindblad model**
   A simple Markov chain on basis states with no structured couplings.
 
 **Prediction**
 
-* Realistic quantum noise (even in simulation with physically motivated channels) will produce distributions that:
-
-  * have **significantly lower entropy** than M2 at comparable effective error rates;
-  * maintain **non-zero mutual information** (I(q_i : q_j)) beyond what M1 predicts;
-  * are better fit by a **low-rank “pathway model”** (e.g. a small set of dominant transitions like
+- Realistic quantum noise (even in simulation with physically motivated channels) will produce distributions that:
+  - have **significantly lower entropy** than M2 at comparable effective error rates;
+  - maintain **non-zero mutual information** (I(q_i : q_j)) beyond what M1 predicts;
+  - are better fit by a **low-rank “pathway model”** (e.g. a small set of dominant transitions like
     (|000\rangle \leftrightarrow |111\rangle \rightarrow {\text{few specific leakage states}}))
     than by fully spread-out noise.
 
@@ -469,9 +470,9 @@ In other words:
 
 H_Q1 is falsified if, for increasing noise:
 
-* measured distributions become well-approximated by M1 or M2 (high entropy, weak correlations);
-* mutual information decays to zero as soon as the overall error rate is moderate;
-* no small set of “pathway transitions” explain most of the probability mass.
+- measured distributions become well-approximated by M1 or M2 (high entropy, weak correlations);
+- mutual information decays to zero as soon as the overall error rate is moderate;
+- no small set of “pathway transitions” explain most of the probability mass.
 
 ---
 
@@ -485,25 +486,24 @@ This sharpens H_Q1 by directly contrasting **structured quantum noise** with del
 
 **Protocol**
 
-1. Use the same GHZ + noise setup as in H_Q1 to obtain a “real” noisy distribution (P_{\text{real}}).
-2. From the same ideal GHZ state, generate a “synthetic” distribution (P_{\text{synthetic}}) by:
+1. Use the same GHZ + noise setup as in H*Q1 to obtain a “real” noisy distribution (P*{\text{real}}).
+2. From the same ideal GHZ state, generate a “synthetic” distribution (P\_{\text{synthetic}}) by:
+   - sampling ideal GHZ outcomes;
+   - then applying independent classical bit-flips or bit-phase flips with tuned error rates (p*i) so that e.g. marginal error rates match those of (P*{\text{real}}).
 
-   * sampling ideal GHZ outcomes;
-   * then applying independent classical bit-flips or bit-phase flips with tuned error rates (p_i) so that e.g. marginal error rates match those of (P_{\text{real}}).
 3. Compare:
-
-   * (H(P_{\text{real}})) vs (H(P_{\text{synthetic}}))
-   * (I(q_i : q_j)) for both
-   * KL divergence (D_{\text{KL}}(P_{\text{real}} | P_{\text{synthetic}}))
-   * higher-order correlation structure (e.g. multi-information).
+   - (H(P*{\text{real}})) vs (H(P*{\text{synthetic}}))
+   - (I(q_i : q_j)) for both
+   - KL divergence (D*{\text{KL}}(P*{\text{real}} | P\_{\text{synthetic}}))
+   - higher-order correlation structure (e.g. multi-information).
 
 **Prediction**
 
 Even with matching single-qubit error rates:
 
-* (P_{\text{real}}) will show **richer correlation structure** (non-trivial multi-qubit couplings).
-* (P_{\text{synthetic}}) will look like a smeared-out, nearly factorized noise model.
-* The KL divergence will remain significantly non-zero over a range of noise strengths.
+- (P\_{\text{real}}) will show **richer correlation structure** (non-trivial multi-qubit couplings).
+- (P\_{\text{synthetic}}) will look like a smeared-out, nearly factorized noise model.
+- The KL divergence will remain significantly non-zero over a range of noise strengths.
 
 Operationally:
 
@@ -521,38 +521,37 @@ This tests the idea that **subsystems can act as “dye tracers” of reconfigur
 
 **System**
 
-* Main system: GHZ_n or some other entangled state on (n) qubits.
-* Sensor(s): 1–2 additional qubits entangled with the main system in a controlled way.
+- Main system: GHZ_n or some other entangled state on (n) qubits.
+- Sensor(s): 1–2 additional qubits entangled with the main system in a controlled way.
 
 **Example construction**
 
-* Prepare GHZ_3 on qubits 0–2.
-* Use a controlled operation to entangle qubit 3 (sensor) with some parity or logical property of the main system.
-* Optionally add qubit 4 as second sensor with a different entangling map.
+- Prepare GHZ_3 on qubits 0–2.
+- Use a controlled operation to entangle qubit 3 (sensor) with some parity or logical property of the main system.
+- Optionally add qubit 4 as second sensor with a different entangling map.
 
 **Protocol**
 
 1. Prepare main+sensor entangled state.
 2. Let the entire system evolve under noise channel (\Lambda(p)) for different (p) or times.
 3. Measure:
+   - sometimes only the sensors,
+   - sometimes the full system,
+   - or condition on sensor outcomes and examine main system distributions.
 
-   * sometimes only the sensors,
-   * sometimes the full system,
-   * or condition on sensor outcomes and examine main system distributions.
 4. Compute:
-
-   * (I(\text{sensor} : \text{main})) as a function of noise strength
-   * conditional distributions of the main system given sensor outcomes
-   * whether particular sensor outcomes correlate with particular decoherence pathways in the main system.
+   - (I(\text{sensor} : \text{main})) as a function of noise strength
+   - conditional distributions of the main system given sensor outcomes
+   - whether particular sensor outcomes correlate with particular decoherence pathways in the main system.
 
 **Prediction**
 
-* For a well-designed sensor entangling map, specific sensor outcomes will be **biased toward particular main-system pathways** (e.g. certain leakage states).
-* This will let you infer something like “when the sensor is 1, the main system is more likely to have followed pathway A than B”.
+- For a well-designed sensor entangling map, specific sensor outcomes will be **biased toward particular main-system pathways** (e.g. certain leakage states).
+- This will let you infer something like “when the sensor is 1, the main system is more likely to have followed pathway A than B”.
 
 In other words:
 
-> There exists a class of sensor couplings that make mid-stream reconfiguration structure *operationally accessible* without full tomography.
+> There exists a class of sensor couplings that make mid-stream reconfiguration structure _operationally accessible_ without full tomography.
 
 ---
 
@@ -566,14 +565,14 @@ This one is more conceptual / data-sciencey, but still testable in principle.
 
 For example:
 
-* Train a model on trajectories of a simple physical system (e.g. harmonic oscillator, Ising model snapshots, or even your own GHZ measurement distributions under varying noise).
-* Examine the latent embeddings (e.g. of states, samples, or time steps).
-* Check whether their geometry reflects true parameters (frequency, coupling strength, noise level, etc.)
+- Train a model on trajectories of a simple physical system (e.g. harmonic oscillator, Ising model snapshots, or even your own GHZ measurement distributions under varying noise).
+- Examine the latent embeddings (e.g. of states, samples, or time steps).
+- Check whether their geometry reflects true parameters (frequency, coupling strength, noise level, etc.)
 
 **Prediction**
 
-* Latent dimensions will correlate in a smooth, often nearly-linear way with **true underlying structural parameters** of the data-generating process.
-* Different architectures or modalities (e.g. LLM vs autoencoder) will learn **similar latent manifolds**, supporting the PRH idea of convergent Platonic representation.
+- Latent dimensions will correlate in a smooth, often nearly-linear way with **true underlying structural parameters** of the data-generating process.
+- Different architectures or modalities (e.g. LLM vs autoencoder) will learn **similar latent manifolds**, supporting the PRH idea of convergent Platonic representation.
 
 This doesn’t prove SST, but it supports the claim:
 
@@ -592,7 +591,7 @@ Using my refactored Qiskit experiment framework (`refactor/simplify-codebase`), 
 
 - Target state:
   \[
-    |\text{GHZ}_4\rangle = \frac{|0000\rangle + |1111\rangle}{\sqrt{2}}
+  |\text{GHZ}\_4\rangle = \frac{|0000\rangle + |1111\rangle}{\sqrt{2}}
   \]
 - Noise models:
   - Depolarizing channel (unstructured, isotropic in the computational basis),
@@ -678,7 +677,7 @@ H_Q1 can now be sharpened:
 The **Fog vs River** dichotomy is the first concrete empirical signature of the **Structured Substrate Thesis**:
 
 - Fog = noise that effectively ignores the geometry of the substrate (isotropic scattering),
-- River = noise that respects and *traces* the geometry (directed flow along constraint-defined channels).
+- River = noise that respects and _traces_ the geometry (directed flow along constraint-defined channels).
 
 Next steps (H_Q2, H_Q3):
 
@@ -692,14 +691,14 @@ Next steps (H_Q2, H_Q3):
 
 These are broader directions, some of which connect directly to H_Q1–H_Q3 and H_R1.
 
-* Map structured decoherence channels empirically (GHZ_n, cluster states, W states).
-* Compare real-noise vs synthetic random noise (H_Q2).
-* Build sensor-qubit subspaces to detect mid-stream reconfiguration (H_Q3).
-* Study topological modes (Majoranas) as stable configurations in the substrate.
-* Formalize LLM latent-space invariants (H_R1, PRH alignment).
-* Explore recursive observer models (phenomenology → representation → physics).
-* Build computational simulations of reconfiguration flow (fluid-dynamics analogues).
-* Develop mathematical formalization of the substrate (category theory / differential geometry / topological QFT).
+- Map structured decoherence channels empirically (GHZ_n, cluster states, W states).
+- Compare real-noise vs synthetic random noise (H_Q2).
+- Build sensor-qubit subspaces to detect mid-stream reconfiguration (H_Q3).
+- Study topological modes (Majoranas) as stable configurations in the substrate.
+- Formalize LLM latent-space invariants (H_R1, PRH alignment).
+- Explore recursive observer models (phenomenology → representation → physics).
+- Build computational simulations of reconfiguration flow (fluid-dynamics analogues).
+- Develop mathematical formalization of the substrate (category theory / differential geometry / topological QFT).
 
 ---
 

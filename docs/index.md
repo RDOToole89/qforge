@@ -17,15 +17,18 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 ## Core Research Metrics
 
 ### Structure Detection
+
 - **Asymmetry Index (AI)**: Primary screening metric for structured vs random decoherence
 - **Pathway Concentration Ratio (PCR)**: Quantifies concentration in preferred pathways
 - **Entanglement-Error Correlation (EEC)**: Correlation between topology and error patterns
 
 ### Temporal & Complexity Analysis
+
 - **Temporal Pathway Stability (TPS)**: Consistency across experimental conditions
 - **Complexity Emergence Score (CES)**: Critical threshold detection for structure emergence
 
 ### Information Theory
+
 - **Total Correlation**: Multivariate mutual information
 - **Structure Score**: Jensen-Shannon divergence from uniform distribution
 - **Concentration Index**: Economic inequality measures for pathway preferences

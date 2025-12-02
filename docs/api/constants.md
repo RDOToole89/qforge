@@ -60,7 +60,7 @@ print(f"Mass threshold: {TOPK_MASS_TARGET}")
 The framework uses Jeffreys prior smoothing with α = 0.5 to ensure:
 
 - **Full Support**: All 2^n possible outcomes have non-zero probability
-- **Bias Reduction**: Eliminates bias when many outcomes are unobserved  
+- **Bias Reduction**: Eliminates bias when many outcomes are unobserved
 - **Deterministic Ordering**: Lexicographic ordering prevents run-to-run drift
 
 ### Confidence Intervals

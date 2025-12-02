@@ -73,7 +73,6 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 - Controls: product states, random classical strings.
 - Null model: independent per-qubit error rates + readout confusions.
 - Tests:
-
   - Bootstrap confidence intervals.
   - JSD vs null model.
   - Reproducibility across ≥3 seeds.
@@ -106,33 +105,27 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 ### 4. Metrics
 
 1. **Structure Score (SS)**
-
    - JSD between observed counts and null.
    - SS ≈ 0 → random, SS > 0.1 → structure.
    - Bootstrapped CI.
 
 2. **Entanglement–Error Correlation (EEC)**
-
    - Compute qubit-pair mutual information from counts.
    - Compare with entanglement adjacency.
    - EEC = Spearman( MI , adjacency ).
    - > 0.3 = moderate correlation.
 
 3. **Pathway Persistence (PP)**
-
    - Rank correlation of top-k error strings across runs.
    - PP > 0.5 = stable structure.
 
 4. **Concentration Index (CI)**
-
    - Gini coefficient over error string distribution.
 
 5. **Total Correlation (TC)**
-
    - Difference between joint entropy and sum of marginals.
 
 6. **Complexity Emergence Score (CES)**
-
    - Track SS vs qubit count.
    - Detect inflection with logistic fit.
 
@@ -149,7 +142,6 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 - **Data type:** QASM simulation shots + counts only (no density matrices yet).
 - **Pipeline:** analysis decoupled from Qiskit; pure statistics layer.
 - **Data structures:**
-
   - `ExperimentSpec`: state, noise, qubits, runs, seed.
   - `ResultSpec`: counts, metrics, null fit, CI.
 
@@ -164,7 +156,6 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 - Multiple-comparison correction for thresholds.
 - Cross-check with Qiskit Aer and Cirq.
 - **Falsification scenarios:**
-
   - SS ≈ 0 across configs.
   - No correlation with entanglement adjacency.
   - Inconsistent patterns across seeds.
@@ -195,7 +186,6 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 **Primary indicator**
 
 - **EEC** (Entanglement-Error Correlation): correlation between the **topology weights** and the **observed error correlation (MI) matrix**.
-
   - **+ and significant** ⇒ errors align with entanglement bonds (supports hypothesis)
   - **\~0** ⇒ errors look topology-independent (falsifies or “no evidence”)
   - **–** ⇒ anti-alignment (interesting counter-evidence)
@@ -203,12 +193,10 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 **Secondary indicators**
 
 - **PCR** (Pathway Concentration Ratio): are a few pathways dominating?
-
   - **> 2** moderate concentration; **> 5** high. Structure tends to increase PCR.
 
 - **AI** (Asymmetry Index): non-uniformity of outcomes. Big AI supports “something structured,” but by itself is nonspecific.
 - **TPS** (Temporal Pathway Stability): do pathway rankings persist across conditions/time?
-
   - **≥ 0.7** under sweeps ⇒ persistent structure, not flukes.
 
 - **TC** (Total Correlation): global multi-information. Higher TC on structured runs vs matched nulls supports coordination among qubits.
@@ -267,26 +255,21 @@ Entanglement **binds degrees of freedom** between qubits. Under noise, these bin
 # Minimal workflow (step-by-step)
 
 1. **Data hygiene**
-
    - Confirm **bit order/qubit index mapping**. Log one example mapping every run.
    - Fill **missing outcomes with zero** counts (no “others” buckets in production).
    - If available, apply basic **measurement error mitigation** or subtract per-qubit readout bias.
 
 2. **Compute metrics** on each run:
-
    - EEC (+ p-value & CI), PCR, AI, TPS (if you have ≥2–3 conditions), TC, CES (if multiple n).
 
 3. **Significance testing**
-
    - Keep bootstrap CIs (already in your stack).
    - Add **permutation p-value** for EEC: shuffle the topology weights vs. MI matrix 1–5k times; p = fraction ≥ observed correlation.
 
 4. **Multiple comparisons**
-
    - If testing many states/sweeps, control FDR (Benjamini–Hochberg) on EEC p-values.
 
 5. **Decision rules**
-
    - **Support**: Preserving > broken > null; EEC consistently positive and significant; PCR high; TPS stable; TC elevated; CES increases with n.
    - **Falsify**: EEC \~ 0 on preserving (and nulls) across layouts/sweeps; PCR \~ 1–2; TPS low; TC similar to nulls; CES flat.
 

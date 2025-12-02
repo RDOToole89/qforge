@@ -11,6 +11,7 @@ This is a **research-grade quantum experiment framework** built on Qiskit for co
 **Central Hypothesis**: Quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns. The framework implements the **Spring Network Model** where entanglement bonds act as springs and decoherence flows along tension patterns.
 
 **Complete Research Metrics Suite (v1.0 Schema Compliant):**
+
 - **AI (Asymmetry Index)**: TVD from uniform distribution with full 2^n support
 - **PCR (Pathway Concentration Ratio)**: Concentration in top vs bottom pathway quartiles
 - **EEC (Entanglement-Error Correlation)**: Pearson correlation between topology and MI matrices
@@ -25,6 +26,7 @@ This is a **research-grade quantum experiment framework** built on Qiskit for co
 The framework is built around a clean, decoupled engine API:
 
 ### Core Components
+
 - **Engine API** (`src/engine/api.py`) - Clean entry points: `run()` and `sweep()`
 - **Pydantic Models** (`src/engine/models/`) - Type-safe configuration and results
 - **Core Logic** (`src/core/`) - Quantum mechanics and analysis
@@ -33,6 +35,7 @@ The framework is built around a clean, decoupled engine API:
 ### Usage Examples
 
 **Basic Research Experiment:**
+
 ```python
 from src.engine.api import run
 from src.engine.models import ExperimentConfig
@@ -58,6 +61,7 @@ print(f"Topology Correlation: {metrics.entanglement_error_correlation:.4f}")
 ```
 
 **Direct Analysis Pipeline:**
+
 ```python
 from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
 
@@ -72,6 +76,7 @@ print(f"Entanglement Correlation: {schema_result['entanglement_error_correlation
 ## Development Commands
 
 ### Core Analysis Testing
+
 ```bash
 # Test individual metrics
 python -c "
@@ -90,6 +95,7 @@ print(f'Metrics computed: {len(result) - 1}')
 ```
 
 ### Research Validation
+
 ```bash
 # Test engine integration with hardened metrics
 python -c "
@@ -116,6 +122,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ## File Organization
 
 ### Analysis Framework (Research-Grade, December 2024)
+
 - `src/core/analysis/metrics/` - **Individual metric implementations**
   - `asymmetry_index.py` - Fast closed-form TVD with educational documentation
   - `complexity_emergence_score.py` - Logistic emergence fitting with AIC model selection
@@ -139,16 +146,19 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - All thresholds, parameters, and validation functions
 
 ### Engine (Primary Interface)
+
 - `src/engine/api.py` - Main entry points: `run()`, `sweep()`
 - `src/engine/models/` - Pydantic models (config, results, research metrics)
 - `src/engine/storage.py` - Deterministic result storage
 
 ### Core Quantum Mechanics
+
 - `src/core/experiment_runner.py` - Quantum circuit execution
 - `src/core/noise_factory.py` - Physics-compliant noise models
 - `src/core/state_factory.py` - Quantum state preparation
 
 ### State Preparation (Educational Excellence)
+
 - `src/core/state_preparation/` - **PRODUCTION-READY**
   - Complete educational framework with 6 state types
   - Hardware compatibility and validation
@@ -159,6 +169,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### ✅ **MAJOR ACHIEVEMENT: Research-Grade Analysis Framework Complete**
 
 **Framework Hardening (December 2024)**
+
 - **Mathematical Rigor**: Full-support Jeffreys smoothing (K = 2^n) throughout all metrics
 - **Deterministic Behavior**: Canonical lexicographic ordering prevents run-to-run drift
 - **Type Safety**: Comprehensive NumPy typing with `NDArray[np.float64]`
@@ -167,6 +178,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Schema Compliance**: Complete v1.0 schema support with robust validation
 
 **Individual Metric Excellence**
+
 - **Asymmetry Index**: Fast closed-form TVD computation avoiding 2^n enumeration when possible
 - **Complexity Emergence**: Sophisticated logistic regression with AIC model selection
 - **Entanglement Correlation**: Multi-topology support (GHZ, W, Bell, Cluster) with statistical validation
@@ -174,6 +186,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Schema Bridge**: Robust conversion between MetricResult and v1.0 schema with alias support
 
 **Quality Assurance**
+
 - **Comprehensive Testing**: All metrics pass rigorous smoke tests
 - **Mathematical Validation**: Property verification functions for each metric
 - **Educational Documentation**: Research-grade documentation with physics interpretations
@@ -182,6 +195,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### 🎯 **Current Architecture Status**
 
 **Analysis Framework (`src/core/analysis/`)** - ✅ **RESEARCH-GRADE & COMPLETE**
+
 - **8 Metrics**: All structured decoherence metrics implemented to publication standards
 - **Mathematical Foundation**: Rigorous information theory, statistics, and quantum mechanics
 - **Schema Compliance**: Full v1.0 compatibility with validation
@@ -189,11 +203,13 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Educational Value**: Comprehensive documentation and examples
 
 **State Preparation (`src/core/state_preparation/`)** - ✅ **PRODUCTION-READY**
+
 - **Educational Framework**: Teaches quantum mechanics while enabling research
 - **Hardware Integration**: Real quantum device compatibility
 - **6 State Types**: GHZ, Bell, W, Cluster, Superposition, Custom
 
 **Engine Integration** - ✅ **STABLE**
+
 - Clean API through `run()` and `sweep()` functions
 - Type-safe Pydantic models for all data structures
 - Automated structured decoherence metrics computation
@@ -201,12 +217,14 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### 🚀 **Ready for Next Phase**
 
 **High-Priority Next Steps:**
+
 1. **H_Q2 Experiment**: Test "Pathway Persistence" in deeper circuits.
 2. **H_Q3 Experiment**: Implement sensor-qubit subspaces.
 3. **Research Documentation**: Expand on the "Fog vs River" findings.
 4. **Performance Benchmarking**: Profile large-scale studies and optimize bottlenecks.
 
 **Research Readiness:**
+
 - ✅ **Publication-Ready Metrics**: All 8 metrics implemented to research standards
 - ✅ **Reproducible Results**: Deterministic behavior with full provenance tracking
 - ✅ **Schema Compliance**: v1.0 compatibility for downstream analysis pipelines

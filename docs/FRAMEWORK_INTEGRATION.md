@@ -54,12 +54,12 @@ config = ExperimentConfig(
     # State Preparation Parameters
     num_qubits=3,
     state_type="GHZ",                    # ← State Prep Framework
-    
-    # Noise Model Parameters  
+
+    # Noise Model Parameters
     noise_enabled=True,
     noise_type="amplitude_damping",      # ← Noise Models Framework
     noise_params={"t1": 100e-6, "temperature": 0.015},
-    
+
     # Engine Parameters
     shots=1024,
     enable_research_metrics=True,        # ← Engine + Analysis
@@ -142,7 +142,7 @@ src/
 │   │
 │   ├── noise_models/         # → Environmental decoherence
 │   │   ├── README.md         # → Educational masterpiece docs
-│   │   ├── base_noise.py     # → Abstract foundation class  
+│   │   ├── base_noise.py     # → Abstract foundation class
 │   │   ├── noise_factory.py  # → Factory pattern implementation
 │   │   ├── depolarizing.py   # → Uniform random errors
 │   │   ├── amplitude_damping.py # → Energy relaxation (T1)
@@ -188,13 +188,13 @@ src/
 
 The framework enables systematic study of all state-noise combinations:
 
-| State Type | Research Focus | Compatible Noise Models | Expected Pathway Behavior |
-|------------|---------------|-------------------------|---------------------------|
-| **GHZ** | Global entanglement pathways | All models | Complex network effects |
-| **Bell** | Two-qubit pathway fundamentals | All models | Simple correlation patterns |
-| **W** | Symmetric pathway emergence | Depolarizing, Phase models | Asymmetric breakdown |
-| **Cluster** | Network topology effects | All models | Local correlation patterns |
-| **Superposition** | Non-entangled controls | All models | Random decoherence baseline |
+| State Type        | Research Focus                 | Compatible Noise Models    | Expected Pathway Behavior   |
+| ----------------- | ------------------------------ | -------------------------- | --------------------------- |
+| **GHZ**           | Global entanglement pathways   | All models                 | Complex network effects     |
+| **Bell**          | Two-qubit pathway fundamentals | All models                 | Simple correlation patterns |
+| **W**             | Symmetric pathway emergence    | Depolarizing, Phase models | Asymmetric breakdown        |
+| **Cluster**       | Network topology effects       | All models                 | Local correlation patterns  |
+| **Superposition** | Non-entangled controls         | All models                 | Random decoherence baseline |
 
 ### 2. **Physics Parameter Exploration**
 
@@ -209,8 +209,8 @@ manifest = SweepManifest(
     parameter_ranges={
         # State parameters
         "num_qubits": [2, 3, 4, 5],
-        
-        # Noise parameters  
+
+        # Noise parameters
         "error_rate": [0.0, 0.01, 0.05, 0.1],
         "t1": [50e-6, 100e-6, 200e-6],
         "temperature": [0.010, 0.015, 0.020]
@@ -260,11 +260,11 @@ class ExperimentConfig:
     # State preparation validation
     state_type: str = Field(..., enum=get_available_states())
     num_qubits: int = Field(..., ge=1, le=20)
-    
-    # Noise model validation  
+
+    # Noise model validation
     noise_type: str = Field(..., enum=get_available_noise_types())
     noise_params: Optional[Dict] = Field(default_factory=dict)
-    
+
     # Cross-validation
     @validator('noise_params')
     def validate_noise_compatibility(cls, v, values):
@@ -281,20 +281,20 @@ class ExperimentRunner:
         # 1. Validate circuit compatibility
         if not self._validate_circuit_noise_compatibility(circuit, noise_model):
             raise ValueError("Circuit incompatible with noise model")
-            
+
         # 2. Optimize simulation parameters
         sim_params = self._optimize_simulation_params(circuit, noise_model)
-        
+
         # 3. Execute with full provenance tracking
         result = self._execute_simulation(circuit, noise_model, sim_params)
-        
+
         # 4. Preserve research context
         result.metadata.update({
             'state_context': circuit.metadata,
             'noise_context': noise_model.metadata,
             'execution_context': sim_params
         })
-        
+
         return result
 ```
 
@@ -307,7 +307,7 @@ class StructuredDecoherenceAnalyzer:
         # Extract context from both frameworks
         state_context = experiment_result.state_metadata
         noise_context = experiment_result.noise_metadata
-        
+
         # Compute context-aware metrics
         metrics = self._compute_metrics(
             experiment_result.measurement_data,
@@ -315,7 +315,7 @@ class StructuredDecoherenceAnalyzer:
             decoherence_mechanism=noise_context['mechanism'],
             expected_pathways=noise_context['research_predictions']
         )
-        
+
         return StructuredDecoherenceMetrics(**metrics)
 ```
 
@@ -328,7 +328,9 @@ class StructuredDecoherenceAnalyzer:
 ```json
 {
   "experiment_metadata": {
-    "config": { /* Complete experiment configuration */ },
+    "config": {
+      /* Complete experiment configuration */
+    },
     "timestamp": "2024-01-15T10:30:00Z",
     "framework_version": "1.0.0"
   },
@@ -336,18 +338,30 @@ class StructuredDecoherenceAnalyzer:
     "state_type": "GHZ",
     "num_qubits": 3,
     "topology": "global_entanglement",
-    "educational_context": { /* State physics description */ },
-    "research_context": { /* Pathway predictions */ }
+    "educational_context": {
+      /* State physics description */
+    },
+    "research_context": {
+      /* Pathway predictions */
+    }
   },
   "noise_model": {
-    "noise_type": "AMPLITUDE_DAMPING", 
-    "parameters": {"t1": 100e-6, "temperature": 0.015},
-    "physics_description": { /* Noise mechanism details */ },
-    "research_predictions": { /* Expected pathway behavior */ }
+    "noise_type": "AMPLITUDE_DAMPING",
+    "parameters": { "t1": 100e-6, "temperature": 0.015 },
+    "physics_description": {
+      /* Noise mechanism details */
+    },
+    "research_predictions": {
+      /* Expected pathway behavior */
+    }
   },
   "execution_results": {
-    "raw_measurements": [ /* Quantum measurement data */ ],
-    "simulation_metadata": { /* Qiskit execution details */ }
+    "raw_measurements": [
+      /* Quantum measurement data */
+    ],
+    "simulation_metadata": {
+      /* Qiskit execution details */
+    }
   },
   "structured_decoherence_metrics": {
     "asymmetry_index": 0.3421,
@@ -357,9 +371,15 @@ class StructuredDecoherenceAnalyzer:
     "complexity_emergence_score": 0.4321
   },
   "research_analysis": {
-    "hypothesis_validation": { /* Pathway hypothesis test results */ },
-    "comparative_context": { /* Comparison with other state-noise combinations */ },
-    "educational_insights": { /* Learning points extracted */ }
+    "hypothesis_validation": {
+      /* Pathway hypothesis test results */
+    },
+    "comparative_context": {
+      /* Comparison with other state-noise combinations */
+    },
+    "educational_insights": {
+      /* Learning points extracted */
+    }
   }
 }
 ```
@@ -377,10 +397,10 @@ topology_analysis = analyze_framework_correlations(
     correlation_metric='pathway_asymmetry'
 )
 
-# Compare noise mechanism effects across state types  
+# Compare noise mechanism effects across state types
 mechanism_analysis = analyze_framework_correlations(
     experiments=all_amplitude_damping_experiments,
-    group_by='state_type', 
+    group_by='state_type',
     correlation_metric='energy_pathway_preference'
 )
 ```
@@ -390,20 +410,23 @@ mechanism_analysis = analyze_framework_correlations(
 ## 🎓 **Educational Integration Benefits**
 
 ### 1. **Progressive Learning Path**
+
 - **State Preparation First**: Understand ideal quantum systems
 - **Add Noise Gradually**: See how environment affects quantum information
 - **Combine Systematically**: Study all state-noise combinations
 - **Analyze Patterns**: Extract pathway behavior insights
 
 ### 2. **Physics Understanding**
+
 - **Quantum States**: Learn entanglement, superposition, topology
 - **Environmental Coupling**: Understand decoherence mechanisms
 - **Combined Effects**: See realistic quantum evolution
 - **Research Methods**: Practice systematic scientific investigation
 
 ### 3. **Research Skills Development**
+
 - **Hypothesis Formation**: Develop structured pathway predictions
-- **Experimental Design**: Plan systematic parameter studies  
+- **Experimental Design**: Plan systematic parameter studies
 - **Data Analysis**: Extract meaningful patterns from quantum data
 - **Scientific Communication**: Report results with proper context
 
@@ -412,18 +435,21 @@ mechanism_analysis = analyze_framework_correlations(
 ## 🚀 **Future Framework Extensions**
 
 ### 1. **Enhanced Integration**
+
 - **Real-time Visualization**: Live plotting of pathway evolution
 - **Machine Learning**: Automated pattern recognition in pathway data
 - **Quantum Error Correction**: Integration with error correction codes
 - **Device Integration**: Direct connection to real quantum hardware
 
 ### 2. **Extended Physics**
+
 - **Non-Markovian Noise**: Memory effects in environmental coupling
 - **Correlated Environments**: Multi-qubit environmental correlations
 - **Dynamic Noise**: Time-varying environmental parameters
 - **Measurement Feedback**: Adaptive experiments based on pathway detection
 
 ### 3. **Research Platform**
+
 - **Collaborative Tools**: Multi-user experiment sharing
 - **Publication Integration**: Direct export to research papers
 - **Database Integration**: Large-scale pathway pattern databases

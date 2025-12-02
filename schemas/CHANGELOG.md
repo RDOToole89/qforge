@@ -11,7 +11,6 @@ This project follows **semantic versioning** across all schemas (core, execution
 
 - Initial release of the **Quantum Experiment Schema Suite (v1.0)**.
 - Five core schemas established:
-
   - `core/experiment_spec.schema.json` – experiment design & intent
   - `core/provenance.schema.json` – reproducibility metadata
   - `core/structure_metrics.schema.json` – standardized decoherence & structure metrics
@@ -21,7 +20,6 @@ This project follows **semantic versioning** across all schemas (core, execution
 
 - `schema_index.json` introduced as central registry of schemas.
 - Documentation:
-
   - `README.md` with schema overview, workflow, and relationships.
   - Schema freeze notice marking v1.0 as **stable & research-ready**.
 

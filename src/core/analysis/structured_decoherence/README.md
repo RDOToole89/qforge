@@ -9,26 +9,29 @@ This module implements the 5 quantitative metrics for detecting structured decoh
 ## The 5 Core Metrics
 
 ### 1. Asymmetry Index (AI)
+
 **Formula**: `AI = (1/N) Σᵢ |pᵢ - p_uniform| / p_uniform`
 
 Measures deviation from uniform error distribution. Higher values indicate structured (non-random) decoherence patterns.
 
 - **Range**: 0 to ∞ (typically 0-2)
-- **Interpretation**: 
+- **Interpretation**:
   - AI < 0.1: Very uniform (random)
   - AI > 0.6: Highly structured
 
-### 2. Pathway Concentration Ratio (PCR)  
+### 2. Pathway Concentration Ratio (PCR)
+
 **Formula**: `PCR = (Top 25% frequencies) / (Bottom 25% frequencies)`
 
 Quantifies concentration of errors in preferred pathways vs. least likely pathways.
 
-- **Range**: 1 to ∞ 
+- **Range**: 1 to ∞
 - **Interpretation**:
   - PCR ≈ 1: Uniform distribution
   - PCR > 2: Strong pathway preferences
 
 ### 3. Entanglement-Error Correlation (EEC)
+
 **Formula**: `EEC = correlation(entanglement_topology, error_patterns)`
 
 Measures correlation between quantum state entanglement structure and observed error patterns.
@@ -39,6 +42,7 @@ Measures correlation between quantum state entanglement structure and observed e
   - |EEC| > 0.5: Strong topology influence
 
 ### 4. Temporal Pathway Stability (TPS)
+
 **Formula**: `TPS = 1 - σ(pathway_rankings) / mean(pathway_rankings)`
 
 Measures consistency of pathway rankings across different noise levels or experimental runs.
@@ -49,6 +53,7 @@ Measures consistency of pathway rankings across different noise levels or experi
   - TPS > 0.8: Highly stable structure
 
 ### 5. Complexity Emergence Score (CES)
+
 **Formula**: `CES = emergence_rate_at_critical_threshold`
 
 Quantifies at what complexity level structured decoherence patterns emerge clearly.
@@ -61,6 +66,7 @@ Quantifies at what complexity level structured decoherence patterns emerge clear
 ## Usage Examples
 
 ### Basic Analysis
+
 ```python
 from src.core.analysis.structured_decoherence import compute_all_pathway_metrics
 
@@ -77,6 +83,7 @@ print(f"EEC: {metrics['entanglement_error_correlation']:.3f}")
 ```
 
 ### High-Level Structure Analysis
+
 ```python
 from src.core.analysis.structured_decoherence import analyze_decoherence_structure
 
@@ -93,6 +100,7 @@ print(f"Interpretation: {analysis['interpretation']}")
 ```
 
 ### Individual Metrics
+
 ```python
 from src.core.analysis.structured_decoherence import (
     compute_asymmetry_index,
@@ -114,7 +122,7 @@ The metrics are automatically computed when `enable_research_metrics: true` is s
 The metrics are designed to detect:
 
 1. **Non-uniform error distributions** (AI)
-2. **Pathway concentration effects** (PCR)  
+2. **Pathway concentration effects** (PCR)
 3. **Topology-dependent error patterns** (EEC)
 4. **Temporal consistency** (TPS)
 5. **Complexity thresholds** (CES)
