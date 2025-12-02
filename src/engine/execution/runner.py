@@ -7,7 +7,6 @@ Uses core state preparation and noise models for sophisticated quantum experimen
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
 from typing import Any
 
 from qiskit import QuantumCircuit, transpile
@@ -17,14 +16,6 @@ from src.core.noise_models import create_noise_model
 
 # Import core modules for sophisticated state preparation and noise
 from src.core.state_preparation import prepare_state
-
-# Canonical metrics + schema v1 (engine-facing)
-try:
-    from src.core.analysis.metrics.registry import compute_all
-    from src.core.analysis.metrics.schema_bridge import metrics_to_schema
-except Exception:  # keep engine runnable even if metrics not installed yet
-    compute_all = None
-    metrics_to_schema = None
 
 logger = logging.getLogger(__name__)
 
@@ -99,94 +90,6 @@ class EngineExperimentRunner:
 
         self.logger.info(f"Completed experiment: {self.experiment_id}")
         return circuit, result
-
-    # ---------- Convenience high-level APIs ----------
-
-    def run_to_counts(
-        self,
-        *,
-        num_qubits: int,
-        state_type: str = "GHZ",
-        noise_type: str | None = None,
-        noise_enabled: bool = False,
-        shots: int = 1024,
-        sim_mode: str = "qasm",
-        error_rate: float | None = None,
-        z_prob: float | None = None,
-        i_prob: float | None = None,
-        t1: float | None = None,
-        t2: float | None = None,
-        custom_params: dict | None = None,
-        rng_seed: int | None = None,
-    ) -> tuple[QuantumCircuit, Mapping[str, int]]:
-        """
-        Run an experiment and return (circuit, canonical counts dict).
-        Canonicalization: bitstrings are MSB-left, length == num_qubits.
-        """
-        circuit, raw = self.run_experiment(
-            num_qubits=num_qubits,
-            state_type=state_type,
-            noise_type=noise_type,
-            noise_enabled=noise_enabled,
-            shots=shots,
-            sim_mode=sim_mode,
-            error_rate=error_rate,
-            z_prob=z_prob,
-            i_prob=i_prob,
-            t1=t1,
-            t2=t2,
-            custom_params=custom_params,
-            rng_seed=rng_seed,
-        )
-        counts = self._extract_canonical_counts(raw, num_qubits)
-        return circuit, counts
-
-    def run_to_schema(
-        self,
-        *,
-        num_qubits: int,
-        state_type: str = "GHZ",
-        noise_type: str | None = None,
-        noise_enabled: bool = False,
-        shots: int = 1024,
-        sim_mode: str = "qasm",
-        error_rate: float | None = None,
-        z_prob: float | None = None,
-        i_prob: float | None = None,
-        t1: float | None = None,
-        t2: float | None = None,
-        custom_params: dict | None = None,
-        rng_seed: int | None = None,
-    ) -> tuple[QuantumCircuit, dict[str, Any]]:
-        """
-        Run an experiment and return (circuit, schema_v1 metrics dict).
-        Requires src.analysis.metrics (registry + schema_bridge).
-        """
-        if compute_all is None or metrics_to_schema is None:
-            raise RuntimeError(
-                "Metrics registry/schema not available. Ensure src.analysis.metrics is importable."
-            )
-
-        circuit, counts = self.run_to_counts(
-            num_qubits=num_qubits,
-            state_type=state_type,
-            noise_type=noise_type,
-            noise_enabled=noise_enabled,
-            shots=shots,
-            sim_mode=sim_mode,
-            error_rate=error_rate,
-            z_prob=z_prob,
-            i_prob=i_prob,
-            t1=t1,
-            t2=t2,
-            custom_params=custom_params,
-            rng_seed=rng_seed,
-        )
-
-        # Compute canonical metrics and convert to schema v1
-        metric_results = compute_all(counts=counts)
-        schema_v1 = metrics_to_schema(metric_results)
-        return circuit, schema_v1
 
     # ---------- Circuit / noise / simulation internals ----------
 

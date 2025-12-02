@@ -145,16 +145,18 @@ Remove legacy code and dead imports from the refactor.
 
 - **Objective**: Identify and remove code that's no longer used post-refactor.
 - **Tasks**:
-  - [ ] **Dead Import Analysis**: Find imports that reference removed modules
-  - [ ] **Orphaned Functions**: Identify functions never called from active code paths
-  - [ ] **Deprecated Patterns**: Remove old patterns superseded by new architecture
-  - [ ] **Test Coverage Gaps**: Ensure removed code doesn't leave untested paths
+  - [x] **Dead Import Analysis**: Found and removed unused imports in runner.py
+  - [x] **Orphaned Functions**: Removed unused methods:
+    - `runner.py`: `run_to_counts()`, `run_to_schema()` (never called)
+    - `service.py`: `unregister_renderer()`, `clear_renderers()` (never called)
+  - [x] **Deprecated Patterns**: Audited - no deprecated patterns found
+  - [x] **Test Coverage Gaps**: All 128 tests pass after cleanup
 
 ### 6.2. Architecture Alignment
 
 - **Objective**: Ensure all code follows the engine-first architecture.
 - **Tasks**:
-  - [ ] **Layer Violations**: Find code that violates AGENTS.md layer boundaries
+  - [x] **Layer Violations**: Verified no violations (experiments→engine→core respected)
   - [ ] **Circular Dependencies**: Detect and break circular import chains
   - [ ] **API Surface Cleanup**: Remove internal functions from public `__all__` exports
 

@@ -100,23 +100,6 @@ class VisualizationService:
                 getattr(renderer, "priority", 0),
             )
 
-    def unregister_renderer(self, renderer: VisualizationRenderer) -> None:
-        """Unregister a previously registered renderer."""
-        with self._lock:
-            before = len(self._renderers)
-            self._renderers = [r for r in self._renderers if r is not renderer]
-            after = len(self._renderers)
-            if before == after:
-                logger.debug("Renderer was not registered: %s", renderer.name)
-            else:
-                logger.debug("Unregistered renderer: %s", renderer.name)
-
-    def clear_renderers(self) -> None:
-        """Remove all renderers (useful in unit tests)."""
-        with self._lock:
-            self._renderers.clear()
-            logger.debug("Cleared all visualization renderers")
-
     # ----- Discovery / selection -----
 
     def list_renderers(self) -> list[str]:
