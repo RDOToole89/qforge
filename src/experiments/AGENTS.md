@@ -193,10 +193,10 @@ from src.engine.api import run_experiment, run_sweep
 result = run_experiment(config)  # Handles everything
 
 # Acceptable: Direct runner usage for custom needs
-from src.engine.experiment_runner import ExperimentRunner
+from src.engine.execution.runner import EngineExperimentRunner
 
-runner = ExperimentRunner(backend=custom_backend)
-result = runner.run(circuit, noise_model, shots, seed)
+runner = EngineExperimentRunner(experiment_id="custom")
+circuit, counts = runner.run_to_counts(...)
 
 # Bad: Reimplementing engine logic
 circuit = create_state(...)

@@ -20,7 +20,7 @@ RUN_START, RUN_END, SWEEP_START, SWEEP_END, PROGRESS
 
 Typical usage
 -------------
-    from src.engine.events import (
+    from src.engine.infrastructure.events import (
         SimpleEventBus, make_event, RUN_START, RUN_END, PROGRESS, ALL
     )
 

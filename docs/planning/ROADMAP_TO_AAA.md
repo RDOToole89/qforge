@@ -104,8 +104,66 @@ If it's not documented, it doesn't exist.
 
 ---
 
+## Phase 5: Pathway Geometry Visualization (The "Seeing")
+
+Recover and extend quantum geometry visualization tools for pathway analysis.
+
+### 5.1. Hypergraph Visualization Recovery
+
+- **Objective**: Restore valuable quantum geometry tools from pre-refactor codebase.
+- **Source**: `main` branch `src/visualization/hypergraph.py` (879 lines)
+- **Tasks**:
+  - [ ] **Recover Core Functions**: Extract and modernize key functions to `src/core/analysis/geometry/`
+  - [ ] **Integrate with Metrics**: Connect geometry measures to existing structured decoherence pipeline
+  - [ ] **Add Research Context**: Document SST relevance for each measure
+
+### 5.2. Key Measures to Recover (SST Relevance)
+
+| Function | What It Does | SST Research Value |
+|----------|--------------|-------------------|
+| **`compute_fubini_study_distance()`** | Quantum distance between density matrices | **HIGH**: Measures "distance traveled" in reconfiguration space during decoherence. Could quantify pathway length and detect shortcuts vs scenic routes. |
+| **`compute_su2_symmetry()`** | SU(2) symmetry analysis from measurement counts | **HIGH**: Symmetry breaking is central to SST — this measures how decoherence destroys rotational invariance along specific pathways. |
+| **`compute_su3_symmetry()`** | SU(3) symmetry for higher-dimensional systems | **MEDIUM**: Useful for qutrit extensions and exploring richer substrate geometry. |
+| **`plot_error_transition_graph()`** | Visualize transitions between error states | **HIGH**: Direct visualization of pathway structure — which bitstrings flow to which others. |
+| **`compute_parity_distribution()`** | Parity analysis of measurement outcomes | **MEDIUM**: Parity conservation/violation tracks pathway topology. |
+| **`compute_conditional_correlations()`** | Correlations conditioned on measurement outcomes | **HIGH**: Essential for H_Q3 sensor qubit experiments — how does observing the sensor constrain main system pathways? |
+| **`compute_bloch_vector()`** + **`plot_bloch_sphere_vectors()`** | Bloch sphere visualization | **MEDIUM**: Educational value for showing single-qubit pathway trajectories. |
+
+### 5.3. New Geometry Measures (Future)
+
+- [ ] **Pathway Curvature**: Measure how "straight" vs "curved" decoherence trajectories are in state space
+- [ ] **Geodesic Deviation**: Compare actual pathways to shortest paths (geodesics) in Hilbert space
+- [ ] **Topology Persistence**: Use persistent homology to detect topological features of pathway networks
+
+---
+
+## Phase 6: Codebase Cleanup (The "Pruning")
+
+Remove legacy code and dead imports from the refactor.
+
+### 6.1. Legacy Code Audit
+
+- **Objective**: Identify and remove code that's no longer used post-refactor.
+- **Tasks**:
+  - [ ] **Dead Import Analysis**: Find imports that reference removed modules
+  - [ ] **Orphaned Functions**: Identify functions never called from active code paths
+  - [ ] **Deprecated Patterns**: Remove old patterns superseded by new architecture
+  - [ ] **Test Coverage Gaps**: Ensure removed code doesn't leave untested paths
+
+### 6.2. Architecture Alignment
+
+- **Objective**: Ensure all code follows the engine-first architecture.
+- **Tasks**:
+  - [ ] **Layer Violations**: Find code that violates AGENTS.md layer boundaries
+  - [ ] **Circular Dependencies**: Detect and break circular import chains
+  - [ ] **API Surface Cleanup**: Remove internal functions from public `__all__` exports
+
+---
+
 ## Immediate Next Steps (The "Sprint")
 
 1. **Fix the Science**: Implement `tests/physics/test_analytical.py` to guarantee our metrics are correct.
 2. **Lock the Environment**: Generate a lock file to ensure consistent installs.
 3. **Document the Theory**: Flesh out `docs/research-docs/` with the mathematical definitions used in the code.
+4. **Audit Legacy Code**: Run comprehensive analysis to identify dead code from refactor.
+5. **Recover Hypergraph**: Extract valuable geometry functions to new `src/core/analysis/geometry/` module.

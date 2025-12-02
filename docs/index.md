@@ -2,6 +2,8 @@
 
 A research-grade quantum experiment framework for structured decoherence analysis built on Qiskit.
 
+> **📖 For Researchers:** See the [Comprehensive Design Document](DESIGN_DOCUMENT.md) for full technical details, metric definitions, architecture, and research roadmap.
+
 ## Overview
 
 This framework provides comprehensive tools for analyzing quantum decoherence patterns and detecting structured error pathways in quantum systems. It implements the **Spring Network Model** hypothesis, which proposes that quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns.
@@ -81,12 +83,13 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed design blueprint and [FR
 
 ## Documentation Structure
 
+- **[Design Document](DESIGN_DOCUMENT.md)**: Comprehensive framework design (metrics, architecture, roadmap)
 - **Getting Started**: Installation, quickstart, and basic usage
 - **User Guide**: Comprehensive analysis workflows and metric explanations
 - **API Reference**: Complete function and class documentation
 - **Research**: [Structured Substrate Thesis (SST)](research-docs/sst-ext.md) and [Research Plan](research-docs/RESEARCH_PLAN.md)
+- **[Architecture](architecture/ARCHITECTURE.md)**: System design and integration patterns
 - **Examples**: Practical tutorials and use cases
-- **Developer Guide**: Contributing guidelines and architecture details
 
 ## Research Background
 

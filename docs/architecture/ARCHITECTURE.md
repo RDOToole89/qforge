@@ -82,7 +82,7 @@ class ExperimentResult(BaseModel):
 **Import Research Analysis:**
 
 ```python
-from src.core.analysis.structured_decoherence.pathway_analysis import compute_all_pathway_metrics
+from src.core.analysis.pipelines import compute_all_pathway_metrics
 ```
 
 **Update run() function:**
@@ -93,7 +93,7 @@ def run(config: ExperimentConfig | Dict[str, Any], ctx: Optional[AppContext] = N
 
     # Add structured decoherence metrics if enabled
     if cfg_model.enable_research_metrics:
-        from src.core.analysis.structured_decoherence.pathway_analysis import compute_all_pathway_metrics
+        from src.core.analysis.pipelines import compute_all_pathway_metrics
 
         # Extract counts from raw result
         counts = _extract_counts_from_result(raw)
@@ -186,7 +186,7 @@ def test_engine_research_sweep():
 def headless_run_experiment(args, logger):
     """Run single experiment using engine API."""
     from src.engine.api import run
-    from src.engine.context import AppContext
+    from src.engine.execution.context import AppContext
 
     # Convert CLI args to engine config
     config = _cli_args_to_engine_config(args)
@@ -205,7 +205,7 @@ def headless_run_experiment(args, logger):
 def headless_sweep(args, logger):
     """Run parameter sweep using engine API."""
     from src.engine.api import sweep
-    from src.engine.context import AppContext
+    from src.engine.execution.context import AppContext
 
     # Load and validate manifest
     manifest_path = Path(args.manifest_file)

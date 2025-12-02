@@ -12,6 +12,8 @@ This layer contains all human-readable and AI-readable documentation. It ensures
 
 ```
 docs/
+├── DESIGN_DOCUMENT.md    # Comprehensive framework design (START HERE)
+├── index.md              # Documentation home
 ├── ai-context/           # AI collaboration context
 │   ├── AI_COLLABORATOR_NOTES.md   # Why this framework matters
 │   └── AI_DOC_STRATEGY.md         # Documentation philosophy
@@ -28,8 +30,16 @@ docs/
 ├── research-docs/      # Scientific theory and SST
 │   ├── RESEARCH_PLAN.md
 │   └── sst-ext.md
-└── index.md           # Documentation home
+└── AGENTS.md            # This file (documentation guidelines)
 ```
+
+## Key Documents
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **DESIGN_DOCUMENT.md** | Comprehensive framework design, metrics, architecture, roadmap | Researchers, collaborators |
+| **index.md** | Quick start and navigation | New users |
+| **AGENTS.md** | Documentation guidelines | AI agents, doc writers |
 
 ## Documentation Types
 

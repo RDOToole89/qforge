@@ -62,10 +62,10 @@ from qiskit import QuantumCircuit
 from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 
 # App plumbing
-from src.engine.context import AppContext
+from src.engine.execution.context import AppContext
 
 # Event bus (optional, cheap)
-from src.engine.events import (
+from src.engine.infrastructure.events import (
     RUN_END,
     RUN_START,
     SWEEP_END,
@@ -73,7 +73,7 @@ from src.engine.events import (
     SimpleEventBus,
     make_event,
 )
-from src.engine.hashing import sha1_of
+from src.engine.persistence.hashing import sha1_of
 
 # Typed models (top-level exports) …
 from src.engine.models import (
@@ -91,10 +91,10 @@ from src.engine.models.results import (
     ExperimentMetadata,
     MeasurementResults,
 )
-from src.engine.runner import run_raw
+from src.engine.execution.runner import run_raw
 
 # Storage adapter
-from src.engine.storage import LocalStorage
+from src.engine.persistence.storage import LocalStorage
 
 # Optional visualization (gracefully skipped if not installed)
 try:

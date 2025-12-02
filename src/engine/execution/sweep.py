@@ -1,4 +1,4 @@
-# src/engine/sweep_driver.py
+# src/engine/execution/sweep.py
 """
 Parameter Sweep Driver (engine-native).
 
@@ -63,7 +63,7 @@ import numpy as np
 from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 
 # Engine-native runner (no legacy deps)
-from src.engine.experiment_runner import EngineExperimentRunner  # << fixed import
+from src.engine.execution.runner import EngineExperimentRunner
 from src.engine.models.config import ExperimentConfig
 from src.engine.models.results import (
     CircuitStatistics,
@@ -85,7 +85,7 @@ from src.engine.models.sweep import (
 )
 
 # Optional persistence
-from src.engine.storage import LocalStorage
+from src.engine.persistence.storage import LocalStorage
 
 logger = logging.getLogger(__name__)
 

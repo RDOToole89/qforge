@@ -163,7 +163,7 @@ circuit = factory.create_state(
 ### Running a Parameter Sweep
 
 ```python
-from src.engine.sweep_driver import run_sweep
+from src.engine.execution.sweep import run_sweep
 
 sweep_config = {
     "base_config": config,

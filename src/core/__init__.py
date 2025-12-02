@@ -13,7 +13,7 @@ Notes
   keep this package focused on pure quantum primitives + utilities.
 
 * Structured-decoherence **metrics** (registry, schema bridge, etc.)
-  live under `src.analysis.metrics`. Import them from there when needed.
+  live under `src.core.analysis.metrics`. Import them from there when needed.
 """
 
 # --- State preparation (canonical entry point) ---

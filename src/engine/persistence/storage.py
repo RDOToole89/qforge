@@ -39,7 +39,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .models import (
+from src.engine.models.storage import (
     ArtifactRef,  # canonical Pydantic model
     DirectoryStructure,  # optional layout
     StorageConfig,  # optional policy

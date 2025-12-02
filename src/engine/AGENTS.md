@@ -39,18 +39,19 @@ Responsibilities:
 
 ```
 src/engine/
-├── models/             # Pydantic schemas (ExperimentConfig, ExperimentResult)
-├── api.py              # Public interface: run_experiment(), run_sweep()
-├── experiment_runner.py  # Core execution: transpile → simulate → collect
-├── sweep_driver.py     # Parameter sweep orchestration
-├── storage.py          # Result persistence and artifact management
-├── context.py          # Execution context and configuration
-├── events.py           # Event bus for progress tracking
-├── hashing.py          # Deterministic config hashing
-├── research_handler.py # Research-specific workflows
-├── runner.py           # Legacy runner (being deprecated)
-├── analysis/           # Analysis pipeline orchestration
-└── visualization/      # Plotting and reporting
+├── api.py                  # Public interface: run(), sweep()
+├── execution/              # Experiment execution
+│   ├── runner.py           # Core execution: transpile → simulate → collect
+│   ├── context.py          # Execution context and configuration
+│   └── sweep.py            # Parameter sweep orchestration
+├── persistence/            # Data management
+│   ├── storage.py          # Result persistence and artifact management
+│   └── hashing.py          # Deterministic config hashing
+├── infrastructure/         # Cross-cutting concerns
+│   └── events.py           # Event bus for progress tracking
+├── models/                 # Pydantic schemas (ExperimentConfig, ExperimentResult)
+├── analysis/               # Research metrics integration
+└── visualization/          # Plotting and rendering
 ```
 
 ## Do Not
@@ -103,7 +104,7 @@ result = AerSimulator().run(circuit).result()  # Raw Qiskit, no validation
 
 ```python
 # Good: Atomic save with provenance
-from src.engine.storage import save_result
+from src.engine.persistence.storage import save_result
 
 save_result(
     result=experiment_result,  # Validated Pydantic model
@@ -121,7 +122,7 @@ with open("result.json", "w") as f:
 
 ```python
 # Good: Declarative sweep configuration
-from src.engine.sweep_driver import run_sweep
+from src.engine.execution.sweep import run_sweep
 
 sweep_results = run_sweep(
     base_config=base_config,
@@ -145,12 +146,12 @@ for error_rate in [0.001, 0.01, 0.1]:
 
 ```python
 # Good: Use event bus for progress tracking
-from src.engine.events import EventBus, ExperimentStarted
+from src.engine.infrastructure.events import SimpleEventBus, RUN_START, RUN_END, make_event
 
-def run_with_events(config: ExperimentConfig, event_bus: EventBus):
-    event_bus.emit(ExperimentStarted(config=config))
+def run_with_events(config: ExperimentConfig, event_bus: SimpleEventBus):
+    event_bus.emit(make_event(RUN_START, config=config))
     # ... execution ...
-    event_bus.emit(ExperimentCompleted(result=result))
+    event_bus.emit(make_event(RUN_END, result=result))
 
 # Bad: Print statements or direct UI updates
 def run_with_events(config):
@@ -204,9 +205,9 @@ noise_model = NoiseFactory.create_noise_model(...)
 ```python
 # Good: Wrap Qiskit in engine abstractions
 from qiskit_aer import AerSimulator
-from src.engine.experiment_runner import ExperimentRunner
+from src.engine.execution.runner import EngineExperimentRunner
 
-runner = ExperimentRunner(backend=AerSimulator())
+runner = EngineExperimentRunner(experiment_id="example")
 result = runner.run(circuit, noise_model, shots, seed)
 ```
 
@@ -231,6 +232,6 @@ These validate:
 See canonical implementations:
 
 - `src/engine/api.py` — Clean public API
-- `src/engine/experiment_runner.py` — Execution orchestration
-- `src/engine/storage.py` — Atomic persistence with provenance
+- `src/engine/execution/runner.py` — Execution orchestration
+- `src/engine/persistence/storage.py` — Atomic persistence with provenance
 - `src/engine/models/config.py` — Pydantic schema patterns

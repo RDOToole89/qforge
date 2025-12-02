@@ -1,26 +1,7 @@
 """
 Engine-native experiment runner.
 
-This module is the engine's execution workhorse:
-- builds a quantum circuit via core state-preparation,
-- (optionally) configures a noise model,
-- transpiles and simulates on AerSimulator,
-- exposes convenience helpers to return canonical counts or a schema-v1
-  metrics payload (via the metrics registry).
-
-Design notes
-------------
-- No backward compatibility shims: imports fail fast if dependencies are missing.
-- QASM-only: density-matrix or statevector modes are intentionally out-of-scope here.
-- Canonicalization: measurement bitstrings are MSB-left and padded/truncated to `num_qubits`.
-- The runner does not manage storage or research integration; the API facade/orchestrator does.
-
-Typical usage
--------------
-    runner = EngineExperimentRunner("ghz-3q")
-    circ, result = runner.run_experiment(num_qubits=3, state_type="GHZ", shots=4096)
-    circ, counts = runner.run_to_counts(num_qubits=3, state_type="GHZ")
-    circ, schema = runner.run_to_schema(num_qubits=3, state_type="GHZ")  # requires metrics package
+Uses core state preparation and noise models for sophisticated quantum experiments.
 """
 
 from __future__ import annotations
@@ -32,13 +13,18 @@ from typing import Any
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
-# Canonical metrics + schema v1 (engine-facing; intentional hard dependency for run_to_schema)
-from src.analysis.metrics.registry import compute_all
-from src.analysis.metrics.schema_bridge import metrics_to_schema
 from src.core.noise_models import create_noise_model
 
-# Sophisticated state preparation and noise (engine-core)
+# Import core modules for sophisticated state preparation and noise
 from src.core.state_preparation import prepare_state
+
+# Canonical metrics + schema v1 (engine-facing)
+try:
+    from src.core.analysis.metrics.registry import compute_all
+    from src.core.analysis.metrics.schema_bridge import metrics_to_schema
+except Exception:  # keep engine runnable even if metrics not installed yet
+    compute_all = None
+    metrics_to_schema = None
 
 logger = logging.getLogger(__name__)
 
@@ -47,29 +33,20 @@ class EngineExperimentRunner:
     """
     Engine-native experiment runner for quantum circuit execution.
 
-    Responsibilities
-    ----------------
-    - Build a circuit using `src.core.state_preparation.prepare_state`
-    - Optionally attach a noise model created via `src.core.noise_models.create_noise_model`
-    - Transpile and simulate with AerSimulator (QASM)
-    - Offer helpers to return canonical counts or schema-v1 metric dicts
-
-    This class deliberately avoids storage, visualization, or research
-    persistence concerns (handled by the API facade/orchestrator).
+    This replaces the legacy core experiment runner with a clean,
+    schema-based implementation that integrates directly with the engine.
     """
 
     def __init__(self, experiment_id: str = "engine-run"):
         """
-        Initialize the runner.
+        Initialize the engine experiment runner.
 
         Args:
-            experiment_id: Logical identifier used only for logging scoping.
+            experiment_id: Unique identifier for this experiment run
         """
         self.experiment_id = experiment_id
         self.logger = logging.getLogger(f"EngineExperimentRunner.{experiment_id}")
-        self.noise_model = None  # set when noise is configured
-
-    # ---------- Public API ----------
+        self.noise_model = None  # Will be set if noise is enabled
 
     def run_experiment(
         self,
@@ -88,33 +65,42 @@ class EngineExperimentRunner:
         rng_seed: int | None = None,
     ) -> tuple[QuantumCircuit, Any]:
         """
-        Build, (optionally) noise-configure, and simulate a circuit.
+        Run a quantum experiment with specified parameters.
 
         Args:
-            num_qubits: Number of qubits.
-            state_type: "GHZ" | "W" | "CLUSTER" | "BELL" | "SUPERPOSITION" | "CUSTOM".
-            noise_type: Noise model name (see core/noise_models).
-            noise_enabled: Whether to attach a noise model.
-            shots: Number of QASM shots.
-            sim_mode: Only "qasm" is supported (others are warned and coerced).
-            error_rate, z_prob, i_prob, t1, t2: Noise parameters (model-dependent).
-            custom_params: Extra params forwarded to state preparation/noise (if supported).
-            rng_seed: Simulator seed for reproducibility.
+            num_qubits: Number of qubits in the circuit
+            state_type: Type of quantum state ("GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM")
+            noise_type: Type of noise model to apply
+            noise_enabled: Whether to apply noise
+            shots: Number of shots for qasm simulation
+            sim_mode: Simulation mode ("qasm" or "density")
+            error_rate: Custom error rate for noise models
+            z_prob: Z probability for PHASE_FLIP noise
+            i_prob: I probability for PHASE_FLIP noise
+            t1: T1 relaxation time for THERMAL_RELAXATION noise
+            t2: T2 dephasing time for THERMAL_RELAXATION noise
+            custom_params: Custom parameters for state preparation or noise
+            rng_seed: Random seed for reproducibility
 
         Returns:
-            (QuantumCircuit, Aer result payload)
+            Tuple of (QuantumCircuit, simulation result)
         """
-        self.logger.info("Starting engine experiment: %s (%d qubits)", state_type, num_qubits)
+        self.logger.info(f"Starting engine experiment: {state_type} state with {num_qubits} qubits")
 
+        # Create quantum circuit
         circuit = self._create_circuit(num_qubits, state_type, custom_params)
 
+        # Apply noise if enabled
         if noise_enabled and noise_type:
             circuit = self._apply_noise(circuit, noise_type, error_rate, z_prob, i_prob, t1, t2)
 
+        # Execute simulation
         result = self._execute_simulation(circuit, sim_mode, shots, rng_seed)
 
-        self.logger.info("Completed experiment: %s", self.experiment_id)
+        self.logger.info(f"Completed experiment: {self.experiment_id}")
         return circuit, result
+
+    # ---------- Convenience high-level APIs ----------
 
     def run_to_counts(
         self,
@@ -134,8 +120,8 @@ class EngineExperimentRunner:
         rng_seed: int | None = None,
     ) -> tuple[QuantumCircuit, Mapping[str, int]]:
         """
-        Convenience: run and return (circuit, canonicalized counts dict).
-        Canonicalization: MSB-left bitstrings of exact length `num_qubits`.
+        Run an experiment and return (circuit, canonical counts dict).
+        Canonicalization: bitstrings are MSB-left, length == num_qubits.
         """
         circuit, raw = self.run_experiment(
             num_qubits=num_qubits,
@@ -174,11 +160,13 @@ class EngineExperimentRunner:
     ) -> tuple[QuantumCircuit, dict[str, Any]]:
         """
         Run an experiment and return (circuit, schema_v1 metrics dict).
-
-        This requires the metrics registry & schema bridge to be importable:
-        - src.analysis.metrics.registry.compute_all
-        - src.analysis.metrics.schema_bridge.metrics_to_schema
+        Requires src.analysis.metrics (registry + schema_bridge).
         """
+        if compute_all is None or metrics_to_schema is None:
+            raise RuntimeError(
+                "Metrics registry/schema not available. Ensure src.analysis.metrics is importable."
+            )
+
         circuit, counts = self.run_to_counts(
             num_qubits=num_qubits,
             state_type=state_type,
@@ -195,79 +183,91 @@ class EngineExperimentRunner:
             rng_seed=rng_seed,
         )
 
+        # Compute canonical metrics and convert to schema v1
         metric_results = compute_all(counts=counts)
         schema_v1 = metrics_to_schema(metric_results)
         return circuit, schema_v1
 
-    # ---------- Internals ----------
+    # ---------- Circuit / noise / simulation internals ----------
 
     def _create_circuit(
         self, num_qubits: int, state_type: str, custom_params: dict | None
     ) -> QuantumCircuit:
-        """Create a circuit via sophisticated core state-prep. Falls back to a basic template if core prep fails."""
+        """Create quantum circuit using sophisticated core state preparation."""
         try:
-            params = {
-                "num_qubits": int(num_qubits),
-                "state_type": str(state_type).upper(),
+            # Use core state preparation with custom parameters
+            state_params = {
+                "num_qubits": num_qubits,
+                "state_type": state_type,
             }
-            if custom_params:
-                params.update(custom_params)
-            circ = prepare_state(**params)
 
-            # Ensure measurement exists for QASM runs
-            if not circ.clbits:
-                circ.measure_all()
-            return circ
+            # Add custom parameters if provided
+            if custom_params:
+                state_params.update(custom_params)
+
+            # Use the sophisticated core state preparation
+            circuit = prepare_state(**state_params)
+
+            # Ensure measurement is added
+            if not circuit.clbits:
+                circuit.measure_all()
+
+            return circuit
 
         except Exception as e:
-            self.logger.error("Core state preparation failed (%s); using basic template.", e)
+            self.logger.error(f"Failed to create circuit with core state preparation: {e}")
+            # Fallback to basic implementation for debugging
             return self._create_basic_circuit(num_qubits, state_type, custom_params)
 
     def _create_basic_circuit(
         self, num_qubits: int, state_type: str, custom_params: dict | None
     ) -> QuantumCircuit:
-        """Basic fallback patterns (dev safety)."""
+        """Fallback basic circuit creation for debugging."""
         circuit = QuantumCircuit(num_qubits, num_qubits)
-        st = str(state_type).upper()
 
-        if st == "GHZ":
+        if state_type == "GHZ":
             circuit.h(0)
             for i in range(1, num_qubits):
                 circuit.cx(0, i)
-        elif st == "W":
+        elif state_type == "W":
+            # W state: superposition of single excitations
             circuit.h(0)
             for i in range(1, num_qubits):
                 circuit.cx(0, i)
                 circuit.h(i)
-        elif st == "BELL":
+        elif state_type == "BELL":
             if num_qubits < 2:
-                raise ValueError("BELL state requires at least 2 qubits")
+                raise ValueError("Bell state requires at least 2 qubits")
             circuit.h(0)
             circuit.cx(0, 1)
-        elif st == "CLUSTER":
+        elif state_type == "CLUSTER":
+            # Linear cluster state
             for i in range(num_qubits):
                 circuit.h(i)
             for i in range(num_qubits - 1):
                 circuit.cx(i, i + 1)
-        elif st == "SUPERPOSITION":
+        elif state_type == "SUPERPOSITION":
+            # Simple superposition state
             for i in range(num_qubits):
                 circuit.h(i)
-        elif st == "CUSTOM":
-            ops = (custom_params or {}).get("circuit_operations", [])
-            for op in ops:
-                g = op.get("gate", "").lower()
-                if g == "h":
-                    circuit.h(int(op["qubit"]))
-                elif g == "cx":
-                    circuit.cx(int(op["control"]), int(op["target"]))
-                elif g == "x":
-                    circuit.x(int(op["qubit"]))
-            if not ops:
+        elif state_type == "CUSTOM":
+            # Custom state preparation
+            if custom_params and "circuit_operations" in custom_params:
+                for op in custom_params["circuit_operations"]:
+                    if op["gate"] == "h":
+                        circuit.h(op["qubit"])
+                    elif op["gate"] == "cx":
+                        circuit.cx(op["control"], op["target"])
+                    elif op["gate"] == "x":
+                        circuit.x(op["qubit"])
+            else:
+                # Default to superposition if no custom operations
                 for i in range(num_qubits):
                     circuit.h(i)
         else:
             raise ValueError(f"Unsupported state type: {state_type}")
 
+        # Measure all qubits
         circuit.measure_all()
         return circuit
 
@@ -281,29 +281,41 @@ class EngineExperimentRunner:
         t1: float | None,
         t2: float | None,
     ) -> QuantumCircuit:
-        """Create and attach a noise model produced by core noise models."""
+        """Apply sophisticated noise using core noise models."""
         try:
-            noise_params: dict[str, Any] = {
-                "noise_type": str(noise_type).upper(),
+            # Map noise type to uppercase (core expects uppercase)
+            noise_type_upper = noise_type.upper() if noise_type else "DEPOLARIZING"
+
+            # Prepare noise parameters
+            noise_params = {
+                "noise_type": noise_type_upper,
                 "num_qubits": circuit.num_qubits,
             }
-            if error_rate is not None:
-                noise_params["error_rate"] = float(error_rate)
-            if z_prob is not None:
-                noise_params["z_prob"] = float(z_prob)
-            if i_prob is not None:
-                noise_params["i_prob"] = float(i_prob)
-            if t1 is not None:
-                noise_params["t1"] = float(t1)
-            if t2 is not None:
-                noise_params["t2"] = float(t2)
 
+            # Add specific noise parameters
+            if error_rate is not None:
+                noise_params["error_rate"] = error_rate
+            if z_prob is not None:
+                noise_params["z_prob"] = z_prob
+            if i_prob is not None:
+                noise_params["i_prob"] = i_prob
+            if t1 is not None:
+                noise_params["t1"] = t1
+            if t2 is not None:
+                noise_params["t2"] = t2
+
+            # Create sophisticated noise model using core
             self.noise_model = create_noise_model(**noise_params)
-            self.logger.info("Noise model created: %s", noise_params["noise_type"])
+
+            self.logger.info(
+                f"Created {noise_type_upper} noise model with parameters: {noise_params}"
+            )
             return circuit
 
         except Exception as e:
-            self.logger.error("Noise creation failed (%s); proceeding without noise.", e)
+            self.logger.error(f"Failed to apply noise with core noise models: {e}")
+            # Return original circuit if noise application fails
+            self.logger.warning(f"Noise type '{noise_type}' not applied due to error")
             self.noise_model = None
             return circuit
 
@@ -314,60 +326,71 @@ class EngineExperimentRunner:
         shots: int,
         rng_seed: int | None,
     ) -> Any:
-        """Transpile and run a QASM simulation on AerSimulator."""
+        """Execute QASM simulation."""
+        # Only support QASM simulation
         if sim_mode != "qasm":
-            self.logger.warning("Simulation mode '%s' not supported; coercing to QASM.", sim_mode)
+            self.logger.warning(f"Simulation mode '{sim_mode}' not supported, using QASM")
 
+        # Build simulator and set options
         backend = AerSimulator()
         if rng_seed is not None:
             backend.set_options(seed_simulator=int(rng_seed))
         if self.noise_model is not None:
             backend.set_options(noise_model=self.noise_model)
 
+        # Transpile for backend target
         tcirc = transpile(circuit, backend)
-        job = backend.run(tcirc, shots=int(shots))
-        return job.result()
 
-    # ---------- Helpers ----------
+        # Run
+        job = backend.run(tcirc, shots=int(shots))
+        result = job.result()
+        return result
+
+    # ---------- Results helpers ----------
 
     def _extract_canonical_counts(self, result: Any, num_qubits: int) -> dict[str, int]:
         """
         Extract counts from a Qiskit Result and canonicalize bitstrings.
-        - Strip spaces Qiskit may insert for registers.
-        - Pad/truncate to `num_qubits`.
-        - Keep MSB-left ordering (compatible with metrics).
+
+        - Removes spaces Qiskit may include for registers
+        - Pads/truncates to length = num_qubits
+        - Keeps MSB-left ordering (compatible with metrics package)
         """
         try:
             raw_counts = result.get_counts()  # type: ignore[attr-defined]
         except Exception:
+            # handle multi-experiment result (rare here)
             raw_counts = result.get_counts(0)  # type: ignore[attr-defined]
 
         counts: dict[str, int] = {}
         for k, v in raw_counts.items():
             key = str(k).replace(" ", "")
+            # Pad (left) to number of qubits, in case classical bits > qubits
             if len(key) < num_qubits:
                 key = key.rjust(num_qubits, "0")
             elif len(key) > num_qubits:
-                key = key[-num_qubits:]
+                key = key[-num_qubits:]  # keep least significant num_qubits bits
             counts[key] = int(v)
 
+        # Ensure non-empty dict for downstream metrics
         if not counts:
-            self.logger.warning("No counts in result; fabricating zero-count for '0'*n.")
+            self.logger.warning("No counts found in Qiskit result; returning {'0'*n: 0}")
             counts["0" * num_qubits] = 0
+
         return counts
 
 
 def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
     """
-    Thin convenience wrapper used by the API facade.
+    Execute experiment using engine-native runner.
 
     Args:
-        config: A dict compatible with ExperimentConfig.model_dump().
-
+        config: experiment config dict
     Returns:
-        (QuantumCircuit, Aer Result)
+        (QuantumCircuit, qiskit result payload)
     """
     runner = EngineExperimentRunner(experiment_id=config.get("experiment_id", "engine-run"))
+
     circuit, raw = runner.run_experiment(
         num_qubits=int(config["num_qubits"]),
         state_type=str(config["state_type"]).upper(),

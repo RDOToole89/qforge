@@ -8,7 +8,7 @@ import numpy as np
 from src.core.analysis.metrics.pathway_concentration_ratio import (
     compute_concentration_with_gini,
 )
-from src.engine.experiment_runner import EngineExperimentRunner
+from src.engine.execution.runner import EngineExperimentRunner
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
