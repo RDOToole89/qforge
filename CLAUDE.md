@@ -242,6 +242,96 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 7. **Type Safety**: Comprehensive typing prevents runtime errors in research workflows
 8. **Error Resilience**: Graceful degradation and meaningful diagnostics
 
+---
+
+## Framework Generalizability
+
+**Key insight**: Although the current flagship is **SST and structured decoherence**, the architecture is **deliberately general**:
+
+- `src/core/` is not tied to SST — it's pure physics + metrics
+- `src/engine/` doesn't know what "structured decoherence" means — it just orchestrates
+- Only `src/experiments/` carries SST-specific semantics
+
+### ExperimentProgram Abstraction
+
+Experiments should follow a pluggable protocol:
+
+```python
+# src/experiments/base.py
+from typing import Protocol, Mapping, Any
+from src.engine.models import ExperimentConfig, ExperimentResult
+
+class ExperimentProgram(Protocol):
+    """A pluggable experiment program."""
+
+    name: str
+    description: str
+
+    def default_config(self) -> ExperimentConfig:
+        ...
+
+    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
+        ...
+```
+
+### Experiment Registry
+
+```python
+# src/experiments/__init__.py
+EXPERIMENT_REGISTRY = {
+    "sst_q1": SSTHypothesisQ1(),
+    "bell_chsh": BellCHSH(),  # future: non-SST proof of generality
+    # "vqe_benchmark": VQEBenchmark(),
+}
+```
+
+### CLI Principles
+
+The CLI should be **thin and boring**:
+
+- **DO**: Parse args → call `run()` / `ExperimentProgram.run()` → print results
+- **DON'T**: Encode orchestration logic, domain decisions, or complex branching
+
+```python
+# CLI is just: parser + caller + printer
+@app.command()
+def run_experiment(name: str, override: list[str] = []):
+    program = EXPERIMENT_REGISTRY[name]
+    result = program.run(parse_overrides(override))
+    print(result.model_dump_json(indent=2))
+```
+
+### Metrics Stay General, Interpretation Specializes
+
+- `src/core/analysis/metrics/` — **strictly general** (no SST language)
+- `StructuredDecoherenceMetrics` — one *view* over the metric bundle
+- Future: `BenchmarkMetrics`, `EntanglementMetrics`, etc.
+
+The engine routes via `research_type`:
+- `research_type="structured_decoherence"` → SST metrics
+- `research_type="benchmark"` → hardware benchmark metrics
+- etc.
+
+---
+
+## Rules for Claude in This Repo
+
+### DO
+
+- Respect the layered architecture (`experiments → engine → core`)
+- Keep everything deterministic and reproducible
+- Keep metrics mathematically and physically faithful
+- Treat SST as **one experiment program**, not the framework's identity
+- Keep CLI/UI layers thin — they call into the framework, not the reverse
+
+### DO NOT (without being asked)
+
+- Strip out SST language from docs — it's important research context
+- "Simplify" metrics just to make code shorter — they are research-grade on purpose
+- Fold `core` and `engine` together — the layered architecture is a feature
+- Turn this into a product-like framework with web UI, auth, etc.
+- Move physics or metric logic into CLI/UI layers
+
 ## Research Workflow
 
 1. **Design Experiment**: Configure quantum state, noise model, research parameters

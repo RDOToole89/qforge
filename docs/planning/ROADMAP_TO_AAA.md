@@ -160,6 +160,50 @@ Remove legacy code and dead imports from the refactor.
 
 ---
 
+## Phase 7: Framework Generalizability (The "Abstraction")
+
+Make explicit that SST is one use case, not the framework's identity.
+
+### 7.1. ExperimentProgram Abstraction
+
+- **Objective**: Formalize the "pluggable experiment" pattern.
+- **Tasks**:
+  - [ ] **Create Protocol**: Add `src/experiments/base.py` with `ExperimentProgram` protocol
+  - [ ] **Refactor SST Experiments**: Wrap existing `sst_hypothesis_q1.py` to implement the protocol
+  - [ ] **Add Registry**: Create `EXPERIMENT_REGISTRY` in `src/experiments/__init__.py`
+
+### 7.2. Non-SST Experiment (Proof of Generality)
+
+- **Objective**: Prove the framework works for experiments unrelated to structured decoherence.
+- **Tasks**:
+  - [ ] **Bell/CHSH Experiment**: Implement as `src/experiments/bell_chsh.py`
+    - Uses existing Bell state preparation
+    - Computes correlations and violations
+    - Demonstrates framework is not SST-specific
+  - [ ] **Register in EXPERIMENT_REGISTRY**: Make it discoverable
+
+### 7.3. Thin CLI Wrapper
+
+- **Objective**: Provide command-line access without bloating the core.
+- **Tasks**:
+  - [ ] **Create CLI**: Add `src/cli.py` using `typer`
+  - [ ] **Commands**:
+    - `run-config <path>` — Run from JSON config file
+    - `run-experiment <name>` — Run predefined experiment by name
+    - `list-experiments` — List available experiment programs
+  - [ ] **Entry Point**: Add `qxf` command in `pyproject.toml`
+  - [ ] **Keep It Thin**: CLI = parser + caller + printer, no domain logic
+
+### 7.4. Documentation Updates
+
+- **Objective**: Make generalizability obvious to users and contributors.
+- **Tasks**:
+  - [ ] **Architecture Doc**: Add "Experiments as Modular Programs" section
+  - [ ] **Tutorial**: How to add a new experiment using `ExperimentProgram`
+  - [ ] **CLAUDE.md**: Document the abstraction pattern (✅ Done)
+
+---
+
 ## Immediate Next Steps (The "Sprint")
 
 1. **Fix the Science**: Implement `tests/physics/test_analytical.py` to guarantee our metrics are correct.
@@ -167,3 +211,4 @@ Remove legacy code and dead imports from the refactor.
 3. **Document the Theory**: Flesh out `docs/research-docs/` with the mathematical definitions used in the code.
 4. **Audit Legacy Code**: Run comprehensive analysis to identify dead code from refactor.
 5. **Recover Hypergraph**: Extract valuable geometry functions to new `src/core/analysis/geometry/` module.
+6. **Framework Generalizability**: Implement `ExperimentProgram` abstraction and Bell/CHSH experiment.
