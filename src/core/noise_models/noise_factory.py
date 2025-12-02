@@ -2,13 +2,13 @@
 Quantum Noise Model Factory for Research-Grade Decoherence Experiments
 
 # Noise Model Factory
-Centralized factory for creating quantum decoherence channels used in structured 
+Centralized factory for creating quantum decoherence channels used in structured
 pathway research. Provides clean interface between engine and noise classes
 while maintaining separation of concerns and physics compliance.
 
 # Educational Purpose
 This factory demonstrates the Factory Pattern in quantum decoherence applications,
-showing how to manage different environmental coupling mechanisms systematically 
+showing how to manage different environmental coupling mechanisms systematically
 while keeping the interface simple and extensible for research use.
 """
 
@@ -48,38 +48,38 @@ def create_noise_model(
 ) -> NoiseModel:
     """
     Factory function to create noise models for decoherence pathway research.
-    
+
     # Quantum Noise Factory Pattern
-    Creates specific decoherence channels (depolarizing, amplitude damping, etc.) using 
-    a unified interface. Each noise type implements different environmental coupling 
+    Creates specific decoherence channels (depolarizing, amplitude damping, etc.) using
+    a unified interface. Each noise type implements different environmental coupling
     mechanisms for studying how decoherence pathways depend on physical origin.
-    
+
     # Research Applications in Pathway Studies
     - Depolarizing noise: Random Pauli errors → uniform pathway degradation studies
     - Amplitude damping: T1 processes → energy relaxation pathway analysis
     - Phase damping: Pure dephasing → coherence loss pathway investigation
     - Thermal relaxation: Finite temperature → realistic hardware pathway modeling
-    
+
     Args:
         noise_type: Type of decoherence channel to create
         num_qubits: Number of qubits (determines system complexity)
         error_rate: Phenomenological error probability [0, 1]
         custom_params: Noise-specific parameters (T1, T2, temperature, etc.)
         experiment_id: Unique identifier for experiment tracking
-        
+
     Returns:
         NoiseModel: Configured quantum decoherence channel ready for pathway studies
-        
+
     Raises:
         ValueError: If noise_type is invalid or parameters violate physics constraints
-        
+
     Example:
         >>> # Basic depolarizing noise
         >>> noise_model = create_noise_model("DEPOLARIZING", 3, error_rate=0.01)
-        
+
         >>> # Physics-based thermal relaxation
         >>> noise_model = create_noise_model(
-        ...     "THERMAL_RELAXATION", 2, 
+        ...     "THERMAL_RELAXATION", 2,
         ...     custom_params={"t1": 100e-6, "t2": 80e-6, "temperature": 0.015}
         ... )
     """
@@ -90,35 +90,35 @@ def create_noise_model(
             f"Invalid noise type: '{noise_type}'. "
             f"Available noise models: {available_noise}"
         )
-    
+
     try:
         # Create noise instance with physics validation
         noise_class = NOISE_CLASSES[noise_type]
-        
+
         # Prepare parameters for noise creation
         init_params = {
             "num_qubits": num_qubits,
             "experiment_id": experiment_id
         }
-        
+
         # Add error rate if provided
         if error_rate is not None:
             init_params["error_rate"] = error_rate
-        
+
         # Add custom physics parameters
         if custom_params:
             init_params.update(custom_params)
-        
+
         # Create noise instance with comprehensive validation
         noise = noise_class(**init_params)
-        
+
         # Create Qiskit noise model
         noise_model = NoiseModel()
-        
+
         # Apply noise to appropriate gates based on noise type characteristics
         gate_list = _get_appropriate_gates(noise_type, num_qubits)
         noise.apply(noise_model, gate_list)
-        
+
         # Log successful creation with research context
         logger.info(
             f"Created {noise_type} noise model: {num_qubits} qubits, "
@@ -128,9 +128,9 @@ def create_noise_model(
             f"Noise details: {noise_type}, qubits={num_qubits}, "
             f"params={custom_params}"
         )
-        
+
         return noise_model
-        
+
     except Exception as e:
         logger.error(
             f"Noise model creation failed: {noise_type} with {num_qubits} qubits - {e} "
@@ -150,22 +150,22 @@ def create_noise_instance(
 ) -> BaseNoise:
     """
     Create a noise instance without generating the full noise model.
-    
+
     # Noise Instance Factory
     Useful for analysis modules that need access to noise properties
     and theoretical calculations without full noise model construction.
     Mirrors state preparation's create_state_instance() for consistency.
-    
+
     Args:
         noise_type: Type of decoherence channel
         num_qubits: Number of qubits
         error_rate: Phenomenological error probability
         custom_params: Physics parameters (T1, T2, etc.)
         experiment_id: Experiment identifier
-        
+
     Returns:
         BaseNoise: Noise instance for property access and analysis
-        
+
     Example:
         >>> noise = create_noise_instance("DEPOLARIZING", 3, error_rate=0.01)
         >>> properties = noise.get_basic_properties()
@@ -178,28 +178,28 @@ def create_noise_instance(
             f"Invalid noise type: '{noise_type}'. "
             f"Available noise models: {available_noise}"
         )
-    
+
     noise_class = NOISE_CLASSES[noise_type]
-    
+
     # Prepare parameters
     init_params = {
         "num_qubits": num_qubits,
         "experiment_id": experiment_id
     }
-    
+
     if error_rate is not None:
         init_params["error_rate"] = error_rate
-    
+
     if custom_params:
         init_params.update(custom_params)
-    
+
     return noise_class(**init_params)
 
 
 def get_available_noise_types() -> List[str]:
     """
     Get list of all available quantum noise types.
-    
+
     Returns:
         List[str]: Available noise types for factory creation
     """
@@ -216,19 +216,19 @@ def create_noise_model_for_hardware(
 ) -> NoiseModel:
     """
     Create noise model with hardware validation for real quantum devices.
-    
+
     # Hardware-Aware Noise Creation
     This enhanced factory function validates noise compatibility with real quantum
     hardware before model creation, providing early feedback about device
     limitations and suggesting alternatives when needed.
-    
+
     # Real Device Considerations for Noise Models
     - Coherence time constraints (T1/T2 limitations)
     - Gate set limitations and error rate bounds
     - Temperature and environmental constraints
     - Coupling topology restrictions
     - Measurement and control system noise
-    
+
     Args:
         noise_type: Type of decoherence channel to create
         num_qubits: Number of qubits (must match backend constraints)
@@ -236,13 +236,13 @@ def create_noise_model_for_hardware(
         error_rate: Phenomenological error probability
         custom_params: Physics parameters (T1, T2, temperature, etc.)
         experiment_id: Unique identifier for experiment tracking
-        
+
     Returns:
         NoiseModel: Hardware-validated quantum decoherence channel
-        
+
     Raises:
         ValueError: If noise model is incompatible with hardware constraints
-        
+
     Example:
         >>> # For real quantum device
         >>> from qiskit import IBMQ
@@ -252,7 +252,7 @@ def create_noise_model_for_hardware(
         ...     'THERMAL_RELAXATION', 3, backend=backend,
         ...     custom_params={'t1': 100e-6, 't2': 80e-6}
         ... )
-        
+
         >>> # For simulation (no validation)
         >>> noise_model = create_noise_model_for_hardware(
         ...     'DEPOLARIZING', 3, error_rate=0.01
@@ -262,7 +262,7 @@ def create_noise_model_for_hardware(
     noise = create_noise_instance(
         noise_type, num_qubits, error_rate, custom_params, experiment_id
     )
-    
+
     # Perform hardware validation if backend provided
     if backend is not None:
         try:
@@ -277,10 +277,10 @@ def create_noise_model_for_hardware(
                 'temperature': getattr(backend_config, 'temperature', 0.015),  # 15 mK typical
                 'backend_name': backend_config.backend_name
             }
-            
+
             # Validate noise compatibility with hardware
             hardware_warnings = noise.validate_for_hardware(backend_constraints)
-            
+
             if hardware_warnings:
                 warning_msg = (
                     f"Hardware compatibility issues for {noise_type} noise "
@@ -288,7 +288,7 @@ def create_noise_model_for_hardware(
                     "\\n".join(f"  - {warning}" for warning in hardware_warnings)
                 )
                 logger.warning(warning_msg)
-                
+
                 # For critical issues, raise error
                 critical_keywords = ['exceeds', 'below', 'unsupported', 'incompatible']
                 if any(keyword in warning.lower() for warning in hardware_warnings for keyword in critical_keywords):
@@ -296,17 +296,17 @@ def create_noise_model_for_hardware(
                         f"Noise {noise_type} is incompatible with backend {backend_constraints['backend_name']}. "
                         f"Issues: {hardware_warnings}"
                     )
-            
+
             logger.info(
                 f"Hardware validation passed for {noise_type} noise "
                 f"on {backend_constraints['backend_name']} "
                 f"({num_qubits}/{backend_constraints['max_qubits']} qubits used)"
             )
-            
+
         except Exception as e:
             logger.error(f"Hardware validation failed: {e}")
             raise ValueError(f"Cannot validate hardware compatibility: {e}") from e
-    
+
     # Create the actual noise model
     return create_noise_model(noise_type, num_qubits, error_rate, custom_params, experiment_id)
 
@@ -319,33 +319,33 @@ def validate_noise_request(
 ) -> List[str]:
     """
     Validate noise creation request before attempting model creation.
-    
+
     # Pre-flight Validation
     Catches common errors before expensive quantum noise model creation,
     providing educational feedback about quantum decoherence constraints
     and physics limitations.
-    
+
     Args:
         noise_type: Requested noise type
         num_qubits: Number of qubits
         error_rate: Error rate parameter
         custom_params: Physics parameters
-        
+
     Returns:
         List[str]: List of validation warnings (empty if valid)
-        
+
     Example:
         >>> warnings = validate_noise_request("DEPOLARIZING", 15, error_rate=0.9)
         >>> if warnings:
         >>>     print("Warnings:", warnings)
     """
     warnings = []
-    
+
     # Check noise type
     if noise_type not in NOISE_CLASSES:
         warnings.append(f"Unknown noise type: {noise_type}")
         return warnings
-    
+
     # Check qubit count
     if num_qubits < 1:
         warnings.append("Noise models require at least 1 qubit")
@@ -355,7 +355,7 @@ def validate_noise_request(
             f"4^{num_qubits} = {4**num_qubits:,} Kraus elements - "
             f"consider smaller systems for efficient simulation"
         )
-    
+
     # Check error rate bounds
     if error_rate is not None:
         if not 0 <= error_rate <= 1:
@@ -365,7 +365,7 @@ def validate_noise_request(
                 f"High error rate ({error_rate:.3f}) may indicate regime "
                 f"where quantum advantage is lost"
             )
-    
+
     # Noise-specific validations
     if noise_type == "DEPOLARIZING" and error_rate is not None:
         max_depol_rate = 1 - (1 / (4**num_qubits))
@@ -374,7 +374,7 @@ def validate_noise_request(
                 f"Depolarizing error rate {error_rate:.4f} exceeds physical bound "
                 f"{max_depol_rate:.4f} for {num_qubits} qubits"
             )
-    
+
     # Physics parameter validations
     if custom_params:
         t1 = custom_params.get('t1')
@@ -383,39 +383,39 @@ def validate_noise_request(
             warnings.append(
                 f"T2 ({t2:.2e}s) cannot exceed 2*T1 ({2*t1:.2e}s) - violates quantum physics"
             )
-        
+
         temperature = custom_params.get('temperature')
         if temperature and temperature < 0:
             warnings.append(f"Temperature must be non-negative, got {temperature}K")
-    
+
     return warnings
 
 
 def _get_appropriate_gates(noise_type: str, num_qubits: int) -> List[str]:
     """
     Get appropriate gate list for specific noise type.
-    
+
     # Gate Selection Strategy
     Different noise types affect different classes of quantum gates:
     - Single-qubit coherent errors: affect single-qubit gates
     - Thermal processes: affect all gates during execution
     - Correlated errors: affect multi-qubit entangling gates
-    
+
     Args:
         noise_type: Type of noise channel
         num_qubits: Number of qubits in system
-        
+
     Returns:
         List of gate names appropriate for this noise type
     """
     # Gate classifications for different noise mechanisms
     single_qubit_gates = ['id', 'u1', 'u2', 'u3', 'h', 'x', 'y', 'z', 's', 't']
     two_qubit_gates = ['cx', 'cy', 'cz', 'ch', 'swap', 'iswap']
-    
+
     # Noise type specific gate selections
     if noise_type in ['BIT_FLIP', 'PHASE_FLIP', 'AMPLITUDE_DAMPING', 'PHASE_DAMPING']:
-        # Single-qubit processes primarily affect single-qubit operations
-        return single_qubit_gates
+        # Single-qubit processes affect all operations (applied to each qubit involved)
+        return single_qubit_gates + two_qubit_gates
     elif noise_type in ['DEPOLARIZING', 'THERMAL_RELAXATION']:
         # Global processes affect all gate types
         if num_qubits == 1:
@@ -432,15 +432,15 @@ def _get_appropriate_gates(noise_type: str, num_qubits: int) -> List[str]:
 def get_noise_info() -> Dict[str, Dict[str, str]]:
     """
     Get comprehensive information about all available noise types.
-    
+
     # Educational Noise Catalog
     Provides detailed descriptions of each noise mechanism for educational
     purposes and research planning. Helps users understand which noise types
     are appropriate for their specific pathway hypothesis testing.
-    
+
     Returns:
         Dict mapping noise types to their descriptions and applications
-        
+
     Example:
         >>> info = get_noise_info()
         >>> print(info["DEPOLARIZING"]["description"])
