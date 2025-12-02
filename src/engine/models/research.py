@@ -17,9 +17,11 @@ Used by: Engine analysis pipeline, research result storage, publications
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Tuple
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
+
 from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class StructuredDecoherenceMetrics(BaseModel):
@@ -49,33 +51,33 @@ class StructuredDecoherenceMetrics(BaseModel):
         description="EEC: Correlation between entanglement topology and error patterns. Range: [-1, 1]",
     )
 
-    temporal_pathway_stability: Optional[float] = Field(
+    temporal_pathway_stability: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
         description="TPS: Consistency of pathway rankings across noise levels. Range: [0, 1], None if single condition",
     )
 
-    complexity_emergence_score: Optional[float] = Field(
+    complexity_emergence_score: float | None = Field(
         default=None,
         ge=0.0,
         description="CES: Critical threshold where structured patterns emerge. None if insufficient data",
     )
 
     # ===== New Schema Metrics =====
-    structure_score: Optional[float] = Field(
+    structure_score: float | None = Field(
         default=None,
         ge=0.0,
         description="SS: Jensen-Shannon divergence from null model. Measures structure vs randomness",
     )
 
-    concentration_index: Optional[float] = Field(
+    concentration_index: float | None = Field(
         default=None,
         ge=0.0,
         description="CI: Gini coefficient of error distribution. Measures inequality in error patterns",
     )
 
-    total_correlation: Optional[float] = Field(
+    total_correlation: float | None = Field(
         default=None,
         ge=0.0,
         description="TC: Multi-information in quantum measurements. Measures total correlation among qubits",
@@ -131,20 +133,18 @@ class AnalysisMetadata(BaseModel):
     state_type: str = Field(description="Quantum state type (GHZ, W, BELL, etc.)")
     num_qubits: int = Field(ge=1, description="Number of qubits in the system")
     total_shots: int = Field(ge=1, description="Total measurement shots used")
-    unique_outcomes: int = Field(
-        ge=1, description="Number of unique measurement outcomes"
-    )
+    unique_outcomes: int = Field(ge=1, description="Number of unique measurement outcomes")
 
     analysis_timestamp: str = Field(
         default_factory=lambda: datetime.now().isoformat(),
         description="When the analysis was performed",
     )
 
-    noise_conditions: Optional[Dict[str, Any]] = Field(
+    noise_conditions: dict[str, Any] | None = Field(
         default=None, description="Noise model parameters used"
     )
 
-    computation_time_ms: Optional[float] = Field(
+    computation_time_ms: float | None = Field(
         default=None,
         ge=0.0,
         description="Time taken to compute metrics in milliseconds",
@@ -155,7 +155,7 @@ class PathwayAnalysis(BaseModel):
     """Human-readable analysis of decoherence pathways."""
 
     # Dominant pathways (bitstring, probability) pairs
-    dominant_pathways: List[Tuple[str, float]] = Field(
+    dominant_pathways: list[tuple[str, float]] = Field(
         description="Top error pathways as (bitstring, probability) pairs"
     )
 
@@ -163,9 +163,7 @@ class PathwayAnalysis(BaseModel):
         description="Qualitative assessment of pathway concentration"
     )
 
-    asymmetry_level: str = Field(
-        description="Qualitative level of asymmetry in error distribution"
-    )
+    asymmetry_level: str = Field(description="Qualitative level of asymmetry in error distribution")
 
     entanglement_influence: str = Field(
         description="Qualitative assessment of entanglement topology influence"
@@ -176,15 +174,15 @@ class PathwayAnalysis(BaseModel):
     measurement_shots: int = Field(ge=1, description="Measurement shots used")
 
     # Research insights
-    research_notes: Optional[str] = Field(
+    research_notes: str | None = Field(
         default=None, description="Additional research insights or observations"
     )
 
     @field_validator("dominant_pathways")
     @classmethod
     def _validate_dominant_probabilities(
-        cls, v: List[Tuple[str, float]]
-    ) -> List[Tuple[str, float]]:
+        cls, v: list[tuple[str, float]]
+    ) -> list[tuple[str, float]]:
         """Ensure probabilities are within [0, 1]."""
         for bitstring, p in v:
             if p < 0.0 or p > 1.0:
@@ -240,22 +238,20 @@ class ResearchMetadata(BaseModel):
     """
 
     # Research context
-    hypothesis: Optional[str] = Field(
-        default=None, description="Research hypothesis being tested"
-    )
+    hypothesis: str | None = Field(default=None, description="Research hypothesis being tested")
 
-    research_phase: Optional[str] = Field(
+    research_phase: str | None = Field(
         default=None,
         description="Phase of research (threshold, characterization, validation, etc.)",
     )
 
-    campaign_id: Optional[str] = Field(
+    campaign_id: str | None = Field(
         default=None,
         description="Research campaign identifier for grouping related experiments",
     )
 
     # Experimental conditions
-    expected_outcomes: Optional[List[str]] = Field(
+    expected_outcomes: list[str] | None = Field(
         default=None, description="Expected experimental outcomes or predictions"
     )
 
@@ -283,42 +279,42 @@ class ComparisonMetrics(BaseModel):
     """
 
     # Statistical comparison
-    baseline_metrics: Optional[StructuredDecoherenceMetrics] = Field(
+    baseline_metrics: StructuredDecoherenceMetrics | None = Field(
         default=None, description="Baseline metrics for comparison"
     )
 
-    delta_asymmetry_index: Optional[float] = Field(
+    delta_asymmetry_index: float | None = Field(
         default=None, description="Change in AI relative to baseline"
     )
 
-    delta_pathway_concentration: Optional[float] = Field(
+    delta_pathway_concentration: float | None = Field(
         default=None, description="Change in PCR relative to baseline"
     )
 
-    delta_entanglement_correlation: Optional[float] = Field(
+    delta_entanglement_correlation: float | None = Field(
         default=None, description="Change in EEC relative to baseline"
     )
 
     # Significance testing
-    statistical_significance: Optional[float] = Field(
+    statistical_significance: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
         description="P-value for statistical significance of differences",
     )
 
-    effect_size: Optional[float] = Field(
+    effect_size: float | None = Field(
         default=None, description="Effect size (Cohen's d) for practical significance"
     )
 
     # Trend analysis
-    trend_direction: Optional[str] = Field(
+    trend_direction: str | None = Field(
         default=None, description="Overall trend direction across conditions"
     )
 
     @field_validator("trend_direction")
     @classmethod
-    def validate_trend_direction(cls, v: Optional[str]) -> Optional[str]:
+    def validate_trend_direction(cls, v: str | None) -> str | None:
         """Validate trend direction."""
         if v is not None:
             valid_trends = [

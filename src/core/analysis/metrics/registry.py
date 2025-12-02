@@ -11,9 +11,9 @@ This module provides:
 - Status determination logic for research quality assessment
 """
 
-from typing import TypedDict, Literal, Callable, Any, Dict, List, Optional, Tuple
 import logging
 from functools import wraps
+from typing import Any, Callable, Literal, Optional, TypedDict
 
 # NOTE: we import constants & bootstrap lazily inside wrappers to avoid circular imports
 from ..constants import STATUS_BAND_WIDTH
@@ -24,21 +24,19 @@ logger = logging.getLogger(__name__)
 # Types & global registry
 # -----------------------
 
-Status = Literal[
-    "validated", "experimental", "unstable", "insufficient_runs", "insufficient_data"
-]
+Status = Literal["validated", "experimental", "unstable", "insufficient_runs", "insufficient_data"]
 
 
 class MetricResult(TypedDict, total=False):
     """Standardized metric result with confidence intervals and status."""
 
     value: float
-    ci95: Tuple[float, float]
+    ci95: tuple[float, float]
     status: Status
-    extras: Dict[str, Any]
+    extras: dict[str, Any]
 
 
-_METRIC_REGISTRY: Dict[str, Callable[..., MetricResult]] = {}
+_METRIC_REGISTRY: dict[str, Callable[..., MetricResult]] = {}
 
 # -----------------------
 # Core registry utilities
@@ -123,9 +121,7 @@ def compute_metric(name: str, **kwargs) -> MetricResult:
         )
 
 
-def compute_all(
-    metric_names: Optional[List[str]] = None, **kwargs
-) -> Dict[str, MetricResult]:
+def compute_all(metric_names: Optional[list[str]] = None, **kwargs) -> dict[str, MetricResult]:
     """
     Compute multiple metrics with shared parameters.
 
@@ -149,7 +145,7 @@ def compute_all(
     if metric_names is None:
         metric_names = list(_METRIC_REGISTRY.keys())
 
-    results: Dict[str, MetricResult] = {}
+    results: dict[str, MetricResult] = {}
 
     # Preflight presence checks for conditional metrics
     has_rankings = ("rankings" in kwargs and kwargs["rankings"]) or (
@@ -203,7 +199,7 @@ def compute_all(
 
 
 def determine_status(
-    value: float, ci95: Tuple[float, float], extras: Optional[Dict[str, Any]] = None
+    value: float, ci95: tuple[float, float], extras: Optional[dict[str, Any]] = None
 ) -> Status:
     """
     Determine research quality status based on confidence interval and additional criteria.
@@ -259,11 +255,7 @@ def determine_status(
 
     # Narrow CI & significant → validated
     if rel <= STATUS_BAND_WIDTH:
-        return (
-            "validated"
-            if (p_value < 0.05 or "p_null" not in extras)
-            else "experimental"
-        )
+        return "validated" if (p_value < 0.05 or "p_null" not in extras) else "experimental"
 
     # Moderate CI → experimental
     if rel <= 0.4:
@@ -291,7 +283,9 @@ def _register_default_wrappers() -> None:
         try:
             # Prefer dedicated structure_score if available
             try:
-                from .structure_score import compute_structure_score as _ss  # type: ignore
+                from .structure_score import (
+                    compute_structure_score as _ss,  # type: ignore
+                )
 
                 value = float(_ss(counts=counts).get("value", 0.0))
                 ci95 = tuple(
@@ -299,11 +293,15 @@ def _register_default_wrappers() -> None:
                 )  # if their module returns MetricResult
             except Exception:
                 # Fallback to AI
-                from .asymmetry_index import compute_asymmetry_index as _ai  # type: ignore
-                from ..core.bootstrap import bootstrap_confidence_interval as _bci  # type: ignore
                 from ..constants import DEFAULT_BOOTSTRAP_B as _B  # type: ignore
+                from ..core.bootstrap import (
+                    bootstrap_confidence_interval as _bci,  # type: ignore
+                )
+                from .asymmetry_index import (
+                    compute_asymmetry_index as _ai,  # type: ignore
+                )
 
-                def _stat(c: Dict[str, int]) -> float:
+                def _stat(c: dict[str, int]) -> float:
                     return float(_ai(c))
 
                 value = _stat(counts)
@@ -317,11 +315,7 @@ def _register_default_wrappers() -> None:
 
             extras = {
                 "method": "structure_score",
-                "proxy": (
-                    "asymmetry_index"
-                    if "compute_asymmetry_index" in locals()
-                    else "native"
-                ),
+                "proxy": ("asymmetry_index" if "compute_asymmetry_index" in locals() else "native"),
                 "n_samples": sum(counts.values()) if counts else 0,
                 "n_outcomes": len(counts),
             }
@@ -339,19 +333,21 @@ def _register_default_wrappers() -> None:
         counts = kwargs.get("counts", {}) or {}
         state_type = kwargs.get("state_type", "GHZ")
         try:
-            from .entanglement_error_correlation import compute_entanglement_error_correlation as _eec  # type: ignore
-            from ..core.bootstrap import bootstrap_confidence_interval as _bci  # type: ignore
             from ..constants import DEFAULT_BOOTSTRAP_B as _B  # type: ignore
+            from ..core.bootstrap import (
+                bootstrap_confidence_interval as _bci,  # type: ignore
+            )
+            from .entanglement_error_correlation import (
+                compute_entanglement_error_correlation as _eec,  # type: ignore
+            )
 
-            def _stat(c: Dict[str, int]) -> float:
+            def _stat(c: dict[str, int]) -> float:
                 v = float(_eec(c, state_type=state_type))
                 # Defensive clip in case of numerical edge cases
                 return float(max(-1.0, min(1.0, v)))
 
             value = _stat(counts)
-            lo, hi = _bci(
-                counts, _stat, n_bootstrap=kwargs.get("B", _B), rng=kwargs.get("rng")
-            )
+            lo, hi = _bci(counts, _stat, n_bootstrap=kwargs.get("B", _B), rng=kwargs.get("rng"))
             ci95 = (float(lo), float(hi))
 
             extras = {
@@ -373,17 +369,19 @@ def _register_default_wrappers() -> None:
     def _wrap_concentration(**kwargs) -> MetricResult:
         counts = kwargs.get("counts", {}) or {}
         try:
-            from .pathway_concentration_ratio import compute_pathway_concentration_ratio as _pcr  # type: ignore
-            from ..core.bootstrap import bootstrap_confidence_interval as _bci  # type: ignore
             from ..constants import DEFAULT_BOOTSTRAP_B as _B  # type: ignore
+            from ..core.bootstrap import (
+                bootstrap_confidence_interval as _bci,  # type: ignore
+            )
+            from .pathway_concentration_ratio import (
+                compute_pathway_concentration_ratio as _pcr,  # type: ignore
+            )
 
-            def _stat(c: Dict[str, int]) -> float:
+            def _stat(c: dict[str, int]) -> float:
                 return float(_pcr(c))
 
             value = _stat(counts)
-            lo, hi = _bci(
-                counts, _stat, n_bootstrap=kwargs.get("B", _B), rng=kwargs.get("rng")
-            )
+            lo, hi = _bci(counts, _stat, n_bootstrap=kwargs.get("B", _B), rng=kwargs.get("rng"))
             ci95 = (float(lo), float(hi))
 
             extras = {
@@ -412,7 +410,9 @@ def _register_default_wrappers() -> None:
                 extras={"reason": "Missing 'rankings' (or 'pathway_rankings') input"},
             )
         try:
-            from .temporal_pathway_stability import compute_temporal_pathway_stability as _tps  # type: ignore
+            from .temporal_pathway_stability import (
+                compute_temporal_pathway_stability as _tps,  # type: ignore
+            )
 
             value = float(_tps(rankings, return_analysis=False))
             # TPS is a derived stability ratio; provide a conservative CI band if not bootstrapping
@@ -440,7 +440,9 @@ def _register_default_wrappers() -> None:
                 extras={"reason": "Missing 'multi_qubit_data' series"},
             )
         try:
-            from .complexity_emergence_score import compute_complexity_emergence_score as _ces  # type: ignore
+            from .complexity_emergence_score import (
+                compute_complexity_emergence_score as _ces,  # type: ignore
+            )
 
             # Return analysis if available to expose extras; else just value
             analysis_or_value = _ces(multi_qubit_data, return_analysis=True)
@@ -474,12 +476,8 @@ def _register_default_wrappers() -> None:
 
     # --- Aliases for backward compatibility ---
     _METRIC_REGISTRY["asymmetry_index"] = _METRIC_REGISTRY["structure_score"]
-    _METRIC_REGISTRY["pathway_concentration_ratio"] = _METRIC_REGISTRY[
-        "concentration_index"
-    ]
-    _METRIC_REGISTRY["temporal_pathway_stability"] = _METRIC_REGISTRY[
-        "pathway_persistence"
-    ]
+    _METRIC_REGISTRY["pathway_concentration_ratio"] = _METRIC_REGISTRY["concentration_index"]
+    _METRIC_REGISTRY["temporal_pathway_stability"] = _METRIC_REGISTRY["pathway_persistence"]
 
     logger.debug("Default wrappers registered (canonical + aliases)")
 

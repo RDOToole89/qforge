@@ -37,19 +37,16 @@ References:
 - Gini (1912), "Measurement of Inequality of Incomes"
 """
 
-import numpy as np
 import logging
-from typing import Mapping, Tuple, List, Optional, Union
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Union
+
+import numpy as np
 
 from ..constants import (
-    ALPHA,
     validate_counts_dict,
-    STRUCTURE_WEAK_THRESHOLD,
-    STRUCTURE_MODERATE_THRESHOLD,
-    STRUCTURE_STRONG_THRESHOLD,
 )
-from ..core.information_theory import counts_to_probabilities
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +65,8 @@ class ConcentrationAnalysis:
     top_quartile_share: float
     bottom_quartile_share: float
     concentration_evidence: str  # "uniform", "moderate", "high", "extreme"
-    dominant_pathways: List[str]
-    rare_pathways: List[str]
+    dominant_pathways: list[str]
+    rare_pathways: list[str]
     inequality_summary: str
 
     def to_dict(self) -> dict:
@@ -191,9 +188,7 @@ def compute_pathway_concentration_ratio(
             )
 
     n_outcomes = len(counts_clean)
-    logger.debug(
-        f"Computing PCR for {n_outcomes} outcomes, adaptive={adaptive_quartiles}"
-    )
+    logger.debug(f"Computing PCR for {n_outcomes} outcomes, adaptive={adaptive_quartiles}")
 
     # Sort frequencies in descending order
     frequencies = sorted(counts_clean.values(), reverse=True)
@@ -217,9 +212,7 @@ def compute_pathway_concentration_ratio(
 
     # Handle edge case: bottom quartile has zero frequency
     if bottom_quartile_sum == 0:
-        logger.warning(
-            "Bottom quartile has zero frequency - extreme concentration detected"
-        )
+        logger.warning("Bottom quartile has zero frequency - extreme concentration detected")
         pcr = float("inf")
     else:
         pcr = top_quartile_sum / bottom_quartile_sum
@@ -240,7 +233,7 @@ def compute_pathway_concentration_ratio(
     )
 
 
-def compute_concentration_with_gini(counts: Mapping[str, int]) -> Tuple[float, float]:
+def compute_concentration_with_gini(counts: Mapping[str, int]) -> tuple[float, float]:
     """
     Compute both PCR and Gini coefficient for comprehensive inequality analysis.
 
@@ -283,9 +276,9 @@ def compute_concentration_with_gini(counts: Mapping[str, int]) -> Tuple[float, f
     else:
         # Standard Gini coefficient formula
         cumsum = np.cumsum(asc)
-        gini = (2.0 * np.sum(np.arange(1, n + 1, dtype=float) * asc)) / (
-            n * cumsum[-1]
-        ) - (n + 1) / n
+        gini = (2.0 * np.sum(np.arange(1, n + 1, dtype=float) * asc)) / (n * cumsum[-1]) - (
+            n + 1
+        ) / n
     gini = max(0.0, gini)  # Ensure non-negative
 
     logger.debug(f"Concentration measures: PCR={pcr:.3f}, Gini={gini:.3f}")
@@ -294,7 +287,7 @@ def compute_concentration_with_gini(counts: Mapping[str, int]) -> Tuple[float, f
 
 def _generate_concentration_analysis(
     pcr: float,
-    frequencies: List[int],
+    frequencies: list[int],
     counts_clean: dict,
     top_k: int,
     bottom_k: int,
@@ -316,9 +309,9 @@ def _generate_concentration_analysis(
     n = len(frequencies)
     if n > 1:
         cumsum = np.cumsum(sorted(frequencies))
-        gini = (2.0 * np.sum(np.arange(1, n + 1) * sorted(frequencies))) / (
-            n * cumsum[-1]
-        ) - (n + 1) / n
+        gini = (2.0 * np.sum(np.arange(1, n + 1) * sorted(frequencies))) / (n * cumsum[-1]) - (
+            n + 1
+        ) / n
         gini = max(0.0, gini)
     else:
         gini = 0.0
@@ -338,7 +331,7 @@ def _generate_concentration_analysis(
     else:
         summary = (
             f"PCR={pcr:.2f} ({concentration_evidence} concentration): "
-            f"top {100*top_quartile_share:.1f}% vs bottom {100*bottom_quartile_share:.1f}% "
+            f"top {100 * top_quartile_share:.1f}% vs bottom {100 * bottom_quartile_share:.1f}% "
             f"of total probability mass"
         )
 
@@ -393,9 +386,7 @@ def validate_pcr_properties(
     # Property 3: Uniform distribution gives PCR ≈ 1.0
     unique_counts = set(counts_clean.values())
     if len(unique_counts) == 1 and len(counts_clean) > 1:  # All counts equal
-        assert (
-            abs(pcr - 1.0) <= tolerance
-        ), f"PCR={pcr} should be ~1.0 for uniform distribution"
+        assert abs(pcr - 1.0) <= tolerance, f"PCR={pcr} should be ~1.0 for uniform distribution"
 
     # Property 4: Single outcome gives PCR = ∞
     if len(counts_clean) == 1:

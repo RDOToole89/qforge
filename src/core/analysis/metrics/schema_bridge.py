@@ -25,8 +25,9 @@ and research tooling that depends on the frozen schema format.
 """
 
 import logging
+from collections.abc import Mapping
 from math import isfinite
-from typing import Dict, Any, Mapping
+from typing import Any
 
 from .registry import MetricResult
 
@@ -39,7 +40,7 @@ __all__ = [
 ]
 
 
-def metrics_to_schema(results: Mapping[str, MetricResult]) -> Dict[str, Any]:
+def metrics_to_schema(results: Mapping[str, MetricResult]) -> dict[str, Any]:
     """
     Convert MetricResult dictionary to v1.0 schema format.
 
@@ -77,7 +78,7 @@ def metrics_to_schema(results: Mapping[str, MetricResult]) -> Dict[str, Any]:
         >>> assert schema_data["schema_version"] == "1.0"
         >>> assert "structure_score" in schema_data
     """
-    schema_output: Dict[str, Any] = {"schema_version": "1.0"}
+    schema_output: dict[str, Any] = {"schema_version": "1.0"}
 
     # Canonical names expected by the schema
     core_metrics = [
@@ -92,7 +93,7 @@ def metrics_to_schema(results: Mapping[str, MetricResult]) -> Dict[str, Any]:
     ]
 
     # Normalize keys: allow callers to pass aliases and map to canonical names.
-    normalized: Dict[str, MetricResult] = _normalize_result_keys(results)
+    normalized: dict[str, MetricResult] = _normalize_result_keys(results)
 
     # Process core metrics (required)
     for metric_name in core_metrics:
@@ -123,22 +124,20 @@ def metrics_to_schema(results: Mapping[str, MetricResult]) -> Dict[str, Any]:
 
 def _normalize_result_keys(
     results: Mapping[str, MetricResult],
-) -> Dict[str, MetricResult]:
+) -> dict[str, MetricResult]:
     """
     Normalize a results mapping that may contain alias keys into canonical keys.
 
     Canonical names take precedence when both canonical and alias are present.
     """
-    mapping = (
-        get_schema_field_mapping()
-    )  # alias -> canonical (contains canonical->canonical too)
+    mapping = get_schema_field_mapping()  # alias -> canonical (contains canonical->canonical too)
 
     # Build reverse lookup: canonical -> [aliases...]
-    reverse: Dict[str, list[str]] = {}
+    reverse: dict[str, list[str]] = {}
     for alias, canonical in mapping.items():
         reverse.setdefault(canonical, []).append(alias)
 
-    normalized: Dict[str, MetricResult] = {}
+    normalized: dict[str, MetricResult] = {}
 
     # Prefer canonical keys if present
     for canonical, aliases in reverse.items():
@@ -148,9 +147,7 @@ def _normalize_result_keys(
         # else try aliases in order
         for alias in aliases:
             if alias != canonical and alias in results:
-                logger.debug(
-                    "Using alias '%s' for canonical metric '%s'", alias, canonical
-                )
+                logger.debug("Using alias '%s' for canonical metric '%s'", alias, canonical)
                 normalized[canonical] = results[alias]
                 break
 
@@ -162,7 +159,7 @@ def _normalize_result_keys(
     return normalized
 
 
-def _convert_metric_result(result: MetricResult, metric_name: str) -> Dict[str, Any]:
+def _convert_metric_result(result: MetricResult, metric_name: str) -> dict[str, Any]:
     """
     Convert single MetricResult to schema format with validation.
 
@@ -190,9 +187,7 @@ def _convert_metric_result(result: MetricResult, metric_name: str) -> Dict[str, 
         )
     value = float(value)
     if not isfinite(value):
-        raise ValueError(
-            f"MetricResult value for '{metric_name}' must be finite, got {value}"
-        )
+        raise ValueError(f"MetricResult value for '{metric_name}' must be finite, got {value}")
 
     # Validate status
     valid_statuses = {
@@ -209,31 +204,25 @@ def _convert_metric_result(result: MetricResult, metric_name: str) -> Dict[str, 
         )
 
     # Build schema result
-    schema_result: Dict[str, Any] = {"value": value, "status": status}
+    schema_result: dict[str, Any] = {"value": value, "status": status}
 
     # Add/validate confidence interval if present
     if "ci95" in result:
         ci95 = result["ci95"]
         if not (isinstance(ci95, (list, tuple)) and len(ci95) == 2):
-            raise ValueError(
-                f"ci95 for '{metric_name}' must be 2-element list/tuple, got {ci95}"
-            )
+            raise ValueError(f"ci95 for '{metric_name}' must be 2-element list/tuple, got {ci95}")
         try:
             lo = float(ci95[0])
             hi = float(ci95[1])
-        except Exception:
+        except Exception as e:
             raise ValueError(
                 f"ci95 bounds for '{metric_name}' must be numeric, got {ci95!r}"
-            )
+            ) from e
         if not (isfinite(lo) and isfinite(hi)):
-            raise ValueError(
-                f"ci95 bounds for '{metric_name}' must be finite, got ({lo}, {hi})"
-            )
+            raise ValueError(f"ci95 bounds for '{metric_name}' must be finite, got ({lo}, {hi})")
         # Ensure canonical ordering: lower <= upper
         if lo > hi:
-            logger.debug(
-                "Swapping ci95 bounds for '%s' (lo=%s, hi=%s)", metric_name, lo, hi
-            )
+            logger.debug("Swapping ci95 bounds for '%s' (lo=%s, hi=%s)", metric_name, lo, hi)
             lo, hi = hi, lo
         schema_result["ci95"] = [lo, hi]
 
@@ -241,15 +230,13 @@ def _convert_metric_result(result: MetricResult, metric_name: str) -> Dict[str, 
     if "extras" in result and result["extras"]:
         extras = result["extras"]
         if not isinstance(extras, dict):
-            raise ValueError(
-                f"'extras' for '{metric_name}' must be a dict, got {type(extras)}"
-            )
+            raise ValueError(f"'extras' for '{metric_name}' must be a dict, got {type(extras)}")
         schema_result["extras"] = extras
 
     return schema_result
 
 
-def validate_schema_output(schema_data: Dict[str, Any]) -> bool:
+def validate_schema_output(schema_data: dict[str, Any]) -> bool:
     """
     Validate that schema output conforms to v1.0 requirements.
 
@@ -301,7 +288,7 @@ def validate_schema_output(schema_data: Dict[str, Any]) -> bool:
     return True
 
 
-def get_schema_field_mapping() -> Dict[str, str]:
+def get_schema_field_mapping() -> dict[str, str]:
     """
     Get mapping from registry metric names to schema field names.
 

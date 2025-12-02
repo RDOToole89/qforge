@@ -30,31 +30,34 @@ References:
 - Nielsen & Chuang (2010), "Quantum Computation and Quantum Information"
 """
 
+import logging
+from collections.abc import Mapping
+from typing import Optional
+
 import numpy as np
 import numpy.linalg as npl
-import logging
-from typing import Dict, Mapping, Optional, Tuple, List
 from numpy.typing import NDArray
+
+from ..constants import (
+    ALPHA,
+    DEFAULT_BOOTSTRAP_B,
+    MAX_OUTCOMES_EXACT,
+    TIKHONOV_LAMBDA,
+    validate_counts_dict,
+)
 
 # Import canonical helpers from information_theory
 from .information_theory import (
     all_bitstrings,
-    n_qubits_from_counts,
     marginal_distribution,
-)
-from ..constants import (
-    ALPHA,
-    TIKHONOV_LAMBDA,
-    DEFAULT_BOOTSTRAP_B,
-    MAX_OUTCOMES_EXACT,
-    validate_counts_dict,
+    n_qubits_from_counts,
 )
 
 logger = logging.getLogger(__name__)
 
 # Type aliases for readability
 Counts = Mapping[str, int]
-Probs = Dict[str, float]
+Probs = dict[str, float]
 
 
 def factorized_null_model(counts: Counts, alpha: float = ALPHA) -> Probs:
@@ -117,7 +120,7 @@ def factorized_null_model(counts: Counts, alpha: float = ALPHA) -> Probs:
     # Canonical lexicographic order over full support
     order = all_bitstrings(n)
 
-    null_model: Dict[str, float] = {}
+    null_model: dict[str, float] = {}
     for bs in order:
         p = 1.0
         for i, b in enumerate(bs):
@@ -141,7 +144,7 @@ def sample_multinomial_counts(
     rng: np.random.Generator,
     order: Optional[list[str]] = None,
     drop_zeros: bool = True,
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Sample one counts dict from Mult(N, probs) with a deterministic key order.
 
     - Uses lexicographically sorted keys by default for canonical ordering.
@@ -166,10 +169,10 @@ def sample_multinomial_counts(
 
 
 def generate_null_samples(
-    null_model: Dict[str, float],
+    null_model: dict[str, float],
     num_samples: int,
     rng: np.random.Generator,
-) -> List[Dict[str, int]]:
+) -> list[dict[str, int]]:
     """Return a single sampled dataset from the null model (wrapped in a list)."""
     if not null_model:
         raise ValueError("Empty null model")
@@ -184,7 +187,7 @@ def parametric_bootstrap_null(
     observed_counts: Mapping[str, int],
     n_bootstrap: int = DEFAULT_BOOTSTRAP_B,
     rng: Optional[np.random.Generator] = None,
-) -> List[Dict[str, int]]:
+) -> list[dict[str, int]]:
     """
     Perform parametric bootstrap under factorized null model.
 
@@ -231,7 +234,7 @@ def parametric_bootstrap_null(
     Q = factorized_null_model(counts_clean)  # already canonical order
 
     # Generate B synthetic datasets
-    out: List[Dict[str, int]] = []
+    out: list[dict[str, int]] = []
     for _ in range(n_bootstrap):
         syn = sample_multinomial_counts(Q, N, rng)
         out.append(syn)
@@ -241,9 +244,9 @@ def parametric_bootstrap_null(
 
 def readout_confusion_model(
     counts: Mapping[str, int],
-    confusion_matrices: List[NDArray[np.float64]],
+    confusion_matrices: list[NDArray[np.float64]],
     regularization: float = TIKHONOV_LAMBDA,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Apply readout confusion correction to measurement counts.
 
@@ -291,16 +294,12 @@ def readout_confusion_model(
     n_qubits = len(next(iter(counts_clean.keys())))
 
     if len(confusion_matrices) != n_qubits:
-        raise ValueError(
-            f"Need {n_qubits} confusion matrices, got {len(confusion_matrices)}"
-        )
+        raise ValueError(f"Need {n_qubits} confusion matrices, got {len(confusion_matrices)}")
 
     # Validate confusion matrices
     for i, C in enumerate(confusion_matrices):
         if C.shape != (2, 2):
-            raise ValueError(
-                f"Confusion matrix {i} has shape {C.shape}, expected (2,2)"
-            )
+            raise ValueError(f"Confusion matrix {i} has shape {C.shape}, expected (2,2)")
         if not np.allclose(C.sum(axis=1), 1.0, atol=1e-12):
             raise ValueError(f"Confusion matrix {i} rows don't sum to 1")
         if np.any(C < 0) or np.any(C > 1):
@@ -343,9 +342,7 @@ def readout_confusion_model(
         try:
             corrected_marginal = npl.solve(A, b)
         except npl.LinAlgError:
-            logger.warning(
-                f"Matrix inversion failed for qubit {i}, using uncorrected marginal"
-            )
+            logger.warning(f"Matrix inversion failed for qubit {i}, using uncorrected marginal")
             corrected_marginal = measured_marginal
 
         # Ensure valid probabilities
@@ -377,7 +374,7 @@ def readout_confusion_model(
 
 def ghz_aware_null_model(
     counts: Mapping[str, int], n_qubits: Optional[int] = None, alpha: float = ALPHA
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Create GHZ-state-aware null model for specialized hypothesis testing.
 
@@ -432,7 +429,7 @@ def ghz_aware_null_model(
     special_count = counts_clean.get(all_zeros, 0) + counts_clean.get(all_ones, 0)
     total_count = sum(counts_clean.values())
 
-    null_model: Dict[str, float] = {}
+    null_model: dict[str, float] = {}
 
     if special_count > 0:
         special_prob = (special_count + alpha) / (total_count + alpha * (2**n))
@@ -457,9 +454,7 @@ def ghz_aware_null_model(
         raise RuntimeError("GHZ-aware null produced invalid normalization.")
     null_model = {bs: prob / Z for bs, prob in null_model.items()}
 
-    logger.info(
-        f"Created GHZ-aware null model (special outcomes: {special_count}/{total_count})"
-    )
+    logger.info(f"Created GHZ-aware null model (special outcomes: {special_count}/{total_count})")
 
     return null_model
 

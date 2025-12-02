@@ -17,13 +17,13 @@ Typical usage:
 
 from __future__ import annotations
 
+from .renderers import HistogramRenderer
 from .service import (
-    VisualizationService,
-    VisualizationRenderer,
     RendererRegistryError,
+    VisualizationRenderer,
+    VisualizationService,
     create_default_service,
 )
-from .renderers import HistogramRenderer
 
 __all__ = [
     "VisualizationService",

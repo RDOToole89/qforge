@@ -28,23 +28,22 @@ Notes
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, Optional
 import gzip
 import hashlib
 import json
 import os
 import re
 import tempfile
+from abc import ABC, abstractmethod
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from .models import (
     ArtifactRef,  # canonical Pydantic model
-    StorageConfig,  # optional policy
     DirectoryStructure,  # optional layout
+    StorageConfig,  # optional policy
 )
-
 
 # ---------- Interfaces ----------
 
@@ -54,7 +53,7 @@ class Storage(ABC):
 
     @abstractmethod
     def save_json(
-        self, rel_path: str, data: Dict[str, Any], *, compress: Optional[bool] = None
+        self, rel_path: str, data: dict[str, Any], *, compress: bool | None = None
     ) -> str:
         """Persist JSON (atomically). Returns absolute path."""
         raise NotImplementedError
@@ -65,7 +64,7 @@ class Storage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def save_analysis(self, analysis: Dict[str, Any]) -> str:
+    def save_analysis(self, analysis: dict[str, Any]) -> str:
         """Persist a research analysis dict and return absolute path."""
         raise NotImplementedError
 
@@ -99,8 +98,8 @@ class LocalStorage(Storage):
         self,
         base_dir: str = "results",
         *,
-        structure: Optional[DirectoryStructure] = None,
-        config: Optional[StorageConfig] = None,
+        structure: DirectoryStructure | None = None,
+        config: StorageConfig | None = None,
     ) -> None:
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
@@ -111,7 +110,7 @@ class LocalStorage(Storage):
     # ---- Public API ----
 
     def save_json(
-        self, rel_path: str, data: Dict[str, Any], *, compress: Optional[bool] = None
+        self, rel_path: str, data: dict[str, Any], *, compress: bool | None = None
     ) -> str:
         """
         Save JSON atomically at base_dir/rel_path. Returns absolute path.
@@ -127,9 +126,7 @@ class LocalStorage(Storage):
 
         # Atomic write via temp file then replace
         if use_gzip:
-            with tempfile.NamedTemporaryFile(
-                "wb", delete=False, dir=target.parent
-            ) as tmp:
+            with tempfile.NamedTemporaryFile("wb", delete=False, dir=target.parent) as tmp:
                 with gzip.GzipFile(fileobj=tmp, mode="wb") as gz:
                     gz.write(json.dumps(data, indent=2, default=str).encode("utf-8"))
                 tmp_path = Path(tmp.name)
@@ -158,7 +155,7 @@ class LocalStorage(Storage):
         with open(ledger, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, default=str) + "\n")
 
-    def save_analysis(self, analysis: Dict[str, Any]) -> str:
+    def save_analysis(self, analysis: dict[str, Any]) -> str:
         """
         Persist analysis with structure-aware directory and filename policy.
 
@@ -174,9 +171,7 @@ class LocalStorage(Storage):
         prov = analysis.get("provenance", {}) or {}
 
         research_type = (meta.get("research_type") or "baseline").lower()
-        research_type = (
-            "baseline" if research_type in {"none", "null"} else research_type
-        )
+        research_type = "baseline" if research_type in {"none", "null"} else research_type
 
         experiment_id = str(meta.get("experiment_id") or "exp")
         state_type = str(params.get("state_type") or "unknown").upper()
@@ -253,11 +248,11 @@ class LocalStorage(Storage):
 # ---------- Internal utilities ----------
 
 
-def _extract_datetime(analysis: Dict[str, Any]) -> datetime:
+def _extract_datetime(analysis: dict[str, Any]) -> datetime:
     """Parse ISO timestamp from analysis, falling back to now(). Accepts 'Z' suffix."""
-    ts = (analysis.get("experiment_metadata", {}) or {}).get(
+    ts = (analysis.get("experiment_metadata", {}) or {}).get("timestamp") or analysis.get(
         "timestamp"
-    ) or analysis.get("timestamp")
+    )
     if isinstance(ts, datetime):
         return ts
     if isinstance(ts, str) and ts:
@@ -290,7 +285,7 @@ def _sanitize_filename(name: str) -> str:
     return safe_stem
 
 
-def _noise_segment(params: Dict[str, Any]) -> str:
+def _noise_segment(params: dict[str, Any]) -> str:
     """
     Build a short, readable noise description.
     Examples:
@@ -306,11 +301,7 @@ def _noise_segment(params: Dict[str, Any]) -> str:
     t2 = params.get("t2")
     err = params.get("error_rate")
 
-    if (
-        ntype in {"thermal_relaxation", "thermal"}
-        and (t1 is not None)
-        and (t2 is not None)
-    ):
+    if ntype in {"thermal_relaxation", "thermal"} and (t1 is not None) and (t2 is not None):
         try:
             t1_us = int(float(t1) * 1e6)
             t2_us = int(float(t2) * 1e6)

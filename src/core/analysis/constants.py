@@ -16,13 +16,15 @@ All constants are chosen based on:
 # Educational Framework
 These constants embody key principles from:
 - Bayesian statistics (prior selection)
-- Information theory (base-2 logarithms) 
+- Information theory (base-2 logarithms)
 - Bootstrap theory (sample size recommendations)
 - Quantum measurement theory (smoothing for shot noise)
 """
 
+from collections.abc import Mapping
+from typing import Final
+
 import numpy as np
-from typing import Final, Mapping
 
 # =============================================================================
 # STATISTICAL CONSTANTS
@@ -89,7 +91,7 @@ A_ij = exp(-λ * d_ij) where d_ij is physical/logical distance.
 λ = 1.0 provides reasonable decay for typical qubit layouts.
 """
 
-# Pathway Persistence (PP)  
+# Pathway Persistence (PP)
 PP_TOP_K_MIN: Final[int] = 5
 """Minimum number of top pathways to track for persistence."""
 
@@ -277,23 +279,24 @@ ENABLE_RESULT_CACHING: Final[bool] = False
 # VALIDATION HELPERS
 # =============================================================================
 
+
 def validate_probability_array(p: np.ndarray, name: str = "probability") -> np.ndarray:
     """Validate and normalize probability array with safety checks."""
     p = np.asarray(p, dtype=np.float64)
-    
+
     if np.any(p < 0):
         raise ValueError(f"{name} array contains negative values")
-    
+
     if np.allclose(p.sum(), 0.0):
         raise ValueError(f"{name} array sums to zero")
-    
+
     # Normalize
     p = p / p.sum()
-    
+
     # Apply safety clamping
     p = np.clip(p, EPS, 1.0)
     p = p / p.sum()  # Renormalize after clamping
-    
+
     return p
 
 
@@ -301,22 +304,22 @@ def validate_counts_dict(counts: Mapping[str, int], name: str = "counts") -> dic
     """Validate counts dictionary for binary strings and positive counts."""
     if not counts:
         raise ValueError(f"{name} dictionary is empty")
-    
+
     # Check all values are non-negative integers
     for bitstring, count in counts.items():
         if not isinstance(count, int) or count < 0:
             raise ValueError(f"{name}['{bitstring}'] = {count} is not a non-negative integer")
-    
+
     # Check bitstring consistency
     lengths = {len(bs) for bs in counts.keys()}
     if len(lengths) > 1:
         raise ValueError(f"{name} contains bitstrings of inconsistent lengths: {lengths}")
-    
+
     # Check binary format
     for bitstring in counts.keys():
-        if not all(c in '01' for c in bitstring):
+        if not all(c in "01" for c in bitstring):
             raise ValueError(f"{name} contains non-binary bitstring: '{bitstring}'")
-    
+
     return dict(counts)
 
 
@@ -327,35 +330,65 @@ def get_status_thresholds() -> dict:
         "experimental_cv": EXPERIMENTAL_CV_THRESHOLD,
         "validated_min_samples": VALIDATED_MIN_SAMPLES,
         "experimental_min_samples": EXPERIMENTAL_MIN_SAMPLES,
-        "significance_p": SIGNIFICANCE_P_VALUE
+        "significance_p": SIGNIFICANCE_P_VALUE,
     }
 
 
 # Public exports
 __all__ = [
     # Core knobs
-    "ALPHA", "EPS", "LOG_BASE", "SCHEMA_VERSION",
-    "DEFAULT_BOOTSTRAP_B", "FAST_BOOTSTRAP_B", "SLOW_BOOTSTRAP_B",
-    "CONFIDENCE_LEVEL", "ALPHA_LEVEL", "CONF_INT_DEFAULT",
+    "ALPHA",
+    "EPS",
+    "LOG_BASE",
+    "SCHEMA_VERSION",
+    "DEFAULT_BOOTSTRAP_B",
+    "FAST_BOOTSTRAP_B",
+    "SLOW_BOOTSTRAP_B",
+    "CONFIDENCE_LEVEL",
+    "ALPHA_LEVEL",
+    "CONF_INT_DEFAULT",
     # Metric-specific
-    "EEC_LAMBDA", "PP_TOP_K_MIN", "PP_TOP_K_MAX", "PP_MASS_THRESHOLD",
-    "PP_MIN_RUNS", "CES_MIN_POINTS", "CES_MAX_QUBITS", "TIKHONOV_LAMBDA",
+    "EEC_LAMBDA",
+    "PP_TOP_K_MIN",
+    "PP_TOP_K_MAX",
+    "PP_MASS_THRESHOLD",
+    "PP_MIN_RUNS",
+    "CES_MIN_POINTS",
+    "CES_MAX_QUBITS",
+    "TIKHONOV_LAMBDA",
     # Canonical aliases for public API
-    "MAX_TOP_K", "TOPK_MASS_TARGET",
+    "MAX_TOP_K",
+    "TOPK_MASS_TARGET",
     # Status thresholds
-    "VALIDATED_CV_THRESHOLD", "STATUS_BAND_WIDTH", "EXPERIMENTAL_CV_THRESHOLD",
-    "VALIDATED_MIN_SAMPLES", "EXPERIMENTAL_MIN_SAMPLES", "UNSTABLE_MAX_SAMPLES",
+    "VALIDATED_CV_THRESHOLD",
+    "STATUS_BAND_WIDTH",
+    "EXPERIMENTAL_CV_THRESHOLD",
+    "VALIDATED_MIN_SAMPLES",
+    "EXPERIMENTAL_MIN_SAMPLES",
+    "UNSTABLE_MAX_SAMPLES",
     "SIGNIFICANCE_P_VALUE",
     # Physical/reference values
-    "MAX_QUBITS_EXACT", "MAX_OUTCOMES_EXACT",
-    "GHZ_EXACT_TC_2QUBIT", "GHZ_EXACT_TC_3QUBIT",
+    "MAX_QUBITS_EXACT",
+    "MAX_OUTCOMES_EXACT",
+    "GHZ_EXACT_TC_2QUBIT",
+    "GHZ_EXACT_TC_3QUBIT",
     # Dev & testing
-    "DEFAULT_TEST_SEED", "PERFORMANCE_TEST_SEED",
-    "NUMERICAL_TOLERANCE", "STATISTICAL_TOLERANCE",
-    "SMALL_TEST_N", "MEDIUM_TEST_N", "LARGE_TEST_N",
-    "SMALL_TEST_SHOTS", "MEDIUM_TEST_SHOTS", "LARGE_TEST_SHOTS",
+    "DEFAULT_TEST_SEED",
+    "PERFORMANCE_TEST_SEED",
+    "NUMERICAL_TOLERANCE",
+    "STATISTICAL_TOLERANCE",
+    "SMALL_TEST_N",
+    "MEDIUM_TEST_N",
+    "LARGE_TEST_N",
+    "SMALL_TEST_SHOTS",
+    "MEDIUM_TEST_SHOTS",
+    "LARGE_TEST_SHOTS",
     # Performance & execution
-    "MAX_COUNTS_DICT_SIZE", "DEFAULT_N_JOBS", "ENABLE_RESULT_CACHING",
+    "MAX_COUNTS_DICT_SIZE",
+    "DEFAULT_N_JOBS",
+    "ENABLE_RESULT_CACHING",
     # Validators / helpers
-    "validate_probability_array", "validate_counts_dict", "get_status_thresholds",
+    "validate_probability_array",
+    "validate_counts_dict",
+    "get_status_thresholds",
 ]

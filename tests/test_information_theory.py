@@ -2,20 +2,18 @@
 Test information theory core module for entropy, divergence, and probability calculations.
 """
 
-import pytest
 import numpy as np
-from typing import Dict
+import pytest
 
+from src.core.analysis.constants import ALPHA
 from src.core.analysis.core.information_theory import (
     counts_to_probabilities,
     entropy,
-    kl_divergence,
     jensen_shannon_divergence,
-    total_correlation,
+    kl_divergence,
     mutual_information,
-    n_qubits_from_counts,
+    total_correlation,
 )
-from src.core.analysis.constants import ALPHA
 
 
 class TestCountsToProbabilities:
@@ -25,14 +23,14 @@ class TestCountsToProbabilities:
         """Test uniform count distribution."""
         counts = {"00": 250, "01": 250, "10": 250, "11": 250}
         probs = counts_to_probabilities(counts)
-        
+
         # Should have full support (4 outcomes for 2 qubits)
         assert len(probs) == 4
-        
+
         # Check all probabilities are positive and sum to 1
         assert all(p > 0 for p in probs.values())
         assert abs(sum(probs.values()) - 1.0) < 1e-10
-        
+
         # Check approximate uniformity (within smoothing tolerance)
         prob_values = list(probs.values())
         assert max(prob_values) - min(prob_values) < 0.01
@@ -41,11 +39,11 @@ class TestCountsToProbabilities:
         """Test that Jeffreys smoothing provides full 2^n support."""
         counts = {"00": 1000}  # Only one outcome observed
         probs = counts_to_probabilities(counts, alpha=ALPHA)
-        
+
         # Should have full support (4 outcomes for 2 qubits)
         assert len(probs) == 4
         assert all(p > 0 for p in probs.values())
-        
+
         # Observed outcome should have highest probability
         assert probs["00"] > probs["01"]
         assert probs["00"] > probs["10"]
@@ -56,10 +54,10 @@ class TestCountsToProbabilities:
         counts = {"11": 100, "00": 200, "01": 150}
         probs1 = counts_to_probabilities(counts)
         probs2 = counts_to_probabilities(counts)
-        
+
         # Results should be identical (deterministic)
         assert probs1 == probs2
-        
+
         # Keys should be in lexicographic order
         keys = list(probs1.keys())
         assert keys == sorted(keys)
@@ -72,11 +70,11 @@ class TestCountsToProbabilities:
     def test_custom_alpha(self):
         """Test custom smoothing parameter."""
         counts = {"0": 100, "1": 0}
-        
+
         # No smoothing
         probs_none = counts_to_probabilities(counts, alpha=0.0)
         assert probs_none["1"] == 0.0
-        
+
         # Heavy smoothing
         probs_heavy = counts_to_probabilities(counts, alpha=10.0)
         assert probs_heavy["1"] > 0.08  # Adjusted for actual smoothing result
@@ -110,11 +108,11 @@ class TestEntropy:
         # More concentrated distribution
         probs1 = np.array([0.7, 0.3])
         h1 = entropy(probs1)
-        
+
         # More uniform distribution
         probs2 = np.array([0.6, 0.4])
         h2 = entropy(probs2)
-        
+
         assert h2 > h1
 
     def test_entropy_bounds(self):
@@ -253,11 +251,11 @@ class TestInformationTheoryIntegration:
         counts = {"00": 300, "01": 200, "10": 250, "11": 250}
         probs = counts_to_probabilities(counts)
         prob_array = np.array(list(probs.values()))
-        
+
         # Entropy should be finite and positive
         h = entropy(prob_array)
         assert 0.0 < h < 2.0  # Less than max entropy for 2 qubits
-        
+
         # KL to uniform should be positive
         uniform = np.array([0.25, 0.25, 0.25, 0.25])
         kl = kl_divergence(prob_array, uniform)
@@ -267,20 +265,20 @@ class TestInformationTheoryIntegration:
         """Test complete information theory workflow."""
         # Start with counts
         counts = {"000": 400, "111": 350, "001": 100, "110": 150}
-        
+
         # Convert to probabilities with full support
         probs = counts_to_probabilities(counts)
         assert len(probs) == 8  # 2^3 = 8 outcomes
-        
+
         # Calculate entropy
         prob_array = np.array(list(probs.values()))
         h = entropy(prob_array)
         assert 0.0 < h < 3.0  # Less than max entropy for 3 qubits
-        
+
         # Calculate total correlation
         tc = total_correlation(counts)
         assert tc >= 0.0
-        
+
         # Calculate pairwise MI
         mi = mutual_information(counts, 0, 1)
         assert mi >= 0.0
@@ -291,11 +289,11 @@ class TestInformationTheoryIntegration:
         counts = {"00": 9999, "01": 1, "10": 0, "11": 0}
         probs = counts_to_probabilities(counts)
         prob_array = np.array(list(probs.values()))
-        
+
         # Should not produce NaN or inf
         h = entropy(prob_array)
         assert np.isfinite(h)
-        
+
         uniform = np.array([0.25, 0.25, 0.25, 0.25])
         kl = kl_divergence(prob_array, uniform)
         assert np.isfinite(kl)

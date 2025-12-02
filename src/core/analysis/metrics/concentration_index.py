@@ -6,13 +6,15 @@ while maintaining backward compatibility with the original implementation.
 """
 
 from .pathway_concentration_ratio import (
-    compute_pathway_concentration_ratio as compute_concentration_index,
-    compute_concentration_with_gini,
     ConcentrationAnalysis,
+    compute_concentration_with_gini,
+)
+from .pathway_concentration_ratio import (
+    compute_pathway_concentration_ratio as compute_concentration_index,
 )
 
 __all__ = [
     "compute_concentration_index",
-    "compute_concentration_with_gini", 
+    "compute_concentration_with_gini",
     "ConcentrationAnalysis",
 ]

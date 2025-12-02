@@ -1,6 +1,7 @@
-from src.run_experiment import run_experiment
-from src.visualization import plot_histogram, plot_density_matrix
 import sys
+
+from src.run_experiment import run_experiment
+from src.visualization import plot_density_matrix, plot_histogram
 
 num_qubits = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 state_type = sys.argv[2].upper() if len(sys.argv) > 2 else "GHZ"

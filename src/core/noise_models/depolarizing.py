@@ -37,10 +37,12 @@ Depolarizing channels demonstrate fundamental quantum information concepts:
 - The connection between environmental symmetries and decoherence isotropy
 """
 
-import numpy as np
 import logging
-from typing import List, Dict, Any
+from typing import Any
+
+import numpy as np
 from qiskit_aer.noise import NoiseModel, depolarizing_error
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger("QuantumExperiment.NoiseModels")
@@ -109,11 +111,7 @@ class DepolarizingNoise(BaseNoise):
         self._validate_depolarizing_bounds(error_rate, num_qubits)
 
         # Initialize base noise with validated parameters
-        super().__init__(
-            error_rate=error_rate,
-            num_qubits=num_qubits,
-            experiment_id=experiment_id
-        )
+        super().__init__(error_rate=error_rate, num_qubits=num_qubits, experiment_id=experiment_id)
 
         # Store depolarizing-specific properties
         self._max_error_rate = 1 - (1 / (4**num_qubits))
@@ -127,11 +125,13 @@ class DepolarizingNoise(BaseNoise):
                 "pauli_probabilities": self._pauli_probabilities,
                 "decoherence_type": "isotropic_uniform",
                 "channel_property": "unital",
-                "research_role": "baseline_worst_case_decoherence"
-            }
+                "research_role": "baseline_worst_case_decoherence",
+            },
         )
 
-    def apply(self, noise_model: NoiseModel, gate_list: List[str], qubits_for_error: int = None) -> None:
+    def apply(
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+    ) -> None:
         """
         Apply depolarizing noise to quantum gates in the noise model.
 
@@ -159,8 +159,23 @@ class DepolarizingNoise(BaseNoise):
             >>> # Now noise_model includes depolarizing errors on H, X, CNOT gates
         """
         # Define gate arity for standard gates
-        one_qubit_gates = {'id', 'u1', 'u2', 'u3', 'h', 'x', 'y', 'z', 's', 't', 'sx', 'rz', 'ry', 'rx'}
-        two_qubit_gates = {'cx', 'cy', 'cz', 'ch', 'swap', 'iswap', 'ecr'}
+        one_qubit_gates = {
+            "id",
+            "u1",
+            "u2",
+            "u3",
+            "h",
+            "x",
+            "y",
+            "z",
+            "s",
+            "t",
+            "sx",
+            "rz",
+            "ry",
+            "rx",
+        }
+        two_qubit_gates = {"cx", "cy", "cz", "ch", "swap", "iswap", "ecr"}
 
         successful_gates = []
         failed_gates = []
@@ -187,7 +202,9 @@ class DepolarizingNoise(BaseNoise):
                 try:
                     channel = depolarizing_error(self.error_rate, gate_qubits)
                 except Exception as e:
-                    logger.warning(f"Could not create depolarizing channel for {gate_qubits} qubits: {e}")
+                    logger.warning(
+                        f"Could not create depolarizing channel for {gate_qubits} qubits: {e}"
+                    )
                     continue
 
                 # Apply error to all instances of this gate type
@@ -220,7 +237,7 @@ class DepolarizingNoise(BaseNoise):
             f"pauli_probs={self._pauli_probabilities}"
         )
 
-    def get_kraus_operators(self) -> List[np.ndarray]:
+    def get_kraus_operators(self) -> list[np.ndarray]:
         """
         Return Kraus operators for the depolarizing channel.
 
@@ -241,13 +258,13 @@ class DepolarizingNoise(BaseNoise):
             ensuring the channel is trace-preserving.
         """
         # Pauli matrices for single-qubit construction
-        I = np.array([[1, 0], [0, 1]], dtype=complex)
+        Id = np.array([[1, 0], [0, 1]], dtype=complex)
         X = np.array([[0, 1], [1, 0]], dtype=complex)
         Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
         Z = np.array([[1, 0], [0, -1]], dtype=complex)
 
-        pauli_ops = [I, X, Y, Z]
-        pauli_probs = [1 - 3*self.error_rate/4] + [self.error_rate/4] * 3
+        pauli_ops = [Id, X, Y, Z]
+        pauli_probs = [1 - 3 * self.error_rate / 4] + [self.error_rate / 4] * 3
 
         if self.num_qubits == 1:
             # Single-qubit Kraus operators
@@ -275,7 +292,7 @@ class DepolarizingNoise(BaseNoise):
 
             return kraus_ops
 
-    def get_physics_description(self) -> Dict[str, str]:
+    def get_physics_description(self) -> dict[str, str]:
         """
         Return comprehensive physics description of depolarizing decoherence.
 
@@ -290,10 +307,10 @@ class DepolarizingNoise(BaseNoise):
             "physical_bounds": f"Error rate p ≤ {self._max_error_rate:.4f} for {self.num_qubits} qubits (complete positivity constraint)",
             "channel_properties": "Unital (preserves maximally mixed states), trace-preserving, completely positive",
             "real_world_examples": "High-temperature superconducting qubits, overdamped trapped ions, noisy photonic systems",
-            "quantum_principles": "Pauli error model, quantum channel theory, environmental decoherence symmetries"
+            "quantum_principles": "Pauli error model, quantum channel theory, environmental decoherence symmetries",
         }
 
-    def get_theoretical_properties(self) -> Dict[str, Any]:
+    def get_theoretical_properties(self) -> dict[str, Any]:
         """
         Get theoretical quantum properties specific to depolarizing channels.
 
@@ -310,12 +327,12 @@ class DepolarizingNoise(BaseNoise):
             "coherence_preservation": "none_global_mixing",
             "measurement_bias": "uniform_all_outcomes",
             "symmetry_properties": "SO(3)_invariant_in_bloch_sphere",
-            "information_capacity": max(0, 1 - 2*self.error_rate),
+            "information_capacity": max(0, 1 - 2 * self.error_rate),
             "channel_rank": 4**self.num_qubits,
-            "unitality": True
+            "unitality": True,
         }
 
-    def get_research_context(self) -> Dict[str, Any]:
+    def get_research_context(self) -> dict[str, Any]:
         """
         Get research context for depolarizing noise in pathway studies.
 
@@ -326,32 +343,32 @@ class DepolarizingNoise(BaseNoise):
             "pathway_hypothesis": {
                 "prediction": "Uniform pathway degradation - no structural bias expected",
                 "test_method": "Compare with directional noise to identify pathway anisotropies",
-                "expected_signature": "Isotropic decoherence with equal pathway utilization"
+                "expected_signature": "Isotropic decoherence with equal pathway utilization",
             },
             "decoherence_characteristics": {
                 "symmetry": "Rotationally invariant - no preferred decoherence direction",
                 "topology_dependence": "Minimal - uniform degradation regardless of entanglement structure",
                 "pathway_bias": "None expected - serves as null hypothesis baseline",
-                "scaling_behavior": "Exponential fidelity decay with error rate"
+                "scaling_behavior": "Exponential fidelity decay with error rate",
             },
             "experimental_role": {
                 "baseline_comparison": "Gold standard for worst-case decoherence scenarios",
                 "isotropy_testing": "Control experiment for identifying directional pathway preferences",
                 "threshold_studies": "Critical error rate determination for quantum advantage",
-                "symmetry_breaking": "Test whether entanglement topology creates asymmetries"
+                "symmetry_breaking": "Test whether entanglement topology creates asymmetries",
             },
             "research_predictions": {
                 "vs_directional_noise": "Should show no pathway preferences unlike amplitude damping",
                 "scaling_with_qubits": "Exponentially fast quantum information loss",
                 "entanglement_robustness": "Fastest possible entanglement decay for given error rate",
-                "measurement_correlations": "Uniform loss of all computational basis correlations"
+                "measurement_correlations": "Uniform loss of all computational basis correlations",
             },
             "educational_applications": {
                 "fundamental_concepts": "Pauli error model, channel bounds, information geometry",
                 "quantum_information": "Channel capacity, fidelity decay, entropy production",
                 "error_correction": "Threshold requirements, syndrome patterns, recovery protocols",
-                "pathway_hypothesis": "Null hypothesis for structured decoherence studies"
-            }
+                "pathway_hypothesis": "Null hypothesis for structured decoherence studies",
+            },
         }
 
     def _validate_depolarizing_bounds(self, error_rate: float, num_qubits: int) -> None:
@@ -374,11 +391,9 @@ class DepolarizingNoise(BaseNoise):
             )
 
         if error_rate < 0:
-            raise ValueError(
-                f"Error rate must be non-negative, got {error_rate:.4f}"
-            )
+            raise ValueError(f"Error rate must be non-negative, got {error_rate:.4f}")
 
-    def _calculate_pauli_probabilities(self) -> Dict[str, float]:
+    def _calculate_pauli_probabilities(self) -> dict[str, float]:
         """
         Calculate individual Pauli error probabilities for educational display.
 
@@ -386,10 +401,10 @@ class DepolarizingNoise(BaseNoise):
             Dict mapping Pauli operators to their error probabilities
         """
         return {
-            "identity": 1 - 3*self.error_rate/4,
-            "pauli_x": self.error_rate/4,
-            "pauli_y": self.error_rate/4,
-            "pauli_z": self.error_rate/4
+            "identity": 1 - 3 * self.error_rate / 4,
+            "pauli_x": self.error_rate / 4,
+            "pauli_y": self.error_rate / 4,
+            "pauli_z": self.error_rate / 4,
         }
 
     def _calculate_entropy_increase(self) -> float:

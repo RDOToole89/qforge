@@ -7,18 +7,18 @@ This module provides essential functions for quantum measurement analysis:
 - Null model framework for hypothesis testing
 """
 
+from .bootstrap import (
+    MetricWithConfidence,
+    bootstrap_confidence_interval,
+    compute_metric_with_confidence,
+)
 from .information_theory import (
-    entropy,
     counts_to_probabilities,
+    entropy,
+    jensen_shannon_divergence,
     marginal_distribution,
     mutual_information,
     total_correlation,
-    jensen_shannon_divergence,
-)
-from .bootstrap import (
-    bootstrap_confidence_interval,
-    compute_metric_with_confidence,
-    MetricWithConfidence,
 )
 from .null_models import (
     factorized_null_model,

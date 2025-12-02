@@ -7,16 +7,17 @@ Why this file?
 """
 
 from __future__ import annotations
-from typing import Dict, Any, Tuple
-import logging
 
-from .models import ExperimentConfig
+import logging
+from typing import Any
+
 from .experiment_runner import run_raw as _engine_run_raw
+from .models import ExperimentConfig
 
 log = logging.getLogger(__name__)
 
 
-def run_raw(config: Dict[str, Any]) -> Tuple[Any, Any]:
+def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
     """Validate config and delegate to the engine-native runner.
 
     Args:

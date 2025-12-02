@@ -49,39 +49,40 @@ Example
 """
 
 from __future__ import annotations
-from typing import Dict, Any, Iterable, List, Optional
-from itertools import product
-from copy import deepcopy
-from datetime import datetime
-from pathlib import Path
+
 import hashlib
 import logging
-import numpy as np
+from collections.abc import Iterable
+from copy import deepcopy
+from datetime import datetime
+from itertools import product
+from pathlib import Path
 
-from src.engine.models.sweep import (
-    SweepManifest,
-    SweepResult,
-    ParameterAnalysis,
-    ParameterEffect,
-    StatisticalSummary,
-    OutcomeStatistics,
-    SweepExecutionMetadata,
-)
-from src.engine.models.results import (
-    ExperimentResult,
-    ExperimentAnalysis,
-    ExperimentMetadata,
-    CircuitStatistics,
-    MeasurementResults,
-    Provenance,
-)
-from src.engine.models.storage import ArtifactRef
-from src.engine.models.config import ExperimentConfig
+import numpy as np
 
 from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 
 # Engine-native runner (no legacy deps)
 from src.engine.experiment_runner import EngineExperimentRunner  # << fixed import
+from src.engine.models.config import ExperimentConfig
+from src.engine.models.results import (
+    CircuitStatistics,
+    ExperimentAnalysis,
+    ExperimentMetadata,
+    ExperimentResult,
+    MeasurementResults,
+    Provenance,
+)
+from src.engine.models.storage import ArtifactRef
+from src.engine.models.sweep import (
+    OutcomeStatistics,
+    ParameterAnalysis,
+    ParameterEffect,
+    StatisticalSummary,
+    SweepExecutionMetadata,
+    SweepManifest,
+    SweepResult,
+)
 
 # Optional persistence
 from src.engine.storage import LocalStorage
@@ -97,7 +98,7 @@ def _hash_config(cfg: ExperimentConfig) -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
-def _probs_from_counts(counts: Dict[str, int]) -> Dict[str, float]:
+def _probs_from_counts(counts: dict[str, int]) -> dict[str, float]:
     total = float(sum(counts.values())) or 1.0
     return {k: v / total for k, v in counts.items()}
 
@@ -134,11 +135,11 @@ def _iter_experiment_configs(manifest: SweepManifest) -> Iterable[ExperimentConf
 
 
 def _maybe_save_histogram(
-    counts: Dict[str, int],
+    counts: dict[str, int],
     exp_id: str,
-    output_dir: Optional[str],
-    title: Optional[str] = None,
-) -> Optional[ArtifactRef]:
+    output_dir: str | None,
+    title: str | None = None,
+) -> ArtifactRef | None:
     """Create and save a histogram PNG for counts if possible; otherwise no-op."""
     if not counts:
         return None
@@ -150,9 +151,7 @@ def _maybe_save_histogram(
     try:
         import matplotlib.pyplot as plt  # keep dependency optional
     except Exception as e:
-        logger.warning(
-            f"matplotlib not available; skipping histogram for {exp_id}: {e}"
-        )
+        logger.warning(f"matplotlib not available; skipping histogram for {exp_id}: {e}")
         return None
 
     try:
@@ -214,8 +213,8 @@ def run_sweep(
     manifest: SweepManifest,
     *,
     enable_histograms: bool = False,
-    output_dir: Optional[str] = None,
-    storage_dir: Optional[str] = None,
+    output_dir: str | None = None,
+    storage_dir: str | None = None,
     save_summary: bool = True,
 ) -> SweepResult:
     """
@@ -251,8 +250,8 @@ def run_sweep(
       single-run API for each config.
     """
     start_t = datetime.now().isoformat()
-    results: List[ExperimentResult] = []
-    errors: Dict[str, int] = {}
+    results: list[ExperimentResult] = []
+    errors: dict[str, int] = {}
 
     runner = EngineExperimentRunner(experiment_id="sweep")
     storage = LocalStorage(base_dir=storage_dir) if storage_dir else None
@@ -298,9 +297,7 @@ def run_sweep(
             # Circuit statistics (robust to Qiskit minor API diffs)
             try:
                 gate_counts = dict(circuit.count_ops())
-                twoq = sum(
-                    v for k, v in gate_counts.items() if k.upper() in {"CX", "CZ", "CP"}
-                )
+                twoq = sum(v for k, v in gate_counts.items() if k.upper() in {"CX", "CZ", "CP"})
                 num_gates = int(len(circuit.data))
             except Exception:
                 gate_counts, twoq, num_gates = {}, 0, 0
@@ -343,21 +340,15 @@ def run_sweep(
                 transpilation_summary={},
             )
 
-            metrics = (
-                compute_research_metrics(counts, cfg)
-                if cfg.enable_research_metrics
-                else None
-            )
+            metrics = compute_research_metrics(counts, cfg) if cfg.enable_research_metrics else None
 
-            artifacts: List[ArtifactRef] = []
+            artifacts: list[ArtifactRef] = []
 
             # Optional: persist analysis JSON per run
             if storage is not None:
                 try:
                     saved_path = storage.save_analysis(analysis.model_dump())
-                    artifacts.append(
-                        ArtifactRef(kind="analysis", path=saved_path, metadata={})
-                    )
+                    artifacts.append(ArtifactRef(kind="analysis", path=saved_path, metadata={}))
                 except Exception as e:
                     logger.warning(f"Failed to persist analysis for {exp_id}: {e}")
 
@@ -421,7 +412,7 @@ def run_sweep(
         )
 
     # Stub main-effects so the structure is valid; you can replace with ANOVA later
-    main_effects: Dict[str, ParameterEffect] = {}
+    main_effects: dict[str, ParameterEffect] = {}
     for pname in manifest.parameter_ranges.keys():
         main_effects[pname] = ParameterEffect(
             parameter_name=pname,
@@ -482,9 +473,7 @@ def run_sweep(
                 "total": len(results),
                 "failed": int(sum(errors.values())),
                 "parameters": list(manifest.parameter_ranges.keys()),
-                "experiment_ids": [
-                    r.analysis.experiment_metadata.experiment_id for r in results
-                ],
+                "experiment_ids": [r.analysis.experiment_metadata.experiment_id for r in results],
                 "artifacts": [a.path for r in results for a in r.artifacts],
                 "primary_metric_mean": outcome_stats.mean,
                 "primary_metric_ci95": [

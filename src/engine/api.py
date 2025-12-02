@@ -49,48 +49,49 @@ so you can attach logging, telemetry, or progress UIs without changing logic.
 
 from __future__ import annotations
 
-from typing import Optional, List, Dict, Any, Iterator
-from datetime import datetime
 import logging
 import os
 from collections import Counter
+from collections.abc import Iterator
+from datetime import datetime
+from typing import Any
 
 from qiskit import QuantumCircuit
-
-# App plumbing
-from src.engine.context import AppContext
-from src.engine.runner import run_raw
-from src.engine.hashing import sha1_of
-
-# Typed models (top-level exports) …
-from src.engine.models import (
-    ExperimentConfig,
-    ExperimentResult,
-    Provenance,
-    SweepManifest,
-    ArtifactRef,
-)
-
-# … and result sub-types (declared in results.py)
-from src.engine.models.results import (
-    ExperimentAnalysis,
-    ExperimentMetadata,
-    CircuitStatistics,
-    MeasurementResults,
-)
 
 # Research integration (counts canonicalization + research metrics)
 from src.engine.analysis import compute_research_metrics, extract_counts_from_result
 
+# App plumbing
+from src.engine.context import AppContext
+
 # Event bus (optional, cheap)
 from src.engine.events import (
+    RUN_END,
+    RUN_START,
+    SWEEP_END,
+    SWEEP_START,
     SimpleEventBus,
     make_event,
-    RUN_START,
-    RUN_END,
-    SWEEP_START,
-    SWEEP_END,
 )
+from src.engine.hashing import sha1_of
+
+# Typed models (top-level exports) …
+from src.engine.models import (
+    ArtifactRef,
+    ExperimentConfig,
+    ExperimentResult,
+    Provenance,
+    SweepManifest,
+)
+
+# … and result sub-types (declared in results.py)
+from src.engine.models.results import (
+    CircuitStatistics,
+    ExperimentAnalysis,
+    ExperimentMetadata,
+    MeasurementResults,
+)
+from src.engine.runner import run_raw
 
 # Storage adapter
 from src.engine.storage import LocalStorage
@@ -110,8 +111,8 @@ logger = logging.getLogger(__name__)
 
 
 def run(
-    config: ExperimentConfig | Dict[str, Any],
-    ctx: Optional[AppContext] = None,
+    config: ExperimentConfig | dict[str, Any],
+    ctx: AppContext | None = None,
 ) -> ExperimentResult:
     """Run a single experiment and return a validated `ExperimentResult`.
 
@@ -146,15 +147,11 @@ def run(
       If you need a dict (for JSON), call `.model_dump()`.
     """
     ctx = ctx or AppContext()
-    cfg_model = (
-        config if isinstance(config, ExperimentConfig) else ExperimentConfig(**config)
-    )
+    cfg_model = config if isinstance(config, ExperimentConfig) else ExperimentConfig(**config)
 
     # Publish start event (useful for progress bars / logs)
     bus = SimpleEventBus()
-    bus.publish(
-        make_event(RUN_START, {"config": cfg_model.model_dump(exclude_none=True)})
-    )
+    bus.publish(make_event(RUN_START, {"config": cfg_model.model_dump(exclude_none=True)}))
 
     # 1) Execute experiment via runner
     circuit, raw = run_raw(cfg_model.model_dump())
@@ -178,9 +175,7 @@ def run(
     storage = LocalStorage(base_dir=ctx.base_results_dir)
     saved_path = storage.save_analysis(analysis.model_dump())
 
-    artifacts: List[ArtifactRef] = [
-        ArtifactRef(kind="analysis", path=saved_path, metadata={})
-    ]
+    artifacts: list[ArtifactRef] = [ArtifactRef(kind="analysis", path=saved_path, metadata={})]
 
     # 7) Optional histogram rendering (only if requested + available)
     if (
@@ -200,9 +195,7 @@ def run(
                 ),
             }
             # Save alongside the analysis file for easy discovery.
-            hist_path = os.path.join(
-                os.path.dirname(saved_path), f"histogram_{cfg_hash}.png"
-            )
+            hist_path = os.path.join(os.path.dirname(saved_path), f"histogram_{cfg_hash}.png")
             # Render using "render_or_none" if available; otherwise call render directly.
             try:
                 artifact = service.render_or_none("histogram", viz_payload, hist_path)  # type: ignore[attr-defined]
@@ -241,9 +234,9 @@ def run(
 
 
 def sweep(
-    manifest: SweepManifest | Dict[str, Any],
-    ctx: Optional[AppContext] = None,
-) -> List[ExperimentResult]:
+    manifest: SweepManifest | dict[str, Any],
+    ctx: AppContext | None = None,
+) -> list[ExperimentResult]:
     """Run a parameter sweep and return a list of `ExperimentResult`.
 
     This is a **simple** Cartesian sweep driver:
@@ -272,18 +265,16 @@ def sweep(
     man = manifest if isinstance(manifest, SweepManifest) else SweepManifest(**manifest)
 
     base = man.base_config.model_dump(exclude_none=True) if man.base_config else {}
-    results: List[ExperimentResult] = []
+    results: list[ExperimentResult] = []
     keys = sorted((man.parameter_ranges or {}).keys())
 
     bus = SimpleEventBus()
     bus.publish(
-        make_event(
-            SWEEP_START, {"keys": keys, "total": _product_len(man.parameter_ranges)}
-        )
+        make_event(SWEEP_START, {"keys": keys, "total": _product_len(man.parameter_ranges)})
     )
 
     # Cartesian expansion (depth-first), honoring stable key order
-    def _expand(idx: int, acc: Dict[str, Any]) -> None:
+    def _expand(idx: int, acc: dict[str, Any]) -> None:
         if idx == len(keys):
             # Merge: base + override + accumulated parameter choices
             cfg = {**base, **(man.override or {}), **acc}
@@ -306,7 +297,7 @@ def sweep(
 
 
 def iter_experiment_configs(
-    manifest: SweepManifest | Dict[str, Any],
+    manifest: SweepManifest | dict[str, Any],
 ) -> Iterator[ExperimentConfig]:
     """Yield concrete `ExperimentConfig` instances for a Cartesian sweep.
 
@@ -335,7 +326,7 @@ def iter_experiment_configs(
     base = man.base_config.model_dump(exclude_none=True) if man.base_config else {}
     keys = sorted((man.parameter_ranges or {}).keys())
 
-    def _expand(idx: int, acc: Dict[str, Any]) -> None:
+    def _expand(idx: int, acc: dict[str, Any]) -> None:
         if idx == len(keys):
             merged = {**base, **(man.override or {}), **acc}
             # Yield N copies if runs_per_config > 1 (vary rng_seed if set)
@@ -363,7 +354,7 @@ def _now_iso() -> str:
     return datetime.now().isoformat()
 
 
-def _product_len(d: Dict[str, List[Any]]) -> int:
+def _product_len(d: dict[str, list[Any]]) -> int:
     total = 1
     for v in (d or {}).values():
         total *= len(v)
@@ -373,7 +364,7 @@ def _product_len(d: Dict[str, List[Any]]) -> int:
 def _build_experiment_analysis(
     *,
     circuit: QuantumCircuit,
-    counts: Dict[str, int],
+    counts: dict[str, int],
     cfg: ExperimentConfig,
 ) -> ExperimentAnalysis:
     """Construct a strongly-typed `ExperimentAnalysis` from circuit + counts + config.
@@ -432,9 +423,7 @@ def _build_experiment_analysis(
         total_shots=total_shots or 1,
         unique_outcomes=unique_outcomes or 1,
         outcome_probabilities=(
-            outcome_probabilities
-            if outcome_probabilities
-            else {("0" * cfg.num_qubits): 1.0}
+            outcome_probabilities if outcome_probabilities else {("0" * cfg.num_qubits): 1.0}
         ),
         density_matrix=None,
         fidelity=None,

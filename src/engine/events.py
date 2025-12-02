@@ -45,7 +45,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from threading import RLock
-from typing import Any, Callable, Dict, List, Optional, Literal, Tuple, Union
+from typing import Any, Callable, Literal, Union
 
 # ---- Canonical event names ---------------------------------------------------
 
@@ -80,7 +80,7 @@ class Event:
 
     name: EventName
     timestamp: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 Handler = Callable[[Event], None]
@@ -94,7 +94,7 @@ class Subscription:
 
     __slots__ = ("_bus", "_name", "_handler", "_active")
 
-    def __init__(self, bus: "SimpleEventBus", name: EventKey, handler: Handler) -> None:
+    def __init__(self, bus: SimpleEventBus, name: EventKey, handler: Handler) -> None:
         self._bus = bus
         self._name = name
         self._handler = handler
@@ -105,7 +105,7 @@ class Subscription:
             self._bus.unsubscribe(self._name, self._handler)
             self._active = False
 
-    def __enter__(self) -> "Subscription":
+    def __enter__(self) -> Subscription:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -129,14 +129,14 @@ class SimpleEventBus:
     """
 
     def __init__(self) -> None:
-        self._by_name: Dict[EventName, List[Handler]] = {
+        self._by_name: dict[EventName, list[Handler]] = {
             RUN_START: [],
             RUN_END: [],
             SWEEP_START: [],
             SWEEP_END: [],
             PROGRESS: [],
         }
-        self._wildcard: List[Handler] = []
+        self._wildcard: list[Handler] = []
         self._lock = RLock()
 
     def subscribe(self, name: EventKey, handler: Handler) -> Subscription:
@@ -182,7 +182,7 @@ class SimpleEventBus:
         *,
         fraction: float,
         message: str = "",
-        meta: Optional[Dict[str, Any]] = None,
+        meta: dict[str, Any] | None = None,
     ) -> None:
         """Publish a standardized PROGRESS event.
 
@@ -205,7 +205,7 @@ class SimpleEventBus:
 # ---- Factory ----------------------------------------------------------------
 
 
-def make_event(name: EventName, payload: Optional[Dict[str, Any]] = None) -> Event:
+def make_event(name: EventName, payload: dict[str, Any] | None = None) -> Event:
     """Create an `Event` with ISO-8601 timestamp."""
     return Event(name=name, timestamp=datetime.now().isoformat(), payload=payload or {})
 

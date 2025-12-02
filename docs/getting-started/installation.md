@@ -35,7 +35,7 @@ pip install -e .
 For production use:
 
 ```bash
-pip install qiskit-experiments
+pip install qiskit-experiment-framework
 ```
 
 ## Verification

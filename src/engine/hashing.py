@@ -35,11 +35,10 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
-import os
-import re
 import unicodedata
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Iterable, Union, Optional
+from typing import Any
 
 
 def canonical_dumps(
@@ -47,8 +46,8 @@ def canonical_dumps(
     *,
     exclude_none: bool = True,
     sort_keys: bool = True,
-    unicode_normalize: Optional[str] = "NFC",
-    float_precision: Optional[int] = None,
+    unicode_normalize: str | None = "NFC",
+    float_precision: int | None = None,
 ) -> str:
     """
     Serialize a mapping to a stable JSON string.
@@ -111,9 +110,7 @@ def blake2_of(
     return hashlib.blake2b(s.encode("utf-8"), digest_size=digest_size).hexdigest()
 
 
-def hash_file(
-    path: Union[str, Path], *, algo: str = "sha1", chunk_size: int = 8192
-) -> str:
+def hash_file(path: str | Path, *, algo: str = "sha1", chunk_size: int = 8192) -> str:
     """
     Hash a file in chunks; returns hex digest.
 
@@ -144,8 +141,8 @@ def _normalize(
     obj: Any,
     *,
     exclude_none: bool,
-    unicode_normalize: Optional[str],
-    float_precision: Optional[int],
+    unicode_normalize: str | None,
+    float_precision: int | None,
 ):
     """Recursively convert `obj` into JSON-serializable, canonical form."""
     # Pydantic models
@@ -202,7 +199,7 @@ def _normalize(
         ]
 
     # Numpy scalars (without importing numpy): duck-typed via .item()
-    if hasattr(obj, "item") and callable(getattr(obj, "item")):
+    if hasattr(obj, "item") and callable(obj.item):
         try:
             return obj.item()  # type: ignore[no-any-return]
         except Exception:

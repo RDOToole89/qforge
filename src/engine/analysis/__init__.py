@@ -11,9 +11,9 @@ Only re-export the small surface the engine needs to import.
 """
 
 from .research_integration import (
-    extract_counts_from_result,
-    compute_research_schema,
     compute_research_metrics,
+    compute_research_schema,
+    extract_counts_from_result,
 )
 
 __all__ = [

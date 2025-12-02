@@ -7,10 +7,11 @@ modifying core engine code.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Iterable, Tuple
 import logging
 import threading
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from typing import Any
 
 from src.engine.models import ArtifactRef
 
@@ -38,12 +39,12 @@ class VisualizationRenderer(ABC):
         return self.__class__.__name__
 
     @abstractmethod
-    def can_render(self, viz_type: str, data: Dict[str, Any]) -> bool:
+    def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
         """Return True if this renderer supports the visualization type and data."""
         raise NotImplementedError
 
     @abstractmethod
-    def render(self, data: Dict[str, Any], output_path: str) -> ArtifactRef:
+    def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
         """Render visualization and return an ArtifactRef."""
         raise NotImplementedError
 
@@ -73,7 +74,7 @@ class VisualizationService:
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
-        self._renderers: List[VisualizationRenderer] = []
+        self._renderers: list[VisualizationRenderer] = []
 
     # ----- Registry management -----
 
@@ -92,9 +93,7 @@ class VisualizationService:
                 return
             self._renderers.append(renderer)
             # Keep registry sorted by descending priority (high first), then name
-            self._renderers.sort(
-                key=lambda r: (-int(getattr(r, "priority", 0)), r.name)
-            )
+            self._renderers.sort(key=lambda r: (-int(getattr(r, "priority", 0)), r.name))
             logger.debug(
                 "Registered renderer: %s (priority=%s)",
                 renderer.name,
@@ -120,12 +119,12 @@ class VisualizationService:
 
     # ----- Discovery / selection -----
 
-    def list_renderers(self) -> List[str]:
+    def list_renderers(self) -> list[str]:
         """List registered renderer names in selection order."""
         with self._lock:
             return [r.name for r in self._renderers]
 
-    def list_supported_types(self) -> List[str]:
+    def list_supported_types(self) -> list[str]:
         """
         Union of supported types reported by all renderers.
         Renderers that do not override `supported_types()` will contribute nothing here,
@@ -141,9 +140,7 @@ class VisualizationService:
                     logger.debug("Renderer %s.supported_types() failed: %s", r.name, e)
         return sorted(types)
 
-    def get_renderer(
-        self, viz_type: str, data: Dict[str, Any]
-    ) -> Optional[VisualizationRenderer]:
+    def get_renderer(self, viz_type: str, data: dict[str, Any]) -> VisualizationRenderer | None:
         """
         Return the best renderer for (viz_type, data), or None if no match.
         Selection is priority-first, then registration order.
@@ -157,15 +154,13 @@ class VisualizationService:
                     logger.warning("Renderer %s.can_render() raised: %s", r.name, e)
         return None
 
-    def can_render(self, viz_type: str, data: Dict[str, Any]) -> bool:
+    def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
         """True if any registered renderer can handle this visualization."""
         return self.get_renderer(viz_type, data) is not None
 
     # ----- Rendering -----
 
-    def render(
-        self, viz_type: str, data: Dict[str, Any], output_path: str
-    ) -> ArtifactRef:
+    def render(self, viz_type: str, data: dict[str, Any], output_path: str) -> ArtifactRef:
         """
         Render visualization using the highest-priority compatible renderer.
 
@@ -193,8 +188,8 @@ class VisualizationService:
         return renderer.render(data, output_path)
 
     def render_or_none(
-        self, viz_type: str, data: Dict[str, Any], output_path: str
-    ) -> Optional[ArtifactRef]:
+        self, viz_type: str, data: dict[str, Any], output_path: str
+    ) -> ArtifactRef | None:
         """
         Render visualization using the best renderer, returning None if no renderer matches.
         Useful for optional visualizations in pipelines.
@@ -207,7 +202,7 @@ class VisualizationService:
 
     # ----- Internals -----
 
-    def _describe_registry(self) -> List[Tuple[str, int]]:
+    def _describe_registry(self) -> list[tuple[str, int]]:
         with self._lock:
             return [(r.name, int(getattr(r, "priority", 0))) for r in self._renderers]
 

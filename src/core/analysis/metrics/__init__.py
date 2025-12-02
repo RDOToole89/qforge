@@ -26,40 +26,39 @@ Educational Features:
 """
 
 # Registry and schema bridge (canonical API)
-from .registry import (
-    MetricResult,
-    Status,
-    register,
-    compute_metric,
-    compute_all,
-    determine_status,
-)
-from .schema_bridge import (
-    metrics_to_schema,
-    validate_schema_output,
-    get_schema_field_mapping,
-)
-
 # Canonical alias modules
 from .concentration_index import (
+    ConcentrationAnalysis,
     compute_concentration_index,
     compute_concentration_with_gini,
-    ConcentrationAnalysis,
 )
 from .pathway_persistence import (
+    TemporalAnalysis,
     compute_pathway_persistence,
     compute_pathway_persistence_scores,
     compute_temporal_transition_matrix,
-    TemporalAnalysis,
+)
+from .registry import (
+    MetricResult,
+    Status,
+    compute_all,
+    compute_metric,
+    determine_status,
+    register,
+)
+from .schema_bridge import (
+    get_schema_field_mapping,
+    metrics_to_schema,
+    validate_schema_output,
 )
 
 # Original implementation modules (backward compatibility)
 # Asymmetry Index (with graceful fallback if extras aren't present)
 try:
     from .asymmetry_index import (
+        AsymmetryAnalysis,
         compute_asymmetry_index,
         compute_asymmetry_index_with_null_comparison,
-        AsymmetryAnalysis,
     )
 except Exception:  # pragma: no cover
     from .asymmetry_index import compute_asymmetry_index  # required
@@ -68,29 +67,32 @@ except Exception:  # pragma: no cover
     AsymmetryAnalysis = None  # type: ignore[assignment]
 
 # PCR original module (also expose original dataclass alias for clarity)
-from .pathway_concentration_ratio import (
-    compute_pathway_concentration_ratio,
-    ConcentrationAnalysis as PCRConcentrationAnalysis,
+# CES
+from .complexity_emergence_score import (
+    EmergenceAnalysis,
+    compute_complexity_emergence_score,
+    compute_emergence_across_metrics,
 )
 
 # EEC
 from .entanglement_error_correlation import (
+    TopologyAnalysis,
     compute_entanglement_error_correlation,
     compute_multiway_entanglement_correlation,
-    TopologyAnalysis,
+)
+from .pathway_concentration_ratio import (
+    ConcentrationAnalysis as PCRConcentrationAnalysis,
+)
+from .pathway_concentration_ratio import (
+    compute_pathway_concentration_ratio,
+)
+from .temporal_pathway_stability import (
+    TemporalAnalysis as TPSTemporalAnalysis,
 )
 
 # TPS original (expose original dataclass alias too)
 from .temporal_pathway_stability import (
     compute_temporal_pathway_stability,
-    TemporalAnalysis as TPSTemporalAnalysis,
-)
-
-# CES
-from .complexity_emergence_score import (
-    compute_complexity_emergence_score,
-    compute_emergence_across_metrics,
-    EmergenceAnalysis,
 )
 
 # Total Correlation (canonical implementation)

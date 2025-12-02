@@ -8,19 +8,18 @@ Provides clean integration for computing research metrics.
 from __future__ import annotations
 
 import logging
-from typing import Dict, Optional, Any
 from datetime import datetime
-
-from src.engine.models.config import ExperimentConfig
-from src.engine.models.research import (
-    StructuredDecoherenceMetrics,
-    AnalysisMetadata,
-    PathwayAnalysis,
-)
+from typing import Any
 
 # Canonical metrics registry + schema bridge (single source of truth)
 from src.core.analysis.metrics.registry import compute_all
 from src.core.analysis.metrics.schema_bridge import metrics_to_schema
+from src.engine.models.config import ExperimentConfig
+from src.engine.models.research import (
+    AnalysisMetadata,
+    PathwayAnalysis,
+    StructuredDecoherenceMetrics,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +29,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def extract_counts_from_result(
-    raw_result: Any, *, num_qubits: Optional[int] = None
-) -> Dict[str, int]:
+def extract_counts_from_result(raw_result: Any, *, num_qubits: int | None = None) -> dict[str, int]:
     """
     Extract measurement counts from Qiskit results and canonicalize.
 
@@ -74,7 +71,7 @@ def extract_counts_from_result(
             except Exception:
                 pass
 
-        clean_counts: Dict[str, int] = {}
+        clean_counts: dict[str, int] = {}
         for bitstring, count in counts_raw.items():
             key = str(bitstring).replace(" ", "")
             if num_qubits is not None:
@@ -96,9 +93,9 @@ def extract_counts_from_result(
 
 
 def compute_research_schema(
-    counts: Dict[str, int],
+    counts: dict[str, int],
     config: ExperimentConfig,
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """
     Compute all registered metrics and return **schema v1** output.
 
@@ -138,8 +135,8 @@ def compute_research_schema(
 
 
 def compute_research_metrics(
-    counts: Dict[str, int], config: ExperimentConfig
-) -> Optional[StructuredDecoherenceMetrics]:
+    counts: dict[str, int], config: ExperimentConfig
+) -> StructuredDecoherenceMetrics | None:
     """
     Compute structured decoherence metrics and return *typed* engine models.
 
@@ -172,9 +169,7 @@ def compute_research_metrics(
     tc = _val("total_correlation", 0.0)
 
     # Optional / nullable
-    tps_block = schema.get("pathway_persistence") or schema.get(
-        "temporal_pathway_stability"
-    )
+    tps_block = schema.get("pathway_persistence") or schema.get("temporal_pathway_stability")
     ces_block = schema.get("complexity_emergence_score")
     tps = (
         float(tps_block.get("value"))
@@ -233,7 +228,7 @@ def compute_research_metrics(
 # ---------------------------------------------------------------------------
 
 
-def _extract_noise_conditions(config: ExperimentConfig) -> Optional[Dict[str, Any]]:
+def _extract_noise_conditions(config: ExperimentConfig) -> dict[str, Any] | None:
     """Extract noise conditions from config for metadata."""
     if not getattr(config, "noise_enabled", False):
         return None
@@ -257,7 +252,7 @@ def _extract_noise_conditions(config: ExperimentConfig) -> Optional[Dict[str, An
 
 
 def _create_pathway_analysis(
-    counts: Dict[str, int], ai: float, pcr: float, eec: float
+    counts: dict[str, int], ai: float, pcr: float, eec: float
 ) -> PathwayAnalysis:
     """Create human-readable pathway analysis."""
     total_shots = max(1, sum(counts.values()))

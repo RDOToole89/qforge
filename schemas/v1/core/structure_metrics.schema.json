@@ -14,7 +14,7 @@
     "structure_score": {
       "type": "object",
       "additionalProperties": false,
-      "description": "SS: Jensen-Shannon divergence from null model",
+      "description": "SS: Total Variation Distance from uniform (or Jensen-Shannon divergence)",
       "properties": {
         "value": { "type": "number", "minimum": 0.0 },
         "ci95": {
@@ -54,9 +54,9 @@
     "concentration_index": {
       "type": "object",
       "additionalProperties": false,
-      "description": "CI: Gini coefficient of error distribution",
+      "description": "CI: Pathway Concentration Ratio (PCR) or Gini coefficient",
       "properties": {
-        "value": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "value": { "type": "number", "minimum": 0.0 },
         "ci95": {
           "type": "array",
           "items": { "type": "number" },

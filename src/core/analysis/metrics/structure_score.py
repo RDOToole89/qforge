@@ -33,26 +33,31 @@ Author: Structured Decoherence Research
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Tuple, Any
+from typing import Any
 
 import numpy as np
 from scipy.stats import spearmanr
 
 # Delegate to rigorously implemented metric modules to avoid duplication and drift.
 from .asymmetry_index import compute_asymmetry_index as _ai_compute
-from .pathway_concentration_ratio import compute_pathway_concentration_ratio as _pcr_compute
-from .entanglement_error_correlation import compute_entanglement_error_correlation as _eec_compute
-from .complexity_emergence_score import compute_complexity_emergence_score as _ces_compute
-from . import schema_bridge as _schema_bridge
+from .complexity_emergence_score import (
+    compute_complexity_emergence_score as _ces_compute,
+)
+from .entanglement_error_correlation import (
+    compute_entanglement_error_correlation as _eec_compute,
+)
+from .pathway_concentration_ratio import (
+    compute_pathway_concentration_ratio as _pcr_compute,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def compute_structure_score(*, counts: Dict[str, int], **kwargs) -> Dict[str, Any]:
+def compute_structure_score(*, counts: dict[str, int], **kwargs) -> dict[str, Any]:
     """
-    Compute Structure Score using Jensen–Shannon divergence from a null model.
+    Compute Structure Score (Asymmetry Index).
 
-    This is a thin wrapper around the canonical implementation in `schema_bridge`.
+    This is a thin wrapper around the canonical implementation of Asymmetry Index.
     Confidence intervals and validation status are handled by higher-level
     pipelines (e.g., bootstrap module) and not in this core wrapper.
 
@@ -65,19 +70,23 @@ def compute_structure_score(*, counts: Dict[str, int], **kwargs) -> Dict[str, An
               {
                 "value": <float>,
                 "status": "computed",
-                "extras": {"method": "jensen_shannon_divergence"}
+                "extras": {"method": "total_variation_distance"}
               }
               (CI and final status should be attached by the bootstrap pipeline.)
 
     Notes:
         - Keeps this "core" file lightweight and in sync with schema specs.
+        - JSD (Jensen-Shannon Divergence) is an alternative metric that is more
+          sensitive to tail deviations than TVD. While TVD is the primary
+          "Structure Score" for its linear interpretability, JSD can be useful
+          for sensitivity analysis in "Fog vs River" detection.
     """
     try:
-        value = _schema_bridge.compute_structure_score(counts, **kwargs)
+        value = compute_asymmetry_index(counts)
         return {
             "value": float(value),
             "status": "computed",
-            "extras": {"method": "jensen_shannon_divergence"},
+            "extras": {"method": "total_variation_distance"},
         }
     except Exception as e:
         logger.error("Structure Score computation failed: %s", e)
@@ -88,7 +97,7 @@ def compute_structure_score(*, counts: Dict[str, int], **kwargs) -> Dict[str, An
         }
 
 
-def compute_asymmetry_index(counts: Dict[str, int]) -> float:
+def compute_asymmetry_index(counts: dict[str, int]) -> float:
     """
     Compute Asymmetry Index (AI) — deviation from a uniform error distribution.
 
@@ -102,7 +111,7 @@ def compute_asymmetry_index(counts: Dict[str, int]) -> float:
     return float(_ai_compute(counts))
 
 
-def compute_pathway_concentration_ratio(counts: Dict[str, int]) -> float:
+def compute_pathway_concentration_ratio(counts: dict[str, int]) -> float:
     """
     Compute Pathway Concentration Ratio (PCR) — concentration in top error pathways.
 
@@ -116,7 +125,7 @@ def compute_pathway_concentration_ratio(counts: Dict[str, int]) -> float:
 
 
 def compute_entanglement_error_correlation(
-    counts: Dict[str, int],
+    counts: dict[str, int],
     state_type: str = "GHZ",
 ) -> float:
     """
@@ -136,7 +145,7 @@ def compute_entanglement_error_correlation(
     return float(_eec_compute(counts, state_type=state_type))
 
 
-def compute_temporal_pathway_stability(pathway_rankings: List[List]) -> float:
+def compute_temporal_pathway_stability(pathway_rankings: list[list]) -> float:
     """
     Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
 
@@ -157,12 +166,12 @@ def compute_temporal_pathway_stability(pathway_rankings: List[List]) -> float:
     if not pathway_rankings or len(pathway_rankings) < 2:
         return 1.0
 
-    def _to_rank_map(r: List) -> Dict[Any, int]:
+    def _to_rank_map(r: list) -> dict[Any, int]:
         return {k: i for i, k in enumerate(r)}
 
     maps = [_to_rank_map(r) for r in pathway_rankings]
 
-    rhos: List[float] = []
+    rhos: list[float] = []
     for i in range(len(maps)):
         for j in range(i + 1, len(maps)):
             common = sorted(set(maps[i]) & set(maps[j]))
@@ -184,7 +193,7 @@ def compute_temporal_pathway_stability(pathway_rankings: List[List]) -> float:
 
 
 def compute_complexity_emergence_score(
-    multi_qubit_data: Dict[int, Dict[str, int]],
+    multi_qubit_data: dict[int, dict[str, int]],
 ) -> float:
     """
     Compute Complexity Emergence Score (CES) — threshold for structured emergence.

@@ -44,20 +44,22 @@ References:
 - Wasserman & Faust (1994), "Social Network Analysis"
 """
 
-import numpy as np
 import logging
-from typing import Mapping, Tuple, List, Optional, Dict, Any, Union
+from collections.abc import Mapping
 from dataclasses import dataclass
-from scipy.stats import pearsonr
 from itertools import combinations
+from typing import Any, Optional, Union
+
+import numpy as np
+from scipy.stats import pearsonr
 
 from ..constants import (
     ALPHA,
-    EEC_LAMBDA,
-    validate_counts_dict,
-    CORRELATION_WEAK_THRESHOLD,
     CORRELATION_MODERATE_THRESHOLD,
     CORRELATION_STRONG_THRESHOLD,
+    CORRELATION_WEAK_THRESHOLD,
+    EEC_LAMBDA,
+    validate_counts_dict,
 )
 from ..core.information_theory import mutual_information
 
@@ -79,7 +81,7 @@ class TopologyAnalysis:
     entanglement_matrix: np.ndarray
     error_correlation_matrix: np.ndarray
     topology_type: str
-    dominant_correlations: List[Tuple[int, int]]
+    dominant_correlations: list[tuple[int, int]]
     topology_summary: str
     statistical_significance: bool
 
@@ -101,7 +103,7 @@ class TopologyAnalysis:
 def compute_entanglement_error_correlation(
     counts: Mapping[str, int],
     state_type: str = "GHZ",
-    topology_params: Optional[Dict[str, Any]] = None,
+    topology_params: Optional[dict[str, Any]] = None,
     alpha: float = ALPHA,
     return_analysis: bool = False,
 ) -> Union[float, "TopologyAnalysis"]:
@@ -193,9 +195,7 @@ def compute_entanglement_error_correlation(
 
     if n_qubits < 2:
         logger.warning(f"EEC requires ≥2 qubits, got {n_qubits}")
-        return (
-            0.0 if not return_analysis else _create_empty_topology_analysis(state_type)
-        )
+        return 0.0 if not return_analysis else _create_empty_topology_analysis(state_type)
 
     logger.debug(
         f"Computing EEC for {n_qubits}-qubit {state_type} state with {len(counts_clean)} outcomes"
@@ -206,17 +206,13 @@ def compute_entanglement_error_correlation(
         topology_params = {}
 
     # Construct entanglement topology matrix
-    entanglement_matrix = _construct_entanglement_topology(
-        n_qubits, state_type, topology_params
-    )
+    entanglement_matrix = _construct_entanglement_topology(n_qubits, state_type, topology_params)
 
     # Compute error correlation matrix from measurement data
     error_matrix = _compute_error_correlation_matrix(counts_clean, n_qubits, alpha)
 
     # Calculate correlation between topology and error patterns
-    eec, p_value = _compute_topology_error_correlation(
-        entanglement_matrix, error_matrix
-    )
+    eec, p_value = _compute_topology_error_correlation(entanglement_matrix, error_matrix)
 
     logger.debug(f"Computed EEC = {eec:.6f} (p-value = {p_value:.4f})")
 
@@ -237,7 +233,7 @@ def compute_entanglement_error_correlation(
 
 def compute_multiway_entanglement_correlation(
     counts: Mapping[str, int], state_type: str = "GHZ", max_order: int = 3
-) -> Dict[int, float]:
+) -> dict[int, float]:
     """
     Compute higher-order entanglement correlations beyond pairwise.
 
@@ -291,9 +287,7 @@ def compute_multiway_entanglement_correlation(
 
         for qubit_combo in qubit_combinations:
             # k-way entanglement weight from topology
-            weight = _compute_kway_entanglement_weight(
-                qubit_combo, state_type, n_qubits
-            )
+            weight = _compute_kway_entanglement_weight(qubit_combo, state_type, n_qubits)
             entanglement_weights.append(weight)
 
             # k-way error frequency from data
@@ -313,7 +307,7 @@ def compute_multiway_entanglement_correlation(
 
 
 def _construct_entanglement_topology(
-    n_qubits: int, state_type: str, params: Dict[str, Any]
+    n_qubits: int, state_type: str, params: dict[str, Any]
 ) -> np.ndarray:
     """
     Construct entanglement topology matrix for given quantum state.
@@ -385,13 +379,9 @@ def _construct_entanglement_topology(
         if custom_matrix is not None:
             W = np.array(custom_matrix)
             if W.shape != (n_qubits, n_qubits):
-                raise ValueError(
-                    f"Custom matrix shape {W.shape} doesn't match {n_qubits} qubits"
-                )
+                raise ValueError(f"Custom matrix shape {W.shape} doesn't match {n_qubits} qubits")
         else:
-            logger.warning(
-                "Custom topology requested but no entanglement_matrix provided"
-            )
+            logger.warning("Custom topology requested but no entanglement_matrix provided")
 
     else:
         raise ValueError(f"Unsupported state type: {state_type}")
@@ -400,9 +390,7 @@ def _construct_entanglement_topology(
     W = (W + W.T) / 2
     np.fill_diagonal(W, 0)
 
-    logger.debug(
-        f"Constructed {state_type} topology matrix with {np.sum(W > 0)} non-zero entries"
-    )
+    logger.debug(f"Constructed {state_type} topology matrix with {np.sum(W > 0)} non-zero entries")
     return W
 
 
@@ -440,7 +428,7 @@ def _compute_error_correlation_matrix(
 
 def _compute_topology_error_correlation(
     entanglement_matrix: np.ndarray, error_matrix: np.ndarray
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Compute correlation between entanglement topology and error patterns.
 
@@ -474,7 +462,7 @@ def _compute_topology_error_correlation(
 
 
 def _compute_kway_entanglement_weight(
-    qubit_combo: Tuple[int, ...], state_type: str, n_qubits: int
+    qubit_combo: tuple[int, ...], state_type: str, n_qubits: int
 ) -> float:
     """Compute k-way entanglement weight for given qubit combination."""
     if state_type.upper() == "GHZ":
@@ -500,9 +488,7 @@ def _compute_kway_entanglement_weight(
         return 1.0
 
 
-def _compute_kway_error_frequency(
-    qubit_combo: Tuple[int, ...], counts: Mapping[str, int]
-) -> float:
+def _compute_kway_error_frequency(qubit_combo: tuple[int, ...], counts: Mapping[str, int]) -> float:
     """Compute k-way error frequency for given qubit combination."""
     # Count how often this specific qubit combination shows correlated errors
     # For simplicity, count outcomes where these qubits differ from all-0 or all-1
@@ -554,9 +540,7 @@ def _generate_topology_analysis(
     # Get top correlations
     k = max(1, len(weights) // 4)
     top_indices = np.argsort(weights)[-k:][::-1]
-    dominant_correlations = [
-        (indices[0][i], indices[1][i]) for i in top_indices if weights[i] > 0
-    ]
+    dominant_correlations = [(indices[0][i], indices[1][i]) for i in top_indices if weights[i] > 0]
 
     # Generate summary
     direction = "positive" if eec > 0 else "negative" if eec < 0 else "zero"
@@ -609,9 +593,7 @@ def validate_eec_properties(
     counts_clean = validate_counts_dict(counts)
 
     # Property 1: Range constraint
-    assert (
-        -1.0 - tolerance <= eec <= 1.0 + tolerance
-    ), f"EEC={eec} outside valid range [-1, 1]"
+    assert -1.0 - tolerance <= eec <= 1.0 + tolerance, f"EEC={eec} outside valid range [-1, 1]"
 
     # Property 2: Finite and real
     assert np.isfinite(eec), f"EEC={eec} is not finite"
@@ -619,9 +601,7 @@ def validate_eec_properties(
 
     # Property 3: Deterministic for identical inputs
     eec_recompute = compute_entanglement_error_correlation(counts_clean, state_type)
-    assert (
-        abs(eec - eec_recompute) <= tolerance
-    ), f"EEC not deterministic: {eec} vs {eec_recompute}"
+    assert abs(eec - eec_recompute) <= tolerance, f"EEC not deterministic: {eec} vs {eec_recompute}"
 
     logger.debug(f"EEC validation passed: EEC={eec:.6f}")
     return True

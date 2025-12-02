@@ -17,13 +17,15 @@ Used by: Engine API, storage systems, analysis pipelines
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Literal, Tuple
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
-from datetime import datetime
-import math
-import logging
 
-from .research import StructuredDecoherenceMetrics, ResearchMetadata
+import logging
+import math
+from datetime import datetime
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from .research import ResearchMetadata, StructuredDecoherenceMetrics
 from .storage import ArtifactRef
 
 logger = logging.getLogger(__name__)
@@ -48,12 +50,12 @@ class ExperimentResult(BaseModel):
     )
 
     # ===== Research Metrics =====
-    structured_decoherence_metrics: Optional[StructuredDecoherenceMetrics] = Field(
+    structured_decoherence_metrics: StructuredDecoherenceMetrics | None = Field(
         default=None,
         description="Structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)",
     )
 
-    research_metadata: Optional[ResearchMetadata] = Field(
+    research_metadata: ResearchMetadata | None = Field(
         default=None, description="Research context and experimental metadata"
     )
 
@@ -63,14 +65,12 @@ class ExperimentResult(BaseModel):
     )
 
     # ===== Results Management =====
-    artifacts: List[ArtifactRef] = Field(
+    artifacts: list[ArtifactRef] = Field(
         default_factory=list,
         description="References to generated files (plots, reports, etc.)",
     )
 
-    config_hash: str = Field(
-        description="Hash of experiment configuration for deduplication"
-    )
+    config_hash: str = Field(description="Hash of experiment configuration for deduplication")
 
     timestamp: str = Field(
         default_factory=lambda: datetime.now().isoformat(),
@@ -78,11 +78,9 @@ class ExperimentResult(BaseModel):
     )
 
     # ===== Status and Quality =====
-    status: ExperimentStatus = Field(
-        default="completed", description="Experiment execution status"
-    )
+    status: ExperimentStatus = Field(default="completed", description="Experiment execution status")
 
-    quality_metrics: Optional[QualityMetrics] = Field(
+    quality_metrics: QualityMetrics | None = Field(
         default=None, description="Quality assessment of experiment results"
     )
 
@@ -119,7 +117,7 @@ class ExperimentAnalysis(BaseModel):
     )
 
     # Input parameters
-    experiment_parameters: Dict[str, Any] = Field(
+    experiment_parameters: dict[str, Any] = Field(
         description="Complete experiment configuration parameters"
     )
 
@@ -134,16 +132,16 @@ class ExperimentAnalysis(BaseModel):
     )
 
     # Optional advanced analysis
-    information_theory_metrics: Optional[Dict[str, Any]] = Field(
+    information_theory_metrics: dict[str, Any] | None = Field(
         default=None,
         description="Information-theoretic analysis (entropy, mutual information, etc.)",
     )
 
-    correlation_analysis: Optional[Dict[str, Any]] = Field(
+    correlation_analysis: dict[str, Any] | None = Field(
         default=None, description="Quantum correlation and entanglement analysis"
     )
 
-    statistical_validation: Optional[Dict[str, Any]] = Field(
+    statistical_validation: dict[str, Any] | None = Field(
         default=None, description="Statistical validation and confidence measures"
     )
 
@@ -155,11 +153,11 @@ class ExperimentMetadata(BaseModel):
     timestamp: str = Field(description="When experiment was performed")
     framework_version: str = Field(description="Quantum experiment framework version")
 
-    research_type: Optional[str] = Field(
+    research_type: str | None = Field(
         default=None, description="Type of research analysis performed"
     )
 
-    experiment_description: Optional[str] = Field(
+    experiment_description: str | None = Field(
         default=None, description="Human-readable description of experiment purpose"
     )
 
@@ -171,23 +169,23 @@ class CircuitStatistics(BaseModel):
     num_gates: int = Field(ge=0, description="Total number of gates")
     num_qubits: int = Field(ge=1, description="Number of qubits")
 
-    gate_types: Dict[str, int] = Field(
+    gate_types: dict[str, int] = Field(
         default_factory=dict, description="Count of each gate type used"
     )
 
     # Advanced circuit metrics
-    two_qubit_gate_count: Optional[int] = Field(
+    two_qubit_gate_count: int | None = Field(
         default=None,
         ge=0,
         description="Number of two-qubit gates (entangling operations)",
     )
 
-    connectivity_graph: Optional[List[List[int]]] = Field(
+    connectivity_graph: list[list[int]] | None = Field(
         default=None, description="Qubit connectivity graph for multi-qubit operations"
     )
 
     @model_validator(mode="after")
-    def _reconcile_circuit_stats(self) -> "CircuitStatistics":
+    def _reconcile_circuit_stats(self) -> CircuitStatistics:
         """
         Auto-heal common inconsistencies:
         - If gate_types sum doesn't match num_gates, set num_gates = sum(gate_types)
@@ -214,7 +212,7 @@ class CircuitStatistics(BaseModel):
                 self.two_qubit_gate_count = 0
 
         if self.connectivity_graph is not None:
-            cleaned: List[List[int]] = []
+            cleaned: list[list[int]] = []
             for edge in self.connectivity_graph:
                 if not isinstance(edge, list) or len(edge) != 2:
                     continue
@@ -236,27 +234,25 @@ class CircuitStatistics(BaseModel):
 class MeasurementResults(BaseModel):
     """Raw measurement data and basic statistics."""
 
-    raw_counts: Dict[str, int] = Field(
+    raw_counts: dict[str, int] = Field(
         description="Raw measurement counts as {bitstring: count} pairs"
     )
 
     total_shots: int = Field(ge=1, description="Total number of measurement shots")
 
-    unique_outcomes: int = Field(
-        ge=1, description="Number of unique measurement outcomes observed"
-    )
+    unique_outcomes: int = Field(ge=1, description="Number of unique measurement outcomes observed")
 
-    outcome_probabilities: Dict[str, float] = Field(
+    outcome_probabilities: dict[str, float] = Field(
         description="Normalized probabilities for each outcome"
     )
 
     # Optional advanced measurements
-    density_matrix: Optional[List[List[float]]] = Field(
+    density_matrix: list[list[float]] | None = Field(
         default=None,
         description="Reconstructed density matrix (for density simulation mode)",
     )
 
-    fidelity: Optional[float] = Field(
+    fidelity: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
@@ -264,7 +260,7 @@ class MeasurementResults(BaseModel):
     )
 
     @classmethod
-    def from_counts(cls, counts: Dict[str, int]) -> "MeasurementResults":
+    def from_counts(cls, counts: dict[str, int]) -> MeasurementResults:
         """
         Convenience constructor from raw counts; computes total_shots, unique_outcomes, and probabilities.
         """
@@ -283,7 +279,7 @@ class MeasurementResults(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _precompute_probs(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _precompute_probs(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
         If outcome_probabilities is missing or empty, compute it from raw_counts/total_shots.
         """
@@ -296,15 +292,13 @@ class MeasurementResults(BaseModel):
             try:
                 total = int(total)
                 if total > 0:
-                    data["outcome_probabilities"] = {
-                        k: v / total for k, v in counts.items()
-                    }
+                    data["outcome_probabilities"] = {k: v / total for k, v in counts.items()}
             except Exception:
                 pass
         return data
 
     @model_validator(mode="after")
-    def _validate_and_heal(self) -> "MeasurementResults":
+    def _validate_and_heal(self) -> MeasurementResults:
         """
         Auto-heal and validate:
         - Ensure total_shots == sum(raw_counts); if not, fix to sum(raw_counts)
@@ -313,13 +307,9 @@ class MeasurementResults(BaseModel):
         - Normalize probabilities to sum ~ 1 (within tolerance)
         """
         # Fix totals
-        sum_counts = (
-            int(sum(int(v) for v in self.raw_counts.values())) if self.raw_counts else 0
-        )
+        sum_counts = int(sum(int(v) for v in self.raw_counts.values())) if self.raw_counts else 0
         if sum_counts <= 0:
-            raise ValueError(
-                "MeasurementResults.raw_counts must be non-empty with positive totals"
-            )
+            raise ValueError("MeasurementResults.raw_counts must be non-empty with positive totals")
 
         if self.total_shots != sum_counts:
             logger.warning(
@@ -383,23 +373,19 @@ class QualityMetrics(BaseModel):
     )
 
     # Statistical quality
-    confidence_level: float = Field(
-        ge=0.0, le=1.0, description="Statistical confidence in results"
-    )
+    confidence_level: float = Field(ge=0.0, le=1.0, description="Statistical confidence in results")
 
-    convergence_achieved: bool = Field(
-        description="Whether statistical convergence was achieved"
-    )
+    convergence_achieved: bool = Field(description="Whether statistical convergence was achieved")
 
     # Research quality
-    research_significance: Optional[float] = Field(
+    research_significance: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
         description="Research significance score for structured decoherence studies",
     )
 
-    publication_readiness: Optional[str] = Field(
+    publication_readiness: str | None = Field(
         default=None, description="Assessment of publication readiness"
     )
 
@@ -407,13 +393,13 @@ class QualityMetrics(BaseModel):
     def from_measurements(
         cls,
         meas: MeasurementResults,
-        num_qubits: Optional[int] = None,
+        num_qubits: int | None = None,
         *,
         target_ci_half_width: float = 0.02,
         z_value: float = 1.96,
         convergence_threshold: float = 0.95,
         coverage_weight: float = 0.5,
-    ) -> "QualityMetrics":
+    ) -> QualityMetrics:
         """
         Convenience constructor computing core quality metrics from measurements.
 
@@ -431,14 +417,10 @@ class QualityMetrics(BaseModel):
         inferred_n = num_qubits
         if inferred_n is None:
             try:
-                inferred_n = max(
-                    len(k.replace(" ", "")) for k in meas.raw_counts.keys()
-                )
+                inferred_n = max(len(k.replace(" ", "")) for k in meas.raw_counts.keys())
             except Exception:
                 # fallback: infer from support size
-                inferred_n = max(
-                    1, int(math.ceil(math.log2(max(1, meas.unique_outcomes))))
-                )
+                inferred_n = max(1, int(math.ceil(math.log2(max(1, meas.unique_outcomes)))))
 
         possible_outcomes = max(1, 2**inferred_n)
         coverage = min(1.0, meas.unique_outcomes / possible_outcomes)
@@ -484,50 +466,42 @@ class Provenance(BaseModel):
     """
 
     # Version information
-    schema_version: str = Field(
-        default="1.0.0", description="Provenance schema version"
-    )
+    schema_version: str = Field(default="1.0.0", description="Provenance schema version")
     timestamp: str = Field(
         default_factory=lambda: datetime.now().isoformat(),
         description="Provenance record creation timestamp",
     )
 
     # Software environment
-    software_versions: Dict[str, str] = Field(
+    software_versions: dict[str, str] = Field(
         default_factory=dict, description="Versions of all software dependencies"
     )
 
     # Hardware environment
-    host_info: Dict[str, str] = Field(
-        default_factory=dict, description="Host system information"
-    )
+    host_info: dict[str, str] = Field(default_factory=dict, description="Host system information")
 
     # Code version
-    git_sha: Optional[str] = Field(
-        default=None, description="Git commit SHA for exact code version"
-    )
+    git_sha: str | None = Field(default=None, description="Git commit SHA for exact code version")
 
     # Randomness control
-    rng_seed: Optional[int] = Field(
-        default=None, description="Random number generator seed used"
-    )
+    rng_seed: int | None = Field(default=None, description="Random number generator seed used")
 
     # Simulation details
-    simulator_info: Dict[str, Any] = Field(
+    simulator_info: dict[str, Any] = Field(
         default_factory=dict, description="Quantum simulator configuration and metadata"
     )
 
-    transpilation_summary: Dict[str, Any] = Field(
+    transpilation_summary: dict[str, Any] = Field(
         default_factory=dict,
         description="Circuit transpilation details and optimizations",
     )
 
     # Execution details
-    execution_time_seconds: Optional[float] = Field(
+    execution_time_seconds: float | None = Field(
         default=None, ge=0.0, description="Total execution time in seconds"
     )
 
-    memory_usage_mb: Optional[float] = Field(
+    memory_usage_mb: float | None = Field(
         default=None, ge=0.0, description="Peak memory usage in megabytes"
     )
 
@@ -577,7 +551,7 @@ def _estimate_required_shots_for_precision(
 
 def compute_quality_metrics(
     meas: MeasurementResults,
-    num_qubits: Optional[int] = None,
+    num_qubits: int | None = None,
     *,
     target_ci_half_width: float = 0.02,
     z_value: float = 1.96,

@@ -6,15 +6,17 @@ while maintaining backward compatibility with the original implementation.
 """
 
 from .temporal_pathway_stability import (
-    compute_temporal_pathway_stability as compute_pathway_persistence,
+    TemporalAnalysis,
     compute_pathway_persistence_scores,
     compute_temporal_transition_matrix,
-    TemporalAnalysis,
+)
+from .temporal_pathway_stability import (
+    compute_temporal_pathway_stability as compute_pathway_persistence,
 )
 
 __all__ = [
     "compute_pathway_persistence",
     "compute_pathway_persistence_scores",
-    "compute_temporal_transition_matrix", 
+    "compute_temporal_transition_matrix",
     "TemporalAnalysis",
 ]

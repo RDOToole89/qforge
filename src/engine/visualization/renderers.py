@@ -6,9 +6,9 @@ from quantum experiment data.
 """
 
 import logging
-from pathlib import Path
-from typing import Dict, Any, Tuple, List
 import math
+from pathlib import Path
+from typing import Any
 
 # Use a headless backend if needed (safe in GUI too)
 import matplotlib
@@ -18,12 +18,12 @@ try:
 except Exception:
     pass
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import FuncFormatter
 
-import numpy as np
+from src.engine.models import ArtifactRef
 
 from .service import VisualizationRenderer
-from src.engine.models import ArtifactRef
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class HistogramRenderer(VisualizationRenderer):
       }
     """
 
-    def can_render(self, viz_type: str, data: Dict[str, Any]) -> bool:
+    def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
         """Check if this is a histogram request with measurement counts/probabilities."""
         if viz_type != "histogram":
             return False
@@ -75,7 +75,7 @@ class HistogramRenderer(VisualizationRenderer):
         )
         return isinstance(counts, dict) and len(counts) > 0
 
-    def render(self, data: Dict[str, Any], output_path: str) -> ArtifactRef:
+    def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
         """Render research-focused histogram and return an ArtifactRef."""
         # ------- Extract inputs -------
         analysis = data.get("analysis", {})
@@ -118,16 +118,12 @@ class HistogramRenderer(VisualizationRenderer):
 
         # Axis labeling
         ax.set_xlabel("Measurement Outcomes", fontsize=12, fontweight="bold")
-        ax.set_ylabel(
-            "Probability" if is_prob else "Counts", fontsize=12, fontweight="bold"
-        )
+        ax.set_ylabel("Probability" if is_prob else "Counts", fontsize=12, fontweight="bold")
 
         # Ticks
         ax.set_xticks(indices)
         rot = 45 if len(reduced_labels) > 12 else 0
-        ax.set_xticklabels(
-            reduced_labels, rotation=rot, ha="right" if rot else "center"
-        )
+        ax.set_xticklabels(reduced_labels, rotation=rot, ha="right" if rot else "center")
 
         # Format large integers nicely
         if not is_prob:
@@ -136,9 +132,7 @@ class HistogramRenderer(VisualizationRenderer):
             ax.set_ylim(0, min(1.0, max(0.05, max(reduced_values) * 1.15)))
 
         # Title
-        ax.set_title(
-            self._build_title(experiment_params), fontsize=14, fontweight="bold", pad=20
-        )
+        ax.set_title(self._build_title(experiment_params), fontsize=14, fontweight="bold", pad=20)
 
         # Research metrics annotation
         self._annotate_metrics(ax, research_metrics)
@@ -202,8 +196,8 @@ class HistogramRenderer(VisualizationRenderer):
 
     # ----------------- helpers -----------------
 
-    def _build_title(self, params: Dict[str, Any]) -> str:
-        parts: List[str] = []
+    def _build_title(self, params: dict[str, Any]) -> str:
+        parts: list[str] = []
         st = params.get("state_type")
         if st:
             parts.append(f"{str(st).upper()} State")
@@ -212,9 +206,7 @@ class HistogramRenderer(VisualizationRenderer):
             parts.append(f"({nq} qubits)")
 
         if params.get("noise_enabled"):
-            noise_type = (
-                str(params.get("noise_type", "noise")).replace("_", " ").title()
-            )
+            noise_type = str(params.get("noise_type", "noise")).replace("_", " ").title()
             er = params.get("error_rate")
             if isinstance(er, (int, float)):
                 parts.append(f"{noise_type} (p={er:.3f})")
@@ -223,7 +215,7 @@ class HistogramRenderer(VisualizationRenderer):
 
         return " - ".join(parts) if parts else "Measurement Results"
 
-    def _annotate_metrics(self, ax, metrics: Dict[str, Any] | None) -> None:
+    def _annotate_metrics(self, ax, metrics: dict[str, Any] | None) -> None:
         if not metrics:
             return
         text_bits = []
@@ -252,9 +244,7 @@ class HistogramRenderer(VisualizationRenderer):
                 bbox=dict(boxstyle="round,pad=0.3", facecolor="0.9", edgecolor="0.8"),
             )
 
-    def _normalize_if_probs(
-        self, counts: Dict[str, Any]
-    ) -> Tuple[bool, Dict[str, float]]:
+    def _normalize_if_probs(self, counts: dict[str, Any]) -> tuple[bool, dict[str, float]]:
         """
         Decide if mapping looks like probabilities or raw counts.
         Returns (is_probability, mapping suitable for plotting).
@@ -286,11 +276,7 @@ class HistogramRenderer(VisualizationRenderer):
             # Already probabilities (normalize slight drift)
             norm = total if total != 0 else 1.0
             return True, {
-                k: (
-                    float(counts[k]) / norm
-                    if math.isfinite(_to_float(counts[k]))
-                    else 0.0
-                )
+                k: (float(counts[k]) / norm if math.isfinite(_to_float(counts[k])) else 0.0)
                 for k in counts.keys()
             }
         else:
@@ -300,7 +286,7 @@ class HistogramRenderer(VisualizationRenderer):
                 for k in counts.keys()
             }
 
-    def _looks_like_counts(self, counts: Dict[str, Any]) -> bool:
+    def _looks_like_counts(self, counts: dict[str, Any]) -> bool:
         """Heuristic: values are all near integers and sum is reasonably > 1."""
         vals = list(counts.values())
         if not vals:
@@ -317,10 +303,10 @@ class HistogramRenderer(VisualizationRenderer):
 
     def _compact_top_k(
         self,
-        mapping: Dict[str, float],
+        mapping: dict[str, float],
         top_k: int,
         sort_mode: str = "value_desc",
-    ) -> Tuple[List[str], List[float], bool]:
+    ) -> tuple[list[str], list[float], bool]:
         """Return (labels, values, used_other_bucket)."""
         items = list(mapping.items())
         if sort_mode == "bitstring":

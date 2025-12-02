@@ -32,14 +32,14 @@ References:
 - Watanabe (1960), "Information Theoretical Analysis of Multivariate Correlation"
 """
 
-import numpy as np
 import logging
-from typing import Dict, Mapping
+from collections.abc import Mapping
+
+import numpy as np
 from numpy.typing import NDArray
 
 from ..constants import (
     ALPHA,
-    EPS,
     LOG_BASE,
     MAX_OUTCOMES_EXACT,
     validate_counts_dict,
@@ -60,9 +60,7 @@ def all_bitstrings(n: int) -> list[str]:
     return [format(i, f"0{n}b") for i in range(2**n)]
 
 
-def counts_to_vector(
-    counts: Mapping[str, int], order: list[str]
-) -> NDArray[np.float64]:
+def counts_to_vector(counts: Mapping[str, int], order: list[str]) -> NDArray[np.float64]:
     """Return counts vector aligned to a given bitstring order (missing->0)."""
     return np.asarray([counts.get(bs, 0) for bs in order], dtype=np.float64)
 
@@ -117,9 +115,7 @@ def entropy(p: NDArray[np.float64], base: float = LOG_BASE) -> float:
     return h
 
 
-def counts_to_probabilities(
-    counts: Mapping[str, int], alpha: float = ALPHA
-) -> Dict[str, float]:
+def counts_to_probabilities(counts: Mapping[str, int], alpha: float = ALPHA) -> dict[str, float]:
     """
     Convert counts to a smoothed probability distribution over the *full* 2^n support.
     Uses Jeffreys smoothing with K = 2^n, adding alpha to *every* outcome, including
@@ -144,16 +140,14 @@ def counts_to_probabilities(
     smoothed_total = total_counts + alpha * K
 
     # Build dict on full support deterministically
-    probabilities: Dict[str, float] = {}
+    probabilities: dict[str, float] = {}
     for bs in order:
         c = float(counts_clean.get(bs, 0))
         probabilities[bs] = (c + alpha) / smoothed_total
 
     prob_sum = sum(probabilities.values())
     if not np.isclose(prob_sum, 1.0, atol=1e-12):
-        logger.warning(
-            f"[counts_to_probabilities] prob sum={prob_sum:.12f} (expected 1.0)"
-        )
+        logger.warning(f"[counts_to_probabilities] prob sum={prob_sum:.12f} (expected 1.0)")
 
     return probabilities
 
@@ -196,7 +190,7 @@ def marginal_distribution(
     n_qubits = len(next(iter(counts_clean.keys())))
 
     if not 0 <= qubit_index < n_qubits:
-        raise ValueError(f"qubit_index {qubit_index} out of range [0, {n_qubits-1}]")
+        raise ValueError(f"qubit_index {qubit_index} out of range [0, {n_qubits - 1}]")
 
     # Count marginal occurrences
     marginal_counts = [0, 0]  # [count for bit=0, count for bit=1]
@@ -252,9 +246,7 @@ def pairwise_joint_distribution(
     n_qubits = len(next(iter(counts_clean.keys())))
 
     if not 0 <= qubit_i < n_qubits or not 0 <= qubit_j < n_qubits:
-        raise ValueError(
-            f"Qubit indices ({qubit_i}, {qubit_j}) out of range [0, {n_qubits-1}]"
-        )
+        raise ValueError(f"Qubit indices ({qubit_i}, {qubit_j}) out of range [0, {n_qubits - 1}]")
 
     if qubit_i == qubit_j:
         raise ValueError(f"Qubit indices must be different, got both {qubit_i}")
@@ -273,9 +265,7 @@ def pairwise_joint_distribution(
 
     joint_probs = (joint_counts + alpha) / smoothed_total
 
-    logger.debug(
-        f"Joint distribution for qubits ({qubit_i}, {qubit_j}):\n{joint_probs}"
-    )
+    logger.debug(f"Joint distribution for qubits ({qubit_i}, {qubit_j}):\n{joint_probs}")
 
     return joint_probs
 
@@ -339,8 +329,7 @@ def mutual_information(
     mi = max(0.0, mi)
 
     logger.debug(
-        f"MI({qubit_i},{qubit_j}) = {mi:.6f} bits "
-        f"(H_i={h_i:.3f}, H_j={h_j:.3f}, H_ij={h_ij:.3f})"
+        f"MI({qubit_i},{qubit_j}) = {mi:.6f} bits (H_i={h_i:.3f}, H_j={h_j:.3f}, H_ij={h_ij:.3f})"
     )
 
     return mi
@@ -391,22 +380,22 @@ def total_correlation(counts: Mapping[str, int], alpha: float = ALPHA) -> float:
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> float:
     """
     Compute Kullback-Leibler divergence KL(p||q) in nats.
-    
+
     Mathematical Definition:
         KL(P||Q) = ∑ p(x) log(p(x)/q(x))
-        
+
     Properties:
         - Non-negative: KL(P||Q) ≥ 0
         - Zero iff P = Q almost everywhere
         - Not symmetric: KL(P||Q) ≠ KL(Q||P) in general
-        
+
     Args:
         p: Reference probability distribution
         q: Comparison probability distribution
-        
+
     Returns:
         float: KL divergence in nats
-        
+
     Notes:
         Input arrays are validated and normalized by validate_probability_array.
         Safe against log(0) due to probability clamping to [EPS, 1].
@@ -440,7 +429,7 @@ def jensen_shannon_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) ->
 
     Raises:
         ValueError: If distributions have different lengths
-        
+
     Notes:
         Computes KL components in nats for numerical stability,
         then converts to bits by dividing by log(2).
@@ -452,9 +441,9 @@ def jensen_shannon_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) ->
     m = 0.5 * (p + q)
     jsd_nats = 0.5 * kl_divergence(p, m) + 0.5 * kl_divergence(q, m)
     jsd_bits = jsd_nats / np.log(2.0)
-    
+
     logger.debug(f"Jensen-Shannon divergence = {jsd_bits:.6f}")
-    
+
     return float(np.clip(jsd_bits, 0.0, 1.0))
 
 

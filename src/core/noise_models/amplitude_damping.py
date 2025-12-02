@@ -38,17 +38,19 @@ Amplitude damping channels demonstrate core quantum mechanics concepts:
 - Asymmetric decoherence and its effects on quantum state preparation
 """
 
-import numpy as np
 import logging
-from typing import List, Dict, Any
+from typing import Any
+
+import numpy as np
 from qiskit_aer.noise import NoiseModel, amplitude_damping_error
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger("QuantumExperiment.NoiseModels")
 
 # Physical constants for realistic parameter calculations
 BOLTZMANN_CONSTANT = 8.617e-5  # eV/K
-PLANCK_CONSTANT = 4.136e-15    # eV⋅s
+PLANCK_CONSTANT = 4.136e-15  # eV⋅s
 TYPICAL_QUBIT_FREQUENCY = 5.5e9  # Hz (superconducting transmon)
 
 
@@ -91,7 +93,7 @@ class AmplitudeDampingNoise(BaseNoise):
         experiment_id: str = "N/A",
         t1: float = None,
         gate_time: float = 20e-9,
-        temperature: float = 0.015
+        temperature: float = 0.015,
     ):
         """
         Initialize amplitude damping noise with physics-based validation.
@@ -150,7 +152,7 @@ class AmplitudeDampingNoise(BaseNoise):
             experiment_id=experiment_id,
             t1=t1,
             gate_time=gate_time,
-            temperature=temperature
+            temperature=temperature,
         )
 
         # Log creation with T1 physics context
@@ -164,11 +166,13 @@ class AmplitudeDampingNoise(BaseNoise):
                 "temperature": temperature,
                 "decoherence_type": "energy_relaxation_directional",
                 "channel_property": "non_unital",
-                "research_role": "directional_pathway_bias_investigation"
-            }
+                "research_role": "directional_pathway_bias_investigation",
+            },
         )
 
-    def apply(self, noise_model: NoiseModel, gate_list: List[str], qubits_for_error: int = None) -> None:
+    def apply(
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+    ) -> None:
         """
         Apply amplitude damping noise to quantum gates.
 
@@ -187,8 +191,27 @@ class AmplitudeDampingNoise(BaseNoise):
             qubits_for_error: Override qubit count (ignored as AD is constructed per-gate)
         """
         # Define gate arity
-        one_qubit_gates = {'id', 'x', 'y', 'z', 'h', 's', 't', 'sdg', 'tdg', 'rx', 'ry', 'rz', 'u1', 'u2', 'u3', 'u', 'p', 'sx'}
-        two_qubit_gates = {'cx', 'cy', 'cz', 'ch', 'swap', 'iswap', 'ecr'}
+        one_qubit_gates = {
+            "id",
+            "x",
+            "y",
+            "z",
+            "h",
+            "s",
+            "t",
+            "sdg",
+            "tdg",
+            "rx",
+            "ry",
+            "rz",
+            "u1",
+            "u2",
+            "u3",
+            "u",
+            "p",
+            "sx",
+        }
+        two_qubit_gates = {"cx", "cy", "cz", "ch", "swap", "iswap", "ecr"}
 
         # Calculate effective damping rate including thermal effects
         effective_rate = self._calculate_effective_damping_rate()
@@ -231,11 +254,10 @@ class AmplitudeDampingNoise(BaseNoise):
 
         if failed_gates:
             logger.warning(
-                f"Failed to apply AMPLITUDE_DAMPING to gates: "
-                f"{[gate for gate, _ in failed_gates]}"
+                f"Failed to apply AMPLITUDE_DAMPING to gates: {[gate for gate, _ in failed_gates]}"
             )
 
-    def get_kraus_operators(self) -> List[np.ndarray]:
+    def get_kraus_operators(self) -> list[np.ndarray]:
         """
         Return Kraus operators for the amplitude damping channel.
 
@@ -260,14 +282,14 @@ class AmplitudeDampingNoise(BaseNoise):
         one_state = np.array([0, 1], dtype=complex)
 
         # Survival operator: no decay occurs
-        K0 = np.outer(zero_state, zero_state) + np.sqrt(1-γ) * np.outer(one_state, one_state)
+        K0 = np.outer(zero_state, zero_state) + np.sqrt(1 - γ) * np.outer(one_state, one_state)
 
         # Decay operator: |1⟩ → |0⟩ transition
         K1 = np.sqrt(γ) * np.outer(zero_state, one_state)
 
         return [K0, K1]
 
-    def get_physics_description(self) -> Dict[str, str]:
+    def get_physics_description(self) -> dict[str, str]:
         """
         Return comprehensive physics description of amplitude damping.
 
@@ -283,10 +305,10 @@ class AmplitudeDampingNoise(BaseNoise):
             "energy_conservation": "Irreversible |1⟩ → |0⟩ transitions preserve energy conservation",
             "channel_properties": "Non-unital (breaks detailed balance), trace-preserving, completely positive",
             "real_world_examples": "Superconducting transmon qubits, trapped ion spontaneous emission, photonic mode decay",
-            "quantum_principles": "T1 relaxation, spontaneous emission, Purcell effect, thermal equilibrium"
+            "quantum_principles": "T1 relaxation, spontaneous emission, Purcell effect, thermal equilibrium",
         }
 
-    def get_theoretical_properties(self) -> Dict[str, Any]:
+    def get_theoretical_properties(self) -> dict[str, Any]:
         """
         Get theoretical quantum properties specific to amplitude damping.
 
@@ -306,10 +328,10 @@ class AmplitudeDampingNoise(BaseNoise):
             "asymmetry_parameter": self.error_rate,  # Degree of |0⟩ vs |1⟩ bias
             "unitality": False,
             "time_reversibility": False,  # Irreversible decay process
-            "information_capacity": self._calculate_channel_capacity()
+            "information_capacity": self._calculate_channel_capacity(),
         }
 
-    def get_research_context(self) -> Dict[str, Any]:
+    def get_research_context(self) -> dict[str, Any]:
         """
         Get research context for amplitude damping in pathway studies.
 
@@ -320,40 +342,36 @@ class AmplitudeDampingNoise(BaseNoise):
             "pathway_hypothesis": {
                 "prediction": "Directional pathway bias favoring |1⟩ → |0⟩ transitions",
                 "test_method": "Compare excited vs ground state pathway utilization patterns",
-                "expected_signature": "Asymmetric decoherence with |1⟩-state pathway dominance"
+                "expected_signature": "Asymmetric decoherence with |1⟩-state pathway dominance",
             },
             "decoherence_characteristics": {
                 "energy_bias": "Preferential decay of excited computational basis states",
                 "topology_dependence": "Strong - affects entangled states with |1⟩ components asymmetrically",
                 "pathway_asymmetry": "Expected - energy flow creates directional pathway preferences",
-                "thermal_scaling": "Finite temperature reduces asymmetry through excitation processes"
+                "thermal_scaling": "Finite temperature reduces asymmetry through excitation processes",
             },
             "experimental_role": {
                 "directional_testing": "Primary model for non-isotropic decoherence pathway analysis",
                 "t1_scaling_studies": "Investigate pathway structure vs energy relaxation timescales",
                 "thermal_pathway_effects": "Study temperature-dependent pathway modifications",
-                "energy_flow_mapping": "Trace energy dissipation pathways through quantum networks"
+                "energy_flow_mapping": "Trace energy dissipation pathways through quantum networks",
             },
             "research_predictions": {
                 "vs_depolarizing": "Should show strong |1⟩-state pathway bias unlike isotropic depolarizing",
                 "temperature_dependence": "Pathway asymmetry decreases with increasing temperature",
                 "entanglement_scaling": "Asymmetric entanglement decay with |1⟩-rich states more fragile",
-                "measurement_bias": "Preferential loss of |1⟩-component correlations in measurements"
+                "measurement_bias": "Preferential loss of |1⟩-component correlations in measurements",
             },
             "educational_applications": {
                 "energy_conservation": "Demonstrate energy conservation constraints in quantum channels",
                 "t1_physics": "Connect microscopic relaxation to macroscopic T1 measurements",
                 "thermal_equilibrium": "Show approach to thermal equilibrium in open quantum systems",
-                "non_unital_channels": "Illustrate channels that break detailed balance symmetry"
-            }
+                "non_unital_channels": "Illustrate channels that break detailed balance symmetry",
+            },
         }
 
     def _validate_amplitude_damping_params(
-        self,
-        error_rate: float,
-        t1: float,
-        gate_time: float,
-        temperature: float
+        self, error_rate: float, t1: float, gate_time: float, temperature: float
     ) -> None:
         """
         Validate amplitude damping parameters against physics constraints.
@@ -364,9 +382,7 @@ class AmplitudeDampingNoise(BaseNoise):
         """
         # Validate damping probability
         if not 0 <= error_rate <= 1:
-            raise ValueError(
-                f"Amplitude damping rate must be in [0,1], got {error_rate}"
-            )
+            raise ValueError(f"Amplitude damping rate must be in [0,1], got {error_rate}")
 
         # Validate T1 time if provided
         if t1 is not None and t1 <= 0:
@@ -489,6 +505,5 @@ class AmplitudeDampingNoise(BaseNoise):
             )
         else:
             return (
-                f"Amplitude damping: γ={self.error_rate:.4f} "
-                f"[phenomenological energy relaxation]"
+                f"Amplitude damping: γ={self.error_rate:.4f} [phenomenological energy relaxation]"
             )

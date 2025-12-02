@@ -17,32 +17,31 @@ Notes
 """
 
 # --- State preparation (canonical entry point) ---
-from .state_preparation import prepare_state
-
-# --- Noise models (canonical factory) ---
-# Import explicitly from the factory to make the public surface unambiguous.
-from .noise_models.noise_factory import create_noise_model
-
 # --- Reusable analysis utilities ---
 # Information theory + bootstrap + null models (core utilities)
 from .analysis.core import (
-    entropy,
+    MetricWithConfidence,
+    bootstrap_confidence_interval,
+    compute_metric_with_confidence,
     counts_to_probabilities,
+    entropy,
+    factorized_null_model,
+    jensen_shannon_divergence,
     marginal_distribution,
     mutual_information,
     total_correlation,
-    jensen_shannon_divergence,
-    bootstrap_confidence_interval,
-    compute_metric_with_confidence,
-    MetricWithConfidence,
-    factorized_null_model,
 )
 
 # Correlation / geometry helpers (from core.correlations)
 from .analysis.core.correlations import (
-    mi_matrix,
     get_topology_adjacency,
+    mi_matrix,
 )
+
+# --- Noise models (canonical factory) ---
+# Import explicitly from the factory to make the public surface unambiguous.
+from .noise_models.noise_factory import create_noise_model
+from .state_preparation import prepare_state
 
 __all__ = [
     # State preparation

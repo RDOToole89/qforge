@@ -25,19 +25,21 @@ This module bridges quantum mechanics with statistical inference:
 - Validation status determination from statistical evidence
 """
 
-import numpy as np
 import logging
-from typing import Dict, Tuple, Callable, Optional, Any, Mapping
-from dataclasses import dataclass
 import warnings
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Any, Callable, Optional
+
+import numpy as np
 
 from ..constants import (
     DEFAULT_BOOTSTRAP_B,
-    validate_counts_dict,
-    VALIDATED_CV_THRESHOLD,
     EXPERIMENTAL_CV_THRESHOLD,
-    VALIDATED_MIN_SAMPLES,
     EXPERIMENTAL_MIN_SAMPLES,
+    VALIDATED_CV_THRESHOLD,
+    VALIDATED_MIN_SAMPLES,
+    validate_counts_dict,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,10 +63,10 @@ class MetricWithConfidence:
     """
 
     value: float
-    ci95: Tuple[float, float]
+    ci95: tuple[float, float]
     status: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to schema-compliant dictionary."""
         return {"value": self.value, "ci95": list(self.ci95), "status": self.status}
 
@@ -78,7 +80,7 @@ def bootstrap_confidence_interval(
     rng: Optional[np.random.Generator] = None,
     # compatibility alias; if provided, use it when rng is None
     random_state: Optional[np.random.Generator] = None,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
      Compute bootstrap confidence interval for any metric function.
 
@@ -151,7 +153,7 @@ def bootstrap_confidence_interval(
     for i in range(n_bootstrap):
         # Use rng for reproducibility; integers faster than choice-of-objects
         resampled_indices = rng.integers(0, n_samples, size=n_samples, endpoint=False)
-        resampled_counts: Dict[str, int] = {}
+        resampled_counts: dict[str, int] = {}
         for idx in resampled_indices:
             o = outcomes[idx]
             resampled_counts[o] = resampled_counts.get(o, 0) + 1
@@ -165,9 +167,7 @@ def bootstrap_confidence_interval(
             continue
 
     if len(bootstrap_metrics) < n_bootstrap * 0.9:
-        logger.warning(
-            f"Many bootstrap samples failed: {len(bootstrap_metrics)}/{n_bootstrap}"
-        )
+        logger.warning(f"Many bootstrap samples failed: {len(bootstrap_metrics)}/{n_bootstrap}")
 
     if not bootstrap_metrics:
         logger.error("All bootstrap samples failed")
@@ -209,8 +209,7 @@ def bootstrap_confidence_interval(
         ci_upper = max(ci_upper, original_metric)
 
     logger.debug(
-        f"Bootstrap CI: [{ci_lower:.4f}, {ci_upper:.4f}] "
-        f"from {len(bootstrap_metrics)} samples"
+        f"Bootstrap CI: [{ci_lower:.4f}, {ci_upper:.4f}] from {len(bootstrap_metrics)} samples"
     )
 
     return (float(ci_lower), float(ci_upper))
@@ -218,7 +217,7 @@ def bootstrap_confidence_interval(
 
 def _compute_bca_interval(
     bootstrap_metrics: np.ndarray, original_metric: float, confidence_level: float
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Compute BCa (Bias-Corrected and accelerated) confidence interval.
 
@@ -254,9 +253,7 @@ def _compute_bca_interval(
     return (float(ci_lower), float(ci_upper))
 
 
-def _compute_bias_correction(
-    bootstrap_metrics: np.ndarray, original_metric: float
-) -> float:
+def _compute_bias_correction(bootstrap_metrics: np.ndarray, original_metric: float) -> float:
     """Calculate bias correction factor z0."""
     proportion_less = np.mean(bootstrap_metrics < original_metric)
     # Avoid infinity at boundaries
@@ -272,7 +269,7 @@ def _normal_quantile(p: float) -> float:
 
         return float(norm.ppf(p))
     except Exception:
-        warnings.warn("BCa requires SciPy; falling back to percentile CI.")
+        warnings.warn("BCa requires SciPy; falling back to percentile CI.", stacklevel=2)
         raise
 
 
@@ -283,13 +280,11 @@ def _normal_cdf(z: float) -> float:
 
         return float(norm.cdf(z))
     except Exception:
-        warnings.warn("BCa requires SciPy; falling back to percentile CI.")
+        warnings.warn("BCa requires SciPy; falling back to percentile CI.", stacklevel=2)
         raise
 
 
-def determine_validation_status(
-    ci_width: float, metric_value: float, n_samples: int
-) -> str:
+def determine_validation_status(ci_width: float, metric_value: float, n_samples: int) -> str:
     """
     Determine validation status based on statistical evidence.
 
@@ -393,7 +388,9 @@ def compute_metric_with_confidence(
 
     # Bind kwargs (including rng) for metric if needed
     if metric_kwargs:
-        metric_func = lambda c: metric_function(c, **metric_kwargs)
+
+        def metric_func(c):
+            return metric_function(c, **metric_kwargs)
     else:
         metric_func = metric_function
 
@@ -416,13 +413,10 @@ def compute_metric_with_confidence(
     status = determine_validation_status(ci_width, metric_value, n_samples)
 
     logger.info(
-        f"{metric_name}: {metric_value:.4f} [{ci_lower:.4f}, {ci_upper:.4f}] "
-        f"status={status}"
+        f"{metric_name}: {metric_value:.4f} [{ci_lower:.4f}, {ci_upper:.4f}] status={status}"
     )
 
-    return MetricWithConfidence(
-        value=metric_value, ci95=(ci_lower, ci_upper), status=status
-    )
+    return MetricWithConfidence(value=metric_value, ci95=(ci_lower, ci_upper), status=status)
 
 
 # compute_all_metrics_with_confidence removed - moved to pipelines for decoupling

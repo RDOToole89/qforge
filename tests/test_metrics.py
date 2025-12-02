@@ -2,28 +2,27 @@
 Test metric calculation modules for structured decoherence analysis.
 """
 
-import pytest
 import numpy as np
-from typing import Dict, List
+import pytest
 
 from src.core.analysis.metrics.asymmetry_index import (
-    compute_asymmetry_index,
     AsymmetryAnalysis,
+    compute_asymmetry_index,
     validate_asymmetry_index_properties,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
-    compute_pathway_concentration_ratio,
+from src.core.analysis.metrics.complexity_emergence_score import (
+    EmergenceAnalysis,
+    compute_complexity_emergence_score,
 )
 from src.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
 )
-from src.core.analysis.metrics.temporal_pathway_stability import (
-    compute_temporal_pathway_stability,
-    TemporalAnalysis,
+from src.core.analysis.metrics.pathway_concentration_ratio import (
+    compute_pathway_concentration_ratio,
 )
-from src.core.analysis.metrics.complexity_emergence_score import (
-    compute_complexity_emergence_score,
-    EmergenceAnalysis,
+from src.core.analysis.metrics.temporal_pathway_stability import (
+    TemporalAnalysis,
+    compute_temporal_pathway_stability,
 )
 
 
@@ -52,7 +51,7 @@ class TestAsymmetryIndex:
         """Test AI with detailed analysis."""
         counts = {"00": 300, "01": 200, "10": 250, "11": 250}
         result = compute_asymmetry_index(counts, return_analysis=True)
-        
+
         assert isinstance(result, AsymmetryAnalysis)
         assert result.asymmetry_index >= 0.0
         assert result.asymmetry_index <= 0.5
@@ -178,7 +177,7 @@ class TestTemporalPathwayStability:
             ["000", "001", "111", "110"],
         ]
         result = compute_temporal_pathway_stability(rankings, return_analysis=True)
-        
+
         assert isinstance(result, TemporalAnalysis)
         assert 0.0 <= result.temporal_pathway_stability <= 1.0
         assert result.ranking_consistency in ["highly_stable", "stable", "unstable", "chaotic"]
@@ -198,10 +197,10 @@ class TestTemporalPathwayStability:
             ["00", "10", "01", "11"],
             ["00", "01", "11", "10"],
         ]
-        
+
         tps_spearman = compute_temporal_pathway_stability(rankings, correlation_method="spearman")
         tps_kendall = compute_temporal_pathway_stability(rankings, correlation_method="kendall")
-        
+
         assert 0.0 <= tps_spearman <= 1.0
         assert 0.0 <= tps_kendall <= 1.0
 
@@ -238,7 +237,7 @@ class TestComplexityEmergenceScore:
             4: {"0000": 500, "1111": 300, "0001": 100, "1110": 100},
         }
         result = compute_complexity_emergence_score(multi_qubit_data, return_analysis=True)
-        
+
         assert isinstance(result, EmergenceAnalysis)
         assert result.complexity_emergence_score >= 0.0
         assert result.emergence_quality in ["excellent", "good", "poor", "insufficient"]
@@ -257,8 +256,10 @@ class TestComplexityEmergenceScore:
             2: {"00": 300, "01": 200, "10": 250, "11": 250},
             3: {"000": 400, "111": 300, "001": 200, "110": 100},
         }
-        
-        ces_ai = compute_complexity_emergence_score(multi_qubit_data, structure_metric="asymmetry_index")
+
+        ces_ai = compute_complexity_emergence_score(
+            multi_qubit_data, structure_metric="asymmetry_index"
+        )
         assert ces_ai >= 0.0
 
 
@@ -268,11 +269,11 @@ class TestMetricIntegration:
     def test_metric_consistency(self):
         """Test consistency between related metrics."""
         counts = {"000": 400, "111": 400, "001": 100, "110": 100}
-        
+
         ai = compute_asymmetry_index(counts)
         pcr = compute_pathway_concentration_ratio(counts)
         eec = compute_entanglement_error_correlation(counts, "GHZ")
-        
+
         # All metrics should indicate some structure
         assert ai > 0.1  # Some asymmetry
         assert pcr > 1.5  # Some concentration
@@ -281,11 +282,11 @@ class TestMetricIntegration:
     def test_metric_bounds(self):
         """Test that all metrics respect their bounds."""
         counts = {"00": 300, "01": 200, "10": 250, "11": 250}
-        
+
         ai = compute_asymmetry_index(counts)
         pcr = compute_pathway_concentration_ratio(counts)
         eec = compute_entanglement_error_correlation(counts, "BELL")
-        
+
         assert 0.0 <= ai <= 0.5
         assert pcr >= 0.0
         assert -1.0 <= eec <= 1.0
@@ -296,12 +297,12 @@ class TestMetricIntegration:
         uniform_counts = {"00": 250, "01": 250, "10": 250, "11": 250}
         ai_uniform = compute_asymmetry_index(uniform_counts)
         pcr_uniform = compute_pathway_concentration_ratio(uniform_counts)
-        
+
         # Deterministic distribution
         deterministic_counts = {"00": 1000}
         ai_det = compute_asymmetry_index(deterministic_counts)
         pcr_det = compute_pathway_concentration_ratio(deterministic_counts)
-        
+
         # AI should increase from uniform to deterministic
         assert ai_det > ai_uniform
         # PCR should increase from uniform to deterministic
@@ -311,12 +312,12 @@ class TestMetricIntegration:
         """Test numerical stability of metrics."""
         # Very skewed distribution
         counts = {"000": 9999, "001": 1, "010": 0, "011": 0, "100": 0, "101": 0, "110": 0, "111": 0}
-        
+
         ai = compute_asymmetry_index(counts)
         pcr = compute_pathway_concentration_ratio(counts)
         eec = compute_entanglement_error_correlation(counts, "GHZ")
-        
+
         # All should be finite
         assert np.isfinite(ai)
-        assert np.isfinite(pcr) or pcr == float('inf')  # PCR can be infinite
+        assert np.isfinite(pcr) or pcr == float("inf")  # PCR can be infinite
         assert np.isfinite(eec)

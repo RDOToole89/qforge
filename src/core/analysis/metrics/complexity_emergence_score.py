@@ -46,15 +46,16 @@ References:
 """
 
 import logging
+import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.stats import linregress
-import warnings
 
-from ..constants import CES_MIN_POINTS, CES_MAX_QUBITS, validate_counts_dict
+from ..constants import CES_MAX_QUBITS, CES_MIN_POINTS, validate_counts_dict
 from .asymmetry_index import compute_asymmetry_index
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ class EmergenceAnalysis:
     scaling_behavior: str  # "sigmoid", "linear", "power_law", "flat"
     fit_r_squared: float
     emergence_confidence: float
-    critical_range: Tuple[float, float]
+    critical_range: tuple[float, float]
     emergence_summary: str
 
     def to_dict(self) -> dict:
@@ -99,7 +100,7 @@ class EmergenceAnalysis:
 
 
 def compute_complexity_emergence_score(
-    multi_qubit_data: Dict[int, Mapping[str, int]],
+    multi_qubit_data: dict[int, Mapping[str, int]],
     structure_metric: str = "asymmetry_index",
     emergence_model: str = "logistic",
     return_analysis: bool = False,
@@ -172,17 +173,13 @@ def compute_complexity_emergence_score(
     # Validate data consistency and extract qubit counts
     qubit_counts = sorted(multi_qubit_data.keys())
     if any(n < 1 or n > CES_MAX_QUBITS for n in qubit_counts):
-        raise ValueError(
-            f"Qubit counts must be in [1, {CES_MAX_QUBITS}], got {qubit_counts}"
-        )
+        raise ValueError(f"Qubit counts must be in [1, {CES_MAX_QUBITS}], got {qubit_counts}")
 
-    logger.debug(
-        "Computing CES for %d system sizes: %s", len(qubit_counts), qubit_counts
-    )
+    logger.debug("Computing CES for %d system sizes: %s", len(qubit_counts), qubit_counts)
 
     # Compute structure metric for each system size, keeping (x,y) aligned
-    x_vals: List[float] = []
-    y_vals: List[float] = []
+    x_vals: list[float] = []
+    y_vals: list[float] = []
     for n_qubits in qubit_counts:
         counts = multi_qubit_data[n_qubits]
         try:
@@ -239,8 +236,8 @@ def compute_complexity_emergence_score(
 
 
 def compute_emergence_across_metrics(
-    multi_qubit_data: Dict[int, Mapping[str, int]], metrics: Optional[List[str]] = None
-) -> Dict[str, float]:
+    multi_qubit_data: dict[int, Mapping[str, int]], metrics: Optional[list[str]] = None
+) -> dict[str, float]:
     """
     Compute CES across multiple structure metrics for comprehensive analysis.
 
@@ -257,7 +254,7 @@ def compute_emergence_across_metrics(
     if metrics is None:
         metrics = ["asymmetry_index", "structure_score", "concentration_index"]
 
-    emergence_scores: Dict[str, float] = {}
+    emergence_scores: dict[str, float] = {}
     for metric in metrics:
         try:
             ces = compute_complexity_emergence_score(
@@ -272,11 +269,9 @@ def compute_emergence_across_metrics(
     return emergence_scores
 
 
-def _fit_emergence_model(
-    x_data: np.ndarray, y_data: np.ndarray, model: str
-) -> Dict[str, Any]:
+def _fit_emergence_model(x_data: np.ndarray, y_data: np.ndarray, model: str) -> dict[str, Any]:
     """Fit specified emergence model to structure vs complexity data."""
-    results: Dict[str, Any] = {"model": model, "success": False}
+    results: dict[str, Any] = {"model": model, "success": False}
     try:
         if model == "logistic":
             fitted = _fit_logistic_emergence(x_data, y_data)
@@ -294,7 +289,7 @@ def _fit_emergence_model(
     return results
 
 
-def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
+def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Fit logistic emergence model: S(n) = A/(1 + exp(-k(n-n₀))) + S₀"""
 
     def logistic_func(x, A, k, n0, S0):
@@ -326,9 +321,7 @@ def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str,
         ss_res = float(np.sum((y_data - y_pred) ** 2))
         ss_tot = float(np.sum((y_data - np.mean(y_data)) ** 2))
         r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
-        param_errors = (
-            np.sqrt(np.diag(pcov)) if pcov is not None else np.array([np.nan] * 4)
-        )
+        param_errors = np.sqrt(np.diag(pcov)) if pcov is not None else np.array([np.nan] * 4)
         return {
             "success": True,
             "parameters": {
@@ -355,7 +348,7 @@ def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str,
         }
 
 
-def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
+def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Fit linear model: S(n) = m×n + b"""
     try:
         slope, intercept, r_value, p_value, std_err = linregress(x_data, y_data)
@@ -379,7 +372,7 @@ def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, A
         }
 
 
-def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
+def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Fit power law model: S(n) = A×n^α + S₀"""
 
     def power_law_func(x, A, alpha, S0):
@@ -408,9 +401,7 @@ def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str
         ss_res = float(np.sum((y_data - y_pred) ** 2))
         ss_tot = float(np.sum((y_data - np.mean(y_data)) ** 2))
         r_squared = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
-        param_errors = (
-            np.sqrt(np.diag(pcov)) if pcov is not None else np.array([np.nan] * 3)
-        )
+        param_errors = np.sqrt(np.diag(pcov)) if pcov is not None else np.array([np.nan] * 3)
         return {
             "success": True,
             "parameters": {"amplitude": A, "exponent": alpha, "baseline": S0},
@@ -431,10 +422,10 @@ def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str
         }
 
 
-def _fit_best_emergence_model(x_data: np.ndarray, y_data: np.ndarray) -> Dict[str, Any]:
+def _fit_best_emergence_model(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Automatically select best emergence model using AIC."""
     models = ["logistic", "linear", "power_law"]
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
 
     for model in models:
         fit_result = _fit_emergence_model(x_data, y_data, model)
@@ -459,16 +450,12 @@ def _fit_best_emergence_model(x_data: np.ndarray, y_data: np.ndarray) -> Dict[st
     logger.debug(
         "Best model: %s (AIC=%s)",
         best_result.get("model"),
-        (
-            f"{best_result.get('aic'):.2f}"
-            if np.isfinite(best_result.get("aic", np.inf))
-            else "−∞"
-        ),
+        (f"{best_result.get('aic'):.2f}" if np.isfinite(best_result.get("aic", np.inf)) else "−∞"),
     )
     return best_result
 
 
-def _calculate_ces_from_fit(fit_results: Dict[str, Any], model: str) -> float:
+def _calculate_ces_from_fit(fit_results: dict[str, Any], model: str) -> float:
     """Calculate CES from fitted model parameters."""
     if not fit_results.get("success"):
         return 0.0
@@ -493,7 +480,7 @@ def _calculate_ces_from_fit(fit_results: Dict[str, Any], model: str) -> float:
 
 def _generate_emergence_analysis(
     ces: float,
-    fit_results: Dict[str, Any],
+    fit_results: dict[str, Any],
     x_data: np.ndarray,
     y_data: np.ndarray,
     structure_metric: str,
@@ -512,9 +499,7 @@ def _generate_emergence_analysis(
         emergence_amplitude = float(params.get("amplitude", 0.0))
         baseline_structure = float(params.get("baseline", 0.0))
         # Confidence range for critical threshold
-        threshold_err = float(
-            fit_results.get("parameter_errors", {}).get("threshold_err", 1.0)
-        )
+        threshold_err = float(fit_results.get("parameter_errors", {}).get("threshold_err", 1.0))
         critical_range = (
             max(0.0, critical_threshold - threshold_err),
             critical_threshold + threshold_err,
@@ -547,9 +532,7 @@ def _generate_emergence_analysis(
     else:
         scaling_behavior = "flat"
 
-    emergence_confidence = r_squared * (
-        1.0 if emergence_quality in ("excellent", "good") else 0.5
-    )
+    emergence_confidence = r_squared * (1.0 if emergence_quality in ("excellent", "good") else 0.5)
     summary = f"CES = {ces:.3f} ({emergence_quality} {scaling_behavior} emergence): threshold ≈ {critical_threshold:.1f} qubits, R² = {r_squared:.3f}"
 
     return EmergenceAnalysis(
@@ -585,7 +568,7 @@ def _create_insufficient_emergence_analysis() -> EmergenceAnalysis:
 
 
 def validate_ces_properties(
-    ces: float, multi_qubit_data: Dict[int, Mapping[str, int]], tolerance: float = 1e-10
+    ces: float, multi_qubit_data: dict[int, Mapping[str, int]], tolerance: float = 1e-10
 ) -> bool:
     """
     Validate mathematical properties of computed CES.
@@ -610,7 +593,7 @@ def complexity_emergence_educational_demo() -> dict:
     Returns:
         dict: Demonstration results with critical phenomena interpretations
     """
-    demo_results: Dict[str, Any] = {}
+    demo_results: dict[str, Any] = {}
 
     # Example 1: Sharp emergence at ~3 qubits (GHZ-like)
     sharp_emergence_data = {
@@ -619,9 +602,7 @@ def complexity_emergence_educational_demo() -> dict:
         4: {"0000": 600, "1111": 350, "0001": 50},  # Strong structure
         5: {"00000": 700, "11111": 250, "00001": 50},  # Dominant structure
     }
-    ces_sharp = compute_complexity_emergence_score(
-        sharp_emergence_data, return_analysis=True
-    )
+    ces_sharp = compute_complexity_emergence_score(sharp_emergence_data, return_analysis=True)
     demo_results["sharp_emergence"] = {
         "data": sharp_emergence_data,
         "analysis": ces_sharp.to_dict(),
@@ -635,9 +616,7 @@ def complexity_emergence_educational_demo() -> dict:
         4: {"0000": 400, "1111": 300, "0001": 150, "0010": 150},
         5: {"00000": 450, "11111": 250, "00001": 150, "00010": 150},
     }
-    ces_gradual = compute_complexity_emergence_score(
-        gradual_emergence_data, return_analysis=True
-    )
+    ces_gradual = compute_complexity_emergence_score(gradual_emergence_data, return_analysis=True)
     demo_results["gradual_emergence"] = {
         "data": gradual_emergence_data,
         "analysis": ces_gradual.to_dict(),
@@ -676,9 +655,7 @@ def complexity_emergence_educational_demo() -> dict:
             "1111": 64,
         },
     }
-    ces_flat = compute_complexity_emergence_score(
-        no_emergence_data, return_analysis=True
-    )
+    ces_flat = compute_complexity_emergence_score(no_emergence_data, return_analysis=True)
     demo_results["no_emergence"] = {
         "data": no_emergence_data,
         "analysis": ces_flat.to_dict(),

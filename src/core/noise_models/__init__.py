@@ -8,14 +8,14 @@ This package includes:
 - A factory function (create_noise_model) to instantiate noise models.
 """
 
-from .base_noise import BaseNoise
-from .depolarizing import DepolarizingNoise
-from .phase_flip import PhaseFlipNoise
 from .amplitude_damping import AmplitudeDampingNoise
-from .phase_damping import PhaseDampingNoise
-from .thermal_relaxation import ThermalRelaxationNoise
+from .base_noise import BaseNoise
 from .bit_flip import BitFlipNoise
-from .noise_factory import create_noise_model, NOISE_CLASSES, get_available_noise_types
+from .depolarizing import DepolarizingNoise
+from .noise_factory import NOISE_CLASSES, create_noise_model, get_available_noise_types
+from .phase_damping import PhaseDampingNoise
+from .phase_flip import PhaseFlipNoise
+from .thermal_relaxation import ThermalRelaxationNoise
 
 __all__ = [
     "BaseNoise",

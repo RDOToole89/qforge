@@ -10,20 +10,19 @@ This module provides:
 - Correlation analysis helpers for topology studies
 """
 
-import numpy as np
 import logging
-from typing import Mapping
+from collections.abc import Mapping
+
+import numpy as np
 from numpy.typing import NDArray
 
+from ..constants import ALPHA, EEC_LAMBDA, validate_counts_dict
 from .information_theory import mutual_information, n_qubits_from_counts
-from ..constants import EEC_LAMBDA, ALPHA, validate_counts_dict
 
 logger = logging.getLogger(__name__)
 
 
-def mi_matrix(
-    counts: Mapping[str, int], *, alpha: float = ALPHA
-) -> NDArray[np.float64]:
+def mi_matrix(counts: Mapping[str, int], *, alpha: float = ALPHA) -> NDArray[np.float64]:
     """
     Compute mutual information matrix for all qubit pairs.
 
@@ -86,9 +85,7 @@ def mi_matrix(
     return mi_mat
 
 
-def adjacency_from_distances(
-    distances: np.ndarray, lam: float = EEC_LAMBDA
-) -> NDArray[np.float64]:
+def adjacency_from_distances(distances: np.ndarray, lam: float = EEC_LAMBDA) -> NDArray[np.float64]:
     """
     Compute adjacency matrix from distance matrix using exponential decay.
 
@@ -222,11 +219,7 @@ def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.floa
             r, c = divmod(idx, cols)
 
             # Right neighbor: stay within the same row and bounds
-            if (
-                (c + 1) < cols
-                and (idx + 1) < n_qubits
-                and ((idx // cols) == ((idx + 1) // cols))
-            ):
+            if (c + 1) < cols and (idx + 1) < n_qubits and ((idx // cols) == ((idx + 1) // cols)):
                 j = idx + 1
                 adj[idx, j] = adj[j, idx] = 1.0
 
@@ -250,8 +243,7 @@ def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.floa
         raise ValueError(f"Unknown topology type: {topology_type}")
 
     logger.debug(
-        f"Generated {topology_type} topology for {n_qubits} qubits, "
-        f"{np.sum(adj)/2:.0f} edges"
+        f"Generated {topology_type} topology for {n_qubits} qubits, {np.sum(adj) / 2:.0f} edges"
     )
 
     return adj

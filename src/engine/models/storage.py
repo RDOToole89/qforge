@@ -16,12 +16,13 @@ Used by: Engine storage systems, visualization, reporting
 """
 
 from __future__ import annotations
-from typing import Any, Dict, Optional, Literal, List
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
-from pathlib import Path
-from datetime import datetime
+
 import mimetypes
-import os
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ArtifactRef(BaseModel):
@@ -42,42 +43,34 @@ class ArtifactRef(BaseModel):
         "analysis",
         "visualization",
         "other",
-    ] = Field(
-        default="other", description="Type of artifact for organization and processing"
-    )
+    ] = Field(default="other", description="Type of artifact for organization and processing")
 
     path: str = Field(
         description="File path to the artifact (absolute or relative to results directory)"
     )
 
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata about the artifact"
     )
 
     # File characteristics
-    file_size_bytes: Optional[int] = Field(
-        default=None, ge=0, description="File size in bytes"
-    )
+    file_size_bytes: int | None = Field(default=None, ge=0, description="File size in bytes")
 
-    mime_type: Optional[str] = Field(default=None, description="MIME type of the file")
+    mime_type: str | None = Field(default=None, description="MIME type of the file")
 
-    creation_timestamp: Optional[str] = Field(
+    creation_timestamp: str | None = Field(
         default=None, description="When the artifact was created"
     )
 
     # Content description
-    title: Optional[str] = Field(
-        default=None, description="Human-readable title for the artifact"
-    )
+    title: str | None = Field(default=None, description="Human-readable title for the artifact")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None, description="Detailed description of artifact contents"
     )
 
     # Access and permissions
-    public: bool = Field(
-        default=False, description="Whether artifact can be shared publicly"
-    )
+    public: bool = Field(default=False, description="Whether artifact can be shared publicly")
 
     publication_ready: bool = Field(
         default=False,
@@ -98,12 +91,12 @@ class ArtifactRef(BaseModel):
             "visualization",
             "other",
         ] = "other",
-        title: Optional[str] = None,
-        description: Optional[str] = None,
+        title: str | None = None,
+        description: str | None = None,
         public: bool = False,
         publication_ready: bool = False,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> "ArtifactRef":
+        metadata: dict[str, Any] | None = None,
+    ) -> ArtifactRef:
         """
         Create an ArtifactRef by inspecting an existing file on disk.
         Populates size, MIME type, and creation timestamp when available.
@@ -139,7 +132,7 @@ class ArtifactRef(BaseModel):
             raise ValueError("path must be a non-empty string")
         return str(Path(v).expanduser())
 
-    def refresh_file_stats(self) -> "ArtifactRef":
+    def refresh_file_stats(self) -> ArtifactRef:
         """
         Refresh file_size_bytes, mime_type, and creation_timestamp from disk.
         Safe to call even if the file is missing.
@@ -187,26 +180,20 @@ class StorageConfig(BaseModel):
     )
 
     # Compression and archival
-    compress_raw_data: bool = Field(
-        default=False, description="Compress raw measurement data"
-    )
+    compress_raw_data: bool = Field(default=False, description="Compress raw measurement data")
 
     archive_old_results: bool = Field(
         default=False, description="Archive results older than retention period"
     )
 
-    retention_days: Optional[int] = Field(
+    retention_days: int | None = Field(
         default=None, ge=1, description="Days to retain results before archival"
     )
 
     # Backup and redundancy
-    backup_enabled: bool = Field(
-        default=False, description="Enable automatic backup of results"
-    )
+    backup_enabled: bool = Field(default=False, description="Enable automatic backup of results")
 
-    backup_location: Optional[str] = Field(
-        default=None, description="Location for backup storage"
-    )
+    backup_location: str | None = Field(default=None, description="Location for backup storage")
 
     @field_validator("base_directory")
     @classmethod
@@ -216,7 +203,7 @@ class StorageConfig(BaseModel):
         return str(Path(v).expanduser())
 
     @model_validator(mode="after")
-    def _validate_backup_and_retention(self) -> "StorageConfig":
+    def _validate_backup_and_retention(self) -> StorageConfig:
         # If backup is enabled, backup_location must be present
         if self.backup_enabled and not self.backup_location:
             raise ValueError("backup_location must be set when backup_enabled=True")
@@ -237,7 +224,7 @@ class StorageConfig(BaseModel):
         self,
         *,
         experiment_id: str,
-        research_type: Optional[str],
+        research_type: str | None,
         timestamp: str,
     ) -> str:
         """Render a filename using the template (without extension)."""
@@ -263,30 +250,18 @@ class DirectoryStructure(BaseModel):
     """
 
     # Main directories
-    experiments: str = Field(
-        default="experiments", description="Individual experiment results"
-    )
+    experiments: str = Field(default="experiments", description="Individual experiment results")
     sweeps: str = Field(default="sweeps", description="Parameter sweep results")
-    campaigns: str = Field(
-        default="campaigns", description="Long-term research campaigns"
-    )
+    campaigns: str = Field(default="campaigns", description="Long-term research campaigns")
     analysis: str = Field(default="analysis", description="Cross-experiment analysis")
-    visualizations: str = Field(
-        default="visualizations", description="Generated plots and figures"
-    )
-    reports: str = Field(
-        default="reports", description="Generated reports and summaries"
-    )
+    visualizations: str = Field(default="visualizations", description="Generated plots and figures")
+    reports: str = Field(default="reports", description="Generated reports and summaries")
     exports: str = Field(default="exports", description="Publication-ready exports")
 
     # Subdirectory organization
     by_date: bool = Field(default=True, description="Use date-based subdirectories")
-    by_research_type: bool = Field(
-        default=True, description="Use research-type subdirectories"
-    )
-    by_quantum_state: bool = Field(
-        default=False, description="Use quantum-state subdirectories"
-    )
+    by_research_type: bool = Field(default=True, description="Use research-type subdirectories")
+    by_quantum_state: bool = Field(default=False, description="Use quantum-state subdirectories")
 
     def get_path(self, base: Path, category: str, **kwargs) -> Path:
         """
@@ -314,11 +289,7 @@ class DirectoryStructure(BaseModel):
             path = path / dt.strftime("%Y/%m/%d")
 
         # Add research type organization if enabled
-        if (
-            self.by_research_type
-            and "research_type" in kwargs
-            and kwargs["research_type"]
-        ):
+        if self.by_research_type and "research_type" in kwargs and kwargs["research_type"]:
             path = path / str(kwargs["research_type"]).replace(" ", "_")
 
         # Add quantum state organization if enabled
@@ -335,8 +306,8 @@ class DirectoryStructure(BaseModel):
         category: Literal["experiments", "sweeps", "campaigns"] = "experiments",
         experiment_id: str,
         timestamp: str,
-        research_type: Optional[str] = None,
-        state_type: Optional[str] = None,
+        research_type: str | None = None,
+        state_type: str | None = None,
     ) -> Path:
         """Build and ensure the directory path for an experiment-like entity."""
         base = storage.base_path()
@@ -371,20 +342,20 @@ class ResultManifest(BaseModel):
     total_size_bytes: int = Field(ge=0, description="Total storage size used")
 
     # Organization
-    experiments: Dict[str, ExperimentManifestEntry] = Field(
+    experiments: dict[str, ExperimentManifestEntry] = Field(
         default_factory=dict, description="Index of experiment results"
     )
 
-    artifact_index: Dict[str, ArtifactRef] = Field(
+    artifact_index: dict[str, ArtifactRef] = Field(
         default_factory=dict, description="Index of all artifacts by path"
     )
 
     # Cleanup tracking
-    archived_experiments: List[str] = Field(
+    archived_experiments: list[str] = Field(
         default_factory=list, description="List of archived experiment IDs"
     )
 
-    orphaned_artifacts: List[str] = Field(
+    orphaned_artifacts: list[str] = Field(
         default_factory=list,
         description="List of artifacts without associated experiments",
     )
@@ -395,7 +366,7 @@ class ResultManifest(BaseModel):
         self,
         entry: ExperimentManifestEntry,
         *,
-        artifacts: List[ArtifactRef] | None = None,
+        artifacts: list[ArtifactRef] | None = None,
     ) -> None:
         """
         Add/update an experiment entry and fold in its artifacts.
@@ -444,13 +415,11 @@ class ExperimentManifestEntry(BaseModel):
 
     experiment_id: str = Field(description="Unique experiment identifier")
     timestamp: str = Field(description="When experiment was performed")
-    research_type: Optional[str] = Field(default=None, description="Type of research")
+    research_type: str | None = Field(default=None, description="Type of research")
 
     # File references
     result_file: str = Field(description="Path to main result file")
-    artifacts: List[str] = Field(
-        default_factory=list, description="Paths to artifact files"
-    )
+    artifacts: list[str] = Field(default_factory=list, description="Paths to artifact files")
 
     # Status
     status: str = Field(description="Current status of experiment results")
@@ -477,5 +446,5 @@ class ExperimentManifestEntry(BaseModel):
 
     @field_validator("artifacts")
     @classmethod
-    def _normalize_artifact_paths(cls, v: List[str]) -> List[str]:
+    def _normalize_artifact_paths(cls, v: list[str]) -> list[str]:
         return [str(Path(p).expanduser()) for p in v]

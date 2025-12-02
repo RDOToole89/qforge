@@ -24,19 +24,21 @@ Typical usage
 """
 
 from __future__ import annotations
-from typing import Dict, Any, Tuple, Optional, Mapping
+
 import logging
+from collections.abc import Mapping
+from typing import Any
 
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
-# Sophisticated state preparation and noise (engine-core)
-from src.core.state_preparation import prepare_state
-from src.core.noise_models import create_noise_model
-
 # Canonical metrics + schema v1 (engine-facing; intentional hard dependency for run_to_schema)
 from src.analysis.metrics.registry import compute_all
 from src.analysis.metrics.schema_bridge import metrics_to_schema
+from src.core.noise_models import create_noise_model
+
+# Sophisticated state preparation and noise (engine-core)
+from src.core.state_preparation import prepare_state
 
 logger = logging.getLogger(__name__)
 
@@ -73,18 +75,18 @@ class EngineExperimentRunner:
         self,
         num_qubits: int,
         state_type: str = "GHZ",
-        noise_type: Optional[str] = None,
+        noise_type: str | None = None,
         noise_enabled: bool = False,
         shots: int = 1024,
         sim_mode: str = "qasm",
-        error_rate: Optional[float] = None,
-        z_prob: Optional[float] = None,
-        i_prob: Optional[float] = None,
-        t1: Optional[float] = None,
-        t2: Optional[float] = None,
-        custom_params: Optional[Dict] = None,
-        rng_seed: Optional[int] = None,
-    ) -> Tuple[QuantumCircuit, Any]:
+        error_rate: float | None = None,
+        z_prob: float | None = None,
+        i_prob: float | None = None,
+        t1: float | None = None,
+        t2: float | None = None,
+        custom_params: dict | None = None,
+        rng_seed: int | None = None,
+    ) -> tuple[QuantumCircuit, Any]:
         """
         Build, (optionally) noise-configure, and simulate a circuit.
 
@@ -102,16 +104,12 @@ class EngineExperimentRunner:
         Returns:
             (QuantumCircuit, Aer result payload)
         """
-        self.logger.info(
-            "Starting engine experiment: %s (%d qubits)", state_type, num_qubits
-        )
+        self.logger.info("Starting engine experiment: %s (%d qubits)", state_type, num_qubits)
 
         circuit = self._create_circuit(num_qubits, state_type, custom_params)
 
         if noise_enabled and noise_type:
-            circuit = self._apply_noise(
-                circuit, noise_type, error_rate, z_prob, i_prob, t1, t2
-            )
+            circuit = self._apply_noise(circuit, noise_type, error_rate, z_prob, i_prob, t1, t2)
 
         result = self._execute_simulation(circuit, sim_mode, shots, rng_seed)
 
@@ -123,18 +121,18 @@ class EngineExperimentRunner:
         *,
         num_qubits: int,
         state_type: str = "GHZ",
-        noise_type: Optional[str] = None,
+        noise_type: str | None = None,
         noise_enabled: bool = False,
         shots: int = 1024,
         sim_mode: str = "qasm",
-        error_rate: Optional[float] = None,
-        z_prob: Optional[float] = None,
-        i_prob: Optional[float] = None,
-        t1: Optional[float] = None,
-        t2: Optional[float] = None,
-        custom_params: Optional[Dict] = None,
-        rng_seed: Optional[int] = None,
-    ) -> Tuple[QuantumCircuit, Mapping[str, int]]:
+        error_rate: float | None = None,
+        z_prob: float | None = None,
+        i_prob: float | None = None,
+        t1: float | None = None,
+        t2: float | None = None,
+        custom_params: dict | None = None,
+        rng_seed: int | None = None,
+    ) -> tuple[QuantumCircuit, Mapping[str, int]]:
         """
         Convenience: run and return (circuit, canonicalized counts dict).
         Canonicalization: MSB-left bitstrings of exact length `num_qubits`.
@@ -162,18 +160,18 @@ class EngineExperimentRunner:
         *,
         num_qubits: int,
         state_type: str = "GHZ",
-        noise_type: Optional[str] = None,
+        noise_type: str | None = None,
         noise_enabled: bool = False,
         shots: int = 1024,
         sim_mode: str = "qasm",
-        error_rate: Optional[float] = None,
-        z_prob: Optional[float] = None,
-        i_prob: Optional[float] = None,
-        t1: Optional[float] = None,
-        t2: Optional[float] = None,
-        custom_params: Optional[Dict] = None,
-        rng_seed: Optional[int] = None,
-    ) -> Tuple[QuantumCircuit, Dict[str, Any]]:
+        error_rate: float | None = None,
+        z_prob: float | None = None,
+        i_prob: float | None = None,
+        t1: float | None = None,
+        t2: float | None = None,
+        custom_params: dict | None = None,
+        rng_seed: int | None = None,
+    ) -> tuple[QuantumCircuit, dict[str, Any]]:
         """
         Run an experiment and return (circuit, schema_v1 metrics dict).
 
@@ -204,7 +202,7 @@ class EngineExperimentRunner:
     # ---------- Internals ----------
 
     def _create_circuit(
-        self, num_qubits: int, state_type: str, custom_params: Optional[Dict]
+        self, num_qubits: int, state_type: str, custom_params: dict | None
     ) -> QuantumCircuit:
         """Create a circuit via sophisticated core state-prep. Falls back to a basic template if core prep fails."""
         try:
@@ -222,13 +220,11 @@ class EngineExperimentRunner:
             return circ
 
         except Exception as e:
-            self.logger.error(
-                "Core state preparation failed (%s); using basic template.", e
-            )
+            self.logger.error("Core state preparation failed (%s); using basic template.", e)
             return self._create_basic_circuit(num_qubits, state_type, custom_params)
 
     def _create_basic_circuit(
-        self, num_qubits: int, state_type: str, custom_params: Optional[Dict]
+        self, num_qubits: int, state_type: str, custom_params: dict | None
     ) -> QuantumCircuit:
         """Basic fallback patterns (dev safety)."""
         circuit = QuantumCircuit(num_qubits, num_qubits)
@@ -279,15 +275,15 @@ class EngineExperimentRunner:
         self,
         circuit: QuantumCircuit,
         noise_type: str,
-        error_rate: Optional[float],
-        z_prob: Optional[float],
-        i_prob: Optional[float],
-        t1: Optional[float],
-        t2: Optional[float],
+        error_rate: float | None,
+        z_prob: float | None,
+        i_prob: float | None,
+        t1: float | None,
+        t2: float | None,
     ) -> QuantumCircuit:
         """Create and attach a noise model produced by core noise models."""
         try:
-            noise_params: Dict[str, Any] = {
+            noise_params: dict[str, Any] = {
                 "noise_type": str(noise_type).upper(),
                 "num_qubits": circuit.num_qubits,
             }
@@ -307,9 +303,7 @@ class EngineExperimentRunner:
             return circuit
 
         except Exception as e:
-            self.logger.error(
-                "Noise creation failed (%s); proceeding without noise.", e
-            )
+            self.logger.error("Noise creation failed (%s); proceeding without noise.", e)
             self.noise_model = None
             return circuit
 
@@ -318,13 +312,11 @@ class EngineExperimentRunner:
         circuit: QuantumCircuit,
         sim_mode: str,
         shots: int,
-        rng_seed: Optional[int],
+        rng_seed: int | None,
     ) -> Any:
         """Transpile and run a QASM simulation on AerSimulator."""
         if sim_mode != "qasm":
-            self.logger.warning(
-                "Simulation mode '%s' not supported; coercing to QASM.", sim_mode
-            )
+            self.logger.warning("Simulation mode '%s' not supported; coercing to QASM.", sim_mode)
 
         backend = AerSimulator()
         if rng_seed is not None:
@@ -338,7 +330,7 @@ class EngineExperimentRunner:
 
     # ---------- Helpers ----------
 
-    def _extract_canonical_counts(self, result: Any, num_qubits: int) -> Dict[str, int]:
+    def _extract_canonical_counts(self, result: Any, num_qubits: int) -> dict[str, int]:
         """
         Extract counts from a Qiskit Result and canonicalize bitstrings.
         - Strip spaces Qiskit may insert for registers.
@@ -350,7 +342,7 @@ class EngineExperimentRunner:
         except Exception:
             raw_counts = result.get_counts(0)  # type: ignore[attr-defined]
 
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for k, v in raw_counts.items():
             key = str(k).replace(" ", "")
             if len(key) < num_qubits:
@@ -360,14 +352,12 @@ class EngineExperimentRunner:
             counts[key] = int(v)
 
         if not counts:
-            self.logger.warning(
-                "No counts in result; fabricating zero-count for '0'*n."
-            )
+            self.logger.warning("No counts in result; fabricating zero-count for '0'*n.")
             counts["0" * num_qubits] = 0
         return counts
 
 
-def run_raw(config: Dict[str, Any]) -> Tuple[Any, Any]:
+def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
     """
     Thin convenience wrapper used by the API facade.
 
@@ -377,9 +367,7 @@ def run_raw(config: Dict[str, Any]) -> Tuple[Any, Any]:
     Returns:
         (QuantumCircuit, Aer Result)
     """
-    runner = EngineExperimentRunner(
-        experiment_id=config.get("experiment_id", "engine-run")
-    )
+    runner = EngineExperimentRunner(experiment_id=config.get("experiment_id", "engine-run"))
     circuit, raw = runner.run_experiment(
         num_qubits=int(config["num_qubits"]),
         state_type=str(config["state_type"]).upper(),

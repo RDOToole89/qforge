@@ -11,18 +11,20 @@ Usage:
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Mapping
+from collections.abc import Mapping
+from typing import Any, Optional
+
 import numpy as np
 
-from ..metrics.registry import compute_all
-from ..metrics.schema_bridge import metrics_to_schema
 from ..metrics.asymmetry_index import compute_asymmetry_index
-from ..metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
+from ..metrics.complexity_emergence_score import compute_complexity_emergence_score
 from ..metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
 )
+from ..metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
+from ..metrics.registry import compute_all
+from ..metrics.schema_bridge import metrics_to_schema
 from ..metrics.temporal_pathway_stability import compute_temporal_pathway_stability
-from ..metrics.complexity_emergence_score import compute_complexity_emergence_score
 
 logger = logging.getLogger("QuantumExperiment.Analysis.StructuredDecoherence")
 
@@ -41,12 +43,12 @@ def run_all_to_schema(
 
 
 def compute_all_pathway_metrics(
-    counts: Dict[str, int],
+    counts: dict[str, int],
     state_type: str = "GHZ",
     num_qubits: Optional[int] = None,
-    historical_data: Optional[List[Dict[str, int]]] = None,
-    multi_qubit_data: Optional[Dict[int, Dict[str, int]]] = None,
-) -> Dict[str, Any]:
+    historical_data: Optional[list[dict[str, int]]] = None,
+    multi_qubit_data: Optional[dict[int, dict[str, int]]] = None,
+) -> dict[str, Any]:
     """
     Compute all 5 structured decoherence pathway metrics.
 
@@ -70,9 +72,7 @@ def compute_all_pathway_metrics(
     # Sanity: ensure all bitstrings have the same length
     bit_lens = {len(b) for b in counts.keys()}
     if len(bit_lens) > 1:
-        logger.warning(
-            "Inconsistent bitstring lengths detected; using the most common length"
-        )
+        logger.warning("Inconsistent bitstring lengths detected; using the most common length")
         # Keep only outcomes with the modal bit-length for downstream interpretation
         modal_len = max(
             ((L, sum(1 for b in counts if len(b) == L)) for L in bit_lens),
@@ -94,7 +94,7 @@ def compute_all_pathway_metrics(
     pcr = compute_pathway_concentration_ratio(counts)
     eec = compute_entanglement_error_correlation(counts, state_type)
 
-    metrics: Dict[str, Any] = {
+    metrics: dict[str, Any] = {
         "asymmetry_index": float(ai),
         "pathway_concentration_ratio": float(pcr) if np.isfinite(pcr) else float("inf"),
         "entanglement_error_correlation": float(np.clip(eec, -1.0, 1.0)),
@@ -103,18 +103,14 @@ def compute_all_pathway_metrics(
     # Compute temporal stability if historical data available
     if historical_data:
         pathway_rankings = _extract_pathway_rankings([counts] + historical_data)
-        metrics["temporal_pathway_stability"] = compute_temporal_pathway_stability(
-            pathway_rankings
-        )
+        metrics["temporal_pathway_stability"] = compute_temporal_pathway_stability(pathway_rankings)
     else:
         metrics["temporal_pathway_stability"] = None
         logger.debug("No historical data provided - TPS not computed")
 
     # Compute complexity emergence if multi-qubit data available
     if multi_qubit_data:
-        metrics["complexity_emergence_score"] = compute_complexity_emergence_score(
-            multi_qubit_data
-        )
+        metrics["complexity_emergence_score"] = compute_complexity_emergence_score(multi_qubit_data)
     else:
         metrics["complexity_emergence_score"] = None
         logger.debug("No multi-qubit data provided - CES not computed")
@@ -146,10 +142,10 @@ def compute_all_pathway_metrics(
 
 
 def analyze_decoherence_structure(
-    counts: Dict[str, int],
+    counts: dict[str, int],
     state_type: str = "GHZ",
     confidence_threshold: float = 0.7,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     High-level analysis of decoherence structure with interpretation.
 
@@ -173,7 +169,7 @@ def analyze_decoherence_structure(
     eec = float(metrics.get("entanglement_error_correlation", 0.0))
 
     # Determine if decoherence appears structured
-    structure_indicators: List[str] = []
+    structure_indicators: list[str] = []
 
     # High asymmetry suggests non-uniform patterns
     if ai > 0.3:
@@ -211,9 +207,7 @@ def analyze_decoherence_structure(
         "structure_score": structure_score,
         "indicators": structure_indicators,
         "metrics": metrics,
-        "interpretation": _generate_interpretation(
-            metrics, is_structured, structure_indicators
-        ),
+        "interpretation": _generate_interpretation(metrics, is_structured, structure_indicators),
     }
 
     logger.info(
@@ -225,9 +219,9 @@ def analyze_decoherence_structure(
     return analysis
 
 
-def _extract_pathway_rankings(data_sequence: List[Dict[str, int]]) -> List[List[str]]:
+def _extract_pathway_rankings(data_sequence: list[dict[str, int]]) -> list[list[str]]:
     """Extract pathway rankings from sequence of measurement data."""
-    rankings: List[List[str]] = []
+    rankings: list[list[str]] = []
     for counts in data_sequence:
         # Sort bitstrings by frequency (most frequent first)
         sorted_outcomes = sorted(counts.items(), key=lambda x: x[1], reverse=True)
@@ -237,10 +231,10 @@ def _extract_pathway_rankings(data_sequence: List[Dict[str, int]]) -> List[List[
 
 
 def _generate_pathway_summary(
-    metrics: Dict[str, Any],
-    counts: Dict[str, int],
+    metrics: dict[str, Any],
+    counts: dict[str, int],
     state_type: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate human-readable pathway analysis summary."""
     total_shots = sum(counts.values()) or 1  # avoid div-by-zero
 
@@ -249,9 +243,7 @@ def _generate_pathway_summary(
     top_pathways = sorted_outcomes[: min(5, len(sorted_outcomes))]
 
     # Calculate pathway probabilities
-    pathway_probs = [
-        (bitstring, count / total_shots) for bitstring, count in top_pathways
-    ]
+    pathway_probs = [(bitstring, count / total_shots) for bitstring, count in top_pathways]
 
     # Friendly PCR string
     pcr = metrics["pathway_concentration_ratio"]
@@ -264,9 +256,7 @@ def _generate_pathway_summary(
         "dominant_pathways": pathway_probs,
         "pathway_concentration": f"Top 25% pathways contain {pcr_str} more events than bottom 25%",
         "asymmetry_level": _classify_asymmetry(metrics["asymmetry_index"]),
-        "entanglement_influence": _classify_correlation(
-            metrics["entanglement_error_correlation"]
-        ),
+        "entanglement_influence": _classify_correlation(metrics["entanglement_error_correlation"]),
         "state_type": state_type,
         "total_outcomes": len(counts),
         "measurement_shots": int(total_shots),
@@ -301,37 +291,30 @@ def _classify_correlation(eec: float) -> str:
 
 
 def _generate_interpretation(
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     is_structured: bool,
-    indicators: List[str],
+    indicators: list[str],
 ) -> str:
     """Generate natural language interpretation of results."""
     if is_structured:
         interpretation = "Analysis indicates STRUCTURED decoherence patterns. "
 
         if "high_asymmetry" in indicators:
-            interpretation += "Error distribution shows significant deviation from uniform randomness. "
+            interpretation += (
+                "Error distribution shows significant deviation from uniform randomness. "
+            )
 
-        if (
-            "pathway_concentration" in indicators
-            or "pathway_concentration_extreme" in indicators
-        ):
+        if "pathway_concentration" in indicators or "pathway_concentration_extreme" in indicators:
             interpretation += "Errors are concentrated in preferred pathways. "
 
         if "topology_correlation" in indicators:
             interpretation += "Error patterns correlate with entanglement topology. "
 
-        interpretation += (
-            "This supports the hypothesis of non-random decoherence pathways."
-        )
+        interpretation += "This supports the hypothesis of non-random decoherence pathways."
     else:
         interpretation = "Analysis indicates RANDOM decoherence patterns. "
-        interpretation += (
-            "Error distribution appears consistent with stochastic decoherence. "
-        )
-        interpretation += (
-            "No clear evidence of structured pathway preferences detected."
-        )
+        interpretation += "Error distribution appears consistent with stochastic decoherence. "
+        interpretation += "No clear evidence of structured pathway preferences detected."
 
     return interpretation
 

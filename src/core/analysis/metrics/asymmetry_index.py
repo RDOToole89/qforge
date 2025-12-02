@@ -43,17 +43,18 @@ References:
 """
 
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, Mapping, Tuple, List, Union
+from typing import Union
 
 import numpy as np
 
 from ..constants import (
     ALPHA,
     MAX_OUTCOMES_EXACT,
-    STRUCTURE_WEAK_THRESHOLD,
     STRUCTURE_MODERATE_THRESHOLD,
     STRUCTURE_STRONG_THRESHOLD,
+    STRUCTURE_WEAK_THRESHOLD,
     validate_counts_dict,
 )
 from ..core.information_theory import (
@@ -85,7 +86,7 @@ class AsymmetryAnalysis:
     structure_evidence: str  # "weak", "moderate", "strong", "none"
     uniform_deviation: float
     entropy_reduction: float  # (H_max - H_obs)/H_max in bits
-    dominant_outcomes: List[str]  # most-probable outcomes (educational)
+    dominant_outcomes: list[str]  # most-probable outcomes (educational)
     statistical_summary: str
 
     def to_dict(self) -> dict:
@@ -108,7 +109,7 @@ class AsymmetryAnalysis:
 
 def _tvd_vs_uniform_from_counts_fast(
     counts: Mapping[str, int], alpha: float
-) -> Tuple[float, int, int]:
+) -> tuple[float, int, int]:
     """
     Compute TVD(p̃ || uniform) in O(|observed|) using the full-support Jeffreys prior.
 
@@ -298,9 +299,7 @@ def compute_asymmetry_index(
         # Compute exact uniform deviation via observed/unobserved split
         denom = float(N + alpha * K)
         u = 1.0 / K
-        obs_devs = [
-            abs(((float(c) + alpha) / denom) - u) for c in counts_clean.values()
-        ]
+        obs_devs = [abs(((float(c) + alpha) / denom) - u) for c in counts_clean.values()]
         p0 = alpha / denom
         unobs_dev = abs(p0 - u)
         uniform_deviation = float(max(max(obs_devs) if obs_devs else 0.0, unobs_dev))
@@ -314,7 +313,9 @@ def compute_asymmetry_index(
         n_dom = max(1, len(sorted_obs) // 4)
         dominant_outcomes = [o for (o, _) in sorted_obs[:n_dom]]
 
-        details_note = f"Large support (K={K}) — used closed-form analysis without full enumeration."
+        details_note = (
+            f"Large support (K={K}) — used closed-form analysis without full enumeration."
+        )
 
     # Evidence label via thresholds from constants
     if ai >= STRUCTURE_STRONG_THRESHOLD:
@@ -346,7 +347,7 @@ def compute_asymmetry_index(
 def compute_asymmetry_index_with_null_comparison(
     counts: Mapping[str, int],
     alpha: float = ALPHA,
-) -> Tuple[float, float, str]:
+) -> tuple[float, float, str]:
     """
     Compute AI with explicit comparison to the factorized null model.
 
@@ -393,15 +394,9 @@ def compute_asymmetry_index_with_null_comparison(
     ai_factorized = 0.5 * float(np.sum(np.abs(obs_array - null_array)))
 
     # Interpretation based on comparison
-    if (
-        ai_uniform >= STRUCTURE_MODERATE_THRESHOLD
-        and ai_factorized >= STRUCTURE_WEAK_THRESHOLD
-    ):
+    if ai_uniform >= STRUCTURE_MODERATE_THRESHOLD and ai_factorized >= STRUCTURE_WEAK_THRESHOLD:
         interpretation = "structured_decoherence"
-    elif (
-        ai_uniform >= STRUCTURE_WEAK_THRESHOLD
-        and ai_factorized < STRUCTURE_WEAK_THRESHOLD
-    ):
+    elif ai_uniform >= STRUCTURE_WEAK_THRESHOLD and ai_factorized < STRUCTURE_WEAK_THRESHOLD:
         interpretation = "marginal_bias_only"
     elif ai_uniform < STRUCTURE_WEAK_THRESHOLD:
         interpretation = "random_decoherence"
@@ -468,7 +463,7 @@ def asymmetry_index_educational_demo() -> dict:
     Returns:
         dict of named examples with counts, AI, and interpretations.
     """
-    demo_results: Dict[str, dict] = {}
+    demo_results: dict[str, dict] = {}
 
     # Example 1: Perfect uniform (random decoherence)
     uniform_counts = {"00": 250, "01": 250, "10": 250, "11": 250}

@@ -9,14 +9,15 @@ implementation with the registry system.
 from __future__ import annotations
 
 import logging
-from typing import Any, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import numpy as np
 
-from .registry import MetricResult, register, determine_status
-from ..core.information_theory import total_correlation as core_total_correlation
+from ..constants import ALPHA, DEFAULT_BOOTSTRAP_B
 from ..core.bootstrap import bootstrap_confidence_interval
-from ..constants import DEFAULT_BOOTSTRAP_B, ALPHA
+from ..core.information_theory import total_correlation as core_total_correlation
+from .registry import MetricResult, determine_status, register
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def compute_total_correlation(
     counts: Mapping[str, int],
     alpha: float = ALPHA,
     B: int = DEFAULT_BOOTSTRAP_B,
-    rng: Optional[Any] = None,
+    rng: Any | None = None,
     **kwargs: Any,
 ) -> MetricResult:
     """

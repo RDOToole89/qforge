@@ -3,15 +3,14 @@ Test constants module for validation, type safety, and helper functions.
 """
 
 import pytest
-from typing import Mapping
 
 from src.core.analysis.constants import (
     ALPHA,
     CONF_INT_DEFAULT,
     MAX_TOP_K,
     TOPK_MASS_TARGET,
-    validate_counts_dict,
     get_status_thresholds,
+    validate_counts_dict,
 )
 
 
@@ -90,6 +89,7 @@ class TestValidateCountsDict:
     def test_mapping_input(self):
         """Test that Mapping inputs are converted to dict."""
         from collections import OrderedDict
+
         counts = OrderedDict([("00", 100), ("11", 200)])
         result = validate_counts_dict(counts)
         assert isinstance(result, dict)

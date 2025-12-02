@@ -17,8 +17,10 @@ Used by: Engine API, CLI parsers, validation layers
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Literal
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
+
+from typing import Any, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ExperimentConfig(BaseModel):
@@ -29,17 +31,13 @@ class ExperimentConfig(BaseModel):
     from basic circuit parameters to advanced research configurations.
     """
 
-    model_config = ConfigDict(
-        extra="forbid", str_strip_whitespace=True, validate_assignment=True
-    )
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, validate_assignment=True)
 
     # ===== Core Quantum Parameters =====
-    num_qubits: int = Field(
-        ge=1, le=20, description="Number of qubits in the quantum circuit"
-    )
+    num_qubits: int = Field(ge=1, le=20, description="Number of qubits in the quantum circuit")
 
-    state_type: Literal["GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM"] = (
-        Field(description="Type of quantum state to prepare")
+    state_type: Literal["GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM"] = Field(
+        description="Type of quantum state to prepare"
     )
 
     # ===== Simulation Parameters =====
@@ -59,7 +57,7 @@ class ExperimentConfig(BaseModel):
         default=False, description="Whether to apply noise to the quantum circuit"
     )
 
-    noise_type: Optional[
+    noise_type: (
         Literal[
             "depolarizing",
             "amplitude_damping",
@@ -68,9 +66,10 @@ class ExperimentConfig(BaseModel):
             "phase_flip",
             "thermal_relaxation",
         ]
-    ] = Field(default=None, description="Type of noise model to apply")
+        | None
+    ) = Field(default=None, description="Type of noise model to apply")
 
-    error_rate: Optional[float] = Field(
+    error_rate: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
@@ -78,10 +77,10 @@ class ExperimentConfig(BaseModel):
     )
 
     # Advanced noise parameters
-    z_prob: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    i_prob: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    t1: Optional[float] = Field(default=None, gt=0.0)
-    t2: Optional[float] = Field(default=None, gt=0.0)
+    z_prob: float | None = Field(default=None, ge=0.0, le=1.0)
+    i_prob: float | None = Field(default=None, ge=0.0, le=1.0)
+    t1: float | None = Field(default=None, gt=0.0)
+    t2: float | None = Field(default=None, gt=0.0)
 
     # ===== Research Parameters =====
     enable_research_metrics: bool = Field(
@@ -89,7 +88,7 @@ class ExperimentConfig(BaseModel):
         description="Enable computation of structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)",
     )
 
-    research_type: Optional[
+    research_type: (
         Literal[
             "structured_decoherence",
             "parameter_sweep",
@@ -99,7 +98,8 @@ class ExperimentConfig(BaseModel):
             "convergence",
             "batch_sweep",
         ]
-    ] = Field(default=None, description="Type of research analysis to perform")
+        | None
+    ) = Field(default=None, description="Type of research analysis to perform")
 
     multiple_runs: int = Field(
         default=1,
@@ -120,12 +120,12 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== System Parameters =====
-    rng_seed: Optional[int] = Field(
+    rng_seed: int | None = Field(
         default=None,
         description="Random number generator seed for reproducible results",
     )
 
-    custom_params: Optional[Dict[str, Any]] = Field(
+    custom_params: dict[str, Any] | None = Field(
         default=None,
         description="Custom parameters for advanced state preparation or noise models",
     )
@@ -141,7 +141,7 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("noise_type", mode="before")
     @classmethod
-    def _normalize_noise_type(cls, v: Optional[str]) -> Optional[str]:
+    def _normalize_noise_type(cls, v: str | None) -> str | None:
         """Normalize noise_type to lowercase to match enum."""
         if isinstance(v, str):
             return v.strip().lower()
@@ -149,19 +149,17 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("t2")
     @classmethod
-    def validate_t2_constraint(cls, v: Optional[float], info) -> Optional[float]:
+    def validate_t2_constraint(cls, v: float | None, info) -> float | None:
         """Validate T2 ≤ 2*T1 constraint (field-level guard; model-level check also present)."""
         if v is not None and "t1" in info.data and info.data["t1"] is not None:
             t1 = info.data["t1"]
             if v > 2 * t1:
-                raise ValueError(
-                    f"T2 ({v}) must be ≤ 2*T1 ({2*t1}) for physical validity"
-                )
+                raise ValueError(f"T2 ({v}) must be ≤ 2*T1 ({2 * t1}) for physical validity")
         return v
 
     @field_validator("noise_type")
     @classmethod
-    def validate_noise_type_with_enabled(cls, v: Optional[str], info) -> Optional[str]:
+    def validate_noise_type_with_enabled(cls, v: str | None, info) -> str | None:
         """Ensure noise_type is provided when noise_enabled=True."""
         if info.data.get("noise_enabled", False) and v is None:
             raise ValueError("noise_type must be specified when noise_enabled=True")
@@ -169,23 +167,21 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("research_type")
     @classmethod
-    def validate_research_type_with_metrics(
-        cls, v: Optional[str], info
-    ) -> Optional[str]:
+    def validate_research_type_with_metrics(cls, v: str | None, info) -> str | None:
         """Ensure research_type is provided when enable_research_metrics=True."""
         if info.data.get("enable_research_metrics", False) and v is None:
             return "structured_decoherence"  # Default research type
         return v
 
     @model_validator(mode="after")
-    def _cross_field_checks(self) -> "ExperimentConfig":
+    def _cross_field_checks(self) -> ExperimentConfig:
         """
         Model-level cross-field validations that are safer after all fields are parsed.
         Currently re-enforces T2 ≤ 2*T1 for robustness when values are set/updated together.
         """
         if self.t1 is not None and self.t2 is not None:
             if self.t2 > 2 * self.t1:
-                raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2*self.t1})")
+                raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2 * self.t1})")
         return self
 
 
@@ -198,29 +194,25 @@ class AdvancedNoiseConfig(BaseModel):
     """
 
     # Thermal relaxation parameters
-    t1_values: Optional[Dict[int, float]] = Field(
+    t1_values: dict[int, float] | None = Field(
         default=None, description="Per-qubit T1 relaxation times"
     )
 
-    t2_values: Optional[Dict[int, float]] = Field(
+    t2_values: dict[int, float] | None = Field(
         default=None, description="Per-qubit T2 dephasing times"
     )
 
     # Correlated noise parameters
-    crosstalk_matrix: Optional[List[List[float]]] = Field(
+    crosstalk_matrix: list[list[float]] | None = Field(
         default=None, description="Qubit crosstalk correlation matrix"
     )
 
     # Time-dependent noise
-    time_dependent: bool = Field(
-        default=False, description="Enable time-dependent noise evolution"
-    )
+    time_dependent: bool = Field(default=False, description="Enable time-dependent noise evolution")
 
     @field_validator("crosstalk_matrix")
     @classmethod
-    def validate_crosstalk_matrix(
-        cls, v: Optional[List[List[float]]]
-    ) -> Optional[List[List[float]]]:
+    def validate_crosstalk_matrix(cls, v: list[list[float]] | None) -> list[list[float]] | None:
         """Validate crosstalk matrix is square and properly normalized."""
         if v is not None:
             n = len(v)

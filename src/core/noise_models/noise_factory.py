@@ -12,21 +12,20 @@ showing how to manage different environmental coupling mechanisms systematically
 while keeping the interface simple and extensible for research use.
 """
 
-from qiskit_aer.noise import NoiseModel
-from typing import Optional, Dict, List
 import logging
+from typing import Optional
 
-from .base_noise import BaseNoise
+from qiskit_aer.noise import NoiseModel
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
-
-# Import available noise classes
-from .depolarizing import DepolarizingNoise
 from .amplitude_damping import AmplitudeDampingNoise
-from .phase_damping import PhaseDampingNoise
+from .base_noise import BaseNoise
 from .bit_flip import BitFlipNoise
+from .depolarizing import DepolarizingNoise
+from .phase_damping import PhaseDampingNoise
 from .phase_flip import PhaseFlipNoise
 from .thermal_relaxation import ThermalRelaxationNoise
+
+logger = logging.getLogger("QuantumExperiment.NoiseModels")
 
 # Noise registry for available noise models
 NOISE_CLASSES = {
@@ -43,8 +42,8 @@ def create_noise_model(
     noise_type: str,
     num_qubits: int,
     error_rate: Optional[float] = None,
-    custom_params: Optional[Dict] = None,
-    experiment_id: str = "N/A"
+    custom_params: Optional[dict] = None,
+    experiment_id: str = "N/A",
 ) -> NoiseModel:
     """
     Factory function to create noise models for decoherence pathway research.
@@ -87,8 +86,7 @@ def create_noise_model(
     if noise_type not in NOISE_CLASSES:
         available_noise = list(NOISE_CLASSES.keys())
         raise ValueError(
-            f"Invalid noise type: '{noise_type}'. "
-            f"Available noise models: {available_noise}"
+            f"Invalid noise type: '{noise_type}'. Available noise models: {available_noise}"
         )
 
     try:
@@ -96,10 +94,7 @@ def create_noise_model(
         noise_class = NOISE_CLASSES[noise_type]
 
         # Prepare parameters for noise creation
-        init_params = {
-            "num_qubits": num_qubits,
-            "experiment_id": experiment_id
-        }
+        init_params = {"num_qubits": num_qubits, "experiment_id": experiment_id}
 
         # Add error rate if provided
         if error_rate is not None:
@@ -124,10 +119,7 @@ def create_noise_model(
             f"Created {noise_type} noise model: {num_qubits} qubits, "
             f"error_rate={noise.error_rate:.4f} (experiment: {experiment_id})"
         )
-        logger.debug(
-            f"Noise details: {noise_type}, qubits={num_qubits}, "
-            f"params={custom_params}"
-        )
+        logger.debug(f"Noise details: {noise_type}, qubits={num_qubits}, params={custom_params}")
 
         return noise_model
 
@@ -136,17 +128,15 @@ def create_noise_model(
             f"Noise model creation failed: {noise_type} with {num_qubits} qubits - {e} "
             f"(experiment: {experiment_id})"
         )
-        raise ValueError(
-            f"Failed to create {noise_type} noise model: {e}"
-        ) from e
+        raise ValueError(f"Failed to create {noise_type} noise model: {e}") from e
 
 
 def create_noise_instance(
     noise_type: str,
     num_qubits: int,
     error_rate: Optional[float] = None,
-    custom_params: Optional[Dict] = None,
-    experiment_id: str = "N/A"
+    custom_params: Optional[dict] = None,
+    experiment_id: str = "N/A",
 ) -> BaseNoise:
     """
     Create a noise instance without generating the full noise model.
@@ -175,17 +165,13 @@ def create_noise_instance(
     if noise_type not in NOISE_CLASSES:
         available_noise = list(NOISE_CLASSES.keys())
         raise ValueError(
-            f"Invalid noise type: '{noise_type}'. "
-            f"Available noise models: {available_noise}"
+            f"Invalid noise type: '{noise_type}'. Available noise models: {available_noise}"
         )
 
     noise_class = NOISE_CLASSES[noise_type]
 
     # Prepare parameters
-    init_params = {
-        "num_qubits": num_qubits,
-        "experiment_id": experiment_id
-    }
+    init_params = {"num_qubits": num_qubits, "experiment_id": experiment_id}
 
     if error_rate is not None:
         init_params["error_rate"] = error_rate
@@ -196,7 +182,7 @@ def create_noise_instance(
     return noise_class(**init_params)
 
 
-def get_available_noise_types() -> List[str]:
+def get_available_noise_types() -> list[str]:
     """
     Get list of all available quantum noise types.
 
@@ -211,8 +197,8 @@ def create_noise_model_for_hardware(
     num_qubits: int,
     backend=None,
     error_rate: Optional[float] = None,
-    custom_params: Optional[Dict] = None,
-    experiment_id: str = "N/A"
+    custom_params: Optional[dict] = None,
+    experiment_id: str = "N/A",
 ) -> NoiseModel:
     """
     Create noise model with hardware validation for real quantum devices.
@@ -259,9 +245,7 @@ def create_noise_model_for_hardware(
         ... )
     """
     # Create noise instance for validation
-    noise = create_noise_instance(
-        noise_type, num_qubits, error_rate, custom_params, experiment_id
-    )
+    noise = create_noise_instance(noise_type, num_qubits, error_rate, custom_params, experiment_id)
 
     # Perform hardware validation if backend provided
     if backend is not None:
@@ -269,13 +253,15 @@ def create_noise_model_for_hardware(
             # Extract backend constraints
             backend_config = backend.configuration()
             backend_constraints = {
-                'max_qubits': backend_config.n_qubits,
-                'supported_gates': set(backend_config.basis_gates) if hasattr(backend_config, 'basis_gates') else set(),
-                'max_error_rate': getattr(backend_config, 'max_error_rate', 0.1),  # Typical limit
-                'min_t1': getattr(backend_config, 'min_t1', 10e-6),  # Typical minimum
-                'min_t2': getattr(backend_config, 'min_t2', 5e-6),   # Typical minimum
-                'temperature': getattr(backend_config, 'temperature', 0.015),  # 15 mK typical
-                'backend_name': backend_config.backend_name
+                "max_qubits": backend_config.n_qubits,
+                "supported_gates": set(backend_config.basis_gates)
+                if hasattr(backend_config, "basis_gates")
+                else set(),
+                "max_error_rate": getattr(backend_config, "max_error_rate", 0.1),  # Typical limit
+                "min_t1": getattr(backend_config, "min_t1", 10e-6),  # Typical minimum
+                "min_t2": getattr(backend_config, "min_t2", 5e-6),  # Typical minimum
+                "temperature": getattr(backend_config, "temperature", 0.015),  # 15 mK typical
+                "backend_name": backend_config.backend_name,
             }
 
             # Validate noise compatibility with hardware
@@ -284,14 +270,18 @@ def create_noise_model_for_hardware(
             if hardware_warnings:
                 warning_msg = (
                     f"Hardware compatibility issues for {noise_type} noise "
-                    f"on {backend_constraints['backend_name']}:\\n" +
-                    "\\n".join(f"  - {warning}" for warning in hardware_warnings)
+                    f"on {backend_constraints['backend_name']}:\\n"
+                    + "\\n".join(f"  - {warning}" for warning in hardware_warnings)
                 )
                 logger.warning(warning_msg)
 
                 # For critical issues, raise error
-                critical_keywords = ['exceeds', 'below', 'unsupported', 'incompatible']
-                if any(keyword in warning.lower() for warning in hardware_warnings for keyword in critical_keywords):
+                critical_keywords = ["exceeds", "below", "unsupported", "incompatible"]
+                if any(
+                    keyword in warning.lower()
+                    for warning in hardware_warnings
+                    for keyword in critical_keywords
+                ):
                     raise ValueError(
                         f"Noise {noise_type} is incompatible with backend {backend_constraints['backend_name']}. "
                         f"Issues: {hardware_warnings}"
@@ -315,8 +305,8 @@ def validate_noise_request(
     noise_type: str,
     num_qubits: int,
     error_rate: Optional[float] = None,
-    custom_params: Optional[Dict] = None
-) -> List[str]:
+    custom_params: Optional[dict] = None,
+) -> list[str]:
     """
     Validate noise creation request before attempting model creation.
 
@@ -377,21 +367,21 @@ def validate_noise_request(
 
     # Physics parameter validations
     if custom_params:
-        t1 = custom_params.get('t1')
-        t2 = custom_params.get('t2')
+        t1 = custom_params.get("t1")
+        t2 = custom_params.get("t2")
         if t1 and t2 and t2 > 2 * t1:
             warnings.append(
-                f"T2 ({t2:.2e}s) cannot exceed 2*T1 ({2*t1:.2e}s) - violates quantum physics"
+                f"T2 ({t2:.2e}s) cannot exceed 2*T1 ({2 * t1:.2e}s) - violates quantum physics"
             )
 
-        temperature = custom_params.get('temperature')
+        temperature = custom_params.get("temperature")
         if temperature and temperature < 0:
             warnings.append(f"Temperature must be non-negative, got {temperature}K")
 
     return warnings
 
 
-def _get_appropriate_gates(noise_type: str, num_qubits: int) -> List[str]:
+def _get_appropriate_gates(noise_type: str, num_qubits: int) -> list[str]:
     """
     Get appropriate gate list for specific noise type.
 
@@ -409,14 +399,14 @@ def _get_appropriate_gates(noise_type: str, num_qubits: int) -> List[str]:
         List of gate names appropriate for this noise type
     """
     # Gate classifications for different noise mechanisms
-    single_qubit_gates = ['id', 'u1', 'u2', 'u3', 'h', 'x', 'y', 'z', 's', 't']
-    two_qubit_gates = ['cx', 'cy', 'cz', 'ch', 'swap', 'iswap']
+    single_qubit_gates = ["id", "u1", "u2", "u3", "h", "x", "y", "z", "s", "t"]
+    two_qubit_gates = ["cx", "cy", "cz", "ch", "swap", "iswap"]
 
     # Noise type specific gate selections
-    if noise_type in ['BIT_FLIP', 'PHASE_FLIP', 'AMPLITUDE_DAMPING', 'PHASE_DAMPING']:
+    if noise_type in ["BIT_FLIP", "PHASE_FLIP", "AMPLITUDE_DAMPING", "PHASE_DAMPING"]:
         # Single-qubit processes affect all operations (applied to each qubit involved)
         return single_qubit_gates + two_qubit_gates
-    elif noise_type in ['DEPOLARIZING', 'THERMAL_RELAXATION']:
+    elif noise_type in ["DEPOLARIZING", "THERMAL_RELAXATION"]:
         # Global processes affect all gate types
         if num_qubits == 1:
             return single_qubit_gates
@@ -429,7 +419,7 @@ def _get_appropriate_gates(noise_type: str, num_qubits: int) -> List[str]:
         return single_qubit_gates + two_qubit_gates
 
 
-def get_noise_info() -> Dict[str, Dict[str, str]]:
+def get_noise_info() -> dict[str, dict[str, str]]:
     """
     Get comprehensive information about all available noise types.
 
@@ -452,55 +442,41 @@ def get_noise_info() -> Dict[str, Dict[str, str]]:
             "mechanism": "Random coupling to all environmental degrees of freedom",
             "research_application": "Baseline uniform pathway degradation studies",
             "typical_origin": "High-temperature environments, multiple error sources",
-            "educational_concepts": "Pauli channels, unital maps, worst-case noise"
+            "educational_concepts": "Pauli channels, unital maps, worst-case noise",
         },
         "AMPLITUDE_DAMPING": {
             "description": "Energy relaxation from excited to ground state",
             "mechanism": "Spontaneous emission and thermal relaxation processes",
             "research_application": "T1-limited pathway analysis and energy flow studies",
             "typical_origin": "Electromagnetic coupling, finite temperature",
-            "educational_concepts": "T1 processes, non-unital channels, energy conservation"
+            "educational_concepts": "T1 processes, non-unital channels, energy conservation",
         },
         "PHASE_DAMPING": {
             "description": "Pure dephasing without energy exchange",
             "mechanism": "Environmental coupling preserving energy eigenstates",
             "research_application": "Coherence loss pathway investigation",
             "typical_origin": "Charge noise, magnetic field fluctuations",
-            "educational_concepts": "T2* processes, elastic scattering, phase coherence"
-        },
-        "THERMAL_RELAXATION": {
-            "description": "Combined T1 and T2 processes at finite temperature",
-            "mechanism": "Coupling to thermal bath with Boltzmann population",
-            "research_application": "Realistic hardware pathway modeling",
-            "typical_origin": "Dilution refrigerator environments, Johnson noise",
-            "educational_concepts": "Thermal equilibrium, detailed balance, Lindblad master equation"
-        },
-        "PHASE_FLIP": {
-            "description": "Random Z rotations preserving computational basis populations",
-            "mechanism": "Longitudinal coupling to environmental fields",
-            "research_application": "Classical error pathway studies",
-            "typical_origin": "Magnetic field noise, charge fluctuations",
-            "educational_concepts": "Classical bit-flip analogs, Z-basis preservation"
+            "educational_concepts": "T2* processes, elastic scattering, phase coherence",
         },
         "BIT_FLIP": {
             "description": "Random X rotations flipping computational basis states",
             "mechanism": "Transverse coupling causing bit-flip transitions",
             "research_application": "Digital error pathway investigation",
             "typical_origin": "Drive field noise, crosstalk between qubits",
-            "educational_concepts": "Classical bit errors, X-basis errors, digital noise"
+            "educational_concepts": "Classical bit errors, X-basis errors, digital noise",
         },
         "PHASE_FLIP": {
             "description": "Random Z rotations preserving computational basis populations",
             "mechanism": "Longitudinal coupling to environmental fields",
             "research_application": "Classical measurement preservation pathway studies",
             "typical_origin": "Magnetic field noise, charge fluctuations",
-            "educational_concepts": "Longitudinal coupling, classical information preservation, interference destruction"
+            "educational_concepts": "Longitudinal coupling, classical information preservation, interference destruction",
         },
         "THERMAL_RELAXATION": {
             "description": "Combined T1 and T2 processes at finite temperature",
             "mechanism": "Coupling to thermal bath with energy exchange and dephasing",
             "research_application": "Realistic hardware pathway modeling",
             "typical_origin": "Dilution refrigerator environments, electromagnetic coupling",
-            "educational_concepts": "T1/T2 physics, thermal equilibrium, master equations, hardware reality"
-        }
+            "educational_concepts": "T1/T2 physics, thermal equilibrium, master equations, hardware reality",
+        },
     }

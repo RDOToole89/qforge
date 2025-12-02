@@ -40,16 +40,17 @@ References:
 - Nielsen & Chuang (2010), "Quantum Computation and Quantum Information"
 """
 
-import numpy as np
 import logging
-from typing import List, Optional, Dict, Union
 from dataclasses import dataclass
-from scipy.stats import spearmanr, kendalltau, pearsonr
+from typing import Optional, Union
+
+import numpy as np
+from scipy.stats import kendalltau, pearsonr, spearmanr
 
 from ..constants import (
     PP_MIN_RUNS,
-    PP_TOP_K_MIN,
     PP_TOP_K_MAX,
+    PP_TOP_K_MIN,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,10 +72,10 @@ class TemporalAnalysis:
     mean_rank_correlation: float
     stability_variance: float
     ranking_consistency: str  # "highly_stable", "stable", "unstable", "chaotic"
-    persistent_pathways: List[str]
-    volatile_pathways: List[str]
+    persistent_pathways: list[str]
+    volatile_pathways: list[str]
     stability_trend: str  # "increasing", "decreasing", "constant", "oscillating"
-    critical_transitions: List[int]
+    critical_transitions: list[int]
     temporal_summary: str
 
     def to_dict(self) -> dict:
@@ -93,7 +94,7 @@ class TemporalAnalysis:
 
 
 def compute_temporal_pathway_stability(
-    pathway_rankings: List[List[str]],
+    pathway_rankings: list[list[str]],
     correlation_method: str = "spearman",
     adaptive_top_k: bool = True,
     return_analysis: bool = False,
@@ -209,13 +210,13 @@ def compute_temporal_pathway_stability(
         pathway_rankings = _apply_adaptive_top_k_selection(pathway_rankings)
 
     # Compute pairwise rank correlations between consecutive conditions
-    rank_correlations: List[float] = []
+    rank_correlations: list[float] = []
     for i in range(len(pathway_rankings) - 1):
         correlation = _compute_ranking_correlation(
             pathway_rankings[i], pathway_rankings[i + 1], correlation_method
         )
         rank_correlations.append(correlation)
-        logger.debug(f"Rank correlation {i}->{i+1}: {correlation:.4f}")
+        logger.debug(f"Rank correlation {i}->{i + 1}: {correlation:.4f}")
 
     if not rank_correlations:
         logger.warning("No valid rank correlations computed")
@@ -237,9 +238,7 @@ def compute_temporal_pathway_stability(
         # Handle zero or negative mean correlation
         tps = 0.0
 
-    logger.debug(
-        "Computed TPS = %.6f (μ=%.4f, σ=%.4f)", tps, mean_correlation, std_correlation
-    )
+    logger.debug("Computed TPS = %.6f (μ=%.4f, σ=%.4f)", tps, mean_correlation, std_correlation)
 
     if not return_analysis:
         return tps
@@ -256,8 +255,8 @@ def compute_temporal_pathway_stability(
 
 
 def compute_pathway_persistence_scores(
-    pathway_rankings: List[List[str]], top_k: Optional[int] = None
-) -> Dict[str, float]:
+    pathway_rankings: list[list[str]], top_k: Optional[int] = None
+) -> dict[str, float]:
     """
     Compute persistence scores for individual pathways across conditions.
 
@@ -307,10 +306,10 @@ def compute_pathway_persistence_scores(
             top_pathways.update(ranking[:top_k])
         all_pathways = top_pathways
 
-    persistence_scores: Dict[str, float] = {}
+    persistence_scores: dict[str, float] = {}
 
     for pathway in all_pathways:
-        rank_positions: List[int] = []
+        rank_positions: list[int] = []
 
         for ranking in pathway_rankings:
             try:
@@ -341,7 +340,7 @@ def compute_pathway_persistence_scores(
 
 
 def compute_temporal_transition_matrix(
-    pathway_rankings: List[List[str]], top_k: int = 5
+    pathway_rankings: list[list[str]], top_k: int = 5
 ) -> np.ndarray:
     """
     Compute transition matrix for pathway rank movements across conditions.
@@ -419,14 +418,14 @@ def compute_temporal_transition_matrix(
 
 
 def _apply_adaptive_top_k_selection(
-    pathway_rankings: List[List[str]],
-) -> List[List[str]]:
+    pathway_rankings: list[list[str]],
+) -> list[list[str]]:
     """Apply adaptive top-k selection to focus on significant pathways.
 
     Note: without per-condition counts we approximate by using a size-based k.
     """
     ks = []
-    filtered: List[List[str]] = []
+    filtered: list[list[str]] = []
     for ranking in pathway_rankings:
         k = max(PP_TOP_K_MIN, min(PP_TOP_K_MAX, max(1, len(ranking) // 2)))
         ks.append(k)
@@ -446,9 +445,7 @@ def _apply_adaptive_top_k_selection(
     return filtered
 
 
-def _compute_ranking_correlation(
-    ranking1: List[str], ranking2: List[str], method: str
-) -> float:
+def _compute_ranking_correlation(ranking1: list[str], ranking2: list[str], method: str) -> float:
     """Compute rank correlation between two pathway rankings."""
     if not ranking1 or not ranking2:
         return 0.0
@@ -489,8 +486,8 @@ def _compute_ranking_correlation(
 
 def _generate_temporal_analysis(
     tps: float,
-    rank_correlations: List[float],
-    pathway_rankings: List[List[str]],
+    rank_correlations: list[float],
+    pathway_rankings: list[list[str]],
     mean_correlation: float,
     std_correlation: float,
     all_pathways: set,
@@ -530,7 +527,7 @@ def _generate_temporal_analysis(
         trend = "insufficient_data"
 
     # Detect critical transitions (large correlation drops)
-    critical_transitions: List[int] = []
+    critical_transitions: list[int] = []
     for i, corr in enumerate(rank_correlations):
         if i > 0 and abs(corr - rank_correlations[i - 1]) > CRITICAL_DROP:
             critical_transitions.append(i)
@@ -571,7 +568,7 @@ def _create_empty_temporal_analysis() -> TemporalAnalysis:
 
 
 def validate_tps_properties(
-    tps: float, pathway_rankings: List[List[str]], tolerance: float = 1e-10
+    tps: float, pathway_rankings: list[list[str]], tolerance: float = 1e-10
 ) -> bool:
     """
     Validate mathematical properties of computed TPS.
@@ -595,9 +592,7 @@ def validate_tps_properties(
 
     # Property 3: Identical rankings give TPS = 1
     if len(set(tuple(r) for r in pathway_rankings)) == 1:  # All rankings identical
-        assert (
-            abs(tps - 1.0) <= tolerance
-        ), f"TPS={tps} should be 1.0 for identical rankings"
+        assert abs(tps - 1.0) <= tolerance, f"TPS={tps} should be 1.0 for identical rankings"
 
     logger.debug("TPS validation passed: TPS=%.6f", tps)
     return True
@@ -610,7 +605,7 @@ def temporal_pathway_stability_educational_demo() -> dict:
     Returns:
         dict: Demonstration results with time series interpretations
     """
-    demo_results: Dict[str, dict] = {}
+    demo_results: dict[str, dict] = {}
 
     # Example 1: Perfect stability
     stable_rankings = [

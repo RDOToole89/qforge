@@ -12,7 +12,7 @@ This is a **research-grade quantum experiment framework** built on Qiskit for co
 
 **Complete Research Metrics Suite (v1.0 Schema Compliant):**
 - **AI (Asymmetry Index)**: TVD from uniform distribution with full 2^n support
-- **PCR (Pathway Concentration Ratio)**: Concentration in top vs bottom pathway quartiles  
+- **PCR (Pathway Concentration Ratio)**: Concentration in top vs bottom pathway quartiles
 - **EEC (Entanglement-Error Correlation)**: Pearson correlation between topology and MI matrices
 - **TPS (Temporal Pathway Stability)**: Spearman correlation consistency across conditions
 - **CES (Complexity Emergence Score)**: Logistic emergence threshold detection
@@ -44,7 +44,7 @@ config = ExperimentConfig(
     research_type="structured_decoherence",
     shots=1024,
     noise_enabled=True,
-    noise_type="depolarizing", 
+    noise_type="depolarizing",
     error_rate=0.05
 )
 
@@ -97,7 +97,7 @@ from src.engine.api import run
 from src.engine.models import ExperimentConfig
 
 config = ExperimentConfig(
-    num_qubits=4, 
+    num_qubits=4,
     state_type='GHZ',
     enable_research_metrics=True,
     research_type='structured_decoherence',
@@ -201,16 +201,17 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### 🚀 **Ready for Next Phase**
 
 **High-Priority Next Steps:**
-1. **Engine Integration Testing**: Validate hardened metrics through engine API
-2. **Scientific Validation**: Run real experiments to test structured decoherence hypothesis
-3. **Research Documentation**: Create comprehensive usage examples and tutorials
-4. **Performance Benchmarking**: Profile large-scale studies and optimize bottlenecks
+1. **H_Q2 Experiment**: Test "Pathway Persistence" in deeper circuits.
+2. **H_Q3 Experiment**: Implement sensor-qubit subspaces.
+3. **Research Documentation**: Expand on the "Fog vs River" findings.
+4. **Performance Benchmarking**: Profile large-scale studies and optimize bottlenecks.
 
 **Research Readiness:**
 - ✅ **Publication-Ready Metrics**: All 8 metrics implemented to research standards
 - ✅ **Reproducible Results**: Deterministic behavior with full provenance tracking
 - ✅ **Schema Compliance**: v1.0 compatibility for downstream analysis pipelines
 - ✅ **Educational Value**: Framework serves both learning and research purposes
+- ✅ **First Discovery**: "Fog vs River" phenomenon confirmed in H_Q1.
 
 ## Architecture Principles
 

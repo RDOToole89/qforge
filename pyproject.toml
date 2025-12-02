@@ -22,9 +22,7 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-xdist>=3.0.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
+    "ruff>=0.1.0",
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
 ]
@@ -38,32 +36,16 @@ docs = [
 [tool.setuptools_scm]
 write_to = "src/_version.py"
 
-[tool.black]
-line-length = 88
-target-version = ['py39']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[tool.ruff]
+line-length = 100
+target-version = "py39"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
-known_first_party = ["src"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
 
 [tool.mypy]
 python_version = "3.9"

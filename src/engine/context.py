@@ -104,11 +104,11 @@ Full injection for tests or production:
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Optional, Callable, Any, Literal
-from pathlib import Path
-import os
 
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Literal
 
 # ---- Minimal structural typing notes (no Protocols to keep stdlib-only) ----
 # event_bus is expected to have: publish(event) and optionally subscribe(...)
@@ -124,7 +124,7 @@ class AppContext:
     base_results_dir: str = "results"
 
     # Optional root for “profiles” (user/device presets, calibration, etc.)
-    profiles_root: Optional[str] = None
+    profiles_root: str | None = None
 
     # Preferred visualization stack for renderers (engine may ignore if unavailable).
     viz_backend: Literal["matplotlib", "none"] = "matplotlib"
@@ -141,19 +141,19 @@ class AppContext:
     # ------------------------ Dependency injection hooks -----------------------
 
     # Optional, preconfigured event bus for the run/sweep facade to use.
-    event_bus: Optional[Any] = None
+    event_bus: Any | None = None
 
     # Optional, preconfigured storage backend (e.g., LocalStorage).
-    storage: Optional[Any] = None
+    storage: Any | None = None
 
     # Optional factory that returns a visualization service instance.
-    make_viz_service: Optional[Callable[[], Any]] = None
+    make_viz_service: Callable[[], Any] | None = None
 
     # ------------------------------ Internals ---------------------------------
 
     # Resolved absolute paths (populated in __post_init__).
     _results_path: Path = field(init=False, repr=False)
-    _profiles_path: Optional[Path] = field(init=False, default=None, repr=False)
+    _profiles_path: Path | None = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Normalize paths and optionally create directories."""
@@ -174,7 +174,7 @@ class AppContext:
         return self._results_path
 
     @property
-    def profiles_path(self) -> Optional[Path]:
+    def profiles_path(self) -> Path | None:
         """Absolute, normalized profiles directory (or None if not set)."""
         return self._profiles_path
 

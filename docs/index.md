@@ -21,7 +21,7 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 - **Pathway Concentration Ratio (PCR)**: Quantifies concentration in preferred pathways
 - **Entanglement-Error Correlation (EEC)**: Correlation between topology and error patterns
 
-### Temporal & Complexity Analysis  
+### Temporal & Complexity Analysis
 - **Temporal Pathway Stability (TPS)**: Consistency across experimental conditions
 - **Complexity Emergence Score (CES)**: Critical threshold detection for structure emergence
 
@@ -44,7 +44,7 @@ config = ExperimentConfig(
     research_type="structured_decoherence",
     shots=1024,
     noise_enabled=True,
-    noise_type="depolarizing", 
+    noise_type="depolarizing",
     error_rate=0.05
 )
 
@@ -61,7 +61,7 @@ print(f"Topology Correlation: {metrics.entanglement_error_correlation:.4f}")
 ## Research Applications
 
 - **Quantum Error Analysis**: Detecting non-random decoherence patterns
-- **Entanglement Dynamics**: Understanding how topology influences error propagation  
+- **Entanglement Dynamics**: Understanding how topology influences error propagation
 - **Critical Phenomena**: Identifying emergence thresholds in quantum systems
 - **Noise Characterization**: Distinguishing structured from stochastic noise sources
 
@@ -74,11 +74,14 @@ The framework follows an **engine-first architecture** with clean separation:
 - **Analysis Framework**: Specialized metrics and statistical methods
 - **Schema System**: Standardized data formats for reproducible research
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed design blueprint and [FRAMEWORK_INTEGRATION.md](FRAMEWORK_INTEGRATION.md) for how the components work together.
+
 ## Documentation Structure
 
 - **Getting Started**: Installation, quickstart, and basic usage
 - **User Guide**: Comprehensive analysis workflows and metric explanations
 - **API Reference**: Complete function and class documentation
+- **Research**: [Structured Substrate Thesis (SST)](research-docs/sst-ext.md) and [Research Plan](research-docs/RESEARCH_PLAN.md)
 - **Examples**: Practical tutorials and use cases
 - **Developer Guide**: Contributing guidelines and architecture details
 
