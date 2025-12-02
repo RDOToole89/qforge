@@ -201,9 +201,9 @@ class EngineExperimentRunner:
                 "state_type": state_type,
             }
 
-            # Add custom parameters if provided
+            # Pass custom parameters as a dict (don't spread them)
             if custom_params:
-                state_params.update(custom_params)
+                state_params["custom_params"] = custom_params
 
             # Use the sophisticated core state preparation
             circuit = prepare_state(**state_params)

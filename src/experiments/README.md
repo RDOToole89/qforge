@@ -25,6 +25,7 @@ print(f"Asymmetry Index: {result.structured_decoherence_metrics.asymmetry_index:
 |------|-------------|------------|
 | `sst_q1` | SST Hypothesis Q1 - Tests if entanglement topology influences decoherence | Depolarizing |
 | `sst_q1_structured` | SST Q1 with structured noise - Compares pathway behavior | Amplitude Damping |
+| `bell_correlation` | Bell state correlation test - Quantum vs classical bounds | Depolarizing |
 
 ## Run vs Sweep
 
@@ -251,6 +252,26 @@ amp_result = sst_q1_structured.run({"error_rate": 0.1})
 
 print(f"Depolarizing AI: {depol_result.structured_decoherence_metrics.asymmetry_index:.4f}")
 print(f"Amplitude Damping AI: {amp_result.structured_decoherence_metrics.asymmetry_index:.4f}")
+```
+
+### Bell State Experiments (Non-SST)
+
+```python
+from src.experiments import bell_correlation
+
+# Run Bell correlation test
+result, metrics = bell_correlation.run_with_bell_metrics()
+print(f"Correlation: {metrics.correlation_coefficient:.4f}")
+print(f"Exceeds classical bound: {metrics.exceeds_classical}")
+
+# Compare all Bell variants
+results = bell_correlation.compare_variants(error_rate=0.1)
+for variant, (result, metrics) in results.items():
+    print(f"{variant}: fidelity={metrics.fidelity:.4f}")
+
+# Watch correlation decay with noise
+for error_rate, result, metrics in bell_correlation.run_noise_sweep():
+    print(f"Error {error_rate:.2f}: correlation={metrics.correlation_coefficient:.4f}")
 ```
 
 ## Troubleshooting

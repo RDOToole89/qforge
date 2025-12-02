@@ -177,11 +177,12 @@ Make explicit that SST is one use case, not the framework's identity.
 
 - **Objective**: Prove the framework works for experiments unrelated to structured decoherence.
 - **Tasks**:
-  - [ ] **Bell/CHSH Experiment**: Implement as `src/experiments/bell_chsh.py`
-    - Uses existing Bell state preparation
-    - Computes correlations and violations
+  - [x] **Bell Correlation Experiment**: Implemented as `src/experiments/bell_correlation.py`
+    - Uses existing Bell state preparation (all 4 variants: Φ+, Φ-, Ψ+, Ψ-)
+    - Computes correlation coefficient, fidelity, classical bound comparison
     - Demonstrates framework is not SST-specific
-  - [ ] **Register in EXPERIMENT_REGISTRY**: Make it discoverable
+  - [x] **Register in EXPERIMENT_REGISTRY**: Available as `bell_correlation`
+  - [x] **Bug fix**: Fixed `custom_params` handling in engine runner
 
 ### 7.3. Thin CLI Wrapper
 

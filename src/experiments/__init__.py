@@ -23,6 +23,12 @@ Usage:
 """
 
 from src.experiments.base import BaseExperiment, ExperimentProgram
+from src.experiments.bell_correlation import (
+    BellCorrelation,
+    BellCorrelationMetrics,
+    bell_correlation,
+    compute_bell_metrics,
+)
 from src.experiments.sst_hypothesis_q1 import SSTHypothesisQ1, sst_q1
 from src.experiments.sst_hypothesis_q1_structured import (
     SSTHypothesisQ1Structured,
@@ -31,8 +37,11 @@ from src.experiments.sst_hypothesis_q1_structured import (
 
 # Registry of available experiments
 EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
+    # SST experiments (structured decoherence research)
     "sst_q1": sst_q1,
     "sst_q1_structured": sst_q1_structured,
+    # Bell experiments (quantum correlation tests)
+    "bell_correlation": bell_correlation,
 }
 
 
@@ -73,10 +82,14 @@ __all__ = [
     "EXPERIMENT_REGISTRY",
     "get_experiment",
     "list_experiments",
-    # Individual experiments
+    # SST experiments
     "SSTHypothesisQ1",
     "SSTHypothesisQ1Structured",
-    # Convenience instances
     "sst_q1",
     "sst_q1_structured",
+    # Bell experiments
+    "BellCorrelation",
+    "BellCorrelationMetrics",
+    "bell_correlation",
+    "compute_bell_metrics",
 ]
