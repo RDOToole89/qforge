@@ -34,12 +34,46 @@ from src.experiments.sst_hypothesis_q1_structured import (
     SSTHypothesisQ1Structured,
     sst_q1_structured,
 )
+from src.experiments.sst_hypothesis_q1_large import (
+    SSTHypothesisQ1Large,
+    sst_q1_large,
+)
+from src.experiments.sst_hypothesis_q1_large_points import (
+    SSTHypothesisQ1LargeHighNoise,
+    SSTHypothesisQ1LargeMaxNoise,
+    sst_q1_large_high_noise,
+    sst_q1_large_max_noise,
+)
+from src.experiments.sst_hypothesis_q1_states import (
+    SSTHypothesisQ1WState,
+    SSTHypothesisQ1ProductState,
+    sst_q1_w,
+    sst_q1_product,
+)
+from src.experiments.sst_hypothesis_q1_cluster import (
+    SSTHypothesisQ1Cluster,
+    sst_q1_cluster,
+)
+from src.experiments.sst_hypothesis_q1_extensions import (
+    SSTHypothesisQ1LargeDepolarizing,
+    SSTHypothesisQ1Huge,
+    sst_q1_large_depolarizing,
+    sst_q1_huge,
+)
 
 # Registry of available experiments
 EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
     # SST experiments (structured decoherence research)
     "sst_q1": sst_q1,
     "sst_q1_structured": sst_q1_structured,
+    "sst_q1_large": sst_q1_large,
+    "sst_q1_large_high_noise": sst_q1_large_high_noise,
+    "sst_q1_large_max_noise": sst_q1_large_max_noise,
+    "sst_q1_w": sst_q1_w,
+    "sst_q1_product": sst_q1_product,
+    "sst_q1_cluster": sst_q1_cluster,
+    "sst_q1_large_depolarizing": sst_q1_large_depolarizing,
+    "sst_q1_huge": sst_q1_huge,
     # Bell experiments (quantum correlation tests)
     "bell_correlation": bell_correlation,
 }
@@ -85,8 +119,24 @@ __all__ = [
     # SST experiments
     "SSTHypothesisQ1",
     "SSTHypothesisQ1Structured",
+    "SSTHypothesisQ1Large",
+    "SSTHypothesisQ1LargeHighNoise",
+    "SSTHypothesisQ1LargeMaxNoise",
     "sst_q1",
     "sst_q1_structured",
+    "sst_q1_large",
+    "sst_q1_large_high_noise",
+    "sst_q1_large_max_noise",
+    "SSTHypothesisQ1WState",
+    "SSTHypothesisQ1ProductState",
+    "SSTHypothesisQ1Cluster",
+    "SSTHypothesisQ1LargeDepolarizing",
+    "SSTHypothesisQ1Huge",
+    "sst_q1_w",
+    "sst_q1_product",
+    "sst_q1_cluster",
+    "sst_q1_large_depolarizing",
+    "sst_q1_huge",
     # Bell experiments
     "BellCorrelation",
     "BellCorrelationMetrics",

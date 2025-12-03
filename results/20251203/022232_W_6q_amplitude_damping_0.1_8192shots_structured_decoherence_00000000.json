@@ -1,0 +1,60 @@
+{
+  "experiment_metadata": {
+    "experiment_id": "W_6",
+    "timestamp": "2025-12-03T02:22:32.328254",
+    "framework_version": "engine-1.0",
+    "research_type": "structured_decoherence",
+    "experiment_description": null
+  },
+  "experiment_parameters": {
+    "num_qubits": 6,
+    "state_type": "W",
+    "sim_mode": "qasm",
+    "shots": 8192,
+    "noise_enabled": true,
+    "noise_type": "amplitude_damping",
+    "error_rate": 0.1,
+    "enable_research_metrics": true,
+    "research_type": "structured_decoherence",
+    "multiple_runs": 1,
+    "track_convergence": false,
+    "visualization_type": "histogram"
+  },
+  "circuit_statistics": {
+    "depth": 2,
+    "num_gates": 8,
+    "num_qubits": 6,
+    "gate_types": {
+      "initialize": 1,
+      "barrier": 1,
+      "measure": 6
+    },
+    "two_qubit_gate_count": 0,
+    "connectivity_graph": null
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "000100": 1356,
+      "100000": 1399,
+      "000001": 1336,
+      "001000": 1386,
+      "010000": 1341,
+      "000010": 1374
+    },
+    "total_shots": 8192,
+    "unique_outcomes": 6,
+    "outcome_probabilities": {
+      "000100": 0.16552734375,
+      "100000": 0.1707763671875,
+      "000001": 0.1630859375,
+      "001000": 0.169189453125,
+      "010000": 0.1636962890625,
+      "000010": 0.167724609375
+    },
+    "density_matrix": null,
+    "fidelity": null
+  },
+  "information_theory_metrics": null,
+  "correlation_analysis": null,
+  "statistical_validation": null
+}

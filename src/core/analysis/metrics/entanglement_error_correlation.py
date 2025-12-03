@@ -383,6 +383,11 @@ def _construct_entanglement_topology(
         else:
             logger.warning("Custom topology requested but no entanglement_matrix provided")
 
+    elif state_type.upper() == "SUPERPOSITION":
+        # Product state: No entanglement between qubits
+        # Returns zero matrix, which correctly leads to EEC = 0.0 (no correlation)
+        pass
+
     else:
         raise ValueError(f"Unsupported state type: {state_type}")
 
