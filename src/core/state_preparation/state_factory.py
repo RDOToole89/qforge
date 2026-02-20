@@ -29,6 +29,7 @@ def prepare_state(
     custom_params: Optional[dict] = None,
     add_barrier: bool = False,
     experiment_id: str = "N/A",
+    balance: Optional[str] = None,
 ) -> QuantumCircuit:
     """
     Factory function to prepare quantum states for decoherence research.
@@ -72,7 +73,8 @@ def prepare_state(
         # Create state instance
         state_class = STATE_CLASSES[state_type]
         state = state_class(
-            num_qubits=num_qubits, custom_params=custom_params, experiment_id=experiment_id
+            num_qubits=num_qubits, custom_params=custom_params, experiment_id=experiment_id,
+            balance=balance,
         )
 
         # Generate quantum circuit

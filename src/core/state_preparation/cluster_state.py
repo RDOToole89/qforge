@@ -110,6 +110,10 @@ class ClusterState(BaseState):
         else:  # lattice == "2d"
             graph_edges, topology_info = self._create_2d_cluster(circuit, ring, params)
 
+        # Gate-count balancing (equalize noise exposure across qubits)
+        if self.balance == "gate_count":
+            circuit = self._apply_gate_count_balancing(circuit)
+
         # Optional: Add barrier for visualization
         if add_barrier:
             circuit.barrier()

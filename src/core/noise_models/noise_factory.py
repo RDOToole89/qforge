@@ -20,6 +20,7 @@ from qiskit_aer.noise import NoiseModel
 from .amplitude_damping import AmplitudeDampingNoise
 from .base_noise import BaseNoise
 from .bit_flip import BitFlipNoise
+from .correlated_depolarizing import CorrelatedDepolarizingNoise
 from .depolarizing import DepolarizingNoise
 from .phase_damping import PhaseDampingNoise
 from .phase_flip import PhaseFlipNoise
@@ -35,6 +36,7 @@ NOISE_CLASSES = {
     "BIT_FLIP": BitFlipNoise,
     "PHASE_FLIP": PhaseFlipNoise,
     "THERMAL_RELAXATION": ThermalRelaxationNoise,
+    "CORRELATED_DEPOLARIZING": CorrelatedDepolarizingNoise,
 }
 
 
@@ -406,7 +408,7 @@ def _get_appropriate_gates(noise_type: str, num_qubits: int) -> list[str]:
     if noise_type in ["BIT_FLIP", "PHASE_FLIP", "AMPLITUDE_DAMPING", "PHASE_DAMPING"]:
         # Single-qubit processes affect all operations (applied to each qubit involved)
         return single_qubit_gates + two_qubit_gates
-    elif noise_type in ["DEPOLARIZING", "THERMAL_RELAXATION"]:
+    elif noise_type in ["DEPOLARIZING", "THERMAL_RELAXATION", "CORRELATED_DEPOLARIZING"]:
         # Global processes affect all gate types
         if num_qubits == 1:
             return single_qubit_gates

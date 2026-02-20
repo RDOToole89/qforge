@@ -115,6 +115,10 @@ class SuperpositionState(BaseState):
             variant = "parametric_product"
             construction_method = "rotation_gates"
 
+        # Gate-count balancing (equalize noise exposure across qubits)
+        if self.balance == "gate_count":
+            circuit = self._apply_gate_count_balancing(circuit)
+
         # Optional: Add barrier for visualization
         if add_barrier:
             circuit.barrier()

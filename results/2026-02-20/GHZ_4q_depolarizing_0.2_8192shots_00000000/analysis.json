@@ -1,0 +1,86 @@
+{
+  "experiment_metadata": {
+    "experiment_id": "GHZ_4",
+    "timestamp": "2026-02-20T18:58:02.653620",
+    "framework_version": "engine-1.0",
+    "research_type": null,
+    "experiment_description": null
+  },
+  "experiment_parameters": {
+    "num_qubits": 4,
+    "state_type": "GHZ",
+    "sim_mode": "qasm",
+    "shots": 8192,
+    "noise_enabled": true,
+    "noise_type": "depolarizing",
+    "error_rate": 0.2,
+    "balance_circuit": "gate_count",
+    "multiple_runs": 1,
+    "track_convergence": false,
+    "visualization_type": "none",
+    "export_formats": [
+      "png"
+    ],
+    "rng_seed": 1432050491
+  },
+  "circuit_statistics": {
+    "depth": 6,
+    "num_gates": 10,
+    "num_qubits": 4,
+    "gate_types": {
+      "h": 1,
+      "cx": 3,
+      "id": 1,
+      "barrier": 1,
+      "measure": 4
+    },
+    "two_qubit_gate_count": 3,
+    "connectivity_graph": null
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "1010": 41,
+      "1001": 43,
+      "0110": 28,
+      "0101": 32,
+      "0111": 155,
+      "1111": 2733,
+      "1101": 194,
+      "1110": 459,
+      "0100": 180,
+      "1100": 335,
+      "1000": 178,
+      "1011": 196,
+      "0001": 448,
+      "0011": 325,
+      "0010": 166,
+      "0000": 2679
+    },
+    "total_shots": 8192,
+    "unique_outcomes": 16,
+    "outcome_probabilities": {
+      "1010": 0.0050048828125,
+      "1001": 0.0052490234375,
+      "0110": 0.00341796875,
+      "0101": 0.00390625,
+      "0111": 0.0189208984375,
+      "1111": 0.3336181640625,
+      "1101": 0.023681640625,
+      "1110": 0.0560302734375,
+      "0100": 0.02197265625,
+      "1100": 0.0408935546875,
+      "1000": 0.021728515625,
+      "1011": 0.02392578125,
+      "0001": 0.0546875,
+      "0011": 0.0396728515625,
+      "0010": 0.020263671875,
+      "0000": 0.3270263671875
+    },
+    "density_matrix": null,
+    "statevector": null,
+    "fidelity": null
+  },
+  "information_theory_metrics": null,
+  "correlation_analysis": null,
+  "statistical_validation": null
+}

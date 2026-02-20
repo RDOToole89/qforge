@@ -51,9 +51,11 @@ A probe state S is considered "good" if its NTC response to increasing correlati
 | State       | What It Is                                                                                                             | G_state                                      | G_circuit                           | Why It Matters as a Probe                                                                                                                                                                                                                                                                       |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Product** | Each qubit is independent. No entanglement. Like n separate coins.                                                     | Empty (no edges)                             | Minimal (single-qubit gates only)   | This is your control. Any correlation you see in the output must come from the noise, not the state. Essential baseline.                                                                                                                                                                        |
-| **GHZ**     | All qubits maximally entangled in a single global superposition. Like n coins glued together: all heads or all tails.  | Complete (all-to-all, conceptually)          | Chain (sequential CX gates)         | GHZ has strong intrinsic correlations; therefore MI-based metrics saturate. Our baseline-subtracted ΔCov removes the dominant state background, restoring sensitivity to noise-induced correlations. The mismatch between G_state (global) and G_circuit (chain) is itself a testable confound. |
-| **W**       | Exactly one qubit is in state \|1⟩, but you do not know which one. The excitation is shared equally across all qubits. | Symmetric (democratic pairwise entanglement) | Depends on preparation method       | Distributes correlation more evenly. May detect noise patterns that GHZ misses because its structure is more democratic.                                                                                                                                                                        |
+| **GHZ**     | All qubits maximally entangled in a single global superposition. Like n coins glued together: all heads or all tails.  | Complete (all-to-all, conceptually)          | Chain (sequential CX: 0→1→2→…→n−1)  | GHZ has strong intrinsic correlations; therefore MI-based metrics saturate. Our baseline-subtracted ΔCov removes the dominant state background, restoring sensitivity to noise-induced correlations. The mismatch between G_state (global) and G_circuit (chain) is itself a testable confound. |
+| **W**       | Exactly one qubit is in state \|1⟩, but you do not know which one. The excitation is shared equally across all qubits. | Symmetric (democratic pairwise entanglement) | Tree / fan-out (see note below)     | Distributes correlation more evenly. May detect noise patterns that GHZ misses because its structure is more democratic. G_circuit is explicitly non-chain, which helps disentangle the G_circuit confound when comparing against GHZ.                                                          |
 | **Cluster** | Qubits entangled in a chain: qubit 0 with 1, qubit 1 with 2, etc. Local neighbour-to-neighbour connections only.       | Chain                                        | Chain (CZ gates between neighbours) | G_state and G_circuit both match a chain topology. Key state for testing whether matching structure to noise boosts detection, and for disentangling the G_state vs G_circuit confound when compared against GHZ.                                                                               |
+
+**Note on W-state preparation circuit:** The standard W-state preparation uses a cascade of controlled-Ry rotations with a tree-like structure. For n = 6: qubit 0 is rotated and then a controlled rotation targets qubit 1; qubit 1 then controls qubit 2; and so on with CNOT swaps at each level to distribute the excitation. The resulting G_circuit is a **directed tree / fan-out** pattern, not a linear chain. This is important: because W's G_circuit differs structurally from both GHZ's chain and Cluster's chain, the W state provides a clean comparison point for disentangling G_circuit effects from G_state effects. The specific circuit used must be documented in every experiment's provenance metadata.
 
 ### 2.2 The Noise Topologies (What You Are Trying to Detect)
 
@@ -161,7 +163,7 @@ These are the claims you will test. Stating them upfront makes your research hon
 
 > _Matching G_noise to G_circuit or G_state improves detectability — we empirically test which match matters._
 
-**The specific test:** Cluster state has chain-like circuit and state structure (G_circuit = G_state = chain). We test whether NTC is higher when G_noise = chain than when G_noise = star, holding p, cs, and n fixed. Comparing this against GHZ (where G_state is global but G_circuit is a chain) lets us disentangle whether it is the state's conceptual structure or the circuit's physical interaction pattern that drives the matching effect.
+**The specific test:** Cluster state has chain-like circuit and state structure (G_circuit = G_state = chain). We test whether NTC is higher when G_noise = chain than when G_noise = star, holding p, cs, and n fixed. Comparing this against GHZ (where G_state is global but G_circuit is a chain) lets us disentangle whether it is the state's conceptual structure or the circuit's physical interaction pattern that drives the matching effect. The W state provides additional leverage because its G_circuit (tree/fan-out) differs from both GHZ and Cluster's chains.
 
 **Why this matters:** If topology matching works, you can use it in reverse. If you do not know the noise topology of your quantum chip, you can prepare different states, see which one gives the strongest signal, and infer the noise structure from the result. This turns your framework into a diagnostic tool.
 
@@ -171,6 +173,8 @@ These are the claims you will test. Stating them upfront makes your research hon
 
 **What you already know:** Your prior experiments showed that 4-qubit systems are statistically underpowered — the NTC values are noisy and p-values are unstable. At 6+ qubits, the signal becomes consistent. This hypothesis formalises that observation and tests whether the trend continues to 7 and 8 qubits.
 
+**On including n=4 and n=5:** These are expected to produce weak or non-significant results based on prior work. They are included deliberately to empirically demonstrate the detection threshold. If the ΔCov-based approach recovers significant signal at n=4 or n=5 where MI-based approaches previously failed, that is itself a strong result — it demonstrates that the methodological improvement (baseline subtraction) has practical impact on the minimum system size needed for noise characterisation.
+
 **Why this matters:** It establishes the practical conditions under which your method works. Every diagnostic tool has a sensitivity threshold, and identifying yours is essential for anyone wanting to use this approach.
 
 ---
@@ -178,6 +182,18 @@ These are the claims you will test. Stating them upfront makes your research hon
 ## 5. The Research Protocol
 
 This is your execution plan. Three phases, each building on the last.
+
+### 5.0 Universal Protocol Requirements
+
+The following requirements apply to **every experiment** across all phases:
+
+1. **Gate-count balancing is mandatory.** All state preparation circuits must be balanced to the same gate count using identity gate padding. Prior work showed that unbalanced circuits created a 3.4× asymmetry artifact in GHZ₃ results — this is not optional. Use `balance="gate_count"` (or equivalent) in every run.
+
+2. **Circuit provenance must be recorded.** Every experiment must log the exact preparation circuit used, including gate count, G_circuit edges, and any balancing applied. This is critical for the three-graph analysis.
+
+3. **Seed control is mandatory.** Baseline (cs = 0) and test (cs > 0) runs for the same condition must use the same random seed to ensure fair comparison.
+
+4. **Minimum shot count: 8192.** Lower counts produce unstable covariance estimates. This is a floor, not a target — use more shots where computationally feasible.
 
 ### Phase 1: Sensitivity Ranking Across States
 
@@ -190,6 +206,7 @@ This is your execution plan. Three phases, each building on the last.
 - Correlation strength: cs ∈ {0.0, 0.3, 0.6, 0.8}
 - Noise topology: chain
 - States: Product, GHZ, W, Cluster
+- Gate-count balancing: enabled (mandatory)
 
 **Controls:**
 
@@ -205,19 +222,27 @@ This is your execution plan. Three phases, each building on the last.
 
 **Deliverable:** Sensitivity curves showing NTC versus cs for each state, with separate curves for each error probability level. These curves are the core finding of the entire programme.
 
+**Bonus analysis (low cost, high value):** Once the Phase 1 results table is complete, compute the noise fingerprint vector f = vec(ΔCov_ij) for each condition and the cosine similarity matrix between all condition pairs. This is computationally trivial given the data already collected and provides an immediate visual (similarity heatmap) showing whether different states produce distinguishable fingerprints for the same noise topology. If the fingerprints cluster cleanly by noise topology regardless of state, that strengthens the case for noise characterisation. If they cluster by state regardless of topology, that reveals a limitation. Either result is informative.
+
 ### Phase 2: Topology Matching
 
 **Goal:** Test whether a state detects noise better when G_noise matches its structure.
 
-**Design:** Pick two noise topologies (chain, star) and two states (GHZ, Cluster). Run all four combinations at n = 6, p = 0.2, cs = 0.6. For GHZ, note that G_state (global) differs from G_circuit (chain) — this is the key comparison that disentangles the two matching hypotheses.
+**Design:** Pick two noise topologies (chain, star) and two states (GHZ, Cluster). Run all four combinations at n = 6, p = 0.2, cs = 0.6. For GHZ, note that G_state (global) differs from G_circuit (chain) — this is the key comparison that disentangles the two matching hypotheses. Include W state as a third probe: its tree-like G_circuit differs from both chain and star, providing additional leverage for separating G_circuit effects from G_state effects.
 
-**Deliverable:** A 2×2 comparison showing NTC for matched vs mismatched state–topology pairs. Bar plots with confidence intervals.
+**Gate-count balancing:** enabled (mandatory).
+
+**Deliverable:** A 3×2 comparison (three states × two topologies) showing NTC for matched vs mismatched state–topology pairs. Bar plots with confidence intervals.
 
 ### Phase 3: Scaling with Qubit Count
 
-**Goal:** Show how NTC evolves from 4 to 8 qubits.
+**Goal:** Show how NTC evolves from 4 to 8 qubits and empirically identify the detection threshold.
 
 Sweep n ∈ {4, 5, 6, 7, 8} at fixed p = 0.2, cs = 0.6, chain topology. Use the best-performing state from Phase 1.
+
+**Gate-count balancing:** enabled (mandatory). Note that gate counts will differ across qubit counts — balancing ensures fairness _within_ each n, not across n values.
+
+**Framing:** n = 4 and n = 5 are expected to produce weak or non-significant NTC based on prior MI-based experiments. Including them serves two purposes: (a) empirically demonstrating the detection threshold, and (b) testing whether the ΔCov methodology recovers signal at smaller n where MI-based approaches failed.
 
 **Deliverable:** NTC versus n plot, annotated with p-values. Shows the emergence threshold and confirms (or refutes) that larger systems give clearer signals.
 
@@ -227,13 +252,14 @@ Sweep n ∈ {4, 5, 6, 7, 8} at fixed p = 0.2, cs = 0.6, chain topology. Use the 
 
 Each phase produces specific plots that tell the research story.
 
-| Plot                   | X-Axis                    | Y-Axis                 | What It Shows                                                                  |
-| ---------------------- | ------------------------- | ---------------------- | ------------------------------------------------------------------------------ |
-| **Sensitivity Curves** | Correlation strength (cs) | NTC value              | One line per state. Reveals which probe is most sensitive at each noise level. |
-| **Match vs Mismatch**  | State–Topology pair       | NTC value (bar height) | Do matched pairs produce higher NTC? Direct test of H2.                        |
-| **Emergence Plot**     | Qubit count (n)           | NTC and p-value        | Where does the signal become statistically reliable?                           |
-| **Edge Decomposition** | Experimental condition    | Mean ΔCov              | Two bars per condition (edge mean and non-edge mean). Shows mechanism.         |
-| **Shuffled Control**   | True vs shuffled topology | NTC value              | Confirms signal is location-specific, not just "more correlation."             |
+| Plot                    | X-Axis                    | Y-Axis                 | What It Shows                                                                  |
+| ----------------------- | ------------------------- | ---------------------- | ------------------------------------------------------------------------------ |
+| **Sensitivity Curves**  | Correlation strength (cs) | NTC value              | One line per state. Reveals which probe is most sensitive at each noise level. |
+| **Match vs Mismatch**   | State–Topology pair       | NTC value (bar height) | Do matched pairs produce higher NTC? Direct test of H2.                        |
+| **Emergence Plot**      | Qubit count (n)           | NTC and p-value        | Where does the signal become statistically reliable?                           |
+| **Edge Decomposition**  | Experimental condition    | Mean ΔCov              | Two bars per condition (edge mean and non-edge mean). Shows mechanism.         |
+| **Shuffled Control**    | True vs shuffled topology | NTC value              | Confirms signal is location-specific, not just "more correlation."             |
+| **Fingerprint Heatmap** | Condition pairs           | Cosine similarity      | Do different states/topologies produce distinguishable ΔCov signatures?        |
 
 ---
 
@@ -256,23 +282,62 @@ To keep the scope honest and reviewers satisfied, be clear about boundaries:
 - The noise model is a controlled abstraction. Real noise is messier, and extending to hardware is future work.
 - NTC is not a universal noise diagnostic. It tests topology alignment specifically.
 
-### 7.2 Future Work: Noise Fingerprinting
+### 7.2 Future Work: Noise Fingerprinting and Classification
 
-A natural extension of this programme is to move from scalar NTC to a richer "fingerprint" representation.
+The Phase 1 bonus analysis (fingerprint vectors and cosine similarity) opens a natural extension path. If fingerprints prove distinguishable, the next steps are:
 
-Let **f** be the vector of all ΔCov values over qubit pairs, flattened:
+**Clustering:** Apply unsupervised clustering (e.g., k-means or hierarchical) to the fingerprint vectors across all experimental conditions. If noise topologies form distinct clusters regardless of probe state, the method generalises.
 
-```
-f = vec(ΔCov_ij) for all i < j
-```
+**Classification:** Train a simple classifier (e.g., logistic regression or nearest-centroid) to predict noise topology from the fingerprint vector. Cross-validate across states to test whether a classifier trained on Cluster-state fingerprints can predict topology when given GHZ-state fingerprints. Success here would demonstrate practical noise tomography.
 
-Then define similarity between two experimental conditions via cosine similarity:
+**Scaling:** Test whether fingerprint distinguishability improves with qubit count, paralleling the NTC emergence in Phase 3.
 
-```
-sim(f_a, f_b) = ⟨f_a, f_b⟩ / (|f_a| · |f_b|)
-```
+This is not required for the current programme but positions the work toward practical noise tomography and connects to the broader quantum error characterisation literature.
 
-This opens up three directions: clustering noise topologies by their fingerprint signatures, identifying which probe states best separate different clusters, and building classifiers that predict noise topology from measurement data alone. This is not required for the current programme but positions the work toward practical noise tomography.
+### 7.3 Completed Results (February 2026)
+
+The full three-phase protocol has been executed. See `docs/research-docs/STATE_PROBE_FINDINGS.md` for the complete findings report with data tables. Key results:
+
+**H1 (Sensitivity Ordering) — Confirmed, stronger than predicted:**
+- GHZ: 9/9 significant (all p < 0.01, all d > 2.3), mean NTC = 0.0154
+- W: 0/9 significant, mean NTC ≈ 0 (confirmed with 10-seed validation)
+- Cluster: NTC = 0.000 exactly, all conditions (Pauli-invariant)
+- Product: NTC = 0.000 exactly, all conditions (Pauli-invariant)
+
+**H2 (Topology Matching) — Partially confirmed:**
+- GHZ detects chain noise (NTC = 0.013, p = 0.006) but not star noise (NTC = -0.005, p = 1.0)
+- G_circuit alignment (not G_state) is the dominant driver of detection
+- Shuffled-topology control confirms location-specificity: 70% NTC reduction when edges are randomized
+
+**H3 (Scaling) — Confirmed:**
+- Detection threshold at n ≥ 5 qubits
+- Effect size scales from d = 1.5 (n=4) to d = 3.65 (n=8)
+
+**Novel finding — Pauli Invariance Blindness:**
+States with uniform Z-basis probability distributions (cluster, product superposition) are provably invisible to Pauli noise channels under Z-basis measurement. Any Pauli error permutes bitstrings within the uniform distribution, leaving measurement statistics unchanged. This is a fundamental constraint on NTC-based noise characterisation: the measurement basis must be adapted to the probe state.
+
+### 7.4 Future Work: Measurement-Basis Extension
+
+The Pauli invariance finding opens the most promising extension direction. The current study uses Z-basis (computational basis) measurement exclusively. The key insight is:
+
+> **Probe sensitivity depends on the triple (state, noise topology, measurement basis), not just (state, noise topology).**
+
+**Immediate next experiment:** Measure cluster states in the X-basis (apply H to all qubits before measurement). The cluster state's X-basis distribution is non-uniform (it concentrates on stabilizer eigenstates), so Pauli noise should produce detectable ΔCov in X-basis measurements. If this recovers NTC sensitivity for cluster states, it demonstrates that:
+
+1. Cluster states can serve as probes with the right measurement basis
+2. The (state, basis) pairing determines which noise channels are visible
+3. Multiple measurement bases on the same state could triangulate noise structure
+
+**Extended programme:**
+
+| State | Z-basis (done) | X-basis | Stabilizer-adapted |
+| --- | --- | --- | --- |
+| GHZ | Strong signal | Predict: weak (uniform in X) | Predict: strong |
+| Cluster | Zero (proven) | Predict: non-zero | Predict: strong |
+| W | Weak | Predict: unknown | Predict: unknown |
+| Product | Zero (proven) | Predict: zero (uniform in all Pauli bases) | N/A |
+
+**Why this matters:** If measurement-basis adaptation recovers sensitivity for cluster states, the framework becomes a complete noise characterisation toolkit. Different (state, basis) combinations act as orthogonal probes, each revealing different aspects of the noise structure. This is analogous to quantum state tomography, but for noise rather than states.
 
 ---
 
@@ -288,9 +353,13 @@ Your existing framework already supports everything needed:
 | Extract covariance   | Covariance extraction from QASM counts                      |
 | Compute NTC          | topology_comparison routine                                 |
 | Significance testing | Permutation test with qubit-label shuffling                 |
+| Gate-count balancing | balance="gate_count" in state preparation                   |
 | Output results       | JSON structured output + histogram generation               |
+| Visualise results    | React Native dashboard consuming JSON output                |
 
-**The main new piece** is a study harness (e.g. **_state_probe_sensitivity.py_**) that loops over states, runs baseline and test conditions, computes all metrics, and writes a single results table. Each row of that table contains: state, n, p, cs, noise_topology, ntc, p_value, effect_size, edge_excess, non_edge_excess. All plots are generated from this table.
+**The main new piece** is a study harness (e.g. **_state_probe_sensitivity.py_**) that loops over states, runs baseline and test conditions, computes all metrics, and writes a single results table. Each row of that table contains: state, n, p, cs, noise_topology, ntc, p_value, effect_size, edge_excess, non_edge_excess. All plots and the dashboard are generated from this table.
+
+**Dashboard integration:** The results table schema (Appendix B) is designed to be directly consumable by the React Native dashboard. Each row is a self-contained experiment record. The dashboard should support filtering by state, topology, and qubit count, and render the sensitivity curves, bar plots, and heatmaps described in Section 6.
 
 ---
 
@@ -318,7 +387,7 @@ This glossary explains every technical term used in this document in plain langu
 
 **GHZ State** — Named after Greenberger, Horne, and Zeilinger. For n qubits: (|00…0⟩ + |11…1⟩)/√2. This means the system is in a superposition of _all qubits are 0_ and _all qubits are 1_. There is nothing in between. This creates maximal global correlation: if you measure any qubit, you immediately know all the others. GHZ states are extremely fragile — any noise on any qubit can collapse the superposition. Important subtlety: G_state is conceptually global (all-to-all), but G_circuit is typically a chain of CX gates (0→1→2→3…).
 
-**W State** — For n qubits, the W state is an equal superposition of all states where exactly one qubit is 1: (|100…0⟩ + |010…0⟩ + |001…0⟩ + …)/√n. The single excitation is democratically shared. W states are more robust than GHZ: losing one qubit does not destroy the entanglement in the remaining qubits.
+**W State** — For n qubits, the W state is an equal superposition of all states where exactly one qubit is 1: (|100…0⟩ + |010…0⟩ + |001…0⟩ + …)/√n. The single excitation is democratically shared. W states are more robust than GHZ: losing one qubit does not destroy the entanglement in the remaining qubits. G_circuit is a tree/fan-out structure from the cascade of controlled rotations used in preparation, which is structurally distinct from both chain and star topologies.
 
 **Cluster State** — Qubits are entangled in a graph pattern. In a _linear cluster_ (which is what you use), qubit 0 is entangled with 1, qubit 1 with 2, qubit 2 with 3, and so on. The entanglement is local — only neighbours are directly connected. Cluster states are the foundation of measurement-based quantum computing. Uniquely, G_state and G_circuit are both chains, making this the cleanest state for topology-matching experiments.
 
@@ -352,13 +421,17 @@ This glossary explains every technical term used in this document in plain langu
 
 **Confidence Interval (CI)** — A range of values that is likely to contain the true value of a quantity. A 95% CI means: if you repeated the experiment 100 times, about 95 of those intervals would contain the true value. Wider CIs mean less certainty. In your plots, error bars will represent CIs computed via bootstrapping (resampling your data with replacement).
 
+**Cosine Similarity** — A measure of how similar two vectors are, regardless of their magnitude. It computes the cosine of the angle between them: 1.0 means identical direction, 0.0 means orthogonal (unrelated), −1.0 means opposite. Used here to compare noise fingerprint vectors (ΔCov patterns) across experimental conditions.
+
 ### A.5 Framework-Specific Terms
 
 **Jeffreys Smoothing** — A method for handling zero counts in probability distributions. If a bitstring was never observed in your shots, its raw probability is 0. But zero probability can cause mathematical problems (like infinity when computing logarithms). Jeffreys smoothing adds a tiny pseudocount (0.5) to every outcome before normalising, so nothing is exactly zero. It is a standard Bayesian technique.
 
-**Gate-Count Balancing** — Ensuring that different quantum states use the same number of quantum gates (operations). This matters because each gate introduces a small amount of noise. If GHZ uses 10 gates and Product uses 2, the difference in NTC might be due to the extra gate noise, not the state's inherent sensitivity. Balancing gate counts (by adding identity gates where needed) ensures fair comparisons.
+**Gate-Count Balancing** — Ensuring that different quantum states use the same number of quantum gates (operations). This matters because each gate introduces a small amount of noise. If GHZ uses 10 gates and Product uses 2, the difference in NTC might be due to the extra gate noise, not the state's inherent sensitivity. Balancing gate counts (by adding identity gates where needed) ensures fair comparisons. Prior work showed that unbalanced circuits created a 3.4× asymmetry artifact, making this a mandatory protocol requirement rather than an optional feature.
 
 **Seed Control** — Using a fixed random number seed so that experiments are reproducible. Quantum simulation involves random processes (noise injection, measurement sampling). Setting the same seed means you get the same random sequence every time, so you can reproduce results exactly. Different seeds give different random sequences, which you can use to estimate variability.
+
+**Noise Fingerprint Vector** — The flattened vector of all ΔCov values across qubit pairs for a given experimental condition. For n qubits, this vector has n(n−1)/2 elements (one per unique pair). Comparing fingerprint vectors via cosine similarity reveals whether different experimental conditions produce distinguishable correlation patterns.
 
 ---
 
@@ -366,18 +439,22 @@ This glossary explains every technical term used in this document in plain langu
 
 Every experiment produces one row in a results table with this structure:
 
-| Field           | Type    | Description                                                         |
-| --------------- | ------- | ------------------------------------------------------------------- |
-| state           | string  | Name of the quantum state (Product, GHZ, W, Cluster)                |
-| n               | integer | Number of qubits                                                    |
-| p               | float   | Error probability (total noise level)                               |
-| cs              | float   | Correlation strength (0 = independent, 1 = fully correlated)        |
-| noise_topology  | string  | Graph structure of correlated noise (chain, star, all_to_all)       |
-| ntc             | float   | Noise Topology Correlation score                                    |
-| p_value         | float   | Statistical significance from permutation test                      |
-| effect_size     | float   | Cohen's d: standardised difference between edge and non-edge excess |
-| edge_excess     | float   | Mean ΔCov on noise topology edges                                   |
-| non_edge_excess | float   | Mean ΔCov on non-edge qubit pairs                                   |
+| Field           | Type    | Description                                                             |
+| --------------- | ------- | ----------------------------------------------------------------------- |
+| state           | string  | Name of the quantum state (Product, GHZ, W, Cluster)                    |
+| n               | integer | Number of qubits                                                        |
+| p               | float   | Error probability (total noise level)                                   |
+| cs              | float   | Correlation strength (0 = independent, 1 = fully correlated)            |
+| noise_topology  | string  | Graph structure of correlated noise (chain, star, all_to_all, shuffled) |
+| ntc             | float   | Noise Topology Correlation score                                        |
+| p_value         | float   | Statistical significance from permutation test                          |
+| effect_size     | float   | Cohen's d: standardised difference between edge and non-edge excess     |
+| edge_excess     | float   | Mean ΔCov on noise topology edges                                       |
+| non_edge_excess | float   | Mean ΔCov on non-edge qubit pairs                                       |
+| gate_count      | integer | Total gates in balanced circuit (for provenance)                        |
+| g_circuit_type  | string  | Structure of G_circuit (chain, tree, minimal, etc.)                     |
+| seed            | integer | Random seed used for this run                                           |
+| shots           | integer | Number of measurement shots                                             |
 
 **Example row:**
 
@@ -392,7 +469,11 @@ Every experiment produces one row in a results table with this structure:
   "p_value": 0.003,
   "effect_size": 2.67,
   "edge_excess": 0.029,
-  "non_edge_excess": -0.0
+  "non_edge_excess": -0.0,
+  "gate_count": 12,
+  "g_circuit_type": "chain",
+  "seed": 42,
+  "shots": 8192
 }
 ```
 

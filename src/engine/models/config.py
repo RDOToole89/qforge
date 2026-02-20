@@ -71,6 +71,7 @@ class ExperimentConfig(BaseModel):
             "bit_flip",
             "phase_flip",
             "thermal_relaxation",
+            "correlated_depolarizing",
         ]
         | None
     ) = Field(default=None, description="Type of noise model to apply")
@@ -87,6 +88,12 @@ class ExperimentConfig(BaseModel):
     i_prob: float | None = Field(default=None, ge=0.0, le=1.0)
     t1: float | None = Field(default=None, gt=0.0)
     t2: float | None = Field(default=None, gt=0.0)
+
+    # Circuit balancing
+    balance_circuit: str | None = Field(
+        default=None,
+        description="Circuit balancing strategy. 'gate_count' pads circuits with identity gates to equalize depth across state types.",
+    )
 
     # ===== Research Parameters =====
     metrics: list[str] | str | None = Field(

@@ -21,7 +21,8 @@ particle loss but less useful for certain quantum protocols.
 from typing import Any
 
 import numpy as np
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile as _qk_transpile
+from qiskit.circuit.library import UnitaryGate
 
 from .base_state import BaseState
 
@@ -57,14 +58,10 @@ class WState(BaseState):
         For n qubits, we create the superposition:
         |W_n⟩ = (|100...0⟩ + |010...0⟩ + ... + |000...1⟩)/√n
 
-        # Implementation Methods
-        1. **Initialize method** (default): Direct state vector initialization
-           - Pros: Exact, works for any n, guaranteed correctness
-           - Cons: Not decomposed into elementary gates
-
-        2. **Gate-based method**: Recursive construction using rotations
-           - Pros: Uses only elementary gates, shows explicit construction
-           - Cons: More complex, currently implemented for n=3 only
+        Uses an efficient gate-based construction via cascaded Givens rotations
+        in the {|01⟩, |10⟩} subspace. This produces O(n) two-qubit gates,
+        ensuring the circuit has explicit entangling gates that noise models
+        can act on (unlike the monolithic ``initialize`` instruction).
 
         Args:
             add_barrier: Add quantum barrier for circuit visualization
@@ -77,16 +74,12 @@ class WState(BaseState):
             >>> circuit = w.create()
             >>> # Creates (|100⟩ + |010⟩ + |001⟩)/√3
         """
-        # Validate qubit count for W state
         if self.num_qubits < 1:
             raise ValueError("W state requires at least 1 qubit")
 
-        # Create quantum circuit
         circuit = QuantumCircuit(self.num_qubits)
 
-        # Handle special cases
         if self.num_qubits == 1:
-            # Single qubit W state is just |1⟩
             circuit.x(0)
             self.log_state_creation(
                 "W (single qubit)", {"note": "W state with 1 qubit is just |1⟩"}
@@ -95,50 +88,62 @@ class WState(BaseState):
                 circuit.barrier()
             return circuit
 
-        # Choose construction method
-        custom_params = self.custom_params or {}
-        method = custom_params.get("method", "initialize")
-        prefer_initialize = custom_params.get("prefer_initialize", True)
-        use_gate_based = (method == "gate") and not prefer_initialize
+        # Givens rotation cascade: spread one excitation across all qubits
+        # Start with excitation on the last qubit
+        circuit.x(self.num_qubits - 1)
 
-        if use_gate_based and self.num_qubits == 3:
-            # Gate-based construction for 3 qubits (educational demonstration)
-            # This shows how W states can be built from elementary gates
-            # More complex than initialize but pedagogically valuable
+        for k in range(self.num_qubits - 1, 0, -1):
+            # Givens rotation G(θ) in {|01⟩, |10⟩} subspace of (q_{k-1}, q_k):
+            #   |10⟩ → cos(θ)|10⟩ + sin(θ)|01⟩
+            # with cos²(θ) = 1/(k+1) so each qubit ends up with amplitude 1/√n
+            theta = np.arccos(np.sqrt(1.0 / (k + 1)))
+            circuit.append(self._givens_gate(theta), [k - 1, k])
 
-            # Create W state using decomposed gates
-            w_state_vector = self._get_w_state_vector()
-            circuit.initialize(w_state_vector, range(self.num_qubits))
-            circuit = circuit.decompose()  # Decompose into elementary gates
+        # Decompose UnitaryGate instructions to standard basis gates
+        # so that noise models can attach errors to each gate.
+        circuit = _qk_transpile(
+            circuit, basis_gates=["cx", "rz", "sx", "x"], optimization_level=1
+        )
 
-            construction_method = "gate_decomposed"
+        # Gate-count balancing (equalize noise exposure across qubits)
+        if self.balance == "gate_count":
+            circuit = self._apply_gate_count_balancing(circuit)
 
-        else:
-            # Default: Direct initialization (most practical)
-            # This is the standard method for W state preparation
-
-            w_state_vector = self._get_w_state_vector()
-            circuit.initialize(w_state_vector, range(self.num_qubits))
-
-            construction_method = "initialize"
-
-        # Optional: Add barrier for visualization
         if add_barrier:
             circuit.barrier()
 
-        # Log successful creation
         self.log_state_creation(
             f"W ({self.num_qubits} qubits)",
             {
                 "entanglement_type": "symmetric_multipartite",
-                "construction_method": construction_method,
-                "excitation_number": 1,  # W states have exactly 1 excitation
+                "construction_method": "givens_cascade",
+                "excitation_number": 1,
+                "two_qubit_gates": self.num_qubits - 1,
                 "symmetry_class": "permutation_symmetric",
                 "robustness": "partially_robust_to_qubit_loss",
             },
         )
 
         return circuit
+
+    @staticmethod
+    def _givens_gate(theta: float) -> UnitaryGate:
+        """Givens rotation in the {|01⟩, |10⟩} subspace.
+
+        Matrix (basis order |00⟩, |01⟩, |10⟩, |11⟩)::
+
+            [[1,    0,       0,    0],
+             [0,  cos θ,   sin θ,  0],
+             [0, -sin θ,   cos θ,  0],
+             [0,    0,       0,    1]]
+        """
+        c, s = np.cos(theta), np.sin(theta)
+        U = np.eye(4, dtype=complex)
+        U[1, 1] = c
+        U[1, 2] = s
+        U[2, 1] = -s
+        U[2, 2] = c
+        return UnitaryGate(U, label="Givens")
 
     def _get_w_state_vector(self) -> np.ndarray:
         """
@@ -189,15 +194,14 @@ class WState(BaseState):
         """
         Estimate circuit depth for W state preparation.
 
-        # Depth Analysis
-        - Initialize method: O(n) depth (implementation dependent)
-        - Gate-based method: O(n²) depth for exact construction
+        Uses n-1 Givens rotations, each decomposing to ~2 CX + single-qubit gates.
 
         Returns:
             int: Estimated circuit depth
         """
-        # Conservative estimate for initialize method
-        return max(1, self.num_qubits)
+        if self.num_qubits == 1:
+            return 1
+        return 2 * (self.num_qubits - 1)  # ~2 layers per Givens rotation
 
     def _get_required_gates(self) -> list[str]:
         """
@@ -207,10 +211,8 @@ class WState(BaseState):
             List[str]: Required gate names
         """
         if self.num_qubits == 1:
-            return ["x"]  # Single qubit W state just needs X gate
-        else:
-            # Initialize method uses arbitrary state preparation
-            return ["initialize"]  # Qiskit's arbitrary state preparation
+            return ["x"]
+        return ["x", "cx", "rz", "sx"]  # Givens rotations decompose to these
 
     def get_theoretical_properties(self) -> dict[str, Any]:
         """

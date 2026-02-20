@@ -60,6 +60,10 @@ from src.experiments.sst_hypothesis_q1_extensions import (
     sst_q1_large_depolarizing,
     sst_q1_huge,
 )
+from src.experiments.state_probe_sensitivity import (
+    StateProbeStudy,
+    state_probe_sensitivity,
+)
 
 # Registry of available experiments
 EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
@@ -76,6 +80,8 @@ EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
     "sst_q1_huge": sst_q1_huge,
     # Bell experiments (quantum correlation tests)
     "bell_correlation": bell_correlation,
+    # State probe sensitivity study (NTC-based noise characterisation)
+    "state_probe_sensitivity": state_probe_sensitivity,
 }
 
 
@@ -142,4 +148,7 @@ __all__ = [
     "BellCorrelationMetrics",
     "bell_correlation",
     "compute_bell_metrics",
+    # State probe sensitivity
+    "StateProbeStudy",
+    "state_probe_sensitivity",
 ]

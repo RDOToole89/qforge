@@ -98,6 +98,10 @@ class GHZState(BaseState):
         for i in range(self.num_qubits - 1):
             circuit.cx(i, i + 1)  # Controlled-X from qubit i to i+1
 
+        # Gate-count balancing (equalize noise exposure across qubits)
+        if self.balance == "gate_count":
+            circuit = self._apply_gate_count_balancing(circuit)
+
         # Optional: Add barrier for visualization
         if add_barrier:
             circuit.barrier()

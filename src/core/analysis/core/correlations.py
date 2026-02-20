@@ -11,7 +11,7 @@ This module provides:
 """
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 from numpy.typing import NDArray
@@ -286,9 +286,122 @@ def correlation_upper_triangle(matrix: np.ndarray) -> NDArray[np.float64]:
     return upper_triangle.astype(np.float64, copy=False)
 
 
+def bit_covariance_matrix(
+    counts: Mapping[str, int],
+    n_qubits: int,
+) -> NDArray[np.float64]:
+    """Compute pairwise bit covariance from measurement counts.
+
+    Cov(b_i, b_j) = E[b_i * b_j] - E[b_i] * E[b_j]
+
+    where b_i in {0, 1} is the measured bit value for qubit i.
+
+    Args:
+        counts: Measurement counts {bitstring: count}
+        n_qubits: Number of qubits
+
+    Returns:
+        n x n covariance matrix with zero diagonal
+    """
+    total = sum(counts.values())
+    if total == 0:
+        return np.zeros((n_qubits, n_qubits), dtype=np.float64)
+
+    b_mean = np.zeros(n_qubits, dtype=np.float64)
+    bb_mean = np.zeros((n_qubits, n_qubits), dtype=np.float64)
+
+    for bitstring, count in counts.items():
+        b = np.array([float(bitstring[i]) for i in range(n_qubits)], dtype=np.float64)
+        weight = count / total
+        b_mean += weight * b
+        bb_mean += weight * np.outer(b, b)
+
+    cov = bb_mean - np.outer(b_mean, b_mean)
+    np.fill_diagonal(cov, 0.0)
+    return cov
+
+
+def excess_covariance_matrix(
+    counts: Mapping[str, int],
+    baseline_counts: Mapping[str, int],
+    n_qubits: int,
+) -> NDArray[np.float64]:
+    """Compute excess covariance: ΔCov = Cov(test) - Cov(baseline).
+
+    Isolates the noise-induced covariance by subtracting the baseline
+    (independent noise) covariance from the test (correlated noise) covariance.
+
+    Args:
+        counts: Test condition measurement counts
+        baseline_counts: Baseline (independent noise) measurement counts
+        n_qubits: Number of qubits
+
+    Returns:
+        n x n excess covariance matrix (symmetric, zero diagonal)
+    """
+    cov_test = bit_covariance_matrix(counts, n_qubits)
+    cov_base = bit_covariance_matrix(baseline_counts, n_qubits)
+    return cov_test - cov_base
+
+
+def fingerprint_vector(
+    counts: Mapping[str, int],
+    baseline_counts: Mapping[str, int],
+    n_qubits: int,
+) -> NDArray[np.float64]:
+    """Extract noise fingerprint as 1D vector from excess covariance.
+
+    Computes the excess covariance matrix and extracts its upper triangle
+    as a flat vector. For n qubits this gives n*(n-1)/2 elements
+    (e.g. 15 for n=6).
+
+    Args:
+        counts: Test condition measurement counts
+        baseline_counts: Baseline (independent noise) measurement counts
+        n_qubits: Number of qubits
+
+    Returns:
+        1D fingerprint vector of length n*(n-1)/2
+    """
+    delta_cov = excess_covariance_matrix(counts, baseline_counts, n_qubits)
+    return correlation_upper_triangle(delta_cov)
+
+
+def cosine_similarity_matrix(
+    vectors: Sequence[NDArray[np.float64]],
+) -> NDArray[np.float64]:
+    """Compute pairwise cosine similarity matrix.
+
+    Args:
+        vectors: Sequence of 1D vectors (all same length)
+
+    Returns:
+        k x k similarity matrix where k = len(vectors).
+        sim[i,j] = dot(v_i, v_j) / (|v_i| * |v_j|).
+        Zero vectors produce 0.0 similarity with everything.
+    """
+    k = len(vectors)
+    mat = np.stack(vectors, axis=0)  # k x d
+    norms = np.linalg.norm(mat, axis=1)  # k
+    # Avoid division by zero: replace zero norms with 1 (result will be 0 anyway)
+    safe_norms = np.where(norms > 0, norms, 1.0)
+    normed = mat / safe_norms[:, np.newaxis]
+    # Zero out rows that had zero norm
+    zero_mask = norms == 0
+    normed[zero_mask] = 0.0
+    sim = normed @ normed.T
+    # Clamp to [-1, 1] for numerical safety
+    np.clip(sim, -1.0, 1.0, out=sim)
+    return sim
+
+
 __all__ = [
     "mi_matrix",
     "adjacency_from_distances",
     "get_topology_adjacency",
     "correlation_upper_triangle",
+    "bit_covariance_matrix",
+    "excess_covariance_matrix",
+    "fingerprint_vector",
+    "cosine_similarity_matrix",
 ]

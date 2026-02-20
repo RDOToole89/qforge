@@ -11,6 +11,7 @@ This package includes:
 from .amplitude_damping import AmplitudeDampingNoise
 from .base_noise import BaseNoise
 from .bit_flip import BitFlipNoise
+from .correlated_depolarizing import CorrelatedDepolarizingNoise
 from .depolarizing import DepolarizingNoise
 from .noise_factory import NOISE_CLASSES, create_noise_model, get_available_noise_types
 from .phase_damping import PhaseDampingNoise
@@ -25,6 +26,7 @@ __all__ = [
     "PhaseDampingNoise",
     "ThermalRelaxationNoise",
     "BitFlipNoise",
+    "CorrelatedDepolarizingNoise",
     "create_noise_model",
     "NOISE_CLASSES",
     "get_available_noise_types",

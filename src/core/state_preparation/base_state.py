@@ -61,7 +61,11 @@ class BaseState(ABC):
     """
 
     def __init__(
-        self, num_qubits: int, custom_params: Optional[dict] = None, experiment_id: str = "N/A"
+        self,
+        num_qubits: int,
+        custom_params: Optional[dict] = None,
+        experiment_id: str = "N/A",
+        balance: Optional[str] = None,
     ):
         """
         Initialize quantum state preparation.
@@ -98,6 +102,7 @@ class BaseState(ABC):
         self.num_qubits = num_qubits
         self.custom_params = custom_params or {}
         self.experiment_id = experiment_id
+        self.balance = balance
 
         # Research metadata for pathway analysis
         self._state_prepared = False
@@ -403,6 +408,47 @@ class BaseState(ABC):
 
         # Normalize to unit vector
         return state / np.linalg.norm(state)
+
+    def _apply_gate_count_balancing(self, circuit: QuantumCircuit) -> QuantumCircuit:
+        """Pad qubits with identity gates so all qubits have equal gate count.
+
+        Under per-gate depolarizing noise, qubits with more gates accumulate
+        more noise. Padding with identity gates equalizes the noise budget
+        so that observed asymmetries are due to state structure, not circuit
+        depth imbalance.
+
+        Args:
+            circuit: Circuit to balance (modified in-place and returned)
+
+        Returns:
+            The same circuit with identity-gate padding applied.
+        """
+        gate_counts: dict[int, int] = {i: 0 for i in range(circuit.num_qubits)}
+
+        for instruction in circuit.data:
+            op = instruction.operation
+            if op.name in ("barrier", "measure"):
+                continue
+            for qubit in instruction.qubits:
+                idx = circuit.qubits.index(qubit)
+                gate_counts[idx] += 1
+
+        max_count = max(gate_counts.values()) if gate_counts else 0
+        padding: dict[int, int] = {}
+
+        for q, count in gate_counts.items():
+            deficit = max_count - count
+            if deficit > 0:
+                for _ in range(deficit):
+                    circuit.id(q)
+                padding[q] = deficit
+
+        circuit.metadata = circuit.metadata or {}
+        circuit.metadata["padding_per_qubit"] = padding
+        circuit.metadata["balanced"] = True
+
+        logger.debug(f"Gate-count balancing: max={max_count}, padding={padding}")
+        return circuit
 
     def get_research_metadata(self) -> dict[str, Any]:
         """

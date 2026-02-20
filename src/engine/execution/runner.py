@@ -56,6 +56,7 @@ class EngineExperimentRunner:
         t2: float | None = None,
         custom_params: dict | None = None,
         rng_seed: int | None = None,
+        balance: str | None = None,
     ) -> tuple[QuantumCircuit, Any]:
         """
         Run a quantum experiment with specified parameters.
@@ -81,11 +82,14 @@ class EngineExperimentRunner:
         self.logger.info(f"Starting engine experiment: {state_type} state with {num_qubits} qubits")
 
         # Create quantum circuit
-        circuit = self._create_circuit(num_qubits, state_type, custom_params)
+        circuit = self._create_circuit(num_qubits, state_type, custom_params, balance=balance)
 
         # Apply noise if enabled
         if noise_enabled and noise_type:
-            circuit = self._apply_noise(circuit, noise_type, error_rate, z_prob, i_prob, t1, t2)
+            circuit = self._apply_noise(
+                circuit, noise_type, error_rate, z_prob, i_prob, t1, t2,
+                custom_params=custom_params,
+            )
 
         # Execute simulation
         result = self._execute_simulation(circuit, sim_mode, shots, rng_seed)
@@ -96,7 +100,8 @@ class EngineExperimentRunner:
     # ---------- Circuit / noise / simulation internals ----------
 
     def _create_circuit(
-        self, num_qubits: int, state_type: str, custom_params: dict | None
+        self, num_qubits: int, state_type: str, custom_params: dict | None,
+        balance: str | None = None,
     ) -> QuantumCircuit:
         """Create quantum circuit using sophisticated core state preparation."""
         try:
@@ -109,6 +114,9 @@ class EngineExperimentRunner:
             # Pass custom parameters as a dict (don't spread them)
             if custom_params:
                 state_params["custom_params"] = custom_params
+
+            if balance:
+                state_params["balance"] = balance
 
             # Use the sophisticated core state preparation
             circuit = prepare_state(**state_params)
@@ -185,6 +193,7 @@ class EngineExperimentRunner:
         i_prob: float | None,
         t1: float | None,
         t2: float | None,
+        custom_params: dict | None = None,
     ) -> QuantumCircuit:
         """Apply sophisticated noise using core noise models."""
         try:
@@ -192,7 +201,7 @@ class EngineExperimentRunner:
             noise_type_upper = noise_type.upper() if noise_type else "DEPOLARIZING"
 
             # Prepare noise parameters
-            noise_params = {
+            noise_params: dict[str, Any] = {
                 "noise_type": noise_type_upper,
                 "num_qubits": circuit.num_qubits,
             }
@@ -208,6 +217,10 @@ class EngineExperimentRunner:
                 noise_params["t1"] = t1
             if t2 is not None:
                 noise_params["t2"] = t2
+
+            # Pass custom_params through for noise models that need them
+            if custom_params:
+                noise_params["custom_params"] = custom_params
 
             # Create sophisticated noise model using core
             self.noise_model = create_noise_model(**noise_params)
@@ -390,5 +403,6 @@ def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
         t2=config.get("t2"),
         custom_params=config.get("custom_params"),
         rng_seed=config.get("rng_seed"),
+        balance=config.get("balance_circuit"),
     )
     return circuit, raw

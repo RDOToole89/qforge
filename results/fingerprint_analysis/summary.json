@@ -1,0 +1,55 @@
+{
+  "n_fingerprints": 42,
+  "n_qubits": 6,
+  "vector_dim": 15,
+  "ghz_mean_cosine": 0.8741978922774065,
+  "ghz_min_cosine": 0.6111573967403547,
+  "ghz_max_cosine": 0.9913047400901107,
+  "per_p_stability": {
+    "SUPERPOSITION": {
+      "0.1": 0.0,
+      "0.2": 0.0,
+      "0.3": 0.0
+    },
+    "GHZ": {
+      "0.1": 0.8562817539192537,
+      "0.2": 0.9027090127669223,
+      "0.3": 0.9127447120387924
+    },
+    "W": {
+      "0.1": 0.5186143562275912,
+      "0.2": 0.6283573631396602,
+      "0.3": 0.7650536549656236
+    },
+    "CLUSTER": {
+      "0.1": 0.0,
+      "0.2": 0.0,
+      "0.3": 0.0
+    }
+  },
+  "pca_variance_explained": [
+    0.7973554979804163,
+    0.09963336617387344,
+    0.04024290512736145
+  ],
+  "verdict": "SCALING",
+  "explanation": "GHZ fingerprints are highly aligned (mean cosine=0.874): noise signature scales in magnitude but preserves direction.",
+  "norms_by_state": {
+    "CLUSTER": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "GHZ": {
+      "mean": 0.04073549154681691,
+      "std": 0.017421729563530015
+    },
+    "SUPERPOSITION": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "W": {
+      "mean": 0.00991411533701802,
+      "std": 0.004124981936210617
+    }
+  }
+}
