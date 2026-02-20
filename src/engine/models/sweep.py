@@ -319,8 +319,8 @@ class SweepResult(BaseModel):
 
     @property
     def has_research_metrics(self) -> bool:
-        """Check if any experiments have structured decoherence metrics."""
-        return any(r.structured_decoherence_metrics is not None for r in self.experiment_results)
+        """Check if any experiments have computed metrics."""
+        return any(r.metrics_bundle is not None for r in self.experiment_results)
 
 
 class ParameterAnalysis(BaseModel):

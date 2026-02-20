@@ -31,13 +31,12 @@ from .config import (
     ExperimentConfig,
 )
 
-# ===== Research (Structured Decoherence) =====
+# ===== Research Metrics =====
 from .research import (
     AnalysisMetadata,
-    ComparisonMetrics,
-    PathwayAnalysis,
+    MetricEntry,
+    MetricsBundle,
     ResearchMetadata,
-    StructuredDecoherenceMetrics,
 )
 
 # ===== Results =====
@@ -87,12 +86,11 @@ __all__ = [
     "QualityMetrics",
     "Provenance",
     "ExperimentStatus",
-    # Research (Structured Decoherence)
-    "StructuredDecoherenceMetrics",
+    # Research Metrics
+    "MetricEntry",
+    "MetricsBundle",
     "AnalysisMetadata",
-    "PathwayAnalysis",
     "ResearchMetadata",
-    "ComparisonMetrics",
     # Sweeps
     "SweepManifest",
     "SweepResult",

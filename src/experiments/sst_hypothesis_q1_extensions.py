@@ -43,8 +43,7 @@ class SSTHypothesisQ1LargeDepolarizing(BaseExperiment):
             noise_type="depolarizing",  # Random noise
             error_rate=0.1,
             shots=8192,
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
 
@@ -72,8 +71,7 @@ class SSTHypothesisQ1Huge(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             shots=16384,  # Doubled shots for larger Hilbert space
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
 

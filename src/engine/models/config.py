@@ -83,9 +83,9 @@ class ExperimentConfig(BaseModel):
     t2: float | None = Field(default=None, gt=0.0)
 
     # ===== Research Parameters =====
-    enable_research_metrics: bool = Field(
-        default=False,
-        description="Enable computation of structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)",
+    metrics: list[str] | str | None = Field(
+        default=None,
+        description="Profile name, explicit metric list, or None for no metrics",
     )
 
     research_type: (
@@ -163,14 +163,6 @@ class ExperimentConfig(BaseModel):
         """Ensure noise_type is provided when noise_enabled=True."""
         if info.data.get("noise_enabled", False) and v is None:
             raise ValueError("noise_type must be specified when noise_enabled=True")
-        return v
-
-    @field_validator("research_type")
-    @classmethod
-    def validate_research_type_with_metrics(cls, v: str | None, info) -> str | None:
-        """Ensure research_type is provided when enable_research_metrics=True."""
-        if info.data.get("enable_research_metrics", False) and v is None:
-            return "structured_decoherence"  # Default research type
         return v
 
     @model_validator(mode="after")

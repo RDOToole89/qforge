@@ -81,7 +81,7 @@ class HistogramRenderer(VisualizationRenderer):
         analysis = data.get("analysis", {})
         measurement_results = analysis.get("measurement_results", {})
         experiment_params = analysis.get("experiment_parameters", {}) or {}
-        research_metrics = data.get("structured_decoherence_metrics")
+        research_metrics = data.get("metrics_bundle")
 
         counts = (
             measurement_results.get("raw_counts")
@@ -137,10 +137,11 @@ class HistogramRenderer(VisualizationRenderer):
         # Research metrics annotation
         self._annotate_metrics(ax, research_metrics)
 
-        # Highlight top bars if PCR indicates concentration
+        # Highlight top bars if concentration_index indicates concentration
         if research_metrics:
             try:
-                pcr = float(research_metrics.get("pathway_concentration_ratio", 1.0))
+                ci_entry = (research_metrics.get("metrics", {}) or {}).get("concentration_index", {})
+                pcr = float(ci_entry.get("value", 1.0)) if isinstance(ci_entry, dict) else 1.0
             except Exception:
                 pcr = 1.0
             if pcr > 2.0 and highlight_top_n > 0:
@@ -215,29 +216,37 @@ class HistogramRenderer(VisualizationRenderer):
 
         return " - ".join(parts) if parts else "Measurement Results"
 
-    def _annotate_metrics(self, ax, metrics: dict[str, Any] | None) -> None:
-        if not metrics:
+    def _annotate_metrics(self, ax, bundle_data: dict[str, Any] | None) -> None:
+        if not bundle_data:
             return
+
+        metrics_dict = bundle_data.get("metrics", {})
+        if not metrics_dict:
+            return
+
+        abbrevs = {
+            "structure_score": "SS",
+            "concentration_index": "CI",
+            "entanglement_error_correlation": "EEC",
+            "total_correlation": "TC",
+            "pathway_persistence": "TPS",
+            "complexity_emergence_score": "CES",
+        }
+
         text_bits = []
-        ai = metrics.get("asymmetry_index")
-        pcr = metrics.get("pathway_concentration_ratio")
-        eec = metrics.get("entanglement_error_correlation")
         try:
-            if ai is not None:
-                text_bits.append(f"AI: {float(ai):.3f}")
-            if pcr is not None:
-                text_bits.append(f"PCR: {float(pcr):.3f}")
-            if eec is not None:
-                text_bits.append(f"EEC: {float(eec):.3f}")
+            for name, entry in metrics_dict.items():
+                if isinstance(entry, dict) and "value" in entry:
+                    label = abbrevs.get(name, name)
+                    text_bits.append(f"{label}: {float(entry['value']):.3f}")
         except Exception:
-            # Be forgiving if types are unexpected
             pass
 
         if text_bits:
             ax.text(
                 0.02,
                 0.98,
-                "Research Metrics: " + " | ".join(text_bits),
+                "Metrics: " + " | ".join(text_bits),
                 transform=ax.transAxes,
                 fontsize=10,
                 va="top",

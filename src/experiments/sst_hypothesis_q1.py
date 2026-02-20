@@ -37,7 +37,7 @@ class SSTHypothesisQ1(BaseExperiment):
 
         # Single run with defaults
         result = exp.run()
-        print(result.structured_decoherence_metrics.asymmetry_index)
+        print(result.metrics_bundle.value("structure_score"))
 
         # Run with overrides
         result = exp.run({"num_qubits": 3, "error_rate": 0.1})
@@ -58,8 +58,7 @@ class SSTHypothesisQ1(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
     def run_noise_sweep(

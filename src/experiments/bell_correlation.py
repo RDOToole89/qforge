@@ -135,8 +135,7 @@ class BellCorrelation(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            enable_research_metrics=False,  # We compute our own metrics
-            research_type=None,
+            # metrics=None is the default — this experiment computes its own
         )
 
     def run(self, overrides: dict[str, Any] | None = None) -> ExperimentResult:

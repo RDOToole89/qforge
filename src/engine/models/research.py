@@ -1,19 +1,12 @@
 """
-Research Models - Structured Decoherence Analysis
+Research Models — Generic Metrics Bundle
 
-Purpose: Define models for structured decoherence pathway research.
-These models capture the 5 quantitative metrics that characterize
-whether quantum decoherence follows structured vs random patterns.
-
-Key Metrics:
-- AI (Asymmetry Index): Deviation from uniform error distribution
-- PCR (Pathway Concentration Ratio): Error concentration in dominant pathways
-- EEC (Entanglement-Error Correlation): Topology-error pattern correlation
-- TPS (Temporal Pathway Stability): Consistency across noise conditions
-- CES (Complexity Emergence Score): Critical threshold identification
+Purpose: Define metric-agnostic models for the engine's analysis layer.
+A MetricsBundle holds an arbitrary set of MetricEntry values keyed by name,
+replacing the former SST-specific StructuredDecoherenceMetrics.
 
 Dependencies: Pydantic only
-Used by: Engine analysis pipeline, research result storage, publications
+Used by: Engine analysis pipeline, research result storage
 """
 
 from __future__ import annotations
@@ -21,114 +14,51 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class StructuredDecoherenceMetrics(BaseModel):
-    """
-    Complete structured decoherence pathway metrics.
+class MetricEntry(BaseModel):
+    """A single computed metric with optional confidence interval."""
 
-    These metrics quantify whether quantum decoherence follows structured
-    pathways determined by entanglement topology vs purely random patterns.
-    """
+    model_config = ConfigDict(extra="forbid")
 
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+    value: float
+    ci95: tuple[float, float] | None = None
+    status: str = "experimental"
+    extras: dict[str, Any] = Field(default_factory=dict)
 
-    # ===== Core Metrics =====
-    asymmetry_index: float = Field(
-        ge=0.0,
-        description="AI: Deviation from uniform error distribution. Formula: (1/N) Σᵢ |pᵢ - p_uniform| / p_uniform",
-    )
 
-    pathway_concentration_ratio: float = Field(
-        ge=0.0,
-        description="PCR: Concentration of errors in top pathways vs bottom pathways. Formula: (Top 25% frequencies) / (Bottom 25% frequencies)",
-    )
+class MetricsBundle(BaseModel):
+    """Collection of named metrics produced by a single analysis run."""
 
-    entanglement_error_correlation: float = Field(
-        ge=-1.0,
-        le=1.0,
-        description="EEC: Correlation between entanglement topology and error patterns. Range: [-1, 1]",
-    )
+    model_config = ConfigDict(extra="forbid")
 
-    temporal_pathway_stability: float | None = Field(
+    metrics: dict[str, MetricEntry] = Field(default_factory=dict)
+    profile: str | None = Field(
         default=None,
-        ge=0.0,
-        le=1.0,
-        description="TPS: Consistency of pathway rankings across noise levels. Range: [0, 1], None if single condition",
+        description="Profile name used to select these metrics, if any",
     )
+    metadata: AnalysisMetadata
 
-    complexity_emergence_score: float | None = Field(
-        default=None,
-        ge=0.0,
-        description="CES: Critical threshold where structured patterns emerge. None if insufficient data",
-    )
+    def get(self, name: str) -> MetricEntry | None:
+        """Look up a metric by name, returning None if absent."""
+        return self.metrics.get(name)
 
-    # ===== New Schema Metrics =====
-    structure_score: float | None = Field(
-        default=None,
-        ge=0.0,
-        description="SS: Jensen-Shannon divergence from null model. Measures structure vs randomness",
-    )
-
-    concentration_index: float | None = Field(
-        default=None,
-        ge=0.0,
-        description="CI: Gini coefficient of error distribution. Measures inequality in error patterns",
-    )
-
-    total_correlation: float | None = Field(
-        default=None,
-        ge=0.0,
-        description="TC: Multi-information in quantum measurements. Measures total correlation among qubits",
-    )
-
-    # ===== Analysis Metadata =====
-    metadata: AnalysisMetadata = Field(
-        description="Metadata about the analysis conditions and parameters"
-    )
-
-    pathway_analysis: PathwayAnalysis = Field(
-        description="Human-readable analysis of pathway characteristics"
-    )
-
-    # ===== Computed Properties =====
-    @property
-    def is_structured(self) -> bool:
-        """Determine if patterns show structured vs random decoherence."""
-        # Heuristic: structured if AI > 0.3 AND PCR > 1.5 AND |EEC| > 0.3
-        return (
-            self.asymmetry_index > 0.3
-            and self.pathway_concentration_ratio > 1.5
-            and abs(self.entanglement_error_correlation) > 0.3
-        )
+    def value(self, name: str) -> float:
+        """Return the scalar value for a metric; raises KeyError if absent."""
+        entry = self.metrics.get(name)
+        if entry is None:
+            raise KeyError(f"Metric '{name}' not in bundle. Have: {list(self.metrics)}")
+        return entry.value
 
     @property
-    def structure_confidence(self) -> float:
-        """Confidence score for structured pattern detection (0-1)."""
-        # Weighted combination of metrics
-        ai_score = min(1.0, self.asymmetry_index / 0.5)
-        pcr_score = min(1.0, (self.pathway_concentration_ratio - 1.0) / 2.0)
-        eec_score = abs(self.entanglement_error_correlation)
-
-        return ai_score * 0.4 + pcr_score * 0.3 + eec_score * 0.3
-
-    # ===== Field Normalization / Safety =====
-    @field_validator("entanglement_error_correlation")
-    @classmethod
-    def _clip_eec(cls, v: float) -> float:
-        """Clip to [-1, 1] to survive floating-point noise from upstream computations."""
-        if v is None:
-            return v
-        if v > 1.0:
-            return 1.0
-        if v < -1.0:
-            return -1.0
-        return float(v)
+    def metric_names(self) -> list[str]:
+        """Sorted list of metric names in this bundle."""
+        return sorted(self.metrics.keys())
 
 
 class AnalysisMetadata(BaseModel):
-    """Metadata about the structured decoherence analysis."""
+    """Metadata about the analysis run."""
 
     state_type: str = Field(description="Quantum state type (GHZ, W, BELL, etc.)")
     num_qubits: int = Field(ge=1, description="Number of qubits in the system")
@@ -151,93 +81,13 @@ class AnalysisMetadata(BaseModel):
     )
 
 
-class PathwayAnalysis(BaseModel):
-    """Human-readable analysis of decoherence pathways."""
-
-    # Dominant pathways (bitstring, probability) pairs
-    dominant_pathways: list[tuple[str, float]] = Field(
-        description="Top error pathways as (bitstring, probability) pairs"
-    )
-
-    pathway_concentration: str = Field(
-        description="Qualitative assessment of pathway concentration"
-    )
-
-    asymmetry_level: str = Field(description="Qualitative level of asymmetry in error distribution")
-
-    entanglement_influence: str = Field(
-        description="Qualitative assessment of entanglement topology influence"
-    )
-
-    # Statistical summary
-    total_outcomes: int = Field(ge=1, description="Total possible outcomes")
-    measurement_shots: int = Field(ge=1, description="Measurement shots used")
-
-    # Research insights
-    research_notes: str | None = Field(
-        default=None, description="Additional research insights or observations"
-    )
-
-    @field_validator("dominant_pathways")
-    @classmethod
-    def _validate_dominant_probabilities(
-        cls, v: list[tuple[str, float]]
-    ) -> list[tuple[str, float]]:
-        """Ensure probabilities are within [0, 1]."""
-        for bitstring, p in v:
-            if p < 0.0 or p > 1.0:
-                raise ValueError(
-                    f"dominant_pathways probability for '{bitstring}' must be within [0, 1], got {p}"
-                )
-        return v
-
-    @field_validator("pathway_concentration")
-    @classmethod
-    def validate_concentration_level(cls, v: str) -> str:
-        """Validate concentration level is one of expected values."""
-        valid_levels = ["very_low", "low", "moderate", "high", "very_high"]
-        if v not in valid_levels:
-            raise ValueError(f"pathway_concentration must be one of {valid_levels}")
-        return v
-
-    @field_validator("asymmetry_level")
-    @classmethod
-    def validate_asymmetry_level(cls, v: str) -> str:
-        """Validate asymmetry level is one of expected values."""
-        valid_levels = [
-            "very_uniform",
-            "slight_asymmetry",
-            "moderate_asymmetry",
-            "high_asymmetry",
-        ]
-        if v not in valid_levels:
-            raise ValueError(f"asymmetry_level must be one of {valid_levels}")
-        return v
-
-    @field_validator("entanglement_influence")
-    @classmethod
-    def validate_entanglement_influence(cls, v: str) -> str:
-        """Validate entanglement influence is one of expected values."""
-        valid_levels = [
-            "no_correlation",
-            "weak_correlation",
-            "moderate_correlation",
-            "strong_correlation",
-        ]
-        if v not in valid_levels:
-            raise ValueError(f"entanglement_influence must be one of {valid_levels}")
-        return v
-
-
 class ResearchMetadata(BaseModel):
     """
     Metadata for research experiments and campaigns.
 
-    Purpose: Track research context, hypotheses, and experimental conditions
-    for structured decoherence studies.
+    Purpose: Track research context, hypotheses, and experimental conditions.
     """
 
-    # Research context
     hypothesis: str | None = Field(default=None, description="Research hypothesis being tested")
 
     research_phase: str | None = Field(
@@ -250,7 +100,6 @@ class ResearchMetadata(BaseModel):
         description="Research campaign identifier for grouping related experiments",
     )
 
-    # Experimental conditions
     expected_outcomes: list[str] | None = Field(
         default=None, description="Expected experimental outcomes or predictions"
     )
@@ -259,7 +108,6 @@ class ResearchMetadata(BaseModel):
         default=False, description="Whether this is a control experiment"
     )
 
-    # Publication metadata
     publication_ready: bool = Field(
         default=False, description="Whether results meet publication quality standards"
     )
@@ -270,68 +118,8 @@ class ResearchMetadata(BaseModel):
     )
 
 
-class ComparisonMetrics(BaseModel):
-    """
-    Metrics for comparing structured decoherence across different conditions.
-
-    Purpose: Enable statistical comparison of pathway metrics across
-    different quantum states, noise levels, and system sizes.
-    """
-
-    # Statistical comparison
-    baseline_metrics: StructuredDecoherenceMetrics | None = Field(
-        default=None, description="Baseline metrics for comparison"
-    )
-
-    delta_asymmetry_index: float | None = Field(
-        default=None, description="Change in AI relative to baseline"
-    )
-
-    delta_pathway_concentration: float | None = Field(
-        default=None, description="Change in PCR relative to baseline"
-    )
-
-    delta_entanglement_correlation: float | None = Field(
-        default=None, description="Change in EEC relative to baseline"
-    )
-
-    # Significance testing
-    statistical_significance: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1.0,
-        description="P-value for statistical significance of differences",
-    )
-
-    effect_size: float | None = Field(
-        default=None, description="Effect size (Cohen's d) for practical significance"
-    )
-
-    # Trend analysis
-    trend_direction: str | None = Field(
-        default=None, description="Overall trend direction across conditions"
-    )
-
-    @field_validator("trend_direction")
-    @classmethod
-    def validate_trend_direction(cls, v: str | None) -> str | None:
-        """Validate trend direction."""
-        if v is not None:
-            valid_trends = [
-                "increasing",
-                "decreasing",
-                "stable",
-                "nonlinear",
-                "unclear",
-            ]
-            if v not in valid_trends:
-                raise ValueError(f"trend_direction must be one of {valid_trends}")
-        return v
-
-
-# Resolve forward references defensively (Pydantic v2 is usually fine, this makes it bulletproof)
-StructuredDecoherenceMetrics.model_rebuild()
-PathwayAnalysis.model_rebuild()
+# Resolve forward references
+MetricEntry.model_rebuild()
+MetricsBundle.model_rebuild()
 AnalysisMetadata.model_rebuild()
 ResearchMetadata.model_rebuild()
-ComparisonMetrics.model_rebuild()

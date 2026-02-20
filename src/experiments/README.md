@@ -16,7 +16,7 @@ exp = get_experiment("sst_q1")
 result = exp.run()
 
 # Check the metrics
-print(f"Asymmetry Index: {result.structured_decoherence_metrics.asymmetry_index:.4f}")
+print(f"Structure Score: {result.metrics_bundle.value('structure_score'):.4f}")
 ```
 
 ## CLI Usage
@@ -118,8 +118,7 @@ All experiments use `ExperimentConfig`. Common parameters:
 | `noise_type` | str | "depolarizing" | Noise model: "depolarizing", "amplitude_damping" |
 | `error_rate` | float | 0.05 | Noise strength (0.0 to 1.0) |
 | `shots` | int | 4096 | Number of measurement shots |
-| `enable_research_metrics` | bool | True | Compute structured decoherence metrics |
-| `research_type` | str | "structured_decoherence" | Type of research metrics |
+| `metrics` | str, list, or None | None | Profile name, explicit metric list, or None |
 
 ### Override Examples
 
@@ -150,11 +149,11 @@ result = exp.run()
 print(result.status)      # "completed"
 print(result.timestamp)   # ISO timestamp
 
-# Structured decoherence metrics (when enabled)
-metrics = result.structured_decoherence_metrics
-print(metrics.asymmetry_index)              # AI: deviation from uniform
-print(metrics.pathway_concentration_ratio)  # PCR: pathway concentration
-print(metrics.entanglement_error_correlation)  # EEC: topology correlation
+# Metrics bundle (when metrics are configured)
+bundle = result.metrics_bundle
+print(bundle.value("structure_score"))       # SS: JSD from null model
+print(bundle.value("concentration_index"))   # CI: pathway concentration
+print(bundle.metric_names)                   # List of computed metrics
 ```
 
 ### Analyzing Sweep Results
@@ -164,13 +163,13 @@ results = sst_q1.sweep({"error_rate": [0.01, 0.05, 0.1, 0.2]})
 
 # Extract metrics for plotting
 error_rates = [0.01, 0.05, 0.1, 0.2]
-ai_values = [r.structured_decoherence_metrics.asymmetry_index for r in results]
+ss_values = [r.metrics_bundle.value("structure_score") for r in results]
 
 import matplotlib.pyplot as plt
-plt.plot(error_rates, ai_values)
+plt.plot(error_rates, ss_values)
 plt.xlabel("Error Rate")
-plt.ylabel("Asymmetry Index")
-plt.title("AI vs Noise Strength")
+plt.ylabel("Structure Score")
+plt.title("SS vs Noise Strength")
 plt.show()
 ```
 
@@ -203,8 +202,7 @@ class MyExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
 # Module-level instance for convenience
@@ -235,7 +233,7 @@ result = my_exp.run()
 
 ## Research Metrics
 
-When `enable_research_metrics=True`, the following metrics are computed:
+When `metrics="structured_decoherence"` is set, the following metrics are computed:
 
 | Metric | Abbreviation | Description |
 |--------|--------------|-------------|
@@ -271,8 +269,8 @@ from src.experiments import sst_q1, sst_q1_structured
 depol_result = sst_q1.run({"error_rate": 0.1})
 amp_result = sst_q1_structured.run({"error_rate": 0.1})
 
-print(f"Depolarizing AI: {depol_result.structured_decoherence_metrics.asymmetry_index:.4f}")
-print(f"Amplitude Damping AI: {amp_result.structured_decoherence_metrics.asymmetry_index:.4f}")
+print(f"Depolarizing SS: {depol_result.metrics_bundle.value('structure_score'):.4f}")
+print(f"Amplitude Damping SS: {amp_result.metrics_bundle.value('structure_score'):.4f}")
 ```
 
 ### Bell State Experiments (Non-SST)
@@ -301,9 +299,9 @@ for error_rate, result, metrics in bell_correlation.run_noise_sweep():
 - Check spelling with `list_experiments()`
 - Ensure experiment is registered in `__init__.py`
 
-**"No structured_decoherence_metrics"**
-- Ensure `enable_research_metrics=True` in config
-- Check `research_type` is set correctly
+**"No metrics_bundle"**
+- Ensure `metrics="structured_decoherence"` (or a metric list) is set in config
+- Default is `None` (no metrics computed)
 
 **Slow execution**
 - Reduce `shots` for faster iteration

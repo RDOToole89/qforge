@@ -25,7 +25,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .research import ResearchMetadata, StructuredDecoherenceMetrics
+from .research import MetricsBundle, ResearchMetadata
 from .storage import ArtifactRef
 
 logger = logging.getLogger(__name__)
@@ -50,9 +50,9 @@ class ExperimentResult(BaseModel):
     )
 
     # ===== Research Metrics =====
-    structured_decoherence_metrics: StructuredDecoherenceMetrics | None = Field(
+    metrics_bundle: MetricsBundle | None = Field(
         default=None,
-        description="Structured decoherence pathway metrics (AI, PCR, EEC, TPS, CES)",
+        description="Computed analysis metrics (profile-based or explicit selection)",
     )
 
     research_metadata: ResearchMetadata | None = Field(
@@ -86,16 +86,9 @@ class ExperimentResult(BaseModel):
 
     # ===== Computed Properties =====
     @property
-    def is_research_experiment(self) -> bool:
-        """Check if this is a research experiment with structured decoherence metrics."""
-        return self.structured_decoherence_metrics is not None
-
-    @property
-    def has_structured_patterns(self) -> bool:
-        """Check if structured decoherence patterns were detected."""
-        if self.structured_decoherence_metrics is None:
-            return False
-        return self.structured_decoherence_metrics.is_structured
+    def has_metrics(self) -> bool:
+        """Check if this experiment has computed metrics."""
+        return self.metrics_bundle is not None
 
     @property
     def total_shots(self) -> int:

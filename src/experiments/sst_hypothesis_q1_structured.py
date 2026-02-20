@@ -53,8 +53,7 @@ class SSTHypothesisQ1Structured(BaseExperiment):
             noise_type="amplitude_damping",  # Structured noise, not depolarizing
             error_rate=0.05,
             shots=4096,
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
     def run_noise_sweep(

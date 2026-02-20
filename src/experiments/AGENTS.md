@@ -57,8 +57,7 @@ Enable research metrics through configuration:
 
 ```python
 ExperimentConfig(
-    enable_research_metrics=True,
-    research_type="structured_decoherence",  # or "benchmark", etc.
+    metrics="structured_decoherence",  # profile name, list, or None
 )
 ```
 
@@ -161,7 +160,7 @@ for name, desc in list_experiments():
 # Run experiment with defaults
 exp = get_experiment("sst_q1")
 result = exp.run()
-print(result.structured_decoherence_metrics.asymmetry_index)
+print(result.metrics_bundle.value("structure_score"))
 
 # Run with overrides
 result = exp.run({"num_qubits": 3, "error_rate": 0.1})

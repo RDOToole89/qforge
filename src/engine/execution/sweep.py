@@ -60,7 +60,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.engine.analysis import compute_research_metrics, extract_counts_from_result
+from src.engine.analysis import compute_metrics_bundle, extract_counts_from_result
 
 # Engine-native runner (no legacy deps)
 from src.engine.execution.runner import EngineExperimentRunner
@@ -194,16 +194,18 @@ def _primary_metric_value(exp_result: ExperimentResult) -> float:
     """
     Extract a single scalar per experiment for sweep summaries.
     Preference order:
-      - structure_score (if present)
-      - asymmetry_index (fallback)
+      - structure_score (if present in metrics_bundle)
+      - first metric value (fallback)
       - 0.0 (no metrics)
     """
-    sm = exp_result.structured_decoherence_metrics
-    if not sm:
+    bundle = exp_result.metrics_bundle
+    if not bundle or not bundle.metrics:
         return 0.0
-    if sm.structure_score is not None:
-        return float(sm.structure_score)
-    return float(sm.asymmetry_index)
+    entry = bundle.get("structure_score")
+    if entry is not None:
+        return entry.value
+    first = next(iter(bundle.metrics.values()))
+    return first.value
 
 
 # -------- main API ----------------------------------------------------------
@@ -340,7 +342,7 @@ def run_sweep(
                 transpilation_summary={},
             )
 
-            metrics = compute_research_metrics(counts, cfg) if cfg.enable_research_metrics else None
+            metrics_bundle = compute_metrics_bundle(counts, cfg) if cfg.metrics else None
 
             artifacts: list[ArtifactRef] = []
 
@@ -365,7 +367,7 @@ def run_sweep(
 
             exp_result = ExperimentResult(
                 analysis=analysis,
-                structured_decoherence_metrics=metrics,
+                metrics_bundle=metrics_bundle,
                 research_metadata=None,
                 provenance=prov,
                 artifacts=artifacts,

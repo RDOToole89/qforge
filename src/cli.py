@@ -168,28 +168,20 @@ def _print_result(result: "ExperimentResult", json_output: bool) -> None:  # noq
     console.print(f"[green]Status:[/green] {result.status}")
     console.print(f"[green]Timestamp:[/green] {result.timestamp}")
 
-    # Show structured decoherence metrics if available
-    if result.structured_decoherence_metrics:
-        metrics = result.structured_decoherence_metrics
+    # Show metrics bundle if available
+    if result.metrics_bundle:
+        bundle = result.metrics_bundle
         console.print()
-        console.print("[bold]Structured Decoherence Metrics:[/bold]")
+        label = f"Metrics ({bundle.profile})" if bundle.profile else "Metrics"
+        console.print(f"[bold]{label}:[/bold]")
 
         metrics_table = Table(show_header=True, header_style="bold")
         metrics_table.add_column("Metric", style="cyan")
         metrics_table.add_column("Value", justify="right")
+        metrics_table.add_column("Status", style="dim")
 
-        if metrics.asymmetry_index is not None:
-            metrics_table.add_row("Asymmetry Index (AI)", f"{metrics.asymmetry_index:.4f}")
-        if metrics.pathway_concentration_ratio is not None:
-            metrics_table.add_row("Pathway Concentration (PCR)", f"{metrics.pathway_concentration_ratio:.4f}")
-        if metrics.entanglement_error_correlation is not None:
-            metrics_table.add_row("Entanglement-Error Correlation (EEC)", f"{metrics.entanglement_error_correlation:.4f}")
-        if metrics.structure_score is not None:
-            metrics_table.add_row("Structure Score (SS)", f"{metrics.structure_score:.4f}")
-        if metrics.concentration_index is not None:
-            metrics_table.add_row("Concentration Index (CI)", f"{metrics.concentration_index:.4f}")
-        if metrics.total_correlation is not None:
-            metrics_table.add_row("Total Correlation (TC)", f"{metrics.total_correlation:.4f}")
+        for name, entry in sorted(bundle.metrics.items()):
+            metrics_table.add_row(name, f"{entry.value:.4f}", entry.status)
 
         console.print(metrics_table)
 

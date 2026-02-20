@@ -40,8 +40,7 @@ class SSTHypothesisQ1Large(SSTHypothesisQ1Structured):
             noise_type="amplitude_damping",
             error_rate=0.1,  # Standard testing point for "River" effect
             shots=8192,  # Increased shots for better statistics on 2^6 states
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
 

@@ -40,8 +40,7 @@ class SSTHypothesisQ1Cluster(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             shots=8192,
-            enable_research_metrics=True,
-            research_type="structured_decoherence",
+            metrics="structured_decoherence",
         )
 
 

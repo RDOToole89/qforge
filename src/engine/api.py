@@ -58,8 +58,8 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 
-# Research integration (counts canonicalization + research metrics)
-from src.engine.analysis import compute_research_metrics, extract_counts_from_result
+# Research integration (counts canonicalization + metrics bundle)
+from src.engine.analysis import compute_metrics_bundle, extract_counts_from_result
 
 # App plumbing
 from src.engine.execution.context import AppContext
@@ -162,10 +162,10 @@ def run(
     # 3) Assemble typed analysis block
     analysis = _build_experiment_analysis(circuit=circuit, counts=counts, cfg=cfg_model)
 
-    # 4) Optional: compute structured-decoherence research metrics
-    structured_decoherence_metrics = None
-    if cfg_model.enable_research_metrics and counts:
-        structured_decoherence_metrics = compute_research_metrics(counts, cfg_model)
+    # 4) Optional: compute analysis metrics
+    metrics_bundle = None
+    if cfg_model.metrics is not None and counts:
+        metrics_bundle = compute_metrics_bundle(counts, cfg_model)
 
     # 5) Build provenance
     prov = _build_provenance(cfg_model)
@@ -188,9 +188,9 @@ def run(
             # The viz layer accepts dicts; convert typed analysis/metrics if present.
             viz_payload = {
                 "analysis": analysis.model_dump(),
-                "structured_decoherence_metrics": (
-                    structured_decoherence_metrics.model_dump()
-                    if structured_decoherence_metrics
+                "metrics_bundle": (
+                    metrics_bundle.model_dump()
+                    if metrics_bundle
                     else None
                 ),
             }
@@ -210,7 +210,7 @@ def run(
     # 8) Package final typed result
     result = ExperimentResult(
         analysis=analysis,
-        structured_decoherence_metrics=structured_decoherence_metrics,
+        metrics_bundle=metrics_bundle,
         provenance=prov,
         artifacts=artifacts,
         config_hash=cfg_hash,
