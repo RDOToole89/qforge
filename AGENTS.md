@@ -2,7 +2,6 @@
 
 Owner: Research Engineering (Roibín O'Toole)
 Last updated: 2025-12-02
-Token budget: 400
 
 ## ⚠️ SCIENTIFIC RIGOR IS PARAMOUNT
 
@@ -25,6 +24,7 @@ Token budget: 400
 5. Every domain with bespoke rules will have its own local `AGENTS.md`; consult them in addition to this global file.
 
 ## Never
+
 - Invent new top-level directories or rename `src/core|engine|experiments`, `schemas`, or `docs` without a design RFC.
 - Mix experiment orchestration logic into `src/core` or physics primitives into `src/engine`.
 - Skip schema validation, physics tests (`pytest tests/physics`), or noise guardrails when introducing new experiment flows.
@@ -32,6 +32,7 @@ Token budget: 400
 - Delete or overwrite data schemas/results without updating the corresponding specs under `schemas/` and `docs/`.
 
 ## Always
+
 - Follow existing folder patterns when adding experiments (`src/experiments/<domain>/...`) or engine components (`src/engine/<service>`).
 - Reuse shared utilities in `src/core` and `src/engine` instead of duplicating physics/math helpers.
 - Update or create the nearest local `AGENTS.md` / `AI.md` when you add new structural concepts.
@@ -39,7 +40,9 @@ Token budget: 400
 - Run formatting (Prettier/markdownlint for docs, Ruff/pytest as configured) before submitting changes.
 
 ## Scope
+
 Local `AGENTS.md` files will live in:
+
 - `src/core` — physics primitives, metrics, and schema utilities.
 - `src/engine` — orchestration, runners, execution backends.
 - `src/experiments` — domain-specific experiment suites and pipelines.

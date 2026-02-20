@@ -2,6 +2,7 @@
 Engine-native experiment runner.
 
 Uses core state preparation and noise models for sophisticated quantum experiments.
+Supports three simulation backends: qasm, statevector, density_matrix.
 """
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
@@ -229,25 +231,105 @@ class EngineExperimentRunner:
         shots: int,
         rng_seed: int | None,
     ) -> Any:
-        """Execute QASM simulation."""
-        # Only support QASM simulation
-        if sim_mode != "qasm":
-            self.logger.warning(f"Simulation mode '{sim_mode}' not supported, using QASM")
+        """Dispatch to the appropriate backend method."""
+        if sim_mode == "statevector":
+            return self._execute_statevector(circuit, shots, rng_seed)
+        elif sim_mode == "density_matrix":
+            return self._execute_density_matrix(circuit, shots, rng_seed)
+        else:
+            return self._execute_qasm(circuit, shots, rng_seed)
 
-        # Build simulator and set options
+    def _execute_qasm(
+        self,
+        circuit: QuantumCircuit,
+        shots: int,
+        rng_seed: int | None,
+    ) -> Any:
+        """Execute shot-based QASM simulation (original behaviour)."""
         backend = AerSimulator()
         if rng_seed is not None:
             backend.set_options(seed_simulator=int(rng_seed))
         if self.noise_model is not None:
             backend.set_options(noise_model=self.noise_model)
 
-        # Transpile for backend target
         tcirc = transpile(circuit, backend)
+        job = backend.run(tcirc, shots=int(shots))
+        return job.result()
 
-        # Run
+    def _execute_statevector(
+        self,
+        circuit: QuantumCircuit,
+        shots: int,
+        rng_seed: int | None,
+    ) -> dict[str, Any]:
+        """Execute exact statevector simulation (noiseless).
+
+        Returns a dict with 'counts' (synthesized via multinomial sampling)
+        and 'statevector' (Qiskit Statevector object).
+        """
+        if self.noise_model is not None:
+            self.logger.warning(
+                "Noise model is set but will be ignored in statevector mode"
+            )
+
+        # Prepare a measurement-free copy for statevector extraction
+        sv_circuit = circuit.copy()
+        sv_circuit.remove_final_measurements()
+        sv_circuit.save_statevector()
+
+        backend = AerSimulator(method="statevector")
+        if rng_seed is not None:
+            backend.set_options(seed_simulator=int(rng_seed))
+
+        tcirc = transpile(sv_circuit, backend)
+        job = backend.run(tcirc, shots=1)
+        result = job.result()
+        statevector = result.get_statevector()
+
+        # Synthesize counts from exact probabilities
+        probs = np.abs(statevector.data) ** 2
+        rng = np.random.default_rng(rng_seed)
+        samples = rng.multinomial(shots, probs)
+        n_qubits = circuit.num_qubits
+        counts: dict[str, int] = {}
+        for idx, count in enumerate(samples):
+            if count > 0:
+                bitstring = format(idx, f"0{n_qubits}b")
+                counts[bitstring] = int(count)
+
+        return {"counts": counts, "statevector": statevector}
+
+    def _execute_density_matrix(
+        self,
+        circuit: QuantumCircuit,
+        shots: int,
+        rng_seed: int | None,
+    ) -> dict[str, Any]:
+        """Execute density matrix simulation (supports noise).
+
+        Returns a dict with 'counts' (from shot-based measurement) and
+        'density_matrix' (DensityMatrix object from the save instruction).
+        """
+        # Build a circuit that saves the density matrix *before* measurement
+        dm_circuit = circuit.copy()
+        dm_circuit.remove_final_measurements()
+        dm_circuit.save_density_matrix()
+        dm_circuit.measure_all()
+
+        backend = AerSimulator(method="density_matrix")
+        if rng_seed is not None:
+            backend.set_options(seed_simulator=int(rng_seed))
+        if self.noise_model is not None:
+            backend.set_options(noise_model=self.noise_model)
+
+        tcirc = transpile(dm_circuit, backend)
         job = backend.run(tcirc, shots=int(shots))
         result = job.result()
-        return result
+
+        counts = result.get_counts()
+        dm = result.data(0).get("density_matrix")
+
+        return {"counts": counts, "density_matrix": dm}
 
     # ---------- Results helpers ----------
 

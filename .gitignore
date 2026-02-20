@@ -27,3 +27,13 @@ build/
 .DS_Store
 Thumbs.db
 .hypothesis/
+
+# Node / Expo / Turborepo
+node_modules/
+.expo/
+.turbo/
+apps/client/ios/
+apps/client/android/
+apps/client/.expo/
+*.tsbuildinfo
+pnpm-lock.yaml

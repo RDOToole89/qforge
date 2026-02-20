@@ -240,16 +240,27 @@ class MeasurementResults(BaseModel):
     )
 
     # Optional advanced measurements
-    density_matrix: list[list[float]] | None = Field(
+    density_matrix: list[list[list[float]]] | None = Field(
         default=None,
-        description="Reconstructed density matrix (for density simulation mode)",
+        description=(
+            "Density matrix from density_matrix simulation mode. "
+            "Shape: NxN where each element is [real, imag] for JSON-safe complex numbers."
+        ),
+    )
+
+    statevector: list[list[float]] | None = Field(
+        default=None,
+        description=(
+            "State vector from statevector simulation mode. "
+            "Each element is [real, imag] for JSON-safe complex numbers."
+        ),
     )
 
     fidelity: float | None = Field(
         default=None,
         ge=0.0,
         le=1.0,
-        description="Fidelity with ideal state (if computed)",
+        description="Fidelity with ideal state (auto-computed for statevector/density_matrix modes)",
     )
 
     @classmethod

@@ -25,40 +25,20 @@ The framework runs quantum experiments on a local Aer simulator, computes 8 rese
 
 ---
 
-## Phase 1: Simulation Backends (unlock density matrix analysis)
+## Phase 1: Simulation Backends (unlock density matrix analysis) — DONE (2026-02-20)
 
 **Goal:** Let the user choose `sim_mode` from `qasm`, `statevector`, `density_matrix`.
 
-**Why first:** Density matrix mode directly serves the structured decoherence research. It lets you see the full mixed state under noise, not just sampled counts. Statevector mode lets you validate state preparation without noise interference.
+**What was delivered:**
 
-**Changes:**
-
-| File | What |
-|------|------|
-| `src/engine/models/config.py` | Extend `sim_mode: Literal["qasm", "statevector", "density_matrix"]` |
-| `src/engine/execution/runner.py` | Backend factory: `AerSimulator(method=sim_mode)`. Skip noise for statevector. Handle result type differences. |
-| `src/engine/api.py` | Extract density matrix / statevector from result when available. Populate `MeasurementResults.density_matrix`. |
-| `src/engine/models/results.py` | Ensure `density_matrix` and `fidelity` fields get populated. |
-
-**Estimated effort:** 3-4 hours
-
-**Verification:**
-```python
-# Density matrix mode with noise
-result = run(ExperimentConfig(
-    num_qubits=3, state_type="GHZ",
-    sim_mode="density_matrix",
-    noise_enabled=True, noise_type="depolarizing", error_rate=0.05,
-))
-assert result.analysis.measurement_results.density_matrix is not None
-
-# Statevector mode (no noise, exact state)
-result = run(ExperimentConfig(
-    num_qubits=3, state_type="GHZ",
-    sim_mode="statevector",
-))
-# Should have pure state vector, fidelity=1.0
-```
+- `sim_mode: Literal["qasm", "statevector", "density_matrix"]` in ExperimentConfig
+- Config validator rejects `statevector + noise_enabled` (Aer limitation)
+- Runner dispatches to `_execute_qasm`, `_execute_statevector`, `_execute_density_matrix`
+- Statevector mode: exact state, counts synthesized via `np.random.multinomial`
+- Density matrix mode: full mixed state, counts from measurement, DM from `save_density_matrix()`
+- Auto-computed fidelity against theoretical state for both new modes
+- `MeasurementResults.statevector` and updated `density_matrix` (complex-safe `[real, imag]`)
+- 18 new tests in `tests/engine/test_simulation_backends.py`, full suite passes (207 tests)
 
 ---
 
@@ -214,6 +194,10 @@ Return `NaN` instead of `1.0` when fewer than 2 rankings are available. Current 
 ### 5d. NTC Metric
 
 Implement the Noise Topology Correlation metric from Feb 2026 findings. It uses excess covariance with permutation testing and correctly handles the MI/GHZ confounding.
+
+### 5e. Exact Probability Metrics
+
+Let the analysis pipeline accept exact probability distributions (from statevector/density_matrix modes) instead of requiring sampled counts. This eliminates artificial sampling noise when exact state data is available. Currently, statevector mode synthesizes counts via multinomial sampling — a pragmatic compromise. This phase would let metrics operate directly on the probability vector.
 
 **Estimated effort:** 6-8 hours
 

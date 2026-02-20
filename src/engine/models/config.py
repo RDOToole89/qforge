@@ -41,8 +41,14 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Simulation Parameters =====
-    sim_mode: Literal["qasm"] = Field(
-        default="qasm", description="Simulation mode: only QASM simulation supported"
+    sim_mode: Literal["qasm", "statevector", "density_matrix"] = Field(
+        default="qasm",
+        description=(
+            "Simulation mode: "
+            "'qasm' = shot-based measurement sampling (supports noise), "
+            "'statevector' = exact noiseless state (counts synthesized via multinomial sampling), "
+            "'density_matrix' = full mixed-state simulation (supports noise, provides density matrix)"
+        ),
     )
 
     shots: int = Field(
@@ -169,11 +175,19 @@ class ExperimentConfig(BaseModel):
     def _cross_field_checks(self) -> ExperimentConfig:
         """
         Model-level cross-field validations that are safer after all fields are parsed.
-        Currently re-enforces T2 ≤ 2*T1 for robustness when values are set/updated together.
         """
         if self.t1 is not None and self.t2 is not None:
             if self.t2 > 2 * self.t1:
                 raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2 * self.t1})")
+
+        # Aer statevector backend does not support NoiseModel
+        if self.sim_mode == "statevector" and self.noise_enabled:
+            raise ValueError(
+                "sim_mode='statevector' is incompatible with noise_enabled=True. "
+                "The statevector backend computes the exact noiseless state. "
+                "Use sim_mode='density_matrix' for noisy simulations with full state access."
+            )
+
         return self
 
 

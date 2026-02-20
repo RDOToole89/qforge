@@ -81,19 +81,31 @@ src/engine/
 
 ```python
 # Good: Clean separation of concerns
-from src.engine.api import run_experiment
+from src.engine.api import run
 from src.engine.models import ExperimentConfig
 
+# QASM mode (default, shot-based)
 config = ExperimentConfig(
-    num_qubits=3,
-    state_type="GHZ",
-    noise_model_type="depolarizing",
-    error_rate=0.01,
-    shots=1024,
-    seed=42  # Explicit seed
+    num_qubits=3, state_type="GHZ",
+    noise_enabled=True, noise_type="depolarizing", error_rate=0.01,
+    shots=1024, rng_seed=42,
 )
 
-result = run_experiment(config)  # Returns validated ExperimentResult
+# Statevector mode (exact noiseless state, counts synthesized)
+config_sv = ExperimentConfig(
+    num_qubits=3, state_type="GHZ",
+    sim_mode="statevector", shots=1024, rng_seed=42,
+)
+
+# Density matrix mode (full mixed state, supports noise)
+config_dm = ExperimentConfig(
+    num_qubits=3, state_type="GHZ",
+    sim_mode="density_matrix",
+    noise_enabled=True, noise_type="depolarizing", error_rate=0.05,
+    shots=1024, rng_seed=42,
+)
+
+result = run(config)  # Returns validated ExperimentResult
 
 # Bad: Mixing layers or skipping validation
 circuit = create_ghz(3)  # Importing from core directly

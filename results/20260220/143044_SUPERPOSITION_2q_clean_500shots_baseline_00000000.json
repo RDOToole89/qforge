@@ -1,0 +1,71 @@
+{
+  "experiment_metadata": {
+    "experiment_id": "SUPERPOSITION_2",
+    "timestamp": "2026-02-20T14:30:44.551786",
+    "framework_version": "engine-1.0",
+    "research_type": null,
+    "experiment_description": null
+  },
+  "experiment_parameters": {
+    "num_qubits": 2,
+    "state_type": "SUPERPOSITION",
+    "sim_mode": "statevector",
+    "shots": 500,
+    "noise_enabled": false,
+    "multiple_runs": 1,
+    "track_convergence": false,
+    "visualization_type": "histogram",
+    "rng_seed": 99
+  },
+  "circuit_statistics": {
+    "depth": 2,
+    "num_gates": 5,
+    "num_qubits": 2,
+    "gate_types": {
+      "h": 2,
+      "barrier": 1,
+      "measure": 2
+    },
+    "two_qubit_gate_count": 1,
+    "connectivity_graph": null
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "00": 130,
+      "01": 122,
+      "10": 125,
+      "11": 123
+    },
+    "total_shots": 500,
+    "unique_outcomes": 4,
+    "outcome_probabilities": {
+      "00": 0.26,
+      "01": 0.244,
+      "10": 0.25,
+      "11": 0.246
+    },
+    "density_matrix": null,
+    "statevector": [
+      [
+        0.5000000000000001,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        0.4999999999999999,
+        0.0
+      ]
+    ],
+    "fidelity": 0.9999999999999996
+  },
+  "information_theory_metrics": null,
+  "correlation_analysis": null,
+  "statistical_validation": null
+}

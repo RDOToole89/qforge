@@ -60,6 +60,38 @@ print(f"Pathway Concentration: {metrics.pathway_concentration_ratio:.4f}")
 print(f"Topology Correlation: {metrics.entanglement_error_correlation:.4f}")
 ```
 
+**Statevector Mode (exact noiseless state):**
+
+```python
+from src.engine.api import run
+from src.engine.models import ExperimentConfig
+
+result = run(ExperimentConfig(
+    num_qubits=3, state_type="GHZ",
+    sim_mode="statevector", shots=1000, rng_seed=42,
+))
+meas = result.analysis.measurement_results
+print(f"Fidelity: {meas.fidelity:.6f}")       # ~1.0 (exact state)
+print(f"Statevector: {len(meas.statevector)} amplitudes")
+```
+
+**Density Matrix Mode (full mixed state with noise):**
+
+```python
+from src.engine.api import run
+from src.engine.models import ExperimentConfig
+
+result = run(ExperimentConfig(
+    num_qubits=3, state_type="GHZ",
+    sim_mode="density_matrix",
+    noise_enabled=True, noise_type="depolarizing", error_rate=0.1,
+    shots=1000,
+))
+meas = result.analysis.measurement_results
+print(f"Fidelity: {meas.fidelity:.4f}")        # < 1.0 (noise degradation)
+print(f"DM shape: {len(meas.density_matrix)}x{len(meas.density_matrix[0])}")
+```
+
 **Direct Analysis Pipeline:**
 
 ```python
