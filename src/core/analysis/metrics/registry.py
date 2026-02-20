@@ -350,12 +350,20 @@ def _register_default_wrappers() -> None:
             lo, hi = _bci(counts, _stat, n_bootstrap=kwargs.get("B", _B), rng=kwargs.get("rng"))
             ci95 = (float(lo), float(hi))
 
-            extras = {
+            extras: dict[str, Any] = {
                 "method": "entanglement_error_correlation",
                 "state_type": state_type,
                 "n_samples": sum(counts.values()) if counts else 0,
                 "n_outcomes": len(counts),
             }
+            # Include full topology analysis matrices for visualization
+            try:
+                analysis = _eec(counts, state_type=state_type, return_analysis=True)
+                if hasattr(analysis, "entanglement_matrix"):
+                    extras["entanglement_matrix"] = analysis.entanglement_matrix.tolist()
+                    extras["error_correlation_matrix"] = analysis.error_correlation_matrix.tolist()
+            except Exception:
+                pass  # Scalar value is still valid
             status = determine_status(value, ci95, extras)
             return MetricResult(value=value, ci95=ci95, status=status, extras=extras)
         except Exception as e:

@@ -38,6 +38,8 @@ class ArtifactRef(BaseModel):
     kind: Literal[
         "histogram",
         "density_matrix",
+        "correlation",
+        "circuit",
         "report",
         "raw_data",
         "analysis",
@@ -85,6 +87,8 @@ class ArtifactRef(BaseModel):
         kind: Literal[
             "histogram",
             "density_matrix",
+            "correlation",
+            "circuit",
             "report",
             "raw_data",
             "analysis",

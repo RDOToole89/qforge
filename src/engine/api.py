@@ -190,35 +190,32 @@ def run(
 
     artifacts: list[ArtifactRef] = [ArtifactRef(kind="analysis", path=saved_path, metadata={})]
 
-    # 7) Optional histogram rendering (only if requested + available)
-    if (
-        cfg_model.visualization_type == "histogram"
-        and create_default_service is not None
-        and counts
-    ):
+    # 7) Visualization (multi-type, multi-format)
+    if cfg_model.visualization_type != "none" and create_default_service is not None:
         try:
             service = create_default_service()
-            # The viz layer accepts dicts; convert typed analysis/metrics if present.
-            viz_payload = {
-                "analysis": analysis.model_dump(),
-                "metrics_bundle": (
-                    metrics_bundle.model_dump()
-                    if metrics_bundle
-                    else None
-                ),
-            }
-            # Save alongside the analysis file for easy discovery.
-            hist_path = os.path.join(os.path.dirname(saved_path), f"histogram_{cfg_hash}.png")
-            # Render using "render_or_none" if available; otherwise call render directly.
-            try:
-                artifact = service.render_or_none("histogram", viz_payload, hist_path)  # type: ignore[attr-defined]
-            except AttributeError:
-                # Older VisualizationService without render_or_none
-                artifact = service.render("histogram", viz_payload, hist_path)  # type: ignore[assignment]
-            if artifact:
-                artifacts.append(artifact)
+            viz_types = _resolve_viz_types(cfg_model.visualization_type, analysis, metrics_bundle)
+            for vt in viz_types:
+                try:
+                    viz_payload: dict[str, Any] = {
+                        "analysis": analysis.model_dump(),
+                        "metrics_bundle": (
+                            metrics_bundle.model_dump() if metrics_bundle else None
+                        ),
+                        "export_formats": cfg_model.export_formats,
+                    }
+                    if vt == "circuit":
+                        viz_payload["circuit"] = circuit  # live QuantumCircuit object
+                    out_path = os.path.join(
+                        os.path.dirname(saved_path), vt
+                    )
+                    artifact = service.render_or_none(vt, viz_payload, out_path)
+                    if artifact:
+                        artifacts.append(artifact)
+                except Exception as e:
+                    logger.warning("Visualization '%s' skipped: %s", vt, e)
         except Exception as e:
-            logger.warning(f"Histogram rendering skipped: {e}")
+            logger.warning("Visualization service init failed: %s", e)
 
     # 8) Package final typed result
     result = ExperimentResult(
@@ -535,6 +532,45 @@ def _compute_fidelity_density_matrix(
     except Exception as e:
         logger.warning(f"Fidelity computation failed (density_matrix): {e}")
         return None
+
+
+def _resolve_viz_types(
+    viz_type: str,
+    analysis: ExperimentAnalysis,
+    metrics_bundle: Any,
+) -> list[str]:
+    """Map ``visualization_type`` config value to a list of renderable types.
+
+    ``"all"`` expands to every type whose data prerequisites are met.
+    ``"none"`` returns an empty list.
+    A single named type returns ``[type]``.
+    """
+    if viz_type == "none":
+        return []
+
+    all_types = ["histogram", "density_matrix", "correlation", "circuit"]
+
+    if viz_type != "all":
+        return [viz_type]
+
+    # For "all", filter to types that have data available
+    available: list[str] = []
+    meas = analysis.measurement_results
+    if meas.raw_counts:
+        available.append("histogram")
+    if meas.density_matrix:
+        available.append("density_matrix")
+    # Correlation needs EEC extras with matrices
+    if metrics_bundle is not None:
+        try:
+            eec = metrics_bundle.metrics.get("entanglement_error_correlation")
+            if eec and eec.extras and "error_correlation_matrix" in eec.extras:
+                available.append("correlation")
+        except Exception:
+            pass
+    # Circuit is always available (we pass the live object)
+    available.append("circuit")
+    return available
 
 
 def _build_provenance(cfg: ExperimentConfig) -> Provenance:

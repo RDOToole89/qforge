@@ -198,8 +198,16 @@ def create_default_service() -> VisualizationService:
     Create a visualization service with default research renderers.
     Add new renderers here or register them at runtime in your pipeline.
     """
-    from .renderers import HistogramRenderer  # local import to avoid import cycles
+    from .renderers import (  # local import to avoid import cycles
+        CircuitDiagramRenderer,
+        CorrelationRenderer,
+        DensityMatrixRenderer,
+        HistogramRenderer,
+    )
 
     service = VisualizationService()
     service.register_renderer(HistogramRenderer())
+    service.register_renderer(DensityMatrixRenderer())
+    service.register_renderer(CorrelationRenderer())
+    service.register_renderer(CircuitDiagramRenderer())
     return service

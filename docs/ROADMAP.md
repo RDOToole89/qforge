@@ -42,50 +42,23 @@ The framework runs quantum experiments on a local Aer simulator, computes 8 rese
 
 ---
 
-## Phase 2: Visualization Expansion
+## Phase 2: Visualization Expansion — DONE (2026-02-20)
 
 **Goal:** Add density matrix heatmap, correlation heatmap, and circuit diagram renderers. Support PDF/SVG export.
 
-**Why:** Publication figures. The histogram alone can't tell the structured decoherence story. You need to *show* the density matrix decaying, the MI correlation structure, and the circuit that produced it.
+**What was delivered:**
 
-### 2a. Density Matrix Renderer
-
-New `DensityMatrixRenderer` in `renderers.py`:
-- Heatmap of |rho_ij| with colorbar
-- Eigenvalue spectrum subplot
-- Purity annotation: `Tr(rho^2)`
-- Triggered by `visualization_type="density_matrix"` or auto-detected when density matrix data is present
-
-### 2b. Correlation Heatmap Renderer
-
-New `CorrelationRenderer` in `renderers.py`:
-- MI matrix heatmap (already computed by EEC metric)
-- Overlay entanglement topology graph edges
-- Annotate with EEC value
-
-### 2c. Circuit Diagram
-
-Wrap Qiskit's `circuit.draw(output='mpl')`:
-- Save as artifact alongside other visualizations
-- Include gate counts and depth in annotation
-
-### 2d. Multi-Format Export
-
-Add `export_formats` to config or viz service:
-- `plt.savefig(path, format="pdf")` for journals
-- `plt.savefig(path, format="svg")` for web
-- Update ArtifactRef with correct MIME types
-
-### 2e. Extend visualization_type
-
-```python
-visualization_type: Literal[
-    "histogram", "density_matrix", "correlation",
-    "circuit", "all", "none"
-] = "histogram"
-```
-
-**Estimated effort:** 6-8 hours total (2h per renderer, 1h for export, 1h for wiring)
+- `visualization_type` extended: `"histogram" | "density_matrix" | "correlation" | "circuit" | "all" | "none"`
+- `export_formats: list[Literal["png", "pdf", "svg"]]` config field (default `["png"]`)
+- `DensityMatrixRenderer`: magnitude heatmap + eigenvalue spectrum + purity/fidelity annotations
+- `CorrelationRenderer`: MI heatmap + entanglement topology side-by-side + EEC annotation
+- `CircuitDiagramRenderer`: Qiskit `circuit.draw(output='mpl')` with depth/gate-count annotations
+- `save_figure()` utility for multi-format export shared by all renderers
+- `HistogramRenderer` updated to use multi-format export
+- EEC registry enriched with topology matrices in `extras` for visualization
+- `api.py` rewritten to support multi-viz loop with `_resolve_viz_types()` helper
+- `ArtifactRef.kind` extended with `"correlation"` and `"circuit"`
+- 32 new tests in `tests/engine/test_visualization.py`, full suite passes (239 tests)
 
 ---
 

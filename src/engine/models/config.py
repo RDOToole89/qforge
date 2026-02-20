@@ -120,9 +120,16 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Output Parameters =====
-    visualization_type: Literal["histogram", "none"] = Field(
+    visualization_type: Literal[
+        "histogram", "density_matrix", "correlation", "circuit", "all", "none"
+    ] = Field(
         default="histogram",
         description="Type of visualization to generate (research-focused)",
+    )
+
+    export_formats: list[Literal["png", "pdf", "svg"]] = Field(
+        default=["png"],
+        description="Output formats for generated visualizations",
     )
 
     # ===== System Parameters =====

@@ -190,7 +190,9 @@ class LocalStorage(Storage):
                 state_type=state_type,
             )
         else:
-            dir_path = self.base_dir / dt.strftime("%Y%m%d")
+            date_dir = self.base_dir / dt.strftime("%Y-%m-%d")
+            experiment_dir_name = f"{state_type}_{num_qubits}q_{noise_desc}_{shots}shots_{cfg_hash}"
+            dir_path = date_dir / experiment_dir_name
         dir_path.mkdir(parents=True, exist_ok=True)
 
         # Choose filename
@@ -210,7 +212,7 @@ class LocalStorage(Storage):
             raw_name = self.config.filename_template.format(**fmt_kwargs)
             base_name = _sanitize_filename(raw_name)
         else:
-            base_name = f"{dt.strftime('%H%M%S')}_{state_type}_{num_qubits}q_{noise_desc}_{shots}shots_{_slug(research_type)}_{cfg_hash}"
+            base_name = "analysis"
 
         # Decide extension / compression
         compress = None

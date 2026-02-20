@@ -17,7 +17,13 @@ Typical usage:
 
 from __future__ import annotations
 
-from .renderers import HistogramRenderer
+from .export import save_figure
+from .renderers import (
+    CircuitDiagramRenderer,
+    CorrelationRenderer,
+    DensityMatrixRenderer,
+    HistogramRenderer,
+)
 from .service import (
     RendererRegistryError,
     VisualizationRenderer,
@@ -30,5 +36,9 @@ __all__ = [
     "VisualizationRenderer",
     "RendererRegistryError",
     "HistogramRenderer",
+    "DensityMatrixRenderer",
+    "CorrelationRenderer",
+    "CircuitDiagramRenderer",
+    "save_figure",
     "create_default_service",
 ]
