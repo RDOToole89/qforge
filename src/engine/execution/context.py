@@ -132,6 +132,9 @@ class AppContext:
     # Logging presentation mode that your app bootstrap can honor.
     logging_mode: Literal["human", "json"] = "human"
 
+    # Log level for setup_logging() (DEBUG, INFO, WARNING, ERROR).
+    log_level: str = "INFO"
+
     # Annotate run provenance with a short environment label.
     engine_label: str = "dev"
 

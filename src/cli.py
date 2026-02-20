@@ -8,6 +8,7 @@ All domain logic lives in the engine and experiments modules.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Annotated, Optional
@@ -23,6 +24,35 @@ app = typer.Typer(
 )
 
 console = Console()
+
+# Shared state populated by the callback, readable by subcommands.
+app_state: dict = {}
+
+
+@app.callback()
+def main_callback(
+    log_level: Annotated[
+        str,
+        typer.Option("--log-level", "-l", help="Log level: DEBUG, INFO, WARNING, ERROR"),
+    ] = os.getenv("QEF_LOG_LEVEL", "WARNING"),
+    quiet: Annotated[
+        bool,
+        typer.Option("--quiet", "-q", help="Suppress non-error log output"),
+    ] = False,
+    results_dir: Annotated[
+        Optional[str],
+        typer.Option("--results-dir", help="Override results directory"),
+    ] = os.getenv("QEF_RESULTS_DIR"),
+) -> None:
+    """Quantum Experiment Framework."""
+    from src.engine.infrastructure.logging import setup_logging
+
+    effective_level = "ERROR" if quiet else log_level.upper()
+    setup_logging(level=effective_level, mode="human")
+
+    app_state["log_level"] = effective_level
+    if results_dir:
+        app_state["results_dir"] = results_dir
 
 
 @app.command("list")

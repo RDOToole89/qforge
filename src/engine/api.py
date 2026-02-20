@@ -67,6 +67,7 @@ from src.engine.execution.context import AppContext
 
 # Event bus (optional, cheap)
 from src.engine.infrastructure.events import (
+    ALL,
     RUN_END,
     RUN_START,
     SWEEP_END,
@@ -74,6 +75,7 @@ from src.engine.infrastructure.events import (
     SimpleEventBus,
     make_event,
 )
+from src.engine.infrastructure.logging import event_log_handler
 from src.engine.persistence.hashing import sha1_of
 
 # Typed models (top-level exports) …
@@ -152,6 +154,7 @@ def run(
 
     # Publish start event (useful for progress bars / logs)
     bus = SimpleEventBus()
+    bus.subscribe(ALL, event_log_handler)
     bus.publish(make_event(RUN_START, {"config": cfg_model.model_dump(exclude_none=True)}))
 
     # 1) Execute experiment via runner
@@ -279,14 +282,16 @@ def sweep(
     keys = sorted((man.parameter_ranges or {}).keys())
 
     bus = SimpleEventBus()
-    bus.publish(
-        make_event(SWEEP_START, {"keys": keys, "total": _product_len(man.parameter_ranges)})
-    )
+    bus.subscribe(ALL, event_log_handler)
+    total = _product_len(man.parameter_ranges)
+    bus.publish(make_event(SWEEP_START, {"keys": keys, "total": total}))
 
     # Cartesian expansion (depth-first), honoring stable key order
     def _expand(idx: int, acc: dict[str, Any]) -> None:
         if idx == len(keys):
             # Merge: base + override + accumulated parameter choices
+            i = len(results)
+            bus.publish_progress(fraction=i / total, message=f"Running {i + 1}/{total}")
             cfg = {**base, **(man.override or {}), **acc}
             results.append(run(cfg, ctx))
             return

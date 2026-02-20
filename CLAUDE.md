@@ -363,6 +363,7 @@ The engine routes via `research_type`:
 - Fold `core` and `engine` together — the layered architecture is a feature
 - Turn this into a product-like framework with web UI, auth, etc.
 - Move physics or metric logic into CLI/UI layers
+- Add "Co-Authored-By", "Powered by", "Generated with", or any AI attribution to commits, PRs, code comments, or docs
 
 ### Breaking Changes Policy
 

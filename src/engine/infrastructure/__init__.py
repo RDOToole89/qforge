@@ -3,6 +3,7 @@ Infrastructure Module
 
 Cross-cutting infrastructure components:
 - events: Event bus for progress tracking and notifications
+- logging: Centralized logging configuration and formatters
 """
 
 from .events import (
@@ -17,6 +18,7 @@ from .events import (
     Subscription,
     make_event,
 )
+from .logging import event_log_handler, setup_logging
 
 __all__ = [
     "SimpleEventBus",
@@ -29,4 +31,6 @@ __all__ = [
     "SWEEP_END",
     "PROGRESS",
     "ALL",
+    "setup_logging",
+    "event_log_handler",
 ]
