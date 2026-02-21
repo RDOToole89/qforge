@@ -1,0 +1,35 @@
+"""FastAPI application for the Quantum Experiment Framework.
+
+Exposes the engine's run() and sweep() APIs over HTTP, plus experiment
+registry browsing and stored result retrieval.
+
+Run from repo root:
+    venv/bin/python -m uvicorn apps.api.main:app --reload --port 8000
+"""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from apps.api.routes import experiments, results
+
+app = FastAPI(
+    title="Quantum Experiment API",
+    version="0.1.0",
+    description="REST API for the Qiskit Experiment Framework.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(experiments.router, prefix="/api/experiments", tags=["experiments"])
+app.include_router(results.router, prefix="/api/results", tags=["results"])
+
+
+@app.get("/api/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}

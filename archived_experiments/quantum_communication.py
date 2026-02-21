@@ -1,8 +1,8 @@
-from qiskit import QuantumCircuit, transpile
-from qiskit_aer import Aer
-from qiskit.visualization import plot_histogram
-
 import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit, transpile
+from qiskit.visualization import plot_histogram
+from qiskit_aer import Aer
+
 
 # Function to create and simulate the quantum communication circuit
 def quantum_communication(eavesdrop=False):
@@ -24,12 +24,13 @@ def quantum_communication(eavesdrop=False):
     qc.measure(1, 1)
 
     # Step 4: Simulate the circuit
-    backend = Aer.get_backend('qasm_simulator')
+    backend = Aer.get_backend("qasm_simulator")
     job = transpile(qc, backend)
     result = backend.run(job, shots=1024).result()
     counts = result.get_counts()
 
     return counts, qc
+
 
 # Run the simulation without eavesdropping
 counts_ideal, qc_ideal = quantum_communication(eavesdrop=False)

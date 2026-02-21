@@ -1,7 +1,7 @@
-from qiskit import QuantumCircuit
-from qiskit_aer import Aer
-from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit
+from qiskit.visualization import plot_histogram
+from qiskit_aer import Aer
 
 # Step 1: Create a circuit with 4 qubits and 4 classical bits
 qc = QuantumCircuit(4, 4)
@@ -15,7 +15,7 @@ for i in range(4):
     qc.measure(i, i)
 
 # Step 4: Simulate the circuit using Aer simulator
-backend = Aer.get_backend('aer_simulator')
+backend = Aer.get_backend("aer_simulator")
 job = backend.run(qc, shots=1024)
 result = job.result()
 counts = result.get_counts()

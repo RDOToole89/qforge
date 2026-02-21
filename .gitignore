@@ -17,8 +17,8 @@ build/
 .ipynb_checkpoints
 
 # Logs and results (optional, if you don't want to track generated logs/results)
-logs/
-results/
+# logs/
+# results/
 
 # Temporary and system files
 *.log
@@ -26,3 +26,14 @@ results/
 *.swp
 .DS_Store
 Thumbs.db
+.hypothesis/
+
+# Node / Expo / Turborepo
+node_modules/
+.expo/
+.turbo/
+apps/client/ios/
+apps/client/android/
+apps/client/.expo/
+*.tsbuildinfo
+pnpm-lock.yaml

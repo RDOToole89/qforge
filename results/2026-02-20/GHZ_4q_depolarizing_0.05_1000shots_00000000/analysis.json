@@ -1,0 +1,79 @@
+{
+  "experiment_metadata": {
+    "experiment_id": "GHZ_4",
+    "timestamp": "2026-02-20T20:15:13.549190",
+    "framework_version": "engine-1.0",
+    "research_type": null,
+    "experiment_description": null
+  },
+  "experiment_parameters": {
+    "num_qubits": 4,
+    "state_type": "GHZ",
+    "sim_mode": "qasm",
+    "shots": 1000,
+    "noise_enabled": true,
+    "noise_type": "depolarizing",
+    "error_rate": 0.05,
+    "metrics": "structured_decoherence",
+    "multiple_runs": 1,
+    "track_convergence": false,
+    "visualization_type": "correlation",
+    "export_formats": [
+      "png"
+    ],
+    "rng_seed": 42
+  },
+  "circuit_statistics": {
+    "depth": 5,
+    "num_gates": 9,
+    "num_qubits": 4,
+    "gate_types": {
+      "h": 1,
+      "cx": 3,
+      "barrier": 1,
+      "measure": 4
+    },
+    "two_qubit_gate_count": 3,
+    "connectivity_graph": null
+  },
+  "measurement_results": {
+    "raw_counts": {
+      "0101": 1,
+      "0010": 8,
+      "1011": 4,
+      "1100": 15,
+      "0100": 7,
+      "0011": 12,
+      "0001": 25,
+      "1111": 435,
+      "1101": 8,
+      "1000": 5,
+      "1110": 19,
+      "0111": 7,
+      "0000": 454
+    },
+    "total_shots": 1000,
+    "unique_outcomes": 13,
+    "outcome_probabilities": {
+      "0101": 0.001,
+      "0010": 0.008,
+      "1011": 0.004,
+      "1100": 0.015,
+      "0100": 0.007,
+      "0011": 0.012,
+      "0001": 0.025,
+      "1111": 0.435,
+      "1101": 0.008,
+      "1000": 0.005,
+      "1110": 0.019,
+      "0111": 0.007,
+      "0000": 0.454
+    },
+    "density_matrix": null,
+    "statevector": null,
+    "fidelity": null
+  },
+  "information_theory_metrics": null,
+  "correlation_analysis": null,
+  "statistical_validation": null
+}

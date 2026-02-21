@@ -1,0 +1,16 @@
+{
+  "name": "qiskit-experiment-framework",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:api": "turbo dev --filter=@qef/api",
+    "dev:client": "turbo dev --filter=@qef/client",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  },
+  "packageManager": "pnpm@10.7.0"
+}

@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "description": "Schema index for structured quantum experiment framework",
+  "schemas": [
+    {
+      "id": "experiment_spec",
+      "file": "core/experiment_spec.schema.json",
+      "description": "Specification of a quantum experiment to run",
+      "required_by": ["experiment_result", "sweep_manifest"]
+    },
+    {
+      "id": "provenance",
+      "file": "core/provenance.schema.json",
+      "description": "Execution provenance metadata (hashes, backend, time, env)",
+      "required_by": ["experiment_result", "analysis_result", "sweep_manifest"]
+    },
+    {
+      "id": "experiment_result",
+      "file": "execution/experiment_result.schema.json",
+      "description": "Raw execution results with structured error pathways and provenance",
+      "depends_on": ["experiment_spec", "provenance"]
+    },
+    {
+      "id": "structure_metrics",
+      "file": "core/structure_metrics.schema.json",
+      "description": "Statistical and structural metrics of decoherence analysis",
+      "required_by": ["analysis_result"]
+    },
+    {
+      "id": "analysis_result",
+      "file": "analysis/analysis_result.schema.json",
+      "description": "Analysis outputs derived from experiment results and metrics",
+      "depends_on": ["structure_metrics", "provenance"]
+    },
+    {
+      "id": "sweep_manifest",
+      "file": "execution/sweep_manifest.schema.json",
+      "description": "Definition of parameter sweeps for systematic studies",
+      "depends_on": ["experiment_spec", "provenance"]
+    }
+  ]
+}

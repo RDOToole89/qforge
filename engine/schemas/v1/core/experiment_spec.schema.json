@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "experiment_spec.schema.json",
+  "title": "ExperimentSpec",
+  "description": "Specification of a quantum experiment (planned configuration before execution)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Schema version for compatibility across the suite"
+    },
+    "experiment_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this experiment specification"
+    },
+    "state_type": {
+      "type": "string",
+      "enum": ["GHZ", "W", "Bell", "Random", "Custom"],
+      "description": "Initial quantum state to prepare"
+    },
+    "n_qubits": {
+      "type": "integer",
+      "minimum": 2,
+      "description": "Number of qubits used in the experiment (>=2 for entangled states)"
+    },
+    "shots": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of measurement shots to run"
+    },
+    "noise_model": {
+      "type": ["string", "null"],
+      "enum": [
+        "depolarizing",
+        "bit_flip",
+        "phase_flip",
+        "amplitude_damping",
+        "custom",
+        null
+      ],
+      "description": "Noise model applied to the circuit (null = ideal/no noise)"
+    },
+    "error_rate": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "description": "Error rate parameter for the chosen noise model (if applicable)"
+    },
+    "seed": {
+      "type": ["integer", "null"],
+      "description": "Random seed for reproducibility (null = auto-generated)"
+    },
+    "engine_config_hash": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Hash of simulator/hardware configuration to ensure provenance"
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Research context metadata describing the purpose of the experiment",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": [
+            "structure_validation",
+            "threshold_mapping",
+            "topology_dependence",
+            "noise_comparison",
+            "predictive_validation"
+          ],
+          "description": "Research phase or study type this experiment belongs to"
+        },
+        "hypothesis": {
+          "type": "string",
+          "description": "Optional free-text description of the hypothesis being tested"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes or contextual remarks about the experiment"
+        }
+      },
+      "required": ["phase"]
+    }
+  },
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "state_type",
+    "n_qubits",
+    "shots",
+    "engine_config_hash",
+    "research"
+  ]
+}

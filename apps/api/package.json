@@ -1,0 +1,9 @@
+{
+  "name": "@qef/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd ../.. && PYTHONPATH=engine venv/bin/python -m uvicorn apps.api.main:app --reload --port 8000",
+    "start": "cd ../.. && PYTHONPATH=engine venv/bin/python -m uvicorn apps.api.main:app --port 8000"
+  }
+}

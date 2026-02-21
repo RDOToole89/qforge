@@ -1,9 +1,13 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-  "python.formatting.provider": "black",
+  "python.formatting.provider": "none",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
   "python.linting.flake8Enabled": false,
@@ -32,5 +36,114 @@
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
   "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "markdownlint.config": {
+    "MD013": false,
+    "MD024": false,
+    "MD025": false,
+    "MD032": false,
+    "MD033": false,
+    "MD036": false,
+    "MD040": false,
+    "MD041": false
+  },
+  "terminal.integrated.shellIntegration.enabled": true,
+  "chat.commandCenter.enabled": true,
+  "github.copilot.chat.terminalChatLocation": "terminal",
+  "terminal.integrated.autoApprove": [
+    {
+      "command": "mkdir",
+      "description": "Allow directory creation"
+    },
+    {
+      "command": "cd",
+      "description": "Allow navigation"
+    },
+    {
+      "command": "ls",
+      "description": "Allow listing files"
+    },
+    {
+      "command": "cat",
+      "description": "Allow reading files"
+    },
+    {
+      "command": "echo",
+      "description": "Allow echo commands"
+    },
+    {
+      "command": "mv",
+      "description": "Allow moving/renaming files"
+    },
+    {
+      "command": "cp",
+      "description": "Allow copying files"
+    },
+    {
+      "command": "touch",
+      "description": "Allow creating files"
+    },
+    {
+      "command": "git",
+      "description": "Allow git commands"
+    },
+    {
+      "command": "npm",
+      "description": "Allow npm commands"
+    },
+    {
+      "command": "npx",
+      "description": "Allow npx commands"
+    },
+    {
+      "command": "python",
+      "description": "Allow Python execution"
+    },
+    {
+      "command": "pytest",
+      "description": "Allow pytest execution"
+    },
+    {
+      "command": "make",
+      "description": "Allow make commands"
+    },
+    {
+      "command": "pip",
+      "description": "Allow pip commands"
+    },
+    {
+      "command": "poetry",
+      "description": "Allow poetry commands"
+    },
+    {
+      "command": "grep",
+      "description": "Allow grep searches"
+    },
+    {
+      "command": "find",
+      "description": "Allow find commands"
+    },
+    {
+      "command": "which",
+      "description": "Allow which commands"
+    },
+    {
+      "command": "pwd",
+      "description": "Allow pwd commands"
+    }
+  ],
+  "terminal.integrated.autoApprove.denied": [
+    {
+      "command": "rm",
+      "description": "Require approval for file removal"
+    },
+    {
+      "command": "rmdir",
+      "description": "Require approval for directory removal"
+    }
+  ]
 }

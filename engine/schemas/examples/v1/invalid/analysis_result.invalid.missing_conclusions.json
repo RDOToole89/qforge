@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../v1/analysis/analysis_result.schema.json",
+  "schema_version": "1.0",
+  "analysis_id": "test_analysis_001",
+  "input_experiments": ["test_exp_001"],
+  "structure_metrics": {
+    "schema_version": "1.0",
+    "structure_score": {
+      "value": 0.234,
+      "ci95": [0.201, 0.267],
+      "status": "validated"
+    },
+    "entanglement_error_correlation": {
+      "value": 0.456,
+      "ci95": [0.423, 0.489],
+      "status": "validated"
+    },
+    "concentration_index": {
+      "value": 0.321,
+      "ci95": [0.295, 0.347],
+      "status": "validated"
+    },
+    "total_correlation": {
+      "value": 1.567,
+      "ci95": [1.434, 1.700],
+      "status": "validated"
+    }
+  },
+  "provenance": {
+    "schema_version": "1.0",
+    "engine_config_hash": "sha256:abc123def456",
+    "execution_backend": "qasm_simulator",
+    "timestamp": "2025-08-16T12:00:00Z"
+  }
+}
