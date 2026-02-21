@@ -468,3 +468,691 @@ Phase 2 fingerprint norms:
 
 PCA variance explained: PC1=79.7%, PC2=10.0%, PC3=4.0%
 ```
+
+---
+---
+
+# Appendix B: Explanatory Walkthrough — The Math Behind the Experiment
+
+*A visual, step-by-step guide to the concepts, math, and physical intuitions underlying this study. Designed to be read linearly, building from single qubits to the full fingerprint analysis.*
+
+---
+
+## B.1 The Bloch Sphere: One Qubit, One Ball
+
+A single qubit's state can be visualised as a point on (or inside) a unit sphere — the **Bloch sphere**.
+
+```
+                    |0⟩  (North pole: "measure 0 with certainty")
+                     ●
+                    /|\
+                   / | \
+                  /  |  \
+        |+⟩ ----●---+---●---- |-⟩     (equator: equal chance of 0 or 1)
+                  \  |  /
+                   \ | /
+                    \|/
+                     ●
+                    |1⟩  (South pole: "measure 1 with certainty")
+
+              ← X axis →
+              ↑ Z axis (vertical)
+              ↙ Y axis (into page)
+```
+
+**Key states on the sphere:**
+
+| State | Location | Meaning |
+|-------|----------|---------|
+| \|0⟩ | North pole | Always measures 0 |
+| \|1⟩ | South pole | Always measures 1 |
+| \|+⟩ = (|0⟩+|1⟩)/√2 | Equator (+X) | 50/50 chance, coherent superposition |
+| \|-⟩ = (|0⟩-|1⟩)/√2 | Equator (-X) | 50/50 chance, opposite phase |
+| Interior points | Inside sphere | Mixed states (noisy/uncertain) |
+
+**The critical intuition:** Points on the equator all give 50/50 measurement outcomes in the Z-basis (up/down measurement). They *differ* in their phases, but Z-basis measurement cannot see phase differences. This is the seed of Pauli invariance.
+
+---
+
+## B.2 What "Z-basis Measurement" Means
+
+Measuring in the Z-basis means projecting onto |0⟩ and |1⟩ — asking "are you at the north pole or the south pole?"
+
+```
+         |0⟩ ●          Measurement projects onto the Z axis:
+              |
+              |          Any state at angle θ from north pole
+              |          → P(0) = cos²(θ/2)
+     |+⟩ ●---+---● |-⟩  → P(1) = sin²(θ/2)
+              |
+              |          States on the equator (θ = 90°):
+              |          → P(0) = P(1) = 0.5
+         |1⟩ ●          → Indistinguishable by Z-measurement!
+```
+
+**What Z-measurement sees:** Only the "height" on the sphere (Z-component). Two states at the same height but different longitudes (different phases) produce identical measurement statistics.
+
+**What Z-measurement misses:** Phase information. The state |+⟩ = (|0⟩+|1⟩)/√2 and |-⟩ = (|0⟩-|1⟩)/√2 both give 50/50 outcomes. To distinguish them, you'd need X-basis measurement (rotate 90° then measure Z).
+
+**For our experiment:** We always measure in the Z-basis. This means we can only detect noise that moves states *vertically* on the Bloch sphere (changing the probability of 0 vs 1). Noise that rotates states *around* the Z-axis (changing phase but not probabilities) is invisible to us.
+
+---
+
+## B.3 Pauli Operators: Three Kinds of Kicks
+
+The Pauli operators X, Y, Z are the three fundamental "error kicks" that can happen to a qubit. On the Bloch sphere, each is a 180° rotation around its axis:
+
+```
+    Z-error (phase flip):           X-error (bit flip):          Y-error (both):
+    Rotates around Z-axis           Rotates around X-axis        Rotates around Y-axis
+
+         |0⟩ ●                           |0⟩ ●──→ ●|1⟩              |0⟩ ●──→ ●|1⟩
+              |   ↺ (phase changes             ↕                          ↕
+              |    but |0⟩,|1⟩ stay)           swap!                     swap!
+         |1⟩ ●                           |1⟩ ●──→ ●|0⟩              |1⟩ ●──→ ●|0⟩
+
+    Z|0⟩ = +|0⟩                     X|0⟩ = |1⟩                   Y|0⟩ = i|1⟩
+    Z|1⟩ = -|1⟩                     X|1⟩ = |0⟩                   Y|1⟩ = -i|0⟩
+    (measurement unchanged!)        (flips the bit!)              (flips + phase)
+```
+
+**Critical for our experiment:**
+
+- **Z-error on a Z-basis state:** |0⟩→|0⟩, |1⟩→-|1⟩. The minus sign is a global phase — measurement can't see it. **Z-errors are invisible in Z-basis.**
+- **X-error on a Z-basis state:** |0⟩→|1⟩, |1⟩→|0⟩. The bit flips! **X-errors are visible in Z-basis.**
+- **Y-error on a Z-basis state:** |0⟩→i|1⟩, |1⟩→-i|0⟩. The bit flips (phases wash out in measurement). **Y-errors are visible in Z-basis.**
+
+So 2 out of 3 Pauli errors cause bit flips detectable by Z-measurement. The third (Z) is invisible.
+
+---
+
+## B.4 Depolarising Noise: The "Fog Machine"
+
+Depolarising noise randomly applies I (nothing), X, Y, or Z with some probability. For a single qubit with error rate p:
+
+```
+    With probability (1-p):   nothing happens          (I)
+    With probability p/3:     X-error (bit flip)       (X)
+    With probability p/3:     Y-error (bit+phase flip) (Y)
+    With probability p/3:     Z-error (phase flip)     (Z)
+```
+
+On the Bloch sphere, this **shrinks the state toward the centre** — like fog obscuring details:
+
+```
+    Before noise:              After noise (p = 0.3):
+
+         ● (pure state)              ● (shrunk toward centre)
+        /                           /
+       /  radius = 1               /  radius = 1 - p = 0.7
+      /                           /
+     ●───── centre               ●───── centre
+```
+
+**"Correlated" depolarising noise** (our experiment) means: when noise hits qubit i, the *same* Pauli error also hits qubit j (with some probability cs). Instead of independent fog on each qubit, it's **fog that drifts in the same direction** for nearby qubits.
+
+```
+    Independent noise:           Correlated noise (chain):
+
+    qubit 0: X error              qubit 0: X error ─┐
+    qubit 1: Z error              qubit 1: X error ←┘ (same error, correlated!)
+    qubit 2: Y error              qubit 2: I (no error, not adjacent to 0)
+    qubit 3: I (no error)         qubit 3: I (no error)
+```
+
+The correlation strength (cs) controls how likely it is that adjacent qubits get the same error. cs=0 means fully independent; cs=1 means perfectly correlated along edges.
+
+---
+
+## B.5 Multi-Qubit States: What GHZ, W, Cluster, and |+⟩ⁿ Look Like
+
+With n qubits, the Bloch sphere becomes insufficient (you'd need a 2ⁿ-dimensional space). But we can understand each state by its **Z-basis measurement distribution** — what outcomes we see when we measure all qubits.
+
+### GHZ State: Two Extremes
+
+```
+    |GHZ⟩ = (|000000⟩ + |111111⟩) / √2
+
+    Measurement outcomes:         Probability distribution:
+    ┌──────────┬────────────┐    ████████████████████  |000000⟩  50%
+    │ 000000   │  50%       │
+    │ 000001   │   0%       │    (nothing in between)
+    │ 000010   │   0%       │
+    │ ...      │   0%       │
+    │ 111111   │  50%       │    ████████████████████  |111111⟩  50%
+    └──────────┴────────────┘
+```
+
+Only 2 out of 64 outcomes ever occur. All qubits are **perfectly correlated**: either all 0 or all 1. This creates strong bit-level covariance — if qubit 0 is 1, all others are definitely 1.
+
+**Why GHZ is a good noise probe:** Any noise that flips even one qubit creates a "forbidden" outcome (like |100000⟩) that shouldn't exist. These leak outcomes are easy to detect and their pattern reveals *which* qubits were hit.
+
+### Product Superposition: Maximum Spread
+
+```
+    |+⟩⁶ = H⁶|000000⟩ = equal superposition of all 64 bitstrings
+
+    Measurement outcomes:         Probability distribution:
+    ┌──────────┬────────────┐    █▌  |000000⟩  1/64 ≈ 1.6%
+    │ 000000   │  1/64      │    █▌  |000001⟩  1/64
+    │ 000001   │  1/64      │    █▌  |000010⟩  1/64
+    │ 000010   │  1/64      │    █▌  |000011⟩  1/64
+    │ ...      │  1/64      │    ...
+    │ 111111   │  1/64      │    █▌  |111111⟩  1/64
+    └──────────┴────────────┘    (perfectly flat — uniform distribution)
+```
+
+Every outcome is equally likely. Qubits are **completely independent**: knowing qubit 0 tells you nothing about qubit 1. Bit covariance is zero.
+
+**Why |+⟩ⁿ is invisible to noise:** A Pauli error permutes bitstrings (e.g., X on qubit 0 swaps |0xxxxx⟩ ↔ |1xxxxx⟩). But if every bitstring has probability 1/64, permuting them changes nothing — shuffling a flat deck doesn't change the deck. So Cov(noisy) = Cov(clean) = 0, and ΔCov = 0 identically.
+
+### Cluster State: Hidden Complexity, Flat Measurement
+
+```
+    |Cluster⟩ = CZ₀₁ CZ₁₂ CZ₂₃ CZ₃₄ CZ₄₅ · H⁶ |000000⟩
+
+    Step 1: H⁶|0⟩⁶ = |+⟩⁶        (uniform superposition, every bitstring = 1/64)
+    Step 2: CZ gates add phases   (flip sign of some amplitudes)
+
+    Measurement outcomes:         Probability distribution:
+    ┌──────────┬────────────┐    █▌  |000000⟩  1/64   (amplitude may be +1/8 or -1/8,
+    │ 000000   │  1/64      │    █▌  |000001⟩  1/64    but |amplitude|² = 1/64 either way)
+    │ 000001   │  1/64      │    █▌  |000010⟩  1/64
+    │ ...      │  ...       │    ...
+    │ 111111   │  1/64      │    █▌  |111111⟩  1/64
+    └──────────┴────────────┘    STILL PERFECTLY FLAT!
+```
+
+CZ gates only change **signs** (phases) of amplitudes, not their magnitudes. So |amplitude|² is unchanged — the measurement distribution stays uniform. The cluster state has rich entanglement structure in its phases, but **Z-basis measurement can't see it**.
+
+This is the Pauli invariance theorem in action: flat distribution → permutation invariant → noise invisible.
+
+### W State: Sparse but Non-Uniform
+
+```
+    |W⟩ = (|100000⟩ + |010000⟩ + |001000⟩ + |000100⟩ + |000010⟩ + |000001⟩) / √6
+
+    Measurement outcomes:         Probability distribution:
+    ┌──────────┬────────────┐    ███████████  |100000⟩  1/6 ≈ 16.7%
+    │ 000000   │   0%       │    ███████████  |010000⟩  1/6
+    │ 100000   │  1/6       │    ███████████  |001000⟩  1/6
+    │ 010000   │  1/6       │    ███████████  |000100⟩  1/6
+    │ 001000   │  1/6       │    ███████████  |000010⟩  1/6
+    │ 000100   │  1/6       │    ███████████  |000001⟩  1/6
+    │ 000010   │  1/6       │
+    │ 000001   │  1/6       │    (6 outcomes, each 16.7%)
+    │ everything else │ 0%  │
+    └──────────┴────────────┘
+```
+
+Only 6 of 64 outcomes occur — each with exactly one qubit in state |1⟩. Qubits are **weakly anti-correlated**: if qubit 0 is 1, all others must be 0. This is a real signal, but it's sparse and uniform *within* the support — making it hard to detect small noise perturbations.
+
+**Why W is a weak probe:** The "one-hot" structure means each qubit has P(1) = 1/6. Noise that flips a bit creates outcomes like |110000⟩ (two qubits on), which are detectable. But the covariance between any pair is small: Cov(bᵢ, bⱼ) = E[bᵢbⱼ] - E[bᵢ]E[bⱼ] = 0 - (1/6)(1/6) = -1/36 ≈ -0.028 for all pairs equally. The uniform anti-correlation means there's no pair-specific structure for noise to disrupt differentially.
+
+---
+
+## B.6 Covariance: Do Qubits Move Together?
+
+**Bit covariance** measures whether two qubits' measurement outcomes are correlated:
+
+```
+    Cov(bᵢ, bⱼ) = E[bᵢ · bⱼ] - E[bᵢ] · E[bⱼ]
+
+    where bᵢ ∈ {0, 1} is the measurement outcome of qubit i
+```
+
+**Intuition with coin flips:**
+
+```
+    Independent coins:           Correlated coins:
+    ┌─────────────────────┐     ┌─────────────────────┐
+    │ Coin A: H T H T H   │     │ Coin A: H H T T H   │
+    │ Coin B: T H H T T   │     │ Coin B: H H T T H   │
+    │                     │     │                     │
+    │ No pattern between  │     │ They match!         │
+    │ Cov ≈ 0             │     │ Cov > 0             │
+    └─────────────────────┘     └─────────────────────┘
+```
+
+For our quantum states:
+
+| State | Cov(any pair) | Why |
+|-------|:-------------|-----|
+| GHZ | +0.25 | Both qubits always match (00 or 11) |
+| \|+⟩ⁿ | 0.0 | Qubits are independent |
+| Cluster | 0.0 | Same as \|+⟩ⁿ in Z-basis (flat distribution) |
+| W | -0.028 | Weak anti-correlation (at most one qubit is 1) |
+
+**The covariance matrix** for n=6 is a 6×6 grid where entry (i,j) = Cov(bᵢ, bⱼ):
+
+```
+    GHZ covariance matrix:                 |+⟩⁶ covariance matrix:
+
+         0     1     2     3     4     5        0     1     2     3     4     5
+    0 [  0   .25   .25   .25   .25   .25]  0 [  0     0     0     0     0     0 ]
+    1 [.25    0    .25   .25   .25   .25]  1 [  0     0     0     0     0     0 ]
+    2 [.25   .25    0    .25   .25   .25]  2 [  0     0     0     0     0     0 ]
+    3 [.25   .25   .25    0    .25   .25]  3 [  0     0     0     0     0     0 ]
+    4 [.25   .25   .25   .25    0    .25]  4 [  0     0     0     0     0     0 ]
+    5 [.25   .25   .25   .25   .25    0 ]  5 [  0     0     0     0     0     0 ]
+```
+
+The diagonal is always zero (a qubit's covariance with itself is variance, which we exclude).
+
+---
+
+## B.7 Excess Covariance (ΔCov): Isolating the Noise Fingerprint
+
+The key insight: we want to see **what the correlated noise adds**, not the state's intrinsic correlation. So we subtract:
+
+```
+    ΔCov = Cov(test) - Cov(baseline)
+           ~~~~~~~~   ~~~~~~~~~~~~~
+           correlated   independent
+           noise        noise (same p,
+           (cs > 0)     but cs = 0)
+```
+
+**Why this works:**
+
+```
+    Cov(test)     = State correlation + Independent noise effect + Correlated noise effect
+    Cov(baseline) = State correlation + Independent noise effect
+    ─────────────────────────────────────────────────────────────────────────────────────
+    ΔCov          =                                             + Correlated noise effect
+```
+
+The subtraction cancels out both the state's intrinsic correlation *and* the independent noise effect. What remains is purely the excess covariance caused by correlated noise.
+
+**For GHZ with chain noise at p=0.2, cs=0.6, our experiment measured:**
+
+```
+    ΔCov (GHZ, chain noise):
+
+         0       1       2       3       4       5
+    0 [  0    +.019   +.008   +.003   +.001   +.000 ]   ← Strongest on edge (0,1)
+    1 [+.019    0     +.014   +.005   +.002   +.001 ]   ← Strong on edge (1,2)
+    2 [+.008  +.014     0     +.010   +.004   +.001 ]   ← Strong on edge (2,3)
+    3 [+.003  +.005   +.010     0     +.007   +.002 ]   ← Strong on edge (3,4)
+    4 [+.001  +.002   +.004   +.007     0     +.005 ]   ← Strong on edge (4,5)
+    5 [+.000  +.001   +.001   +.002   +.005     0   ]
+
+    Pattern: largest values on nearest-neighbor pairs (the chain edges!)
+             decays with distance
+```
+
+Compare to the chain noise adjacency matrix:
+
+```
+    Chain adjacency:                  ΔCov pattern:
+
+         0  1  2  3  4  5                0  1  2  3  4  5
+    0 [  0  1  0  0  0  0 ]         0 [  ·  ██ ▓  ░  ·  · ]     ██ = large positive
+    1 [  1  0  1  0  0  0 ]         1 [ ██  ·  ██ ▓  ░  · ]     ▓  = medium
+    2 [  0  1  0  1  0  0 ]         2 [  ▓ ██  ·  ██ ░  · ]     ░  = small
+    3 [  0  0  1  0  1  0 ]         3 [  ░  ▓ ██  ·  ▓  ░ ]     ·  = near zero
+    4 [  0  0  0  1  0  1 ]         4 [  ·  ░  ░  ▓  ·  ▓ ]
+    5 [  0  0  0  0  1  0 ]         5 [  ·  ·  ·  ░  ▓  · ]
+
+    The ΔCov mirrors the noise topology!
+```
+
+The correlated noise creates excess covariance **exactly where the noise edges are**. This is the physical signal that NTC and the fingerprint both try to detect.
+
+---
+
+## B.8 The Fingerprint Vector: Flattening a Matrix into a Direction
+
+A 6×6 symmetric matrix with zero diagonal has 15 unique entries (the upper triangle). We extract these as a flat vector — the **fingerprint**:
+
+```
+    ΔCov matrix (symmetric):            Fingerprint vector (15 elements):
+
+         0     1     2     3     4     5
+    0 [  ·    a₀₁   a₀₂   a₀₃   a₀₄   a₀₅ ]     fv = [ a₀₁, a₀₂, a₀₃, a₀₄, a₀₅,
+    1 [       ·     a₁₂   a₁₃   a₁₄   a₁₅ ]                 a₁₂, a₁₃, a₁₄, a₁₅,
+    2 [              ·    a₂₃   a₂₄   a₂₅ ]                       a₂₃, a₂₄, a₂₅,
+    3 [                    ·    a₃₄   a₃₅ ]                             a₃₄, a₃₅,
+    4 [                          ·    a₄₅ ]                                   a₄₅ ]
+    5 [                                ·  ]
+```
+
+Each element of fv corresponds to one qubit pair. The vector lives in a 15-dimensional space (for n=6). We can't visualise 15D directly, but we can measure two properties:
+
+**Magnitude (norm):** How strong is the noise signal overall?
+
+```
+    ||fv|| = √(a₀₁² + a₀₂² + ... + a₄₅²)
+
+    GHZ at p=0.2, cs=0.6:  ||fv|| = 0.045  (strong signal)
+    W   at p=0.2, cs=0.6:  ||fv|| = 0.010  (weak signal)
+    |+⟩⁶ at any condition: ||fv|| = 0.000  (no signal, exactly)
+```
+
+**Direction:** Where does the noise "point" in the space of qubit-pair correlations?
+
+```
+    fv̂ = fv / ||fv||    (unit vector, direction only)
+```
+
+---
+
+## B.9 Cosine Similarity: Are Two Fingerprints Pointing the Same Way?
+
+**Cosine similarity** measures the angle between two vectors, ignoring their lengths:
+
+```
+    cos(θ) = (fv₁ · fv₂) / (||fv₁|| · ||fv₂||)
+
+    = +1.0  → same direction (parallel)           →→
+    =  0.0  → perpendicular (orthogonal)          →↑
+    = -1.0  → opposite directions (anti-parallel)  →←
+```
+
+**Visual intuition in 2D (imagine 2 qubit pairs instead of 15):**
+
+```
+                     ↑ Pair (1,2) covariance
+                     |
+            fv₃ ╱    |
+               ╱     |    ╲ fv₂
+              ╱      |     ╲
+             ╱  θ₁₃  | θ₁₂ ╲
+            ──────── · ────────→  Pair (0,1) covariance
+                     |
+                     |
+
+    fv₁ = long arrow pointing right     (strong chain-like signal)
+    fv₂ = short arrow pointing right    (weak chain-like signal)
+    fv₃ = medium arrow pointing up-left (different topology signal)
+
+    cos(fv₁, fv₂) ≈ 1.0   → same direction, different magnitude = SCALING
+    cos(fv₁, fv₃) ≈ 0.0   → perpendicular = different noise topology
+```
+
+**What our experiment found:**
+
+```
+    Within GHZ chain-noise conditions (varying p and cs):
+    cos(fv_i, fv_j) = 0.611 to 0.991, mean = 0.874
+
+    → All chain-noise fingerprints point roughly the same way
+    → Different p and cs just change the arrow length, not direction
+    → This is SCALING: the noise structure is stable
+
+    GHZ chain vs GHZ star:
+    cos(fv_chain, fv_star) ≈ low  (different direction!)
+    ||fv_chain|| ≈ ||fv_star||   (same length!)
+
+    → Star noise is equally "loud" but points in a completely different direction
+    → NTC (which projects onto the chain template) sees nothing for star
+    → The fingerprint captures both
+```
+
+---
+
+## B.10 Why NTC Misses Star Noise: Template Projection
+
+NTC computes a single number by comparing edge vs non-edge excess covariance against a specific adjacency matrix (the "template"). Geometrically, it's a **dot product** between the fingerprint and the template:
+
+```
+    NTC ∝ fv · template_vector
+
+    Chain template (which edges are "expected"):
+    template_chain = [1, 0, 0, 0, 0,   ← pair (0,1) is an edge
+                         1, 0, 0, 0,   ← pair (1,2) is an edge
+                            1, 0, 0,   ← pair (2,3) is an edge
+                               1, 0,   ← pair (3,4) is an edge
+                                  1]   ← pair (4,5) is an edge
+```
+
+Now imagine two fingerprints in this 15D space:
+
+```
+    fv_chain points mostly along the chain template direction
+    fv_star  points mostly along a DIFFERENT direction (star edges)
+
+    NTC_chain = fv · template_chain
+
+    fv_chain · template_chain = LARGE (aligned!)     → NTC = +0.013 ✓
+    fv_star  · template_chain = SMALL (orthogonal!)  → NTC = -0.005 ✗
+
+    But ||fv_chain|| = 0.040  and  ||fv_star|| = 0.040
+    The star signal is just as strong — it's just pointing the wrong way
+    for the chain template to see it.
+```
+
+**Analogy:** Imagine you're listening for a specific melody (chain template) in a noisy room. NTC is like a matched filter that correlates the audio with your melody. If someone plays a *different* melody equally loudly (star topology), your matched filter hears nothing — not because the room is quiet, but because the filter is tuned to the wrong pattern.
+
+The fingerprint vector is like recording the entire audio spectrum — you can identify *any* melody after the fact, without deciding in advance what to listen for.
+
+---
+
+## B.11 The Pauli Invariance Theorem: Why Flat = Invisible
+
+This is the core theoretical result. Here's the complete argument:
+
+**Setup:** An n-qubit state |ψ⟩ is measured in the Z-basis, giving outcome bitstring x with probability P(x).
+
+**Depolarising noise** applies a random n-qubit Pauli operator P = P₁ ⊗ P₂ ⊗ ... ⊗ Pₙ, where each Pᵢ ∈ {I, X, Y, Z}.
+
+**Key fact:** Each Pᵢ acts on computational basis states as:
+
+```
+    I|b⟩ = |b⟩           (do nothing)
+    X|b⟩ = |1-b⟩         (flip the bit)
+    Y|b⟩ = ±i|1-b⟩       (flip the bit + phase)
+    Z|b⟩ = (-1)ᵇ|b⟩      (phase only, no flip)
+```
+
+When we **measure** in the Z-basis, we only see the bit value, not the phase. So effectively:
+
+```
+    I: b → b    (no change)
+    X: b → 1-b  (flip)
+    Y: b → 1-b  (flip — phase is invisible to measurement)
+    Z: b → b    (no change — phase is invisible to measurement)
+```
+
+Each single-qubit Pauli either flips the bit or doesn't. An n-qubit Pauli **permutes** the set of bitstrings:
+
+```
+    P = X₀ ⊗ I₁ ⊗ Z₂  acts on bitstring x₀x₁x₂ as:
+
+    000 → 100    (X flips qubit 0, I does nothing, Z does nothing)
+    001 → 101
+    010 → 110
+    011 → 111
+    100 → 000
+    101 → 001
+    110 → 010
+    111 → 011
+
+    This is a permutation of the 8 bitstrings!
+```
+
+**The theorem:**
+
+```
+    If P(x) = 1/2ⁿ for all x (uniform distribution), then:
+
+    P_noisy(x) = Σ_P  prob(P) · P(permutation of x by P)
+               = Σ_P  prob(P) · 1/2ⁿ        ← because every P(x) = 1/2ⁿ
+               = 1/2ⁿ · Σ_P prob(P)
+               = 1/2ⁿ · 1
+               = 1/2ⁿ
+
+    The noisy distribution equals the clean distribution. QED.
+```
+
+**In words:** Permuting a flat deck doesn't change the deck. No matter how you shuffle (what Pauli errors you apply), every bitstring still has probability 1/2ⁿ. Therefore Cov(noisy) = Cov(clean), ΔCov = 0, fingerprint = zero vector.
+
+**This is why |+⟩ⁿ and Cluster give exactly zero signal:**
+
+```
+    |+⟩⁶: P(x) = 1/64 for all 64 bitstrings  → Pauli invariant → ΔCov = 0  ✓
+    Cluster: P(x) = 1/64 (CZ only changes phases, not |amplitudes|²) → ΔCov = 0  ✓
+    GHZ: P(000000) = 0.5, P(111111) = 0.5, rest = 0  → NOT uniform → ΔCov ≠ 0  ✓
+    W: P(single-excitation states) = 1/6, rest = 0  → NOT uniform → ΔCov ≠ 0  ✓
+```
+
+---
+
+## B.12 PCA: Seeing 15 Dimensions in 2
+
+Principal Component Analysis (PCA) finds the directions of maximum spread in high-dimensional data and projects onto them:
+
+```
+    Original: 42 fingerprints, each with 15 values
+              (42 points in 15-dimensional space)
+
+    PCA step 1: Find the direction of maximum spread → PC1
+    PCA step 2: Find the perpendicular direction of next-maximum spread → PC2
+    PCA step 3: Project all 42 points onto the PC1-PC2 plane
+
+    Result: A 2D scatter plot that preserves as much structure as possible
+```
+
+**What our PCA showed:**
+
+```
+    PC2 (10% variance)
+     ↑
+     |         ★ GHZ×star
+     |           (different topology = off the main ray)
+     |
+     | ·  ·  ·  · · · ·→ GHZ×chain points along PC1
+     |  W W W               (scaling = spreading along one direction)
+     | W W W W
+     ●  S/C              → SUPERPOSITION and CLUSTER at origin
+     |                     (zero vectors, no signal at all)
+     +──────────────────→ PC1 (80% variance)
+```
+
+PC1 (80% of variance) is the **magnitude axis** — how strong the noise is. GHZ fingerprints spread along this axis as p and cs increase, but stay on the same ray.
+
+PC2 (10% of variance) separates **different noise topologies** — the star-noise GHZ fingerprint jumps off the ray onto PC2, confirming it has a different direction.
+
+Together, PC1 and PC2 capture 90% of all the structure. This means the effective dimensionality of our noise fingerprint data is roughly 2 — not 15. Two numbers (magnitude + topology angle) summarise almost everything.
+
+---
+
+## B.13 Putting It All Together: The Complete Experiment Pipeline
+
+Here is the full pipeline, step by step, for one condition (e.g., GHZ, p=0.2, cs=0.6, chain noise):
+
+```
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 1: Prepare State                                               │
+    │                                                                     │
+    │   |000000⟩ ──H──●────────────────── ──M──  →  qubit 0              │
+    │                  │                                                  │
+    │              ────⊕──●──────────────── ──M──  →  qubit 1             │
+    │                     │                                               │
+    │                 ────⊕──●───────────── ──M──  →  qubit 2             │
+    │                        │                                            │
+    │                    ────⊕──●────────── ──M──  →  qubit 3             │
+    │                           │                                         │
+    │                       ────⊕──●─────── ──M──  →  qubit 4             │
+    │                              │                                      │
+    │                          ────⊕──────── ──M──  →  qubit 5            │
+    │                                                                     │
+    │   Circuit creates: (|000000⟩ + |111111⟩)/√2                        │
+    │   CX chain: gates on pairs (0,1), (1,2), (2,3), (3,4), (4,5)      │
+    └─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 2: Apply Noise (two runs)                                      │
+    │                                                                     │
+    │   BASELINE (cs=0):  Independent depolarising, p=0.2                 │
+    │     → Each qubit gets random Pauli errors independently             │
+    │     → 8192 shots → counts_baseline                                  │
+    │                                                                     │
+    │   TEST (cs=0.6):  Correlated depolarising, p=0.2, chain topology   │
+    │     → Adjacent qubits (0-1, 1-2, ...) share errors with prob 0.6   │
+    │     → 8192 shots → counts_test                                      │
+    └─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 3: Compute Covariance Matrices                                 │
+    │                                                                     │
+    │   For each run, compute 6×6 bit covariance matrix:                  │
+    │                                                                     │
+    │   Cov(bᵢ,bⱼ) = (1/N) Σₖ bᵢ⁽ᵏ⁾bⱼ⁽ᵏ⁾  -  [(1/N) Σₖ bᵢ⁽ᵏ⁾]·[(1/N) Σₖ bⱼ⁽ᵏ⁾]  │
+    │                 ─────────────────────     ──────────────────────────│
+    │                    E[bᵢ · bⱼ]                E[bᵢ] · E[bⱼ]       │
+    │                                                                     │
+    │   → Cov_test (6×6)   and   Cov_baseline (6×6)                     │
+    └─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 4: Excess Covariance                                           │
+    │                                                                     │
+    │   ΔCov = Cov_test - Cov_baseline                                   │
+    │                                                                     │
+    │   This cancels the state's intrinsic correlation and isolates       │
+    │   the effect of correlated noise.                                   │
+    │                                                                     │
+    │        0       1       2       3       4       5                    │
+    │   0 [  ·    +.019   +.008   +.003   +.001   +.000 ]               │
+    │   1 [+.019    ·     +.014   +.005   +.002   +.001 ]               │
+    │   2 [+.008  +.014     ·     +.010   +.004   +.001 ]               │
+    │   3 [+.003  +.005   +.010     ·     +.007   +.002 ]               │
+    │   4 [+.001  +.002   +.004   +.007     ·     +.005 ]               │
+    │   5 [+.000  +.001   +.001   +.002   +.005     ·   ]               │
+    └─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 5: Extract Fingerprint Vector                                  │
+    │                                                                     │
+    │   Take upper triangle of ΔCov → 15-element vector:                 │
+    │                                                                     │
+    │   fv = [.019, .008, .003, .001, .000,   ← row 0 pairs             │
+    │              .014, .005, .002, .001,     ← row 1 pairs             │
+    │                   .010, .004, .001,      ← row 2 pairs             │
+    │                        .007, .002,       ← row 3 pairs             │
+    │                             .005]        ← row 4 pair              │
+    │                                                                     │
+    │   ||fv|| = 0.045   (magnitude: how strong is the noise?)           │
+    │   fv̂ = fv/||fv||   (direction: what topology is the noise?)       │
+    └─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ STEP 6: Compare Fingerprints Across Conditions                      │
+    │                                                                     │
+    │   Compute cosine similarity between all pairs of fingerprints:      │
+    │                                                                     │
+    │   cos(θ) = (fv₁ · fv₂) / (||fv₁|| · ||fv₂||)                    │
+    │                                                                     │
+    │   High cosine (>0.8) across conditions → SCALING (same direction)  │
+    │   Low cosine  (<0.5) across conditions → SHIFTING (different dir)  │
+    │                                                                     │
+    │   Our result: mean cosine = 0.874 → SCALING                       │
+    │   The noise fingerprint is a stable structural signature.           │
+    └─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## B.14 Key Takeaways
+
+1. **Z-basis measurement sees bit flips, not phase flips.** This is why states on the equator of the Bloch sphere (like |+⟩) are invisible to Z-basis noise detection.
+
+2. **Uniform distributions are permutation-invariant.** Pauli noise permutes bitstrings, so if all bitstrings are equally likely (|+⟩ⁿ, Cluster), noise cannot change the measurement statistics. ΔCov = 0 exactly.
+
+3. **GHZ is a good probe because it has a sparse, non-uniform distribution.** Only 2 of 2ⁿ outcomes are possible, so any noise-induced leakage is immediately visible and its pattern reveals the noise structure.
+
+4. **Excess covariance (ΔCov) isolates the noise signal** by subtracting the baseline. The resulting matrix is a spatial map of where correlated noise is acting.
+
+5. **The fingerprint vector flattens ΔCov into a direction in n(n-1)/2 dimensional space.** Magnitude = noise strength, direction = noise topology. These are independent.
+
+6. **Cosine similarity measures whether two fingerprints point the same way,** regardless of magnitude. High cosine across conditions = the noise signature scales (gets louder) without changing character (topology).
+
+7. **NTC is a dot product with a fixed template** — it detects one specific topology. The fingerprint vector detects any topology, because it encodes the full spatial pattern without presupposing the answer.
+
+8. **The star noise result proves the distinction:** NTC says "no star noise detected" (because it's using a chain template). The fingerprint says "star noise detected, same strength as chain, different direction." The fingerprint is strictly more informative.
