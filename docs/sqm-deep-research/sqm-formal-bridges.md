@@ -645,22 +645,479 @@ Your measured mean cosine of 0.874 (not 1.0) reflects higher-order corrections �
 
 ---
 
-## 9. What to Study Next (in order)
+## 9. Foundation: Linear Algebra at Depth
 
-1. **3Blue1Brown "Essence of Linear Algebra"** (3-4 hours)
-   - Vectors, inner products, matrices as transformations
-   - After this, the Fubini-Study metric and Kraus operators will click
+This is the prerequisite everything else rests on. Without it, the equations above are symbols; with it, they're pictures.
 
-2. **Density matrices** — understand ρ = |ψ⟩⟨ψ| for pure states and ρ = Σ pᵢ|ψᵢ⟩⟨ψᵢ| for mixed states
-   - The Bloch sphere parameterisation ρ = (I + r⃗·σ⃗)/2 ties everything together
-   - Try: compute ρ for |+⟩, for |0⟩, for the 50/50 mixture of |0⟩ and |1⟩
+### 9.1 Vectors, Bases, and Linear Maps
 
-3. **Kraus operators** — apply the depolarising channel by hand to a 2x2 density matrix
-   - Verify that E(I/2) = I/2 (fixed point)
-   - Verify that E(|0⟩⟨0|) has shrunk Bloch vector
+A quantum state |ψ⟩ is a **vector** in a complex vector space. For one qubit, the space is C² (two complex numbers):
 
-4. **Tensor products** — understand |ψ⟩_A ⊗ |φ⟩_B and why entangled states can't be factored
-   - This is the bridge to multi-qubit systems and why GHZ is special
+```
+    |ψ⟩ = α|0⟩ + β|1⟩ = [α]     where α, β ∈ ℂ and |α|² + |β|² = 1
+                          [β]
+```
 
-5. **The Lindblad equation** — once you have density matrices and Kraus operators, Lindblad is the continuous-time version
-   - The jump operators Lₖ define the decoherence pathways
+A **basis** is a set of vectors that spans the space. The Z-basis {|0⟩, |1⟩} and the X-basis {|+⟩, |-⟩} are two different bases for the same space:
+
+```
+    Z-basis:                    X-basis:
+
+    |0⟩ = [1]    |1⟩ = [0]     |+⟩ = [1/√2]    |-⟩ = [ 1/√2]
+          [0]          [1]           [1/√2]           [-1/√2]
+```
+
+Every state can be written in either basis:
+
+```
+    |0⟩ = (1/√2)|+⟩ + (1/√2)|-⟩      (Z-basis state in X-basis)
+    |+⟩ = (1/√2)|0⟩ + (1/√2)|1⟩      (X-basis state in Z-basis)
+```
+
+A **linear map** (matrix) transforms vectors. In quantum mechanics, gates are linear maps:
+
+```
+    Hadamard gate:  H = (1/√2) [1   1]    maps |0⟩ → |+⟩
+                               [1  -1]    maps |1⟩ → |-⟩
+
+    Pauli X gate:   X = [0  1]            maps |0⟩ → |1⟩
+                        [1  0]            maps |1⟩ → |0⟩
+
+    Pauli Z gate:   Z = [1   0]           maps |0⟩ → |0⟩
+                        [0  -1]           maps |1⟩ → -|1⟩
+```
+
+**Geometric meaning:** A matrix is a transformation of space. It stretches, rotates, and/or reflects vectors. On the Bloch sphere, single-qubit gates are rotations:
+
+```
+    H = 180° rotation around the axis halfway between X and Z:
+
+         |0⟩ ●──── H ────→ ●|+⟩
+              |                |
+              |   (rotate      |
+              |    around      |
+              |    (X+Z)/√2    |
+              |    axis)       |
+         |1⟩ ●──── H ────→ ●|-⟩
+```
+
+### 9.2 Inner Products and Orthogonality
+
+The **inner product** ⟨ψ|φ⟩ is the fundamental operation in quantum mechanics:
+
+```
+    ⟨ψ|φ⟩ = α₁*β₁ + α₂*β₂     (conjugate-multiply and sum)
+
+    where |ψ⟩ = [α₁]    |φ⟩ = [β₁]
+                [α₂]          [β₂]
+
+    The * means complex conjugate: (a + bi)* = a - bi
+```
+
+Examples:
+
+```
+    ⟨0|1⟩ = [1 0] · [0] = 1·0 + 0·1 = 0     (orthogonal!)
+                      [1]
+
+    ⟨0|+⟩ = [1 0] · [1/√2] = 1/√2            (45° angle)
+                      [1/√2]
+
+    ⟨0|0⟩ = [1 0] · [1] = 1                   (parallel — same state)
+                      [0]
+```
+
+**|⟨ψ|φ⟩|² is the probability** of measuring |φ⟩ when you have |ψ⟩:
+
+```
+    P(measure |1⟩ | state is |+⟩) = |⟨1|+⟩|² = |1/√2|² = 1/2    ✓
+    P(measure |0⟩ | state is |0⟩) = |⟨0|0⟩|² = |1|² = 1          ✓
+    P(measure |1⟩ | state is |0⟩) = |⟨1|0⟩|² = |0|² = 0          ✓
+```
+
+**Orthogonality means perfectly distinguishable.** If ⟨ψ|φ⟩ = 0, you can always design a measurement that tells them apart with certainty. If not, there's an irreducible probability of confusing them. This is why the Fubini-Study metric (Section 1) is about |⟨ψ|φ⟩| — distinguishability IS geometry.
+
+### 9.3 Basis Change as Rotation
+
+Changing basis is a rotation of your coordinate system. The physics doesn't change — only your description of it:
+
+```
+    State |0⟩ in Z-basis: "definitely 0"
+    State |0⟩ in X-basis: "50/50 between + and -"
+
+    Same state, different descriptions.
+
+    Z-basis measurement:                X-basis measurement:
+    (asking "up or down?")              (asking "left or right?")
+
+         |0⟩ ● ← definite answer           |0⟩ ● ← uncertain!
+              |                                  |
+              |                         |+⟩ ●────┼────● |-⟩
+              |                                  |
+         |1⟩ ●                              |1⟩ ●
+
+    The measurement basis determines what question you ask.
+    Different questions → different certainties.
+```
+
+**This is why measurement basis matters for your experiment:** Z-basis measurement asks about bit values. States that are "uncertain" in Z-basis (like |+⟩ⁿ — uniform distribution) can't be disturbed by noise in a way Z-measurement would see. You'd need to rotate to X-basis to see the disturbance.
+
+---
+
+## 10. Foundation: Spectral Theory (Eigenvalues and Diagonalisation)
+
+This is the mathematical heart of quantum mechanics. Every observable, every measurement, every stable state is about eigenvalues.
+
+### 10.1 Eigenvalues and Eigenvectors
+
+An **eigenvector** of a matrix A is a vector that only gets scaled (not rotated) when A acts on it:
+
+```
+    A|v⟩ = λ|v⟩
+
+    |v⟩ = eigenvector (the direction that survives)
+    λ   = eigenvalue (the scale factor)
+```
+
+**Physical meaning in QM:**
+
+```
+    If A is an observable (like energy H or spin Z):
+    - Eigenvectors = states with DEFINITE values of that observable
+    - Eigenvalues = the values you'd measure with certainty
+
+    Z = [1   0]     Z|0⟩ = +1·|0⟩    eigenvalue +1 ("spin up")
+        [0  -1]     Z|1⟩ = -1·|1⟩    eigenvalue -1 ("spin down")
+
+    X = [0  1]      X|+⟩ = +1·|+⟩    eigenvalue +1 ("spin right")
+        [1  0]      X|-⟩ = -1·|-⟩    eigenvalue -1 ("spin left")
+```
+
+**The Z operator's eigenvectors are {|0⟩, |1⟩} — the Z-basis.**
+**The X operator's eigenvectors are {|+⟩, |-⟩} — the X-basis.**
+
+Every Hermitian operator defines its own basis of eigenvectors. Measuring an observable means projecting onto its eigenbasis.
+
+### 10.2 Diagonalisation: Finding the Natural Basis
+
+A matrix is **diagonal** in its eigenbasis — it just scales each eigenvector:
+
+```
+    In Z-basis, Z is already diagonal:     In Z-basis, X is off-diagonal:
+
+    Z = [1   0]  (diagonal — Z-basis      X = [0  1]  (off-diagonal — Z-basis
+        [0  -1]   is "natural" for Z)          [1  0]   is NOT natural for X)
+
+    But in X-basis, X becomes diagonal:
+
+    X = [1   0]  (in the {|+⟩, |-⟩} basis)
+        [0  -1]
+```
+
+**Diagonalisation** means: find the basis where a matrix becomes diagonal. Physically: find the states that have definite values of the observable.
+
+```
+    Any Hermitian matrix A can be written:
+
+    A = U D U†
+
+    where D = diagonal matrix of eigenvalues = [λ₁  0   0 ]
+                                                [0   λ₂  0 ]
+                                                [0   0   λ₃]
+
+    and U = matrix whose columns are the eigenvectors
+
+    This is called the SPECTRAL DECOMPOSITION.
+```
+
+### 10.3 Why Eigenvalues Matter for Decoherence
+
+The Lindblad equation (Section 5) drives the density matrix toward states that are **eigenstates of the Lindblad operators**. These are the pointer states — the survivors of decoherence.
+
+```
+    Phase damping Lindblad operator: L = Z = [1   0]
+                                              [0  -1]
+
+    Eigenstates of Z: |0⟩ (eigenvalue +1) and |1⟩ (eigenvalue -1)
+
+    → Phase damping drives everything toward mixtures of |0⟩ and |1⟩
+    → The Z-eigenbasis is the "pointer basis" for phase damping
+    → Classical reality (in this noise model) = the Z-basis states
+```
+
+For depolarising noise, the Lindblad operators are {X, Y, Z}. These three operators **don't share eigenstates** (X-eigenstates ≠ Z-eigenstates). That's why depolarising noise drives everything toward the maximally mixed state I/2 rather than toward any particular basis — no basis is preferred.
+
+### 10.4 Spectral Decomposition of Density Matrices
+
+A density matrix ρ is Hermitian and positive, so it has a spectral decomposition:
+
+```
+    ρ = Σᵢ pᵢ |ψᵢ⟩⟨ψᵢ|
+
+    pᵢ = eigenvalues (probabilities, sum to 1)
+    |ψᵢ⟩ = eigenvectors (orthogonal pure states)
+```
+
+This tells you: ρ is a probabilistic mixture of its eigenstates with weights pᵢ.
+
+```
+    Pure state:     ρ = |ψ⟩⟨ψ|         eigenvalues: {1, 0, 0, ...}
+                                        (one eigenvalue = 1, rest = 0)
+
+    Maximally mixed: ρ = I/d            eigenvalues: {1/d, 1/d, ..., 1/d}
+                                        (all equal — maximum uncertainty)
+
+    Partially mixed: ρ = 0.7|0⟩⟨0| + 0.3|1⟩⟨1|   eigenvalues: {0.7, 0.3}
+                                        (some structure remains)
+```
+
+**The von Neumann entropy** measures how mixed a state is:
+
+```
+    S(ρ) = -Σᵢ pᵢ log₂(pᵢ)
+
+    Pure state:   S = 0           (zero uncertainty)
+    Max mixed:    S = log₂(d)     (maximum uncertainty)
+```
+
+### Geometric Example: Eigenvalues on the Bloch Sphere
+
+For a single qubit, the eigenvalues of ρ = (I + r⃗·σ⃗)/2 are:
+
+```
+    λ± = (1 ± |r⃗|) / 2
+
+    |r⃗| = 1 (surface):  λ = {1, 0}     → pure state
+    |r⃗| = 0 (centre):   λ = {½, ½}     → maximally mixed
+    |r⃗| = 0.6 (inside): λ = {0.8, 0.2} → partially mixed
+```
+
+```
+         ● |r⃗| = 1  →  eigenvalues {1, 0}  →  pure, S = 0
+        /
+       /  |r⃗| = 0.6  →  eigenvalues {0.8, 0.2}  →  S = 0.72 bits
+      /
+     ●───── |r⃗| = 0  →  eigenvalues {0.5, 0.5}  →  S = 1 bit
+
+    The Bloch vector LENGTH = how pure the state is
+    The Bloch vector DIRECTION = which basis it's closest to
+    Eigenvalues encode both pieces of information
+```
+
+Decoherence shrinks |r⃗| toward 0, moving eigenvalues toward {½, ½}. The *direction* of r⃗ (which eigenbasis dominates) is determined by the pointer basis — the eigenbasis of the Lindblad operators.
+
+---
+
+## 11. Foundation: Complex Vector Spaces and Projective Geometry
+
+### 11.1 Why Complex Numbers?
+
+Quantum amplitudes are complex: α = a + bi where i² = -1. This isn't a mathematical convenience — it's physically necessary because quantum mechanics requires **interference**.
+
+```
+    Real numbers can add constructively:     3 + 5 = 8
+    Real numbers can add to zero:            3 + (-3) = 0
+
+    Complex numbers can do both AND can PARTIALLY cancel:
+
+    (1+i) + (1-i) = 2        (imaginary parts cancel)
+    (1+i) + (-1-i) = 0       (complete cancellation)
+    (1+i) + (i-1) = 2i       (real parts cancel!)
+
+    This partial cancellation IS quantum interference.
+```
+
+### 11.2 Interference as Geometry in C²
+
+On the Bloch sphere, the **phase** of a superposition determines where on the equator it sits:
+
+```
+    |ψ⟩ = (1/√2)(|0⟩ + e^(iφ)|1⟩)
+
+    φ = 0:    |+⟩ = (|0⟩ + |1⟩)/√2     → positive X axis
+    φ = π:    |-⟩ = (|0⟩ - |1⟩)/√2     → negative X axis
+    φ = π/2:  |+i⟩ = (|0⟩ + i|1⟩)/√2   → positive Y axis
+    φ = -π/2: |-i⟩ = (|0⟩ - i|1⟩)/√2   → negative Y axis
+```
+
+```
+                |0⟩
+                 ●
+                /|\
+               / | \
+              /  |  \
+    |-⟩  ●───── ●|+i⟩    All these states give P(0) = P(1) = ½
+    φ=π    \  |  /        They ONLY differ in phase φ
+            \ | /         Z-measurement can't tell them apart
+             \|/          X-measurement CAN (it's sensitive to phase)
+              ●
+             |1⟩
+
+    The equator = the orbit of phase variation
+    Phase = the COMPLEX part of quantum mechanics
+    Real QM would only have |+⟩ and |-⟩ (north and south on X-axis)
+    Complex QM fills in the whole equator
+```
+
+### 11.3 Projective Geometry: Why Global Phase Doesn't Matter
+
+Two vectors that differ by a global phase are the same quantum state:
+
+```
+    |ψ⟩ and e^(iθ)|ψ⟩ are physically identical for any θ
+
+    Example:  |0⟩  and  i|0⟩  and  -|0⟩  and  e^(i·0.37)|0⟩
+              are ALL the same state.
+
+    This means the state space is NOT C² (a 4D real space).
+    It's C² with the phase equivalence modded out:
+
+    CP¹ = C² \ {0} / ~    where |ψ⟩ ~ e^(iθ)|ψ⟩
+
+    For n+1 complex dimensions: CP^n has 2n REAL dimensions.
+    For 1 qubit: CP¹ has 2 real dimensions = the Bloch sphere.
+    For 2 qubits: CP³ has 6 real dimensions (can't visualise!).
+```
+
+### 11.4 Multi-Qubit Projective Space and Entanglement
+
+For n qubits, the Hilbert space is C^(2ⁿ) and the projective space is CP^(2ⁿ - 1):
+
+```
+    1 qubit:  CP¹  (2 real dims — the Bloch sphere)
+    2 qubits: CP³  (6 real dims)
+    3 qubits: CP⁷  (14 real dims)
+    6 qubits: CP⁶³ (126 real dims!)
+```
+
+**Entanglement is a property of this projective geometry.** A product state |ψ⟩⊗|φ⟩ lives on a special submanifold (the Segre embedding). Entangled states are points OFF this submanifold:
+
+```
+    CP³ (2-qubit projective space):
+
+    ┌─────────────────────────────────────────┐
+    │                                         │
+    │     ● |GHZ⟩ = (|00⟩+|11⟩)/√2          │
+    │         (entangled — OFF the product    │
+    │          submanifold)                    │
+    │                                         │
+    │   ╭─────────────────────╮               │
+    │   │  Product states      │               │
+    │   │  |ψ⟩⊗|φ⟩            │               │
+    │   │     ● |00⟩           │               │
+    │   │     ● |+0⟩           │               │
+    │   │     ● |+⟩⊗|-⟩       │               │
+    │   ╰─────────────────────╯               │
+    │   (Segre submanifold ≅ CP¹ × CP¹)      │
+    │                                         │
+    └─────────────────────────────────────────┘
+
+    The DISTANCE from a state to the product submanifold
+    is a measure of its entanglement.
+    GHZ is maximally far → maximally entangled.
+```
+
+This is the deepest version of "structure not substance": entanglement isn't a thing states *have*, it's a geometric property — their *position* relative to the product submanifold in projective space.
+
+### 11.5 The Fubini-Study Metric in Coordinates
+
+In the Z-basis, any 1-qubit state (up to global phase) can be written:
+
+```
+    |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ) sin(θ/2)|1⟩
+
+    θ ∈ [0, π]    (polar angle on Bloch sphere — "how much |1⟩?")
+    φ ∈ [0, 2π)   (azimuthal angle — "what phase?")
+```
+
+The Fubini-Study metric in these coordinates is:
+
+```
+    ds²_FS = ¼(dθ² + sin²θ · dφ²)
+
+    This is exactly the metric of a sphere of radius ½!
+    (The Bloch sphere has radius 1 in the standard convention,
+     but the Fubini-Study distance from pole to pole is π/2, not π.)
+```
+
+For n qubits, the Fubini-Study metric on CP^(2ⁿ-1) generalises to:
+
+```
+    ds²_FS = ⟨dψ|dψ⟩ - |⟨ψ|dψ⟩|²
+
+    First term: total change in the vector
+    Second term: subtract the component along the current state
+                 (removes global phase changes)
+    Result: only the "physical" change — perpendicular to the ray
+```
+
+This is the metric your cosine similarity approximates in the fingerprint space: it measures perpendicular change (direction shift) while ignoring parallel change (magnitude scaling).
+
+---
+
+## 12. Revised Study Path (in order)
+
+### Phase 1: Visual Linear Algebra (1-2 weeks, light)
+
+1. **3Blue1Brown "Essence of Linear Algebra"** — full series (3-4 hours)
+   - Vectors as arrows, matrices as transformations, determinants as area scaling
+   - Key episodes: "Linear transformations", "Matrix multiplication as composition", "Eigenvectors and eigenvalues"
+
+2. **Exercises with Pauli matrices** — do these by hand on paper:
+   - Multiply X·Z and Z·X. Are they equal? (No: XZ = -iY, ZX = +iY. Non-commutativity!)
+   - Verify X² = Y² = Z² = I (each Pauli squares to identity)
+   - Find eigenvalues/eigenvectors of X, Y, Z (you already know the answers — now derive them)
+   - Compute H·Z·H and verify it equals X (basis change by conjugation)
+
+### Phase 2: Spectral Theory Applied to QM (2-3 weeks)
+
+3. **Diagonalisation practice:**
+   - Diagonalise X = UDU† by finding U (the matrix of eigenvectors)
+   - Verify: U = (1/√2)[[1,1],[1,-1]] = H, D = [[1,0],[0,-1]] = Z, so X = HZH†
+   - Physical meaning: X in its own basis looks like Z. Measuring X = rotate to X-basis, then measure Z.
+
+4. **Density matrix exercises:**
+   - Compute ρ = |+⟩⟨+| as a 2×2 matrix. Verify Tr(ρ) = 1, ρ² = ρ (pure state).
+   - Compute ρ_mixed = ½|0⟩⟨0| + ½|1⟩⟨1| = I/2. Verify ρ² ≠ ρ (mixed!), Tr(ρ²) = ½.
+   - Compute the Bloch vector for each: |r⃗| = 1 for pure, |r⃗| = 0 for mixed.
+   - Find eigenvalues of both ρ matrices. Verify they match the formula λ± = (1±|r⃗|)/2.
+
+5. **Spectral decomposition of noise:**
+   - Apply the depolarising channel to ρ = |0⟩⟨0| = [[1,0],[0,0]] with p=0.1
+   - E(ρ) = 0.9·ρ + (0.1/3)(XρX + YρY + ZρZ)
+   - Work it out: XρX = [[0,0],[0,1]], ZρZ = [[1,0],[0,0]], YρY = [[0,0],[0,1]]
+   - Result: E(ρ) = [[0.933, 0], [0, 0.067]]. The Bloch vector shrunk from [0,0,1] to [0,0,0.867].
+
+### Phase 3: Tensor Products and Entanglement (2-3 weeks)
+
+6. **Tensor products:**
+   - Compute |0⟩⊗|0⟩ = [1,0,0,0]ᵀ (a 4-element vector for 2 qubits)
+   - Compute |+⟩⊗|0⟩ = [1/√2, 0, 1/√2, 0]ᵀ
+   - Compute |Bell⟩ = (|00⟩+|11⟩)/√2 = [1/√2, 0, 0, 1/√2]ᵀ
+   - Try to factor |Bell⟩ as |a⟩⊗|b⟩. You can't — that's entanglement.
+
+7. **Partial trace** — the operation that creates mixed states from entangled pure states:
+   - For |Bell⟩ = (|00⟩+|11⟩)/√2, compute ρ_AB = |Bell⟩⟨Bell| (a 4×4 matrix)
+   - Trace out qubit B: ρ_A = Tr_B(ρ_AB) = ½|0⟩⟨0| + ½|1⟩⟨1| = I/2
+   - Qubit A alone is maximally mixed, even though the joint state is pure!
+
+### Phase 4: Channels and Geometry (when ready)
+
+8. **Kraus operators in multi-qubit systems:**
+   - Apply X₀⊗I₁ to |Bell⟩. What happens?
+   - Apply Z₀⊗Z₁ to |GHZ₃⟩. Why is GHZ fragile to correlated Z-errors?
+
+9. **Connect to your experiment:**
+   - Re-derive why ΔCov mirrors the noise adjacency using the Kraus/Lindblad formalism
+   - Prove the Pauli invariance theorem using density matrix algebra (not just the counting argument)
+   - Show that the fingerprint direction m_topology is the off-diagonal structure of Σ_edges (L_corr ρ L_corr† - independent contribution)
+
+### Resources
+
+| Resource | Covers | Time | Style |
+|----------|--------|------|-------|
+| 3Blue1Brown "Essence of Linear Algebra" | Vectors, transforms, eigenvalues | 3-4 hrs | Visual, exactly your style |
+| 3Blue1Brown "Quantum Mechanics" series (if available) | Spin, measurement, complex amplitudes | 2-3 hrs | Visual |
+| Hidary "Quantum Computing: An Applied Approach" Ch 1-4 | Linear algebra for QC, density matrices | 1-2 weeks | Code-heavy, practical |
+| Nielsen & Chuang Ch 2 (just Ch 2!) | Postulates of QM, density matrices, spectral theorem | 1 week | Dense but definitive |
+| Preskill lecture notes Ch 3 | Open systems, channels, Kraus, Lindblad | 1-2 weeks | Free online, excellent |
