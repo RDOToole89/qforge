@@ -1,121 +1,190 @@
 'use dom';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import { V3, TAU, spherePoints, statePoints } from "../math";
 import type { ProbeStateConfig, RuntimeChannel } from "../types";
 
 interface BlochSceneProps {
-  state: ProbeStateConfig;
-  channel: RuntimeChannel | null;
-  errorRate: number;
-  pointCount: number;
+  runtimeCh: Record<string, RuntimeChannel>;
+  channel: string;
+  strength: number;
+  showOrig: boolean;
+  showTrans: boolean;
+  rotation: number;
+  stateCfg: ProbeStateConfig;
+  viewMode: "full" | "state";
 }
 
 export default function BlochScene({
-  state,
+  runtimeCh,
   channel,
-  errorRate,
-  pointCount,
+  strength,
+  showOrig,
+  showTrans,
+  rotation,
+  stateCfg,
+  viewMode,
 }: BlochSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
-    renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
-    cleanCloud: THREE.Points;
-    noisyCloud: THREE.Points;
-    frameId: number;
+    renderer: THREE.WebGLRenderer;
+    origCloud: THREE.Points;
+    transCloud: THREE.Points;
+    el: HTMLDivElement;
   } | null>(null);
+  const frameRef = useRef<number>(0);
 
-  // Initialize Three.js scene
+  // Keep current props in refs for animation loop
+  const pRef = useRef({ rotation, channel, strength, showOrig, showTrans });
   useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
+    pRef.current = { rotation, channel, strength, showOrig, showTrans };
+  });
+  const chRef = useRef(runtimeCh);
+  useEffect(() => { chRef.current = runtimeCh; }, [runtimeCh]);
 
-    const w = mount.clientWidth;
-    const h = mount.clientHeight;
+  const origPts = useMemo(() => {
+    return viewMode === "state" ? statePoints(stateCfg, 350) : spherePoints(350);
+  }, [stateCfg, viewMode]);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    mount.appendChild(renderer.domElement);
+  const origPtsRef = useRef(origPts);
+  useEffect(() => { origPtsRef.current = origPts; }, [origPts]);
+
+  // Remount key when view mode or state changes
+  const key = `${viewMode}-${stateCfg?.name}-${JSON.stringify(stateCfg?.bloch)}`;
+
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+    const w = el.clientWidth, h = el.clientHeight;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-    camera.position.set(2.2, 1.5, 2.2);
-    camera.lookAt(0, 0, 0);
+    scene.background = new THREE.Color(0x08090e);
+    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    el.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0x404060, 0.8));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.6);
+    dl.position.set(3, 4, 2);
+    scene.add(dl);
 
     // Wireframe sphere
-    const wireGeo = new THREE.SphereGeometry(1, 24, 16);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x334455,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.15,
-    });
-    scene.add(new THREE.Mesh(wireGeo, wireMat));
+    scene.add(new THREE.Mesh(
+      new THREE.SphereGeometry(1, 28, 20),
+      new THREE.MeshBasicMaterial({ color: 0x2a3a5a, wireframe: true, transparent: true, opacity: 0.12 }),
+    ));
 
     // Axes
-    const axisColors = [0xff4444, 0x44ff44, 0x4488ff];
-    const axisLabels = ["X", "Y", "Z"];
-    const axisDirs = [V3(1, 0, 0), V3(0, 1, 0), V3(0, 0, 1)];
-    axisDirs.forEach((dir, i) => {
-      const arrow = new THREE.ArrowHelper(
-        dir,
-        V3(0, 0, 0),
-        1.3,
-        axisColors[i],
-        0.08,
-        0.05,
-      );
-      scene.add(arrow);
+    const axC = [0xff4466, 0x44ff88, 0x4488ff];
+    [V3(1, 0, 0), V3(0, 1, 0), V3(0, 0, 1)].forEach((d, i) => {
+      scene.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([d.clone().multiplyScalar(-1.3), d.clone().multiplyScalar(1.3)]),
+        new THREE.LineBasicMaterial({ color: axC[i], transparent: true, opacity: 0.35 }),
+      ));
     });
 
-    // Point clouds
-    const makeCloud = (color: number, size: number): THREE.Points => {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(new Float32Array(pointCount * 3), 3),
+    // Pole dots
+    [V3(0, 0, 1.05), V3(0, 0, -1.05), V3(1.05, 0, 0), V3(-1.05, 0, 0), V3(0, 1.05, 0), V3(0, -1.05, 0)].forEach((pos, i) => {
+      const m = new THREE.Mesh(
+        new THREE.SphereGeometry(0.025, 8, 8),
+        new THREE.MeshBasicMaterial({ color: axC[Math.floor(i / 2)] }),
       );
-      const mat = new THREE.PointsMaterial({
-        color,
-        size,
-        transparent: true,
-        opacity: 0.7,
-        sizeAttenuation: true,
-      });
-      const pts = new THREE.Points(geo, mat);
-      scene.add(pts);
-      return pts;
+      m.position.set(pos.x, pos.z, pos.y); // swap Y/Z for Three.js
+      scene.add(m);
+    });
+
+    // Great circles
+    [0, 1, 2].forEach((ax) => {
+      const cp: THREE.Vector3[] = [];
+      for (let i = 0; i <= 64; i++) {
+        const a = (i / 64) * TAU;
+        if (ax === 0) cp.push(V3(Math.cos(a), Math.sin(a), 0));
+        else if (ax === 1) cp.push(V3(Math.cos(a), 0, Math.sin(a)));
+        else cp.push(V3(0, Math.cos(a), Math.sin(a)));
+      }
+      scene.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(cp),
+        new THREE.LineBasicMaterial({ color: 0x2a3a5a, transparent: true, opacity: 0.12 }),
+      ));
+    });
+
+    // State Bloch vector arrow
+    const bv = stateCfg?.bloch ?? { rx: 0, ry: 0, rz: 0 };
+    const bLen = Math.sqrt(bv.rx * bv.rx + bv.ry * bv.ry + bv.rz * bv.rz);
+    if (bLen > 0.05) {
+      const dir = V3(bv.rx, bv.rz, bv.ry); // swap Y/Z
+      const stColor = new THREE.Color(stateCfg.color ?? "#ffffff");
+      scene.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([V3(0, 0, 0), dir.clone().normalize().multiplyScalar(bLen)]),
+        new THREE.LineBasicMaterial({ color: stColor, linewidth: 2, transparent: true, opacity: 0.8 }),
+      ));
+      const tipMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.04, 8, 8),
+        new THREE.MeshBasicMaterial({ color: stColor }),
+      );
+      tipMesh.position.copy(dir.clone().normalize().multiplyScalar(bLen));
+      scene.add(tipMesh);
+    }
+
+    // Point clouds
+    const pts = origPtsRef.current;
+    const mkCloud = (color: number, size: number, opacity: number): THREE.Points => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts.length * 3), 3));
+      const c = new THREE.Points(g, new THREE.PointsMaterial({ color, size, transparent: true, opacity }));
+      scene.add(c);
+      return c;
     };
+    const origCloud = mkCloud(0x3366aa, 0.018, 0.3);
+    const transCloud = mkCloud(0xff9933, 0.022, 0.65);
 
-    const cleanCloud = makeCloud(0x44ddff, 0.025);
-    const noisyCloud = makeCloud(0xff6644, 0.025);
+    // Set initial positions for original cloud
+    const op = origCloud.geometry.attributes.position.array as Float32Array;
+    pts.forEach((p, i) => {
+      op[i * 3] = p.x;
+      op[i * 3 + 1] = p.z; // Three.js Y = Bloch Z (up)
+      op[i * 3 + 2] = p.y; // Three.js Z = Bloch Y
+    });
+    origCloud.geometry.attributes.position.needsUpdate = true;
 
-    let frameId = 0;
+    sceneRef.current = { scene, camera, renderer, origCloud, transCloud, el };
+
     const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      const t = Date.now() * 0.0003;
-      scene.rotation.y = t;
+      frameRef.current = requestAnimationFrame(animate);
+      const pr = pRef.current;
+      camera.position.set(
+        2.8 * Math.cos(pr.rotation),
+        1.4,
+        2.8 * Math.sin(pr.rotation),
+      );
+      camera.lookAt(0, 0, 0);
+
+      const ch = chRef.current[pr.channel];
+      const curPts = origPtsRef.current;
+      if (ch && curPts) {
+        const pos = transCloud.geometry.attributes.position.array as Float32Array;
+        curPts.forEach((pt, i) => {
+          const t = ch.apply(pt, pr.strength);
+          pos[i * 3] = t.x;
+          pos[i * 3 + 1] = t.z;
+          pos[i * 3 + 2] = t.y;
+        });
+        transCloud.geometry.attributes.position.needsUpdate = true;
+      }
+      transCloud.visible = pr.showTrans;
+      origCloud.visible = pr.showOrig;
       renderer.render(scene, camera);
     };
     animate();
 
-    sceneRef.current = {
-      renderer,
-      scene,
-      camera,
-      cleanCloud,
-      noisyCloud,
-      frameId,
-    };
-
     const handleResize = () => {
-      if (!mount) return;
-      const nw = mount.clientWidth;
-      const nh = mount.clientHeight;
+      if (!el) return;
+      const nw = el.clientWidth, nh = el.clientHeight;
       camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
@@ -124,60 +193,16 @@ export default function BlochScene({
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(frameId);
+      cancelAnimationFrame(frameRef.current);
       renderer.dispose();
-      if (mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
-      }
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
-  }, [pointCount]);
-
-  // Update point clouds when state/channel/error changes
-  useEffect(() => {
-    const s = sceneRef.current;
-    if (!s) return;
-
-    const cleanPts = statePoints(state, pointCount);
-    const cleanPos = s.cleanCloud.geometry.attributes
-      .position as THREE.BufferAttribute;
-    for (let i = 0; i < pointCount; i++) {
-      const pt = cleanPts[i] ?? V3(0, 0, 0);
-      cleanPos.setXYZ(i, pt.x, pt.y, pt.z);
-    }
-    cleanPos.needsUpdate = true;
-
-    // Noisy cloud
-    const noisyPos = s.noisyCloud.geometry.attributes
-      .position as THREE.BufferAttribute;
-    if (channel && errorRate > 0) {
-      const spherePts = spherePoints(pointCount);
-      for (let i = 0; i < pointCount; i++) {
-        const pt = channel.apply(
-          { x: spherePts[i].x, y: spherePts[i].y, z: spherePts[i].z },
-          errorRate,
-        );
-        noisyPos.setXYZ(i, pt.x, pt.y, pt.z);
-      }
-      (s.noisyCloud.material as THREE.PointsMaterial).opacity = 0.5;
-    } else {
-      for (let i = 0; i < pointCount; i++) {
-        noisyPos.setXYZ(i, 0, 0, 0);
-      }
-      (s.noisyCloud.material as THREE.PointsMaterial).opacity = 0;
-    }
-    noisyPos.needsUpdate = true;
-  }, [state, channel, errorRate, pointCount]);
+  }, [key]);
 
   return (
     <div
       ref={mountRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: 300,
-        borderRadius: 8,
-        overflow: "hidden",
-      }}
+      style={{ width: "100%", height: "100%", borderRadius: "8px", overflow: "hidden" }}
     />
   );
 }

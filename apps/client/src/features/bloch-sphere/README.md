@@ -20,23 +20,33 @@ The core loop: **state x channel x topology -> visual + quantitative output**, a
 
 ```
 src/features/bloch-sphere/
-  types.ts                  # All TypeScript interfaces
+  types.ts                  # All TypeScript interfaces (inc. ExperimentalDataEntry)
   config.ts                 # DEFAULT_CONFIG (5 states, 5 channels, 3 topologies)
   math.ts                   # Three.js helpers, point generation, Bloch map compilation
   index.ts                  # Barrel export
-  BlochSphereScreen.tsx     # Main composition component (use dom)
+  BlochSphereScreen.tsx     # Main orchestrator: tabs, state, drag-to-rotate, animation
   components/
-    BlochScene.tsx          # Single-qubit 3D Bloch sphere (Three.js, use dom)
-    TwoQubitScene.tsx       # 2-qubit correlator space visualization (Three.js, use dom)
-    PTMHeatmap.tsx          # 4x4 Pauli Transfer Matrix heatmap
-    CorrelatorBars.tsx      # Delta-correlator bar chart (clean vs noisy)
-    FingerprintViewer.tsx   # Experimental fingerprint norms + cosine similarity
-    ConfigEditor.tsx        # State/channel/topology selector with error rate slider
+    BlochScene.tsx          # Single-qubit 3D Bloch sphere with pole dots, great circles
+    TwoQubitScene.tsx       # 2-qubit correlator space with multi-topology clouds
+    PTMHeatmap.tsx          # 4x4 Pauli Transfer Matrix heatmap (orange/blue)
+    CorrelatorBars.tsx      # Delta-correlator bar chart with center-line style
+    FingerprintViewer.tsx   # Experimental fingerprint norms + cosine similarity matrix
+    ConfigEditor.tsx        # Modal JSON editor with import/export/reset
 ```
 
 ### Platform Strategy
 
 The entire screen is a `'use dom'` component. On web it renders natively; on React Native it runs inside an automatic webview via Expo's DOM component system. This is the right tradeoff — Three.js requires WebGL, and the visualization is inherently a web-first experience.
+
+### UI Design
+
+The interface uses a **dark hacker aesthetic** (#08090e background, #ff9933 orange accents, IBM Plex Sans font) with a tab-based layout:
+
+- **Header**: Title + tab buttons (1-Qubit, 2-Qubit, PTM, Data) + Config button
+- **Left sidebar**: Button-style selectors with colored dots and Z-basis badges. Shows state/channel/topology selectors contextually based on active tab. Includes strength slider, animate button, and view mode toggle.
+- **Center**: Full-screen 3D scene (drag to rotate). Shows BlochScene or TwoQubitScene depending on tab.
+- **Right sidebar**: Context-dependent info panels — Kraus operators, Bloch map formulas, PTM heatmap, delta-correlator bars, fingerprint viewer, research insights.
+- **Config modal**: Full JSON editor for states, channels, topologies, and experimental data.
 
 ---
 
@@ -52,13 +62,16 @@ The entire screen is a `'use dom'` component. On web it renders natively; on Rea
 - **Real-time deformation**: Drag the error rate slider and watch the point cloud contract
   - Blue cloud = original state, Orange cloud = after channel application
   - "Full Sphere" mode shows the entire Bloch ball; "State View" clusters points around the state's Bloch vector
+  - Toggle original/transformed clouds independently
 - **Animate button**: Cycles error rate 0 -> 1 -> 0 to show the full decoherence trajectory
-- **Drag to rotate** the 3D scene
+- **Drag to rotate** the 3D scene manually
+- **Sphere details**: Wireframe, great circles, pole dots, state Bloch vector arrow
 
 ### PTM View: Pauli Transfer Matrix
 
 - 4x4 heatmap showing how each Pauli component (I, X, Y, Z) maps through the channel
 - Color-coded: orange = positive transfer, blue = negative, blank = zero
+- Axis labels colored per Pauli operator
 - Updates in real-time with the error rate slider
 - Annotates when a state is Z-uniform (Z-row entries produce no measurable signal)
 
@@ -66,6 +79,8 @@ The entire screen is a `'use dom'` component. On web it renders natively; on Rea
 
 - Axes: ZI, IZ, ZZ (the Z-basis correlators)
 - **3 noise topologies**: Chain (correlated), Star (independent), Correlated ZZ
+- Each topology renders as a distinctly colored point cloud
+- **"All" mode**: Shows all topologies simultaneously for comparison
 - Shows how different topologies deform the correlator signature differently
 - **Delta-correlator bars**: Quantitative readout of how much each correlator shifts
 - Switch between probe states to see why GHZ shows strong Delta-ZZ while Cluster shows zero
@@ -73,15 +88,18 @@ The entire screen is a `'use dom'` component. On web it renders natively; on Rea
 ### Data View: Experimental Fingerprints
 
 - Load fingerprint vectors (15-dimensional for 6 qubits) from the framework's analysis pipeline
-- Displays fingerprint norms as bar charts
+- Displays fingerprint norms as bar charts (color-coded by topology)
 - Computes and displays cosine similarity matrix between all loaded fingerprints
-- Color-coded by noise topology
+- Up to 12 entries supported in the similarity matrix view
 
-### Config Editor
+### Config Editor (Modal)
 
-- Edit probe states, channels, topologies, and experimental data as JSON
+- Opens as a full-screen overlay via the Config button
+- Tabs: States, Channels, Exp. Data, Topologies
+- Edit any section as raw JSON
 - Import/export full configuration files
 - Reset to defaults
+- Click outside to dismiss
 
 ---
 
@@ -116,7 +134,7 @@ This visualizer directly illustrates the framework's key results:
 
 ### Loading Experimental Data
 
-The Data tab accepts fingerprint entries in this format:
+Open Config modal -> Exp. Data tab. The format:
 
 ```json
 [
@@ -210,21 +228,22 @@ Navigate to the "Visualizer" tab.
 - `three` — WebGL 3D rendering
 - `@types/three` — TypeScript definitions
 - Expo SDK 54 with `use dom` for native webview rendering
+- Volta pins Node.js to 20.18.1 (required for Expo SDK 54)
 
 ### Adding a New Probe State
 
-1. Add the state definition to `config.ts` → `DEFAULT_CONFIG.states`
+1. Add the state definition to `config.ts` -> `DEFAULT_CONFIG.states`
 2. Provide: `name`, `desc`, `bloch` vector, `correlators` signature, `color`, `zBasisSignal`, `insight`, `uniform`
 3. The state automatically appears in the sidebar selector
 
 ### Adding a New Channel
 
-1. Add the channel definition to `config.ts` → `DEFAULT_CONFIG.channels`
+1. Add the channel definition to `config.ts` -> `DEFAULT_CONFIG.channels`
 2. Provide: `name`, `desc`, `formula`, `blochMap` (string expressions using rx, ry, rz, p, sqrt), `kraus`, `geometry`, `insight`
 3. The Bloch map expressions are compiled at runtime into executable functions
 
 ### Adding a New Topology
 
-1. Add to `config.ts` → `DEFAULT_CONFIG.topologies`
+1. Add to `config.ts` -> `DEFAULT_CONFIG.topologies`
 2. Provide: `name`, `desc`, `corrGrowXX/YY/ZZ`, `singleQubitDecay`, optional `preserveZ`
 3. Appears in the 2-qubit topology selector

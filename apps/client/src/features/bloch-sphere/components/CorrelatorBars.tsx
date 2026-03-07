@@ -1,134 +1,65 @@
 'use dom';
 
-import React from "react";
-import type { CorrelatorSignature } from "../types";
+import { useMemo } from "react";
+import { generate2QFromState, apply2QNoise } from "../math";
+import type { ProbeStateConfig, TopologyConfig } from "../types";
 
 interface CorrelatorBarsProps {
-  clean: CorrelatorSignature;
-  noisy: CorrelatorSignature;
-  stateColor: string;
+  stateCfg: ProbeStateConfig;
+  topo: TopologyConfig;
+  strength: number;
 }
 
-const CORRELATOR_KEYS: (keyof CorrelatorSignature)[] = [
-  "zi",
-  "iz",
-  "zz",
-  "xx",
-  "yy",
-  "xz",
-  "zx",
-];
+export default function CorrelatorBars({ stateCfg, topo, strength }: CorrelatorBarsProps) {
+  const pts = useMemo(() => generate2QFromState(stateCfg, 100), [stateCfg]);
+  const noised = apply2QNoise(pts, topo, strength);
 
-export default function CorrelatorBars({
-  clean,
-  noisy,
-  stateColor,
-}: CorrelatorBarsProps) {
+  const avgOrig = { zi: 0, iz: 0, zz: 0 };
+  const avgNoise = { zi: 0, iz: 0, zz: 0 };
+  pts.forEach((p) => { avgOrig.zi += p.zi; avgOrig.iz += p.iz; avgOrig.zz += p.zz; });
+  noised.forEach((p) => { avgNoise.zi += p.zi; avgNoise.iz += p.iz; avgNoise.zz += p.zz; });
+
+  const n = pts.length;
+  const delta = {
+    zi: avgNoise.zi / n - avgOrig.zi / n,
+    iz: avgNoise.iz / n - avgOrig.iz / n,
+    zz: avgNoise.zz / n - avgOrig.zz / n,
+  };
+
+  const bars = [
+    { label: "\u0394\u27E8ZI\u27E9", value: delta.zi, color: "#ff4466" },
+    { label: "\u0394\u27E8IZ\u27E9", value: delta.iz, color: "#44ff88" },
+    { label: "\u0394\u27E8ZZ\u27E9", value: delta.zz, color: "#4488ff" },
+  ];
+  const mx = Math.max(...bars.map((b) => Math.abs(b.value)), 0.001);
+
   return (
-    <div style={{ fontFamily: "monospace", fontSize: 12 }}>
-      <div
-        style={{
-          color: "#94a3b8",
-          marginBottom: 8,
-          fontWeight: 600,
-          fontSize: 13,
-        }}
-      >
-        Correlator Signature
-      </div>
-      {CORRELATOR_KEYS.map((key) => {
-        const cleanVal = clean[key] ?? 0;
-        const noisyVal = noisy[key] ?? 0;
-        if (cleanVal === 0 && noisyVal === 0) return null;
-
-        const barWidth = (v: number) =>
-          `${Math.min(Math.abs(v) * 100, 100)}%`;
-
-        return (
-          <div key={key} style={{ marginBottom: 6 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                color: "#94a3b8",
-                marginBottom: 2,
-              }}
-            >
-              <span style={{ textTransform: "uppercase", fontSize: 10 }}>
-                {String(key)}
-              </span>
-              <span style={{ fontSize: 10 }}>
-                {cleanVal.toFixed(2)} {"\u2192"} {noisyVal.toFixed(2)}
-              </span>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                height: 8,
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: 4,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  left: cleanVal >= 0 ? "50%" : undefined,
-                  right: cleanVal < 0 ? "50%" : undefined,
-                  top: 0,
-                  height: "100%",
-                  width: barWidth(cleanVal),
-                  background: stateColor,
-                  opacity: 0.3,
-                  borderRadius: 4,
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  left: noisyVal >= 0 ? "50%" : undefined,
-                  right: noisyVal < 0 ? "50%" : undefined,
-                  top: 0,
-                  height: "100%",
-                  width: barWidth(noisyVal),
-                  background: stateColor,
-                  opacity: 0.8,
-                  borderRadius: 4,
-                }}
-              />
-            </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      {bars.map((b) => (
+        <div key={b.label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div style={{ width: "44px", fontSize: "10px", fontFamily: "monospace", color: b.color, textAlign: "right" }}>
+            {b.label}
           </div>
-        );
-      })}
-      <div style={{ marginTop: 8, fontSize: 10, color: "#64748b" }}>
-        <span
-          style={{
-            display: "inline-block",
-            width: 10,
-            height: 10,
-            background: stateColor,
-            opacity: 0.3,
-            borderRadius: 2,
-            marginRight: 4,
-            verticalAlign: "middle",
-          }}
-        />
-        Clean{" "}
-        <span
-          style={{
-            display: "inline-block",
-            width: 10,
-            height: 10,
-            background: stateColor,
-            opacity: 0.8,
-            borderRadius: 2,
-            marginRight: 4,
-            marginLeft: 8,
-            verticalAlign: "middle",
-          }}
-        />
-        Noisy
-      </div>
+          <div style={{
+            flex: 1, height: "12px", background: "rgba(255,255,255,0.03)",
+            borderRadius: "3px", position: "relative", overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", left: "50%", top: 0, bottom: 0,
+              width: "1px", background: "rgba(255,255,255,0.1)",
+            }} />
+            <div style={{
+              position: "absolute", left: "50%", top: 0, bottom: 0,
+              width: `${(Math.abs(b.value) / mx) * 50}%`,
+              background: b.color, opacity: 0.5, borderRadius: "2px",
+              transform: b.value >= 0 ? "none" : "translateX(-100%)",
+            }} />
+          </div>
+          <div style={{ width: "48px", fontSize: "9px", fontFamily: "monospace", color: "#667", textAlign: "right" }}>
+            {b.value.toFixed(4)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

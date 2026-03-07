@@ -12,6 +12,6 @@ export type {
   PTMFn,
   TwoQubitPoint,
   NoisedTwoQubitPoint,
-  FingerprintEntry,
+  ExperimentalDataEntry,
 } from "./types";
 export { DEFAULT_CONFIG } from "./config";

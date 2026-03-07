@@ -1,219 +1,177 @@
 'use dom';
 
-import React from "react";
+import { useState, useEffect } from "react";
+import { DEFAULT_CONFIG } from "../config";
+import type { BlochConfig } from "../types";
 
 interface ConfigEditorProps {
-  /** Keys of available states */
-  stateKeys: string[];
-  /** Display names for states */
-  stateNames: Record<string, string>;
-  /** Currently selected state key */
-  selectedState: string;
-  onStateChange: (key: string) => void;
-
-  /** Keys of available channels */
-  channelKeys: string[];
-  /** Display names for channels */
-  channelNames: Record<string, string>;
-  /** Currently selected channel key */
-  selectedChannel: string;
-  onChannelChange: (key: string) => void;
-
-  /** Keys of available topologies */
-  topoKeys: string[];
-  /** Display names for topologies */
-  topoNames: Record<string, string>;
-  /** Currently selected topology key */
-  selectedTopo: string;
-  onTopoChange: (key: string) => void;
-
-  /** Error rate 0-1 */
-  errorRate: number;
-  onErrorRateChange: (rate: number) => void;
-
-  /** State color for accent */
-  stateColor: string;
-
-  /** Insight text for current state */
-  insight: string;
-
-  /** Z-basis signal strength label */
-  zBasisSignal: string;
+  config: BlochConfig;
+  onUpdate: (config: BlochConfig) => void;
+  onClose: () => void;
 }
 
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "6px 8px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 6,
-  color: "#e2e8f0",
-  fontSize: 13,
-  fontFamily: "monospace",
-  outline: "none",
-  cursor: "pointer",
+type TabKey = "states" | "channels" | "data" | "topologies";
+
+const HINTS: Record<TabKey, string> = {
+  states: 'Define probe states with bloch: {rx, ry, rz}, correlators: {zi, iz, zz, xx, yy}, uniform: bool',
+  channels: 'Define channels with blochMap: {rx, ry, rz} expressions. Vars: rx, ry, rz, p, sqrt()',
+  data: 'Array of {label, noiseStrength, topology, fingerprint: [15 floats]}',
+  topologies: 'Define 2Q topologies with corrGrowXX/YY/ZZ, singleQubitDecay',
 };
 
-const labelStyle: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: 11,
-  fontWeight: 600,
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.05em",
-  marginBottom: 4,
-  display: "block",
-};
+export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditorProps) {
+  const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<TabKey>("states");
 
-export default function ConfigEditor({
-  stateKeys,
-  stateNames,
-  selectedState,
-  onStateChange,
-  channelKeys,
-  channelNames,
-  selectedChannel,
-  onChannelChange,
-  topoKeys,
-  topoNames,
-  selectedTopo,
-  onTopoChange,
-  errorRate,
-  onErrorRateChange,
-  stateColor,
-  insight,
-  zBasisSignal,
-}: ConfigEditorProps) {
+  useEffect(() => {
+    const sections: Record<TabKey, unknown> = {
+      states: config.states,
+      channels: config.channels,
+      data: config.experimentalData,
+      topologies: config.topologies,
+    };
+    setText(JSON.stringify(sections[tab] ?? {}, null, 2));
+  }, [tab, config]);
+
+  const apply = () => {
+    try {
+      const parsed = JSON.parse(text);
+      const updated = { ...config };
+      if (tab === "states") updated.states = parsed;
+      else if (tab === "channels") updated.channels = parsed;
+      else if (tab === "data") updated.experimentalData = parsed;
+      else updated.topologies = parsed;
+      setError(null);
+      onUpdate(updated);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Parse error");
+    }
+  };
+
+  const exportCfg = () => {
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "bloch-cptp-config.json";
+    a.click();
+  };
+
+  const importCfg = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          onUpdate(JSON.parse(ev.target?.result as string));
+          setError(null);
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err.message : "Parse error");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   return (
-    <div style={{ fontFamily: "monospace", fontSize: 13 }}>
-      {/* State selector */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={labelStyle}>Probe State</label>
-        <select
-          style={{ ...selectStyle, borderColor: stateColor }}
-          value={selectedState}
-          onChange={(e) => onStateChange(e.target.value)}
-        >
-          {stateKeys.map((k) => (
-            <option key={k} value={k}>
-              {stateNames[k]}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "rgba(0,0,0,0.7)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        width: "720px", maxHeight: "85vh", background: "#0c0e18",
+        border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px",
+        display: "flex", flexDirection: "column", overflow: "hidden",
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+          display: "flex", alignItems: "center", gap: "10px",
+        }}>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: "#e8eef6" }}>Config</span>
+          <div style={{
+            display: "flex", gap: "3px",
+            background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px",
+          }}>
+            {(["states", "channels", "data", "topologies"] as TabKey[]).map((t) => (
+              <button key={t} onClick={() => setTab(t)} style={{
+                padding: "4px 10px", borderRadius: "4px", border: "none",
+                fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
+                background: tab === t ? "rgba(255,153,51,0.15)" : "transparent",
+                color: tab === t ? "#ff9933" : "#5a6a82",
+              }}>
+                {t === "data" ? "Exp. Data" : t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+          <div style={{ flex: 1 }} />
+          <button onClick={onClose} style={{
+            background: "none", border: "none", color: "#667",
+            fontSize: "18px", cursor: "pointer",
+          }}>x</button>
+        </div>
 
-      {/* Z-basis signal badge */}
-      <div style={{ marginBottom: 12 }}>
-        <span
+        {/* Hint */}
+        <div style={{ padding: "6px 16px 0", fontSize: "11px", color: "#5a6a82", lineHeight: "1.5" }}>
+          {HINTS[tab]}
+        </div>
+
+        {/* Editor */}
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          spellCheck={false}
           style={{
-            display: "inline-block",
-            padding: "2px 8px",
-            borderRadius: 4,
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            background:
-              zBasisSignal === "strong"
-                ? "rgba(68, 255, 136, 0.15)"
-                : zBasisSignal === "weak"
-                  ? "rgba(255, 200, 50, 0.15)"
-                  : "rgba(255, 68, 102, 0.15)",
-            color:
-              zBasisSignal === "strong"
-                ? "#44ff88"
-                : zBasisSignal === "weak"
-                  ? "#ffc832"
-                  : "#ff4466",
-            border: `1px solid ${
-              zBasisSignal === "strong"
-                ? "rgba(68, 255, 136, 0.3)"
-                : zBasisSignal === "weak"
-                  ? "rgba(255, 200, 50, 0.3)"
-                  : "rgba(255, 68, 102, 0.3)"
-            }`,
-          }}
-        >
-          Z-basis: {zBasisSignal}
-        </span>
-      </div>
-
-      {/* Insight text */}
-      <div
-        style={{
-          color: "#94a3b8",
-          fontSize: 11,
-          lineHeight: 1.5,
-          marginBottom: 16,
-          padding: "8px 10px",
-          background: "rgba(255,255,255,0.03)",
-          borderRadius: 6,
-          borderLeft: `3px solid ${stateColor}`,
-        }}
-      >
-        {insight}
-      </div>
-
-      {/* Channel selector */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={labelStyle}>Noise Channel</label>
-        <select
-          style={selectStyle}
-          value={selectedChannel}
-          onChange={(e) => onChannelChange(e.target.value)}
-        >
-          {channelKeys.map((k) => (
-            <option key={k} value={k}>
-              {channelNames[k]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Topology selector */}
-      <div style={{ marginBottom: 16 }}>
-        <label style={labelStyle}>Topology</label>
-        <select
-          style={selectStyle}
-          value={selectedTopo}
-          onChange={(e) => onTopoChange(e.target.value)}
-        >
-          {topoKeys.map((k) => (
-            <option key={k} value={k}>
-              {topoNames[k]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Error rate slider */}
-      <div style={{ marginBottom: 8 }}>
-        <label style={labelStyle}>
-          Error Rate: {(errorRate * 100).toFixed(0)}%
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={errorRate}
-          onChange={(e) => onErrorRateChange(parseFloat(e.target.value))}
-          style={{
-            width: "100%",
-            accentColor: stateColor,
-            cursor: "pointer",
+            flex: 1, margin: "10px 16px", padding: "12px",
+            background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "8px", color: "#b8c4d8", fontFamily: "monospace",
+            fontSize: "11px", lineHeight: "1.5", resize: "none", outline: "none",
+            minHeight: "200px",
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: 9,
-            color: "#64748b",
-            marginTop: 2,
-          }}
-        >
-          <span>0%</span>
-          <span>50%</span>
-          <span>100%</span>
+
+        {/* Error */}
+        {error && (
+          <div style={{
+            margin: "0 16px 8px", padding: "6px 10px",
+            background: "rgba(255,68,68,0.1)", border: "1px solid rgba(255,68,68,0.2)",
+            borderRadius: "6px", fontSize: "11px", color: "#ff6666",
+          }}>{error}</div>
+        )}
+
+        {/* Actions */}
+        <div style={{
+          padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.06)",
+          display: "flex", gap: "6px",
+        }}>
+          {([
+            ["Apply", "#ff9933", apply] as const,
+            ["Export", "#4488ff", exportCfg] as const,
+            ["Import", "#44ff88", importCfg] as const,
+          ]).map(([label, color, fn]) => (
+            <button key={label} onClick={fn} style={{
+              padding: "5px 12px", borderRadius: "5px",
+              border: `1px solid ${color}44`, background: `${color}15`,
+              color, fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
+            }}>{label}</button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <button onClick={() => onUpdate(DEFAULT_CONFIG)} style={{
+            padding: "5px 12px", borderRadius: "5px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#667", fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
+          }}>Reset</button>
         </div>
       </div>
     </div>

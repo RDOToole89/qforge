@@ -67,12 +67,20 @@ export interface DisplayConfig {
   backgroundColor: string;
 }
 
+/** Experimental data fingerprint entry */
+export interface ExperimentalDataEntry {
+  label: string;
+  noiseStrength: number;
+  topology: string;
+  fingerprint: number[];
+}
+
 /** Top-level Bloch config shape */
 export interface BlochConfig {
   states: Record<string, ProbeStateConfig>;
   channels: Record<string, ChannelConfig>;
   topologies: Record<string, TopologyConfig>;
-  experimentalData: unknown[];
+  experimentalData: ExperimentalDataEntry[];
   display: DisplayConfig;
 }
 
@@ -107,11 +115,4 @@ export interface NoisedTwoQubitPoint {
   zi: number;
   iz: number;
   zz: number;
-}
-
-/** Correlator fingerprint entry */
-export interface FingerprintEntry {
-  label: string;
-  clean: number;
-  noisy: number;
 }

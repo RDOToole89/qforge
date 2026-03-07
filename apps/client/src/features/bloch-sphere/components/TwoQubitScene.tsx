@@ -1,123 +1,126 @@
 'use dom';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
 import { V3, generate2QFromState, apply2QNoise } from "../math";
-import type {
-  ProbeStateConfig,
-  TopologyConfig,
-} from "../types";
+import type { ProbeStateConfig, TopologyConfig } from "../types";
 
 interface TwoQubitSceneProps {
-  state: ProbeStateConfig;
-  topology: TopologyConfig;
-  errorRate: number;
+  topoConfigs: Record<string, TopologyConfig>;
+  activeTopo: string; // key or "all"
+  strength: number;
+  rotation: number;
+  stateCfg: ProbeStateConfig;
 }
 
 export default function TwoQubitScene({
-  state,
-  topology,
-  errorRate,
+  topoConfigs,
+  activeTopo,
+  strength,
+  rotation,
+  stateCfg,
 }: TwoQubitSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<{
-    renderer: THREE.WebGLRenderer;
-    scene: THREE.Scene;
-    camera: THREE.PerspectiveCamera;
-    cleanCloud: THREE.Points;
-    noisyCloud: THREE.Points;
-    frameId: number;
-  } | null>(null);
+  const frameRef = useRef<number>(0);
+
+  const pRef = useRef({ rotation, activeTopo, strength });
+  useEffect(() => { pRef.current = { rotation, activeTopo, strength }; });
+  const topoRef = useRef(topoConfigs);
+  useEffect(() => { topoRef.current = topoConfigs; }, [topoConfigs]);
+
+  const basePts = useMemo(() => generate2QFromState(stateCfg, 450), [stateCfg]);
+  const basePtsRef = useRef(basePts);
+  useEffect(() => { basePtsRef.current = basePts; }, [basePts]);
+
+  const key = `2q-${stateCfg?.name}-${JSON.stringify(stateCfg?.correlators)}`;
 
   useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
-
-    const w = mount.clientWidth;
-    const h = mount.clientHeight;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    mount.appendChild(renderer.domElement);
+    const el = mountRef.current;
+    if (!el) return;
+    const w = el.clientWidth, h = el.clientHeight;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-    camera.position.set(2.5, 1.8, 2.5);
-    camera.lookAt(0, 0, 0);
+    scene.background = new THREE.Color(0x08090e);
+    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    el.appendChild(renderer.domElement);
 
-    // Axes for correlator space: ZI, IZ, ZZ
-    const axisColors = [0xff4444, 0x44ff44, 0x4488ff];
-    const axisDirs = [V3(1, 0, 0), V3(0, 1, 0), V3(0, 0, 1)];
-    axisDirs.forEach((dir, i) => {
-      const arrow = new THREE.ArrowHelper(
-        dir,
-        V3(0, 0, 0),
-        1.3,
-        axisColors[i],
-        0.08,
-        0.05,
-      );
-      scene.add(arrow);
-      const negArrow = new THREE.ArrowHelper(
-        dir.clone().negate(),
-        V3(0, 0, 0),
-        1.3,
-        axisColors[i],
-        0.08,
-        0.05,
-      );
-      scene.add(negArrow);
+    scene.add(new THREE.AmbientLight(0x404060, 0.8));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.6);
+    dl.position.set(3, 4, 2);
+    scene.add(dl);
+
+    // Axes: ZI, IZ, ZZ
+    const axC = [0xff4466, 0x44ff88, 0x4488ff];
+    [V3(1, 0, 0), V3(0, 1, 0), V3(0, 0, 1)].forEach((d, i) => {
+      scene.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([d.clone().multiplyScalar(-1.4), d.clone().multiplyScalar(1.4)]),
+        new THREE.LineBasicMaterial({ color: axC[i], transparent: true, opacity: 0.4 }),
+      ));
     });
 
-    // Grid plane
-    const grid = new THREE.GridHelper(2, 10, 0x222244, 0x111133);
-    scene.add(grid);
+    const pts = basePtsRef.current;
 
-    const N = 400;
-    const makeCloud = (color: number, size: number): THREE.Points => {
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(new Float32Array(N * 3), 3),
-      );
-      const mat = new THREE.PointsMaterial({
-        color,
-        size,
-        transparent: true,
-        opacity: 0.6,
-        sizeAttenuation: true,
-      });
-      const pts = new THREE.Points(geo, mat);
-      scene.add(pts);
-      return pts;
+    const mkCloud = (color: number, size: number, opacity: number): THREE.Points => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts.length * 3), 3));
+      const c = new THREE.Points(g, new THREE.PointsMaterial({ color, size, transparent: true, opacity }));
+      scene.add(c);
+      return c;
     };
 
-    const cleanCloud = makeCloud(0x44ddff, 0.03);
-    const noisyCloud = makeCloud(0xff6644, 0.03);
+    // Original cloud
+    const origCloud = mkCloud(0x3366aa, 0.016, 0.25);
+    const op = origCloud.geometry.attributes.position.array as Float32Array;
+    pts.forEach((p, i) => {
+      op[i * 3] = p.zi;
+      op[i * 3 + 1] = p.zz;
+      op[i * 3 + 2] = p.iz;
+    });
+    origCloud.geometry.attributes.position.needsUpdate = true;
 
-    let frameId = 0;
+    // Topology clouds with distinct colors
+    const topoColors = [0xff9933, 0xcc44ff, 0x44ddff, 0xff4466, 0x44ff88];
+    const topoClouds: Record<string, THREE.Points> = {};
+    Object.keys(topoConfigs).forEach((k, i) => {
+      topoClouds[k] = mkCloud(topoColors[i % topoColors.length], 0.022, 0.6);
+    });
+
     const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      const t = Date.now() * 0.0002;
-      scene.rotation.y = t;
+      frameRef.current = requestAnimationFrame(animate);
+      const pr = pRef.current;
+      camera.position.set(
+        3.0 * Math.cos(pr.rotation),
+        1.6,
+        3.0 * Math.sin(pr.rotation),
+      );
+      camera.lookAt(0, 0, 0);
+
+      const topos = topoRef.current;
+      const curPts = basePtsRef.current;
+      for (const [k, cloud] of Object.entries(topoClouds)) {
+        const show = pr.activeTopo === "all" || pr.activeTopo === k;
+        cloud.visible = show;
+        if (show && topos[k] && curPts) {
+          const noised = apply2QNoise(curPts, topos[k], pr.strength);
+          const pos = cloud.geometry.attributes.position.array as Float32Array;
+          noised.forEach((pt, i) => {
+            pos[i * 3] = pt.zi;
+            pos[i * 3 + 1] = pt.zz;
+            pos[i * 3 + 2] = pt.iz;
+          });
+          cloud.geometry.attributes.position.needsUpdate = true;
+        }
+      }
       renderer.render(scene, camera);
     };
     animate();
 
-    sceneRef.current = {
-      renderer,
-      scene,
-      camera,
-      cleanCloud,
-      noisyCloud,
-      frameId,
-    };
-
     const handleResize = () => {
-      if (!mount) return;
-      const nw = mount.clientWidth;
-      const nh = mount.clientHeight;
+      if (!el) return;
+      const nw = el.clientWidth, nh = el.clientHeight;
       camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
@@ -126,57 +129,16 @@ export default function TwoQubitScene({
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(frameId);
+      cancelAnimationFrame(frameRef.current);
       renderer.dispose();
-      if (mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
-      }
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
-  }, []);
-
-  // Update points
-  useEffect(() => {
-    const s = sceneRef.current;
-    if (!s) return;
-    const N = 400;
-
-    const cleanSamples = generate2QFromState(state, N);
-    const cleanPos = s.cleanCloud.geometry.attributes
-      .position as THREE.BufferAttribute;
-    for (let i = 0; i < N; i++) {
-      const pt = cleanSamples[i];
-      cleanPos.setXYZ(i, pt.zi, pt.iz, pt.zz);
-    }
-    cleanPos.needsUpdate = true;
-
-    const noisyPos = s.noisyCloud.geometry.attributes
-      .position as THREE.BufferAttribute;
-    if (errorRate > 0) {
-      const noised = apply2QNoise(cleanSamples, topology, errorRate);
-      for (let i = 0; i < N; i++) {
-        const pt = noised[i];
-        noisyPos.setXYZ(i, pt.zi, pt.iz, pt.zz);
-      }
-      (s.noisyCloud.material as THREE.PointsMaterial).opacity = 0.5;
-    } else {
-      for (let i = 0; i < N; i++) {
-        noisyPos.setXYZ(i, 0, 0, 0);
-      }
-      (s.noisyCloud.material as THREE.PointsMaterial).opacity = 0;
-    }
-    noisyPos.needsUpdate = true;
-  }, [state, topology, errorRate]);
+  }, [key]);
 
   return (
     <div
       ref={mountRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: 250,
-        borderRadius: 8,
-        overflow: "hidden",
-      }}
+      style={{ width: "100%", height: "100%", borderRadius: "8px", overflow: "hidden" }}
     />
   );
 }

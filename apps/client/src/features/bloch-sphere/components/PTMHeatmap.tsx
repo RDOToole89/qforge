@@ -1,92 +1,58 @@
 'use dom';
 
-import React from "react";
+import type { RuntimeChannel } from "../types";
 
 interface PTMHeatmapProps {
-  matrix: number[][];
-  channelName: string;
+  runtimeCh: Record<string, RuntimeChannel>;
+  channel: string;
+  strength: number;
 }
 
 const LABELS = ["I", "X", "Y", "Z"];
+const LABEL_COLORS = ["#8899aa", "#ff4466", "#44ff88", "#4488ff"];
 
-function cellColor(v: number): string {
-  const abs = Math.abs(v);
-  if (v > 0.01) return `rgba(68, 221, 255, ${abs})`;
-  if (v < -0.01) return `rgba(255, 100, 68, ${abs})`;
-  return "rgba(255,255,255,0.03)";
-}
+export default function PTMHeatmap({ runtimeCh, channel, strength }: PTMHeatmapProps) {
+  const ch = runtimeCh[channel];
+  if (!ch) return null;
 
-export default function PTMHeatmap({ matrix, channelName }: PTMHeatmapProps) {
+  const ptm = ch.ptm(strength);
+  const mx = Math.max(...ptm.flat().map(Math.abs), 0.01);
+
+  const bg = (v: number): string => {
+    const t = v / mx;
+    if (t > 0.01) return `rgba(255,153,51,${Math.min(t * 0.7, 0.65)})`;
+    if (t < -0.01) return `rgba(68,136,255,${Math.min(Math.abs(t) * 0.7, 0.65)})`;
+    return "rgba(255,255,255,0.02)";
+  };
+
   return (
-    <div style={{ fontFamily: "monospace", fontSize: 12 }}>
-      <div
-        style={{
-          color: "#94a3b8",
-          marginBottom: 6,
-          fontWeight: 600,
-          fontSize: 13,
-        }}
-      >
-        PTM: {channelName}
+    <div>
+      <div style={{ display: "flex", marginLeft: "28px" }}>
+        {LABELS.map((l, i) => (
+          <div key={l} style={{
+            width: "42px", textAlign: "center", fontSize: "10px",
+            color: LABEL_COLORS[i], fontFamily: "monospace", fontWeight: 600,
+          }}>{l}</div>
+        ))}
       </div>
-      <table
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-        }}
-      >
-        <thead>
-          <tr>
-            <th style={{ width: 24 }} />
-            {LABELS.map((l) => (
-              <th
-                key={l}
-                style={{
-                  color: "#64748b",
-                  padding: "2px 6px",
-                  textAlign: "center",
-                  fontSize: 11,
-                }}
-              >
-                {l}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {matrix.map((row, i) => (
-            <tr key={i}>
-              <td
-                style={{
-                  color: "#64748b",
-                  paddingRight: 4,
-                  textAlign: "right",
-                  fontSize: 11,
-                }}
-              >
-                {LABELS[i]}
-              </td>
-              {row.map((v, j) => (
-                <td
-                  key={j}
-                  style={{
-                    background: cellColor(v),
-                    color: Math.abs(v) > 0.3 ? "#fff" : "#94a3b8",
-                    textAlign: "center",
-                    padding: "4px 6px",
-                    borderRadius: 3,
-                    border: "1px solid rgba(255,255,255,0.05)",
-                    fontSize: 11,
-                    minWidth: 40,
-                  }}
-                >
-                  {v.toFixed(2)}
-                </td>
-              ))}
-            </tr>
+      {ptm.map((row, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center" }}>
+          <div style={{
+            width: "28px", fontSize: "10px", textAlign: "right", paddingRight: "5px",
+            color: LABEL_COLORS[i], fontFamily: "monospace", fontWeight: 600,
+          }}>{LABELS[i]}</div>
+          {row.map((v, j) => (
+            <div key={j} style={{
+              width: "42px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center",
+              background: bg(v), borderRadius: "3px", margin: "1px",
+              fontSize: "10px", fontFamily: "monospace",
+              color: Math.abs(v) > 0.25 ? "#fff" : "#556",
+            }}>
+              {Math.abs(v) > 0.005 ? v.toFixed(2) : ""}
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      ))}
     </div>
   );
 }

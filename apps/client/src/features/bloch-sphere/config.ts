@@ -175,6 +175,6 @@ export const DEFAULT_CONFIG: BlochConfig = {
       preserveZ: true,
     },
   },
-  experimentalData: [],
+  experimentalData: [] as import("./types").ExperimentalDataEntry[],
   display: { pointCount: 350, backgroundColor: "#08090e" },
 };
