@@ -37,3 +37,6 @@ apps/client/android/
 apps/client/.expo/
 *.tsbuildinfo
 pnpm-lock.yaml
+
+# Private context (session notes, not for repo)
+.context/

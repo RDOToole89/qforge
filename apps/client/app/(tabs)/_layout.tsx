@@ -41,6 +41,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="visualizer"
+        options={{
+          title: "Visualizer",
+          tabBarIcon: ({ color }) => <TabBarIcon name="cube" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="registry"
         options={{
           title: "Registry",
