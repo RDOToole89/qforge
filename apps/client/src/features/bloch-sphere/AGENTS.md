@@ -4,23 +4,27 @@ Quick reference for AI agents working on this component.
 
 ## What This Is
 
-An interactive 3D visualization of quantum noise channels on the Bloch sphere, integrated into an Expo app. It shows how different probe states (GHZ, W, Cluster, etc.) respond to different noise channels and topologies — directly tied to the Qiskit Experiment Framework's structured decoherence research.
+An interactive 3D visualization of quantum noise channels on the Bloch sphere, integrated into an Expo app. Two modes:
+
+- **Built-in mode**: Hardcoded educational examples showing how probe states (GHZ, W, Cluster, etc.) respond to noise channels and topologies
+- **Experiment mode**: Live data from the Python experiment pipeline — per-qubit Bloch vectors from partial traces, real correlators, mutual information, and animated decoherence sweeps
 
 ## UI Layout
 
 The interface follows a **tab-based full-screen** design:
 
 ```
-[Header: Title | 1-Qubit | 2-Qubit | PTM | Data |        | Config btn]
+[Header: [Built-in|Experiment] | 1-Qubit | 2-Qubit | PTM | Data | Config btn]
 [Left Sidebar]  [        Full-screen 3D Scene          ]  [Right Sidebar]
 [State buttons] [   BlochScene OR TwoQubitScene         ]  [Context panels]
 [Channel btns ] [   (drag to rotate)                    ]  [Kraus/PTM/etc]
 [Controls     ] [                                       ]  [Insight text ]
 ```
 
-- Left sidebar: button-style selectors (states, channels, topologies) — context-dependent on active tab
+- **Mode toggle**: switches between Built-in (hardcoded) and Experiment (live data) modes
+- Left sidebar: in built-in mode, button-style selectors; in experiment mode, result picker + sweep controls
 - Center: single full-screen Three.js scene (NOT split view)
-- Right sidebar: info panels that change per tab
+- Right sidebar: info panels that change per tab and mode (includes educational explainers in experiment mode)
 - Config button opens a modal overlay with JSON editor
 
 ## File Map
@@ -35,24 +39,39 @@ math.ts               Pure functions. V3(), spherePoints(), compileBlochMap(), b
                       like "(1-p)*rx" into executable Bloch map functions.
                       buildRuntime() takes config.channels and returns RuntimeChannel objects
                       with compiled apply() and ptm() methods.
-BlochSphereScreen.tsx  Main orchestrator. Manages all state: tab, selected state/channel/topo,
-                      strength, animation, drag rotation, view mode, cloud visibility.
+experimentAdapter.ts  Pure functions converting BlochVisualizerData (API response) into
+                      existing component prop shapes (ProbeStateConfig, etc.).
+                      Functions: blochDataToStateCfg(), blochDataToAllQubits(),
+                      blochDataToPairCfg(), blochDataToFingerprints(), getQubitPairs().
+                      Also exports QUBIT_COLORS palette for per-qubit coloring.
+BlochSphereScreen.tsx  Main orchestrator. Manages all state: tab, mode (builtin/experiment),
+                      selected state/channel/topo, strength, animation, drag rotation,
+                      experiment result selection, sweep config/animation.
+                      Contains inline MIMatrixHeatmap component.
                       USE DOM component.
 components/
   BlochScene.tsx       Three.js scene: wireframe sphere, axes, great circles, pole dots,
                       state Bloch vector arrow, point clouds (blue original + orange transformed).
-                      Controlled rotation via parent (drag-to-rotate). USE DOM.
+                      In experiment mode: renders additionalStates as colored spheres,
+                      skips transformed cloud. Controlled rotation via parent. USE DOM.
   TwoQubitScene.tsx    Three.js scene: 3-axis correlator space (ZI, IZ, ZZ).
                       Multiple topology clouds with distinct colors. Supports "all" mode.
                       Controlled rotation via parent. USE DOM.
   PTMHeatmap.tsx       4x4 grid showing Pauli Transfer Matrix values. Orange=positive, blue=negative.
-                      Takes runtimeCh + channel key + strength. Pure HTML/CSS.
+                      Takes runtimeCh + channel key + strength. Accepts optional rawMatrix
+                      prop to render directly without computing from channel. Pure HTML/CSS.
   CorrelatorBars.tsx   Delta-correlator horizontal bars with center-line style.
                       Takes stateCfg + topology + strength. Generates sample points internally.
+                      Accepts optional experimentCorrelators prop to show actual measured
+                      Pauli expectation values (ZI, IZ, ZZ, XX, YY) instead of deltas.
   FingerprintViewer.tsx Displays loaded ExperimentalDataEntry[] with norms bars + cosine
                       similarity matrix. Color-coded by topology.
   ConfigEditor.tsx     Modal overlay with JSON editor. Tabs: States, Channels, Exp. Data,
                       Topologies. Apply/Export/Import/Reset buttons.
+  ReducedStateExplainer.tsx  Educational panel for experiment mode. Four contexts:
+                      "single" (reduced density matrix), "diagonal_warning" (Z-basis only),
+                      "multi_qubit_insight" (structured decoherence), "multi" (two-qubit
+                      correlators). Explains partial traces, purity, and measurement limits.
 ```
 
 ## Critical Implementation Details
@@ -102,7 +121,28 @@ The 2-qubit view uses a simplified noise model (not full Qiskit simulation):
 - `corrGrowZZ/XX/YY`: how fast 2-body correlators grow (topology effect)
 - `preserveZ`: if true, Z-component doesn't decay (models pure dephasing)
 
-This is a pedagogical approximation. For quantitative results, use the Python engine.
+This is a pedagogical approximation. For quantitative results, use the Python engine or experiment mode.
+
+### Experiment Mode Architecture
+
+In experiment mode, data flows: **Python engine → `/api/bloch` endpoints → `experimentAdapter.ts` → existing components**.
+
+The adapter converts `BlochVisualizerData` (API response) into `ProbeStateConfig` and other existing prop shapes so that `BlochScene`, `CorrelatorBars`, `FingerprintViewer`, etc. work unchanged.
+
+Key state in `BlochSphereScreen`:
+- `mode`: `"builtin" | "experiment"` — controls which sidebar/controls are shown
+- `blochData` / `sweepData`: raw API responses
+- `_activeBloch`: computed as `sweepSnapshot ?? blochData` — all derived data uses this single source
+- `sweepProgress`: 0–1 float controlling the interpolation position across sweep snapshots
+
+### Sweep Interpolation
+
+The sweep animates by linearly interpolating between `BlochVisualizerData` snapshots:
+- Bloch vectors: lerp per-component (rx, ry, rz)
+- Purity: lerp scalar
+- Correlators: lerp per-component (zi, iz, zz, xx, yy)
+- MI matrix: lerp per-cell
+- The `sweepSnapshot` useMemo produces a synthetic `BlochVisualizerData` at any fractional position
 
 ### Animation Loop Pattern
 
@@ -118,6 +158,14 @@ const animate = () => {
   // ... use pr.rotation, pr.strength, etc.
 };
 ```
+
+### Backend: `apps/api/routes/bloch.py`
+
+Contains the quantum math (NumPy) and two FastAPI endpoints:
+- `GET /{filename:path}` — transforms stored result into BlochVisualizerData
+- `POST /sweep` — runs experiments at multiple error rates, returns snapshot array
+
+Key math: `partial_trace_single_qubit` and `partial_trace_two_qubit` use `np.einsum` to trace out qubits. `density_matrix_to_bloch` extracts Bloch vector via Pauli traces. `mutual_information_from_rho` computes von Neumann entropy-based MI.
 
 ## How to Extend
 
@@ -178,10 +226,11 @@ The Data tab accepts JSON arrays of fingerprint entries via the Config modal:
 - Do NOT import React Native components (View, Text, etc.) in `'use dom'` files
 - Do NOT try to render full multi-qubit PTMs (16x16+) as heatmaps — they're unreadable
 - Do NOT add hardware noise model import — it's a rabbit hole for current research stage
-- Do NOT use this for quantitative analysis — it's a pedagogical/exploration tool. Use the Python engine for real numbers.
 - Do NOT replace button-style selectors with dropdowns — the button layout is intentional for visual density
 - Do NOT split the center 3D scene into side-by-side views — the full-screen scene is a deliberate design choice
+- Do NOT move quantum math (partial traces, Bloch vectors) to the frontend — it must stay in Python/NumPy for scientific rigor
+- Do NOT use `encodeURIComponent` on filenames passed to `/api/bloch/` — the `{filename:path}` route parameter expects literal slashes
 
 ## Next Priority
 
-**Measurement basis toggle** (v4.2) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. This maps to the framework's highest-priority experiment. See README.md roadmap for details.
+**Measurement basis toggle** (v5.1) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. This maps to the framework's highest-priority experiment. See README.md roadmap for details.

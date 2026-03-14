@@ -93,6 +93,56 @@ export interface ExperimentResult {
   status: string;
 }
 
+// ── Bloch Visualizer Data (from /bloch-data endpoint) ────────────────
+
+export interface QubitBlochData {
+  qubit_index: number;
+  bloch_vector: { rx: number; ry: number; rz: number };
+  purity: number;
+}
+
+export interface PairCorrelatorData {
+  qubit_i: number;
+  qubit_j: number;
+  correlators: { zi: number; iz: number; zz: number; xx: number; yy: number };
+  mutual_information: number;
+}
+
+export interface BlochVisualizerData {
+  experiment_id: string;
+  state_type: string;
+  num_qubits: number;
+  noise_type: string | null;
+  error_rate: number | null;
+  fidelity: number | null;
+  source_mode: "density_matrix" | "statevector" | "diagonal_estimate";
+  qubits: QubitBlochData[];
+  pairs: PairCorrelatorData[];
+  mi_matrix: number[][];
+  metrics: Record<string, { value: number; ci95: [number, number] | null }> | null;
+}
+
+// ── Bloch Sweep (animated decoherence progression) ───────────────────
+
+export interface BlochSweepRequest {
+  state_type: string;
+  num_qubits: number;
+  noise_type: string;
+  error_rates: number[];
+  sim_mode?: string;
+  shots?: number;
+  rng_seed?: number | null;
+}
+
+export interface BlochSweepResponse {
+  state_type: string;
+  num_qubits: number;
+  noise_type: string;
+  sim_mode: string;
+  error_rates: number[];
+  snapshots: BlochVisualizerData[];
+}
+
 // ── Registry ──────────────────────────────────────────────────────────
 
 export interface RegistryEntry {

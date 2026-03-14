@@ -11,8 +11,12 @@ This is a **research visualization tool** that makes abstract quantum concepts t
 - **Understand** why GHZ detects correlated noise while Cluster states are blind in Z-basis
 - **Explore** 2-qubit correlator space to see topology-dependent noise fingerprints
 - **Load** experimental data from the framework's analysis pipeline
+- **Visualize** real experiment results with per-qubit Bloch vectors from partial traces
+- **Animate** decoherence sweeps — watch Bloch vectors shrink as error rate increases
 
-The core loop: **state x channel x topology -> visual + quantitative output**, all configurable.
+Two operating modes:
+- **Built-in mode**: Hardcoded educational examples (5 states, 5 channels, 3 topologies)
+- **Experiment mode**: Live data from the Python experiment pipeline via the `/api/bloch` endpoints
 
 ---
 
@@ -23,8 +27,9 @@ src/features/bloch-sphere/
   types.ts                  # All TypeScript interfaces (inc. ExperimentalDataEntry)
   config.ts                 # DEFAULT_CONFIG (5 states, 5 channels, 3 topologies)
   math.ts                   # Three.js helpers, point generation, Bloch map compilation
+  experimentAdapter.ts      # Pure functions: BlochVisualizerData → component prop shapes
   index.ts                  # Barrel export
-  BlochSphereScreen.tsx     # Main orchestrator: tabs, state, drag-to-rotate, animation
+  BlochSphereScreen.tsx     # Main orchestrator: tabs, state, mode toggle, sweep animation
   components/
     BlochScene.tsx          # Single-qubit 3D Bloch sphere with pole dots, great circles
     TwoQubitScene.tsx       # 2-qubit correlator space with multi-topology clouds
@@ -32,6 +37,7 @@ src/features/bloch-sphere/
     CorrelatorBars.tsx      # Delta-correlator bar chart with center-line style
     FingerprintViewer.tsx   # Experimental fingerprint norms + cosine similarity matrix
     ConfigEditor.tsx        # Modal JSON editor with import/export/reset
+    ReducedStateExplainer.tsx  # Educational panel for experiment mode contexts
 ```
 
 ### Platform Strategy
@@ -50,7 +56,31 @@ The interface uses a **dark hacker aesthetic** (#08090e background, #ff9933 oran
 
 ---
 
-## Features (v4)
+## Features (v5)
+
+### Experiment Mode
+
+Toggle between **Built-in** and **Experiment** mode via the header toggle.
+
+**Single result viewing:**
+- Select a stored experiment result from the dropdown
+- Per-qubit Bloch vectors computed via partial traces of the density matrix
+- "All" view shows all qubit vectors on a single sphere with per-qubit colors
+- Correlator bars show actual measured Pauli expectation values
+- Mutual information matrix heatmap for qubit-pair entanglement structure
+- Metrics from the analysis pipeline (fidelity, asymmetry index, etc.)
+
+**Decoherence sweep animation:**
+- Configure state type, qubit count, and noise type
+- Runs experiments at multiple error rates via `POST /api/bloch/sweep`
+- Scrub through error rates with a slider or auto-animate
+- Bloch vectors smoothly interpolate between snapshots
+- Watch decoherence progression: pure states shrink toward the origin as noise increases
+
+**Educational context:**
+- `ReducedStateExplainer` panel explains reduced density matrices, partial traces, and what purity means
+- Diagonal estimate warning when only Z-basis measurements are available
+- Multi-qubit insight explaining non-uniform decoherence across the register
 
 ### 1-Qubit View: Bloch Sphere Deformation
 
@@ -166,15 +196,37 @@ fingerprint = compute_fingerprint_vector(
 
 ---
 
+## Backend API
+
+The experiment mode connects to two endpoints on the FastAPI server:
+
+### `GET /api/bloch/{filename:path}`
+
+Transforms a stored experiment result into `BlochVisualizerData`. The filename is the path relative to `results/` (e.g., `2026-03-07/GHZ_3q_depolarizing/analysis.json`). The backend computes partial traces, Bloch vectors, correlators, and mutual information using NumPy.
+
+### `POST /api/bloch/sweep`
+
+Runs experiments at multiple error rates and returns an array of `BlochVisualizerData` snapshots. Request body (`BlochSweepRequest`):
+
+```json
+{
+  "state_type": "GHZ",
+  "num_qubits": 3,
+  "noise_type": "depolarizing",
+  "error_rates": [0, 0.02, 0.05, 0.1, 0.2, 0.3],
+  "sim_mode": "density_matrix",
+  "shots": 4096,
+  "rng_seed": 42
+}
+```
+
+Backend source: `apps/api/routes/bloch.py`
+
+---
+
 ## Roadmap
 
-### v4.1 — Real Data Pipeline (Next)
-
-- [ ] Load analysis.json files directly from the framework's results directory
-- [ ] Auto-extract fingerprint vectors from stored experiment results
-- [ ] Batch import: point at a results folder and load all conditions at once
-
-### v4.2 — Measurement Basis Toggle (High Priority)
+### v5.1 — Measurement Basis Toggle (High Priority)
 
 This maps directly to the framework's highest-priority experiment (X-basis measurement for Cluster states).
 
@@ -183,26 +235,18 @@ This maps directly to the framework's highest-priority experiment (X-basis measu
 - [ ] Cluster state should "wake up" (show non-zero correlators) in X-basis
 - [ ] Side-by-side Z-basis vs X-basis comparison mode
 
-This is the **big missing piece** — but better to add after confirming Z-basis data loads cleanly.
-
-### v4.3 — Fingerprint Atlas
+### v5.2 — Fingerprint Atlas
 
 - [ ] PCA projection of loaded fingerprints in PC1/PC2 space
 - [ ] Color-code points by noise topology (chain=orange, star=purple)
 - [ ] Visually confirm the "scaling not shifting" finding (points along a line, not a cloud)
 - [ ] Hover to see condition labels
 
-### v4.4 — Diff Mode
+### v5.3 — Diff Mode
 
 - [ ] Pick two states (e.g. GHZ vs Cluster) and see fingerprint responses side-by-side under identical noise
 - [ ] Direct visual of Finding 1 (state sensitivity ordering)
 - [ ] Overlay delta-correlator bars for comparison
-
-### v4.5 — Live Experiment Integration
-
-- [ ] Connect to the Python engine API (via the existing FastAPI server)
-- [ ] Run experiments from the visualizer and see results update in real-time
-- [ ] Parameter sweep visualization: animate through error rates with live data
 
 ### Explicitly Not Planned
 

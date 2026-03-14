@@ -5,6 +5,13 @@ import * as THREE from "three";
 import { V3, TAU, spherePoints, statePoints } from "../math";
 import type { ProbeStateConfig, RuntimeChannel } from "../types";
 
+/** Additional state dot for "All qubits" experiment view */
+interface AdditionalState {
+  bloch: { rx: number; ry: number; rz: number };
+  color: string;
+  label: string;
+}
+
 interface BlochSceneProps {
   runtimeCh: Record<string, RuntimeChannel>;
   channel: string;
@@ -14,6 +21,10 @@ interface BlochSceneProps {
   rotation: number;
   stateCfg: ProbeStateConfig;
   viewMode: "full" | "state";
+  /** When true, skip transformed cloud — show only the state as the final result */
+  experimentMode?: boolean;
+  /** Array of qubit states to render as dots on the sphere (experiment "All" view) */
+  additionalStates?: AdditionalState[];
 }
 
 export default function BlochScene({
@@ -25,6 +36,8 @@ export default function BlochScene({
   rotation,
   stateCfg,
   viewMode,
+  experimentMode = false,
+  additionalStates,
 }: BlochSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
@@ -38,9 +51,9 @@ export default function BlochScene({
   const frameRef = useRef<number>(0);
 
   // Keep current props in refs for animation loop
-  const pRef = useRef({ rotation, channel, strength, showOrig, showTrans });
+  const pRef = useRef({ rotation, channel, strength, showOrig, showTrans, experimentMode });
   useEffect(() => {
-    pRef.current = { rotation, channel, strength, showOrig, showTrans };
+    pRef.current = { rotation, channel, strength, showOrig, showTrans, experimentMode };
   });
   const chRef = useRef(runtimeCh);
   useEffect(() => { chRef.current = runtimeCh; }, [runtimeCh]);
@@ -52,8 +65,8 @@ export default function BlochScene({
   const origPtsRef = useRef(origPts);
   useEffect(() => { origPtsRef.current = origPts; }, [origPts]);
 
-  // Remount key when view mode or state changes
-  const key = `${viewMode}-${stateCfg?.name}-${JSON.stringify(stateCfg?.bloch)}`;
+  // Remount key when view mode, state, or additional states change
+  const key = `${viewMode}-${stateCfg?.name}-${JSON.stringify(stateCfg?.bloch)}-${experimentMode}-${additionalStates?.length ?? 0}`;
 
   useEffect(() => {
     const el = mountRef.current;
@@ -97,6 +110,19 @@ export default function BlochScene({
       m.position.set(pos.x, pos.z, pos.y); // swap Y/Z for Three.js
       scene.add(m);
     });
+
+    // Additional state dots (experiment "All qubits" view)
+    if (additionalStates?.length) {
+      for (const st of additionalStates) {
+        const { rx, ry, rz } = st.bloch;
+        const m = new THREE.Mesh(
+          new THREE.SphereGeometry(0.06, 12, 12),
+          new THREE.MeshBasicMaterial({ color: new THREE.Color(st.color) }),
+        );
+        m.position.set(rx, rz, ry); // swap Y/Z for Three.js
+        scene.add(m);
+      }
+    }
 
     // Great circles
     [0, 1, 2].forEach((ax) => {
@@ -164,20 +190,26 @@ export default function BlochScene({
       );
       camera.lookAt(0, 0, 0);
 
-      const ch = chRef.current[pr.channel];
-      const curPts = origPtsRef.current;
-      if (ch && curPts) {
-        const pos = transCloud.geometry.attributes.position.array as Float32Array;
-        curPts.forEach((pt, i) => {
-          const t = ch.apply(pt, pr.strength);
-          pos[i * 3] = t.x;
-          pos[i * 3 + 1] = t.z;
-          pos[i * 3 + 2] = t.y;
-        });
-        transCloud.geometry.attributes.position.needsUpdate = true;
+      if (pr.experimentMode) {
+        // In experiment mode, no transformed cloud — state IS the result
+        transCloud.visible = false;
+        origCloud.visible = pr.showOrig;
+      } else {
+        const ch = chRef.current[pr.channel];
+        const curPts = origPtsRef.current;
+        if (ch && curPts) {
+          const pos = transCloud.geometry.attributes.position.array as Float32Array;
+          curPts.forEach((pt, i) => {
+            const t = ch.apply(pt, pr.strength);
+            pos[i * 3] = t.x;
+            pos[i * 3 + 1] = t.z;
+            pos[i * 3 + 2] = t.y;
+          });
+          transCloud.geometry.attributes.position.needsUpdate = true;
+        }
+        transCloud.visible = pr.showTrans;
+        origCloud.visible = pr.showOrig;
       }
-      transCloud.visible = pr.showTrans;
-      origCloud.visible = pr.showOrig;
       renderer.render(scene, camera);
     };
     animate();

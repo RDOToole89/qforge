@@ -10,7 +10,7 @@ Run from repo root:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from apps.api.routes import experiments, results
+from apps.api.routes import bloch, experiments, results
 
 app = FastAPI(
     title="Quantum Experiment API",
@@ -28,6 +28,7 @@ app.add_middleware(
 
 app.include_router(experiments.router, prefix="/api/experiments", tags=["experiments"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
+app.include_router(bloch.router, prefix="/api/bloch", tags=["bloch"])
 
 
 @app.get("/api/health")
