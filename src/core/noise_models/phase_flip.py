@@ -1,5 +1,4 @@
-"""
-Phase Flip Noise for Longitudinal Environmental Coupling Research
+"""Phase Flip Noise for Longitudinal Environmental Coupling Research.
 
 # The Phase Flip Channel - Longitudinal Decoherence
 Phase flip noise represents longitudinal environmental coupling where computational
@@ -46,12 +45,11 @@ from qiskit_aer.noise import NoiseModel, pauli_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 
 class PhaseFlipNoise(BaseNoise):
-    """
-    Phase flip noise model for longitudinal environmental coupling research.
+    """Phase flip noise model for longitudinal environmental coupling research.
 
     # Quantum Phase Flip Definition
     The phase flip channel models longitudinal decoherence by applying random
@@ -90,8 +88,7 @@ class PhaseFlipNoise(BaseNoise):
         magnetic_field_noise: float = None,
         charge_noise: float = None,
     ):
-        """
-        Initialize phase flip noise with physics-based validation.
+        """Initialize phase flip noise with physics-based validation.
 
         # Physics Parameter Integration
         Supports both phenomenological flip rates and physics-based
@@ -165,8 +162,7 @@ class PhaseFlipNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply phase flip noise to quantum gates.
+        """Apply phase flip noise to quantum gates.
 
         # Longitudinal Error Implementation
         Creates Qiskit Pauli error channels that model phase flip transitions:
@@ -241,8 +237,7 @@ class PhaseFlipNoise(BaseNoise):
             )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the phase flip channel.
+        """Return Kraus operators for the phase flip channel.
 
         # Mathematical Construction
         For phase flip channel with flip probability p:
@@ -269,8 +264,7 @@ class PhaseFlipNoise(BaseNoise):
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of phase flip decoherence.
+        """Return comprehensive physics description of phase flip decoherence.
 
         Returns:
             Dict with educational physics content about longitudinal coupling
@@ -292,8 +286,7 @@ class PhaseFlipNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to phase flip channels.
+        """Get theoretical quantum properties specific to phase flip channels.
 
         Returns:
             Dict with phase flip channel specific properties
@@ -315,8 +308,7 @@ class PhaseFlipNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for phase flip noise in pathway studies.
+        """Get research context for phase flip noise in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -356,8 +348,7 @@ class PhaseFlipNoise(BaseNoise):
     def _validate_phase_flip_params(
         self, error_rate: float, magnetic_field_noise: float, charge_noise: float
     ) -> None:
-        """
-        Validate phase flip parameters against physics constraints.
+        """Validate phase flip parameters against physics constraints.
 
         # Physics Constraint Validation
         Ensures all parameters represent realistic phase flip scenarios
@@ -378,8 +369,7 @@ class PhaseFlipNoise(BaseNoise):
             raise ValueError(f"Charge noise must be non-negative, got {charge_noise}")
 
     def _calculate_physics_flip_rate(self) -> float:
-        """
-        Calculate phase flip rate from physics parameters.
+        """Calculate phase flip rate from physics parameters.
 
         # Physics-Based Rate Calculation
         Converts environmental noise parameters to effective phase flip rates
@@ -411,8 +401,7 @@ class PhaseFlipNoise(BaseNoise):
         return min(1.0, flip_rate)
 
     def _calculate_flip_probabilities(self) -> dict[str, float]:
-        """
-        Calculate individual flip probabilities for educational display.
+        """Calculate individual flip probabilities for educational display.
 
         Returns:
             Dict mapping operators to their probabilities
@@ -420,8 +409,7 @@ class PhaseFlipNoise(BaseNoise):
         return {"identity": 1 - self.error_rate, "phase_flip_z": self.error_rate}
 
     def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """
-        Get gate-specific phase flip sensitivity factors.
+        """Get gate-specific phase flip sensitivity factors.
 
         # Gate Sensitivity Physics
         Different gates have different sensitivities to phase flip errors:
@@ -459,8 +447,7 @@ class PhaseFlipNoise(BaseNoise):
         }
 
     def _calculate_channel_capacity(self) -> float:
-        """
-        Calculate quantum channel capacity for phase flip channel.
+        """Calculate quantum channel capacity for phase flip channel.
 
         # Information Theory
         Channel capacity for phase flip depends on the flip probability
@@ -478,8 +465,7 @@ class PhaseFlipNoise(BaseNoise):
             return max(0, 1 - p)  # Simplified capacity estimate
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for phase flip noise.
+        """Get specific pathway prediction for phase flip noise.
 
         Returns:
             Phase flip specific pathway hypothesis prediction
@@ -491,9 +477,7 @@ class PhaseFlipNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess phase flip noise sensitivity to quantum state topology.
-        """
+        """Assess phase flip noise sensitivity to quantum state topology."""
         return (
             "Moderate topology sensitivity expected due to interference dependence. "
             "States with more superposition content should show stronger "
@@ -501,9 +485,7 @@ class PhaseFlipNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze phase flip noise pathway preferences.
-        """
+        """Analyze phase flip noise pathway preferences."""
         return (
             f"Longitudinal pathway preferences. Phase flip errors affect "
             f"quantum interference while preserving computational basis "

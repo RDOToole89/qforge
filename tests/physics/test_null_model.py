@@ -51,11 +51,7 @@ class TestNullModelAI:
             raw_counts = rng.multinomial(n_shots, [1 / n_outcomes] * n_outcomes)
 
             # Convert to counts dict
-            counts = {
-                format(i, f"0{n_qubits}b"): int(c)
-                for i, c in enumerate(raw_counts)
-                if c > 0
-            }
+            counts = {format(i, f"0{n_qubits}b"): int(c) for i, c in enumerate(raw_counts) if c > 0}
 
             ai = compute_asymmetry_index(counts)
             ai_values.append(ai)
@@ -91,11 +87,7 @@ class TestNullModelAI:
         for _ in range(n_trials):
             n_outcomes = 2**n_qubits
             raw_counts = rng.multinomial(n_shots, [1 / n_outcomes] * n_outcomes)
-            counts = {
-                format(i, f"0{n_qubits}b"): int(c)
-                for i, c in enumerate(raw_counts)
-                if c > 0
-            }
+            counts = {format(i, f"0{n_qubits}b"): int(c) for i, c in enumerate(raw_counts) if c > 0}
             ai = compute_asymmetry_index(counts)
             ai_values.append(ai)
 
@@ -103,8 +95,7 @@ class TestNullModelAI:
 
         # 90th percentile should still be low
         assert p90 < 0.15, (
-            f"90th percentile of null AI too high: {p90:.4f}. "
-            f"Expected < 0.15 for uniform samples."
+            f"90th percentile of null AI too high: {p90:.4f}. Expected < 0.15 for uniform samples."
         )
 
     @pytest.mark.slow
@@ -134,9 +125,7 @@ class TestNullModelAI:
             n_outcomes = 2**n_qubits
             null_counts = rng.multinomial(n_shots, [1 / n_outcomes] * n_outcomes)
             null_dict = {
-                format(i, f"0{n_qubits}b"): int(c)
-                for i, c in enumerate(null_counts)
-                if c > 0
+                format(i, f"0{n_qubits}b"): int(c) for i, c in enumerate(null_counts) if c > 0
             }
             null_ai_values.append(compute_asymmetry_index(null_dict))
 
@@ -152,9 +141,7 @@ class TestNullModelAI:
 
             structured_counts = rng.multinomial(n_shots, ghz_probs)
             structured_dict = {
-                format(i, f"0{n_qubits}b"): int(c)
-                for i, c in enumerate(structured_counts)
-                if c > 0
+                format(i, f"0{n_qubits}b"): int(c) for i, c in enumerate(structured_counts) if c > 0
             }
             structured_ai_values.append(compute_asymmetry_index(structured_dict))
 
@@ -162,9 +149,7 @@ class TestNullModelAI:
         mean_structured = np.mean(structured_ai_values)
 
         # Compute effect size (Cohen's d)
-        pooled_std = np.sqrt(
-            (np.var(null_ai_values) + np.var(structured_ai_values)) / 2
-        )
+        pooled_std = np.sqrt((np.var(null_ai_values) + np.var(structured_ai_values)) / 2)
         if pooled_std > 0:
             cohens_d = (mean_structured - mean_null) / pooled_std
         else:
@@ -172,8 +157,7 @@ class TestNullModelAI:
 
         # We want clear separation
         assert mean_structured > mean_null, (
-            f"Structured AI ({mean_structured:.4f}) should exceed "
-            f"null AI ({mean_null:.4f})"
+            f"Structured AI ({mean_structured:.4f}) should exceed null AI ({mean_null:.4f})"
         )
 
         # Effect size should be large (d > 0.8 is "large" by convention)

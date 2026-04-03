@@ -1,5 +1,4 @@
-"""
-Persistence Module
+"""Persistence Module.
 
 Data persistence and artifact management:
 - storage: Result persistence and artifact management

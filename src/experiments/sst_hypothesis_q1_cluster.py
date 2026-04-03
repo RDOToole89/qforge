@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1 (Cluster State)
+"""SST Hypothesis Q1 (Cluster State).
 
 This experiment tests the "River Scaling" hypothesis on a Cluster State (Graph State).
 Cluster states have a linear nearest-neighbor entanglement topology (1D chain),
@@ -18,8 +17,7 @@ from src.experiments.base import BaseExperiment
 
 
 class SSTHypothesisQ1Cluster(BaseExperiment):
-    """
-    SST Hypothesis Q1 with Linear Cluster State.
+    """SST Hypothesis Q1 with Linear Cluster State.
 
     Cluster states are created by applying Hadamard gates to all qubits
     and then CZ gates between nearest neighbors. They are the resource

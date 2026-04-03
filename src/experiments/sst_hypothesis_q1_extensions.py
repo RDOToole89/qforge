@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1 (Extensions): Control and Scaling
+"""SST Hypothesis Q1 (Extensions): Control and Scaling.
 
 This module adds two critical experiments to complete the SST hypothesis testing:
 
@@ -21,8 +20,7 @@ from src.experiments.base import BaseExperiment
 
 
 class SSTHypothesisQ1LargeDepolarizing(BaseExperiment):
-    """
-    SST Q1 Large Scale Control (6 Qubits, Depolarizing).
+    """SST Q1 Large Scale Control (6 Qubits, Depolarizing).
 
     The "Null Hypothesis" test. We apply random (depolarizing) noise to the
     highly entangled 6-qubit GHZ state.
@@ -36,6 +34,7 @@ class SSTHypothesisQ1LargeDepolarizing(BaseExperiment):
     description = "SST Q1 Large Control (6q GHZ + Depolarizing Noise)"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for the large depolarizing control experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -48,8 +47,7 @@ class SSTHypothesisQ1LargeDepolarizing(BaseExperiment):
 
 
 class SSTHypothesisQ1Huge(BaseExperiment):
-    """
-    SST Q1 Huge Scale (8 Qubits).
+    """SST Q1 Huge Scale (8 Qubits).
 
     Pushing the "River Scaling" to the limit of classical simulation comfort.
     8 qubits = 256 states.
@@ -64,6 +62,7 @@ class SSTHypothesisQ1Huge(BaseExperiment):
     description = "SST Q1 Huge Scale (8q GHZ) to test exponential scaling"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for the huge-scale 8-qubit experiment."""
         return ExperimentConfig(
             num_qubits=8,  # Scaling up to 8
             state_type="GHZ",

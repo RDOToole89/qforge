@@ -1,5 +1,4 @@
-"""
-Quantum Noise Models Framework for Decoherence Pathway Research
+"""Quantum Noise Models Framework for Decoherence Pathway Research.
 
 # Quantum Decoherence Fundamentals
 Noise models represent the environmental coupling that destroys quantum coherence
@@ -34,7 +33,7 @@ from typing import Any
 
 from qiskit_aer.noise import NoiseModel
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 # Default parameters matching physics standards
 DEFAULT_ERROR_RATE = 0.05  # Typical gate fidelity ~95%
@@ -45,8 +44,7 @@ DEFAULT_TEMPERATURE = 0.015  # 15 mK typical dilution refrigerator
 
 
 class BaseNoise(ABC):
-    """
-    Abstract base class for quantum noise models in decoherence pathway research.
+    """Abstract base class for quantum noise models in decoherence pathway research.
 
     # Quantum Decoherence Foundation
     BaseNoise provides the foundational architecture for modeling environmental
@@ -100,8 +98,7 @@ class BaseNoise(ABC):
         experiment_id: str = "N/A",
         **physics_params,
     ):
-        """
-        Initialize base noise model with physics validation.
+        """Initialize base noise model with physics validation.
 
         # Parameter Validation Philosophy
         All parameters undergo physics-based validation to ensure they represent
@@ -137,8 +134,7 @@ class BaseNoise(ABC):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
-        """
-        Apply quantum noise to specified gates in the noise model.
+        """Apply quantum noise to specified gates in the noise model.
 
         # Abstract Method Contract
         Each noise type implements its specific decoherence mechanism while
@@ -162,8 +158,7 @@ class BaseNoise(ABC):
 
     @abstractmethod
     def get_kraus_operators(self) -> list[Any]:
-        """
-        Return Kraus operators representing the quantum decoherence channel.
+        """Return Kraus operators representing the quantum decoherence channel.
 
         # Mathematical Representation
         Kraus operators {Kᵢ} provide the fundamental mathematical description
@@ -180,8 +175,7 @@ class BaseNoise(ABC):
 
     @abstractmethod
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return educational description of the physical decoherence mechanism.
+        """Return educational description of the physical decoherence mechanism.
 
         # Educational Physics Content
         Provides comprehensive explanation of:
@@ -202,8 +196,7 @@ class BaseNoise(ABC):
         pass
 
     def get_basic_properties(self) -> dict[str, Any]:
-        """
-        Get basic properties of the noise model for framework integration.
+        """Get basic properties of the noise model for framework integration.
 
         # Framework Integration Contract
         Provides standardized interface for engine and analysis modules to
@@ -226,8 +219,7 @@ class BaseNoise(ABC):
         }
 
     def validate_for_hardware(self, backend_constraints: dict[str, Any]) -> list[str]:
-        """
-        Validate noise model compatibility with real quantum hardware.
+        """Validate noise model compatibility with real quantum hardware.
 
         # Hardware Validation Philosophy
         Real quantum devices have constraints on gate sets, connectivity,
@@ -285,8 +277,7 @@ class BaseNoise(ABC):
         return warnings
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for structured decoherence pathway studies.
+        """Get research context for structured decoherence pathway studies.
 
         # Research Integration
         Provides context for how this noise type contributes to pathway hypothesis
@@ -321,8 +312,7 @@ class BaseNoise(ABC):
     # Helper Methods (Following BaseState patterns)
 
     def _validate_error_rate(self, error_rate: float) -> None:
-        """
-        Validate error rate against quantum physics constraints.
+        """Validate error rate against quantum physics constraints.
 
         # Physics Constraint Validation
         Error rates must be probabilities [0,1] and respect channel-specific
@@ -337,8 +327,7 @@ class BaseNoise(ABC):
         # Channel-specific bounds will be validated by subclasses
 
     def _validate_qubit_count(self, num_qubits: int) -> None:
-        """
-        Validate qubit count for noise model creation.
+        """Validate qubit count for noise model creation.
 
         # Computational Feasibility
         Large qubit counts create exponentially large noise operators
@@ -357,8 +346,7 @@ class BaseNoise(ABC):
             )
 
     def _validate_physics_parameters(self, **params) -> None:
-        """
-        Validate physics parameters against quantum mechanics constraints.
+        """Validate physics parameters against quantum mechanics constraints.
 
         # Quantum Physics Compliance
         Ensures all physics parameters (T1, T2, temperature, etc.) satisfy
@@ -383,8 +371,7 @@ class BaseNoise(ABC):
             raise ValueError(f"Gate time must be positive, got {gate_time}s")
 
     def _estimate_decoherence_timescale(self) -> str:
-        """
-        Estimate characteristic decoherence timescale for this noise type.
+        """Estimate characteristic decoherence timescale for this noise type.
 
         Returns:
             Human-readable timescale description
@@ -402,8 +389,7 @@ class BaseNoise(ABC):
             return "No decoherence (error_rate=0)"
 
     def _is_unital_channel(self) -> bool:
-        """
-        Check if this noise channel is unital (preserves maximally mixed state).
+        """Check if this noise channel is unital (preserves maximally mixed state).
 
         # Channel Classification
         Unital channels satisfy E(I/d) = I/d where I is the identity matrix
@@ -414,8 +400,7 @@ class BaseNoise(ABC):
         return self._noise_type in ["DEPOLARIZING", "PHASE_DAMPING"]
 
     def _estimate_channel_capacity(self) -> float:
-        """
-        Estimate quantum channel capacity for information transmission.
+        """Estimate quantum channel capacity for information transmission.
 
         # Information Theory
         Channel capacity determines maximum rate of reliable quantum
@@ -431,8 +416,7 @@ class BaseNoise(ABC):
             return max(0, 1 - 2 * self.error_rate)
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get list of quantum gates required for this noise model.
+        """Get list of quantum gates required for this noise model.
 
         # Hardware Compatibility
         Different noise types may require different gate sets for proper
@@ -442,8 +426,7 @@ class BaseNoise(ABC):
         return ["id", "u1", "u2", "u3", "cx"]
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get predicted effect on decoherence pathway structure.
+        """Get predicted effect on decoherence pathway structure.
 
         Returns:
             Pathway hypothesis prediction for this noise type
@@ -452,23 +435,17 @@ class BaseNoise(ABC):
         return f"{self._noise_type} decoherence may create pathway bias based on coupling mechanism"
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess how sensitive this noise type is to quantum state topology.
-        """
+        """Assess how sensitive this noise type is to quantum state topology."""
         # Default assessment - subclasses can provide specific analysis
         return "Sensitivity depends on specific coupling mechanism and environmental structure"
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze whether this noise type has intrinsic pathway preferences.
-        """
+        """Analyze whether this noise type has intrinsic pathway preferences."""
         # Default analysis - subclasses can provide specific insights
         return "Pathway preferences determined by physical coupling strength and symmetries"
 
     def _get_educational_concepts(self) -> list[str]:
-        """
-        Get key educational concepts demonstrated by this noise type.
-        """
+        """Get key educational concepts demonstrated by this noise type."""
         return [
             "Quantum decoherence and environmental coupling",
             "CPTP maps and Kraus operator representation",
@@ -477,9 +454,7 @@ class BaseNoise(ABC):
         ]
 
     def _get_real_world_examples(self) -> list[str]:
-        """
-        Get real-world examples where this noise type occurs.
-        """
+        """Get real-world examples where this noise type occurs."""
         return [
             "Superconducting quantum processors in dilution refrigerators",
             "Trapped ion systems with laser-driven gates",
@@ -488,9 +463,7 @@ class BaseNoise(ABC):
         ]
 
     def _get_quantum_principles(self) -> list[str]:
-        """
-        Get quantum mechanics principles illustrated by this noise type.
-        """
+        """Get quantum mechanics principles illustrated by this noise type."""
         return [
             "No-cloning theorem and information preservation limits",
             "Quantum error correction threshold requirements",
@@ -499,8 +472,7 @@ class BaseNoise(ABC):
         ]
 
     def log_noise_creation(self, noise_type: str, extra_info: dict | None = None) -> None:
-        """
-        Log noise model creation with comprehensive metadata.
+        """Log noise model creation with comprehensive metadata.
 
         # Educational Logging Philosophy
         Structured logging helps users understand what noise models are being
@@ -530,9 +502,7 @@ class BaseNoise(ABC):
         logger.debug(f"Noise creation details: {base_info}")
 
     def _log_initialization(self) -> None:
-        """
-        Log noise model initialization with physics validation.
-        """
+        """Log noise model initialization with physics validation."""
         logger.debug(
             f"Initialized {self._noise_type} noise: "
             f"error_rate={self.error_rate:.4f}, qubits={self.num_qubits}, "

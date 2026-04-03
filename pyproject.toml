@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "qiskit-experiments"
 dynamic = ["version"]
 description = "Research-grade quantum experiment framework for structured decoherence analysis"
-readme = "CLAUDE.md"
+readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [{name = "Quantum Research Team"}]
 requires-python = ">=3.9"
@@ -50,9 +50,37 @@ write_to = "src/_version.py"
 line-length = 100
 target-version = "py39"
 
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
-ignore = []
+select = ["E", "F", "I", "B", "UP", "W", "D", "C901"]
+ignore = [
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in __init__
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"scripts/**" = ["D"]
+# Noise models have long docstrings with physics formulas and references
+"src/core/noise_models/**" = ["E501"]
+# TODO: Refactor these complex functions in Phase 3
+"src/core/analysis/metrics/registry.py" = ["C901"]
+"src/core/analysis/metrics/entanglement_error_correlation.py" = ["C901"]
+"src/core/state_preparation/custom_state.py" = ["C901"]
+"src/engine/execution/runner.py" = ["C901"]
+"src/engine/persistence/hashing.py" = ["C901"]
+"src/experiments/state_probe_sensitivity.py" = ["C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]

@@ -1,5 +1,4 @@
-"""
-Research-focused visualization renderers.
+"""Research-focused visualization renderers.
 
 Each renderer is a plugin that can create specific types of visualizations
 from quantum experiment data.
@@ -61,8 +60,7 @@ def _build_title(params: dict[str, Any]) -> str:
 
 
 class HistogramRenderer(VisualizationRenderer):
-    """
-    Renders measurement histograms optimized for research analysis.
+    """Renders measurement histograms optimized for research analysis.
 
     Features:
     - Clean, publication-ready styling
@@ -95,6 +93,7 @@ class HistogramRenderer(VisualizationRenderer):
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Check whether this renderer can handle the given visualization type and data."""
         if viz_type != "histogram":
             return False
 
@@ -109,6 +108,7 @@ class HistogramRenderer(VisualizationRenderer):
         return isinstance(counts, dict) and len(counts) > 0
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render a measurement histogram and save it to disk."""
         analysis = data.get("analysis", {})
         measurement_results = analysis.get("measurement_results", {})
         experiment_params = analysis.get("experiment_parameters", {}) or {}
@@ -334,16 +334,14 @@ class DensityMatrixRenderer(VisualizationRenderer):
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Check whether density matrix data is available for rendering."""
         if viz_type != "density_matrix":
             return False
-        dm = (
-            data.get("analysis", {})
-            .get("measurement_results", {})
-            .get("density_matrix")
-        )
+        dm = data.get("analysis", {}).get("measurement_results", {}).get("density_matrix")
         return isinstance(dm, list) and len(dm) > 0
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render a density matrix heatmap with eigenvalue spectrum and save it to disk."""
         analysis = data.get("analysis", {})
         meas = analysis.get("measurement_results", {})
         experiment_params = analysis.get("experiment_parameters", {}) or {}
@@ -380,8 +378,12 @@ class DensityMatrixRenderer(VisualizationRenderer):
             ann_lines.append(f"Fidelity = {float(fidelity):.4f}")
         ann_lines.append(f"Dimension = {n}x{n}")
         ax_heatmap.text(
-            0.02, 0.98, "\n".join(ann_lines),
-            transform=ax_heatmap.transAxes, fontsize=9, va="top",
+            0.02,
+            0.98,
+            "\n".join(ann_lines),
+            transform=ax_heatmap.transAxes,
+            fontsize=9,
+            va="top",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
         )
 
@@ -395,7 +397,9 @@ class DensityMatrixRenderer(VisualizationRenderer):
         # Super-title
         fig.suptitle(
             f"Density Matrix — {_build_title(experiment_params)}",
-            fontsize=14, fontweight="bold", y=1.02,
+            fontsize=14,
+            fontweight="bold",
+            y=1.02,
         )
         plt.tight_layout()
 
@@ -434,6 +438,7 @@ class CorrelationRenderer(VisualizationRenderer):
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Check whether correlation matrix data is available for rendering."""
         if viz_type != "correlation":
             return False
         extras = self._get_eec_extras(data)
@@ -444,6 +449,7 @@ class CorrelationRenderer(VisualizationRenderer):
         )
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render MI and entanglement topology heatmaps side by side and save to disk."""
         analysis = data.get("analysis", {})
         experiment_params = analysis.get("experiment_parameters", {}) or {}
         export_formats = data.get("export_formats", ["png"])
@@ -485,15 +491,20 @@ class CorrelationRenderer(VisualizationRenderer):
 
         # EEC annotation
         fig.text(
-            0.5, 0.01,
+            0.5,
+            0.01,
             f"EEC = {eec_value:.4f}",
-            ha="center", fontsize=12, fontweight="bold",
+            ha="center",
+            fontsize=12,
+            fontweight="bold",
             bbox=dict(boxstyle="round,pad=0.4", facecolor="lightyellow", edgecolor="gray"),
         )
 
         fig.suptitle(
             f"Correlation Analysis — {_build_title(experiment_params)}",
-            fontsize=14, fontweight="bold", y=1.02,
+            fontsize=14,
+            fontweight="bold",
+            y=1.02,
         )
         plt.tight_layout(rect=[0, 0.04, 1, 1])
 
@@ -542,6 +553,7 @@ class CircuitDiagramRenderer(VisualizationRenderer):
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Check whether a drawable quantum circuit is present in the data."""
         if viz_type != "circuit":
             return False
         circuit = data.get("circuit")
@@ -549,18 +561,22 @@ class CircuitDiagramRenderer(VisualizationRenderer):
         return circuit is not None and hasattr(circuit, "draw") and hasattr(circuit, "depth")
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render a quantum circuit diagram and save it to disk."""
         circuit = data["circuit"]
         export_formats = data.get("export_formats", ["png"])
-        experiment_params = data.get("analysis", {}).get("experiment_parameters", {}) or {}
+        data.get("analysis", {}).get("experiment_parameters", {}) or {}
 
         fig = circuit.draw(output="mpl")
         # Annotate with depth and gate count
         depth = circuit.depth()
         num_gates = len(circuit.data)
         fig.text(
-            0.99, 0.01,
+            0.99,
+            0.01,
             f"Depth: {depth}  |  Gates: {num_gates}",
-            ha="right", va="bottom", fontsize=9,
+            ha="right",
+            va="bottom",
+            fontsize=9,
             bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
         )
 

@@ -1,5 +1,4 @@
-"""
-Experiment Execution Module
+"""Experiment Execution Module.
 
 Core execution components for quantum experiments:
 - runner: Quantum circuit execution and measurement

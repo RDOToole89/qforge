@@ -1,5 +1,4 @@
-"""
-Phase Damping Noise for Pure Dephasing Research
+"""Phase Damping Noise for Pure Dephasing Research.
 
 # The Phase Damping Channel - Fundamental Pure Dephasing
 Phase damping represents pure dephasing processes where qubits lose phase
@@ -47,7 +46,7 @@ from qiskit_aer.noise import NoiseModel, phase_damping_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 # Physical constants for T2* calculations
 TYPICAL_MAGNETIC_NOISE = 1e-6  # Tesla RMS field fluctuations
@@ -56,8 +55,7 @@ TYPICAL_CHARGE_NOISE = 1e-6  # eV RMS energy fluctuations
 
 
 class PhaseDampingNoise(BaseNoise):
-    """
-    Phase damping noise model for pure dephasing research.
+    """Phase damping noise model for pure dephasing research.
 
     # Quantum Pure Dephasing Definition
     The phase damping channel models pure dephasing: loss of quantum coherence
@@ -97,8 +95,7 @@ class PhaseDampingNoise(BaseNoise):
         gate_time: float = 20e-9,
         temperature: float = 0.015,
     ):
-        """
-        Initialize phase damping noise with physics-based validation.
+        """Initialize phase damping noise with physics-based validation.
 
         # Physics Parameter Integration
         Supports both phenomenological damping rates and physics-based T2* calculations:
@@ -175,8 +172,7 @@ class PhaseDampingNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply phase damping noise to single-qubit quantum gates.
+        """Apply phase damping noise to single-qubit quantum gates.
 
         # Pure Dephasing Implementation
         Creates Qiskit phase damping error channels that model pure dephasing:
@@ -281,8 +277,7 @@ class PhaseDampingNoise(BaseNoise):
             )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the phase damping channel.
+        """Return Kraus operators for the phase damping channel.
 
         # Mathematical Construction
         For phase damping with dephasing rate λ:
@@ -317,8 +312,7 @@ class PhaseDampingNoise(BaseNoise):
         return [K0, K1, K2]
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of phase damping.
+        """Return comprehensive physics description of phase damping.
 
         Returns:
             Dict with educational physics content about pure dephasing
@@ -338,8 +332,7 @@ class PhaseDampingNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to phase damping.
+        """Get theoretical quantum properties specific to phase damping.
 
         Returns:
             Dict with phase damping channel specific properties
@@ -362,8 +355,7 @@ class PhaseDampingNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for phase damping in pathway studies.
+        """Get research context for phase damping in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -403,8 +395,7 @@ class PhaseDampingNoise(BaseNoise):
     def _validate_phase_damping_params(
         self, error_rate: float, t2_star: float, gate_time: float, temperature: float
     ) -> None:
-        """
-        Validate phase damping parameters against physics constraints.
+        """Validate phase damping parameters against physics constraints.
 
         # Physics Constraint Validation
         Ensures all parameters represent realistic phase damping scenarios
@@ -434,8 +425,7 @@ class PhaseDampingNoise(BaseNoise):
             )
 
     def _calculate_thermal_dephasing(self) -> float:
-        """
-        Calculate thermal contribution to dephasing at operating temperature.
+        """Calculate thermal contribution to dephasing at operating temperature.
 
         # Thermal Dephasing
         At finite temperature, thermal fluctuations contribute to dephasing.
@@ -457,8 +447,7 @@ class PhaseDampingNoise(BaseNoise):
         return min(0.01, thermal_energy / typical_energy_scale)
 
     def _calculate_effective_dephasing_rate(self) -> float:
-        """
-        Calculate effective dephasing rate including thermal contributions.
+        """Calculate effective dephasing rate including thermal contributions.
 
         # Effective Rate Calculation
         Combines intrinsic dephasing with thermal contributions:
@@ -474,8 +463,7 @@ class PhaseDampingNoise(BaseNoise):
         return min(1.0, base_rate + thermal_contribution)
 
     def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """
-        Get gate-specific dephasing sensitivity factors.
+        """Get gate-specific dephasing sensitivity factors.
 
         # Gate Sensitivity Physics
         Different gates have different sensitivities to dephasing:
@@ -512,8 +500,7 @@ class PhaseDampingNoise(BaseNoise):
         }
 
     def _calculate_channel_capacity(self) -> float:
-        """
-        Calculate quantum channel capacity for phase damping.
+        """Calculate quantum channel capacity for phase damping.
 
         # Information Theory
         Channel capacity for phase damping depends on the dephasing rate
@@ -529,8 +516,7 @@ class PhaseDampingNoise(BaseNoise):
             return max(0, 1 - λ)
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for phase damping noise.
+        """Get specific pathway prediction for phase damping noise.
 
         Returns:
             Phase damping specific pathway hypothesis prediction
@@ -542,9 +528,7 @@ class PhaseDampingNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess phase damping sensitivity to quantum state topology.
-        """
+        """Assess phase damping sensitivity to quantum state topology."""
         return (
             "Moderate topology sensitivity expected due to coherence-dependence. "
             "States with more superposition components should show stronger "
@@ -552,9 +536,7 @@ class PhaseDampingNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze phase damping pathway preferences.
-        """
+        """Analyze phase damping pathway preferences."""
         return (
             f"Coherence-dependent pathway preferences. Phase damping preferentially "
             f"affects coherent superposition pathways while preserving computational "

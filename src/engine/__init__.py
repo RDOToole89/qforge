@@ -1,5 +1,4 @@
-"""
-Quantum Experiment Engine
+"""Quantum Experiment Engine.
 
 The engine layer orchestrates experiment execution, manages IO operations,
 and provides the public API for running experiments.

@@ -27,12 +27,25 @@ src/features/bloch-sphere/
   types.ts                  # All TypeScript interfaces (inc. ExperimentalDataEntry)
   config.ts                 # DEFAULT_CONFIG (5 states, 5 channels, 3 topologies)
   math.ts                   # Three.js helpers, point generation, Bloch map compilation
+  styles.ts                 # Shared style constants (LS, bdr, cS, cT)
   experimentAdapter.ts      # Pure functions: BlochVisualizerData → component prop shapes
   index.ts                  # Barrel export
-  BlochSphereScreen.tsx     # Main orchestrator: tabs, state, mode toggle, sweep animation
+  BlochSphereScreen.tsx     # Main orchestrator (~230 lines): composes hooks + components
+
+  hooks/
+    useBuiltInMode.ts       # Built-in mode state: config, channel, strength, animation
+    useExperimentMode.ts    # Experiment mode state: result selection, Bloch data, derived memos
+    useSweepMode.ts         # Sweep state: config form, interpolation, sweep animation
+    useDragRotation.ts      # Pointer drag rotation handling
+
   components/
+    Header.tsx              # Mode toggle (builtin/experiment) + tab buttons
+    BuiltinSidebar.tsx      # Built-in mode left panel: state/channel/topology selectors
+    ExperimentSidebar.tsx   # Experiment mode left panel: result picker, sweep controls
+    DataPanel.tsx           # Right sidebar: state info, metrics, fingerprints, PTM
     BlochScene.tsx          # Single-qubit 3D Bloch sphere with pole dots, great circles
     TwoQubitScene.tsx       # 2-qubit correlator space with multi-topology clouds
+    MIMatrixHeatmap.tsx     # Mutual information matrix heatmap
     PTMHeatmap.tsx          # 4x4 Pauli Transfer Matrix heatmap (orange/blue)
     CorrelatorBars.tsx      # Delta-correlator bar chart with center-line style
     FingerprintViewer.tsx   # Experimental fingerprint norms + cosine similarity matrix

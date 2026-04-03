@@ -46,6 +46,10 @@ export const terms: GlossaryTerm[] = [
       "The fidelity between the ideal unitary operation U and the actual quantum channel E: F = Tr(U†E(ρ))/d averaged over input states. Typically reported as average gate fidelity. State-of-the-art: single-qubit >99.9%, two-qubit >99.5%.",
     intuitiveExplanation:
       "How closely a real quantum gate matches the ideal operation. 99.9% fidelity means the gate introduces ~0.1% error each time. Since algorithms require thousands of gates, even small infidelities compound — driving the need for error correction.",
+    keyEquation:
+      "F_{\\text{avg}} = \\frac{\\text{Tr}(U^\\dagger \\varepsilon(\\rho))}{d} \\quad \\text{averaged over } \\rho",
+    formulaExplanation:
+      "Average gate fidelity compares the ideal unitary U with the actual noisy channel ε, averaged over all input states. F = 1 means perfect implementation; F = 0.999 means 0.1% error per gate. Since algorithms chain thousands of gates, even tiny infidelities compound.",
     relatedTerms: ["quantum_gate", "cptp_map", "surface_code"],
     categoryId: "hardware",
   },
@@ -76,6 +80,10 @@ export const terms: GlossaryTerm[] = [
       "A single-number benchmark for quantum computer capability: QV = 2^m where m is the largest circuit width for which random square circuits can be executed with heavy output probability >2/3. Captures qubit count, connectivity, gate fidelity, and crosstalk.",
     intuitiveExplanation:
       "A holistic score for how powerful a quantum computer is — not just how many qubits it has, but how well they work together. Higher quantum volume means the device can run deeper, wider circuits reliably. Current leaders: QV ~ 2^7 to 2^10.",
+    keyEquation:
+      "QV = 2^m, \\quad m = \\max\\{n : \\text{heavy output} > 2/3\\}",
+    formulaExplanation:
+      "Quantum volume 2^m where m is the largest circuit size that passes a statistical test. 'Heavy output' means the circuit produces bitstrings with above-median probability more than 2/3 of the time. Higher QV means the device can run wider, deeper circuits reliably.",
     relatedTerms: ["gate_fidelity", "circuit_depth", "superconducting_qubit"],
     categoryId: "hardware",
   },

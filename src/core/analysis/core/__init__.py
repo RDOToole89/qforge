@@ -1,5 +1,4 @@
-"""
-Core analysis utilities for structured decoherence research.
+"""Core analysis utilities for structured decoherence research.
 
 This module provides essential functions for quantum measurement analysis:
 - Information theory metrics (Shannon entropy, mutual information, etc.)

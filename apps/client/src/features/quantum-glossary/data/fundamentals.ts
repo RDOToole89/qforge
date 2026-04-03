@@ -17,6 +17,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The quantum version of a classical bit. Unlike a regular bit that must be 0 or 1, a qubit can exist in a superposition of both states simultaneously until measured.",
     symbol: "|ψ⟩",
+    keyEquation: "|\\psi\\rangle = \\alpha|0\\rangle + \\beta|1\\rangle, \\quad |\\alpha|^2 + |\\beta|^2 = 1",
+    formulaExplanation:
+      "A qubit state is a weighted combination of |0⟩ and |1⟩. The weights α and β are complex numbers whose squared magnitudes must add to 1 — ensuring total probability is conserved.",
     relatedTerms: ["superposition", "bloch_sphere", "measurement", "hilbert_space"],
     categoryId: "fundamentals",
   },
@@ -28,6 +31,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A quantum system can be in multiple states at once — not uncertain, but genuinely in all of them. Measurement forces it to 'pick' one outcome probabilistically.",
     symbol: "α|0⟩ + β|1⟩",
+    keyEquation: "|\\psi\\rangle = \\sum_{i} c_i |e_i\\rangle, \\quad \\sum_{i} |c_i|^2 = 1",
+    formulaExplanation:
+      "Any quantum state can be written as a sum over basis states |eᵢ⟩ with complex coefficients cᵢ. The squared magnitudes of all coefficients must sum to 1 — this is the normalization condition that preserves probability.",
     relatedTerms: ["qubit", "measurement", "born_rule", "interference"],
     categoryId: "fundamentals",
   },
@@ -50,6 +56,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The recipe for calculating probabilities in quantum mechanics: square the absolute value of the amplitude. If a qubit has amplitude 1/√2 for |0⟩, the probability of measuring 0 is (1/√2)² = 1/2.",
     symbol: "P(m) = |⟨m|ψ⟩|²",
+    keyEquation: "P(m) = |\\langle m | \\psi \\rangle|^2",
+    formulaExplanation:
+      "The probability of getting outcome m equals the squared magnitude of the inner product (overlap) between the measurement state ⟨m| and the quantum state |ψ⟩. This is the bridge between quantum math and experimental results.",
     relatedTerms: ["measurement", "superposition", "probability_amplitude"],
     categoryId: "fundamentals",
   },
@@ -61,6 +70,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The mathematical 'arena' where quantum states live. A single qubit lives in a 2D space; two qubits live in a 4D space. The dimension doubles with each added qubit — this exponential growth is what makes quantum computing powerful.",
     symbol: "ℋ",
+    keyEquation: "\\mathcal{H} = \\mathbb{C}^{2^n}, \\quad \\dim(\\mathcal{H}) = 2^n",
+    formulaExplanation:
+      "The state space for n qubits is a 2ⁿ-dimensional complex vector space. Each added qubit doubles the dimension — 1 qubit = 2D, 2 qubits = 4D, 10 qubits = 1024D. This exponential scaling is both the power and the challenge of quantum computing.",
     relatedTerms: ["qubit", "basis_states", "inner_product", "tensor_product"],
     categoryId: "fundamentals",
   },
@@ -83,6 +95,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The 'hidden variable' behind quantum probabilities. Unlike classical probabilities that only add up, amplitudes are complex numbers that can cancel each other out (destructive interference) or reinforce (constructive interference).",
     symbol: "α, β ∈ ℂ",
+    keyEquation: "\\alpha = |\\alpha|\\, e^{i\\theta}, \\quad P = |\\alpha|^2",
+    formulaExplanation:
+      "An amplitude is a complex number with a magnitude and a phase angle θ. The probability comes from squaring the magnitude — but the phase is what enables interference. Two paths with opposite phases cancel; same phases reinforce.",
     relatedTerms: ["born_rule", "superposition", "interference"],
     categoryId: "fundamentals",
   },

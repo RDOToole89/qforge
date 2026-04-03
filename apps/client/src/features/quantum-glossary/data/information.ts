@@ -17,6 +17,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Measures the 'quantum uncertainty' in a state. A pure state has zero entropy (you know exactly what state it is). A maximally mixed qubit has entropy 1 bit. When used on a reduced state, it quantifies entanglement.",
     symbol: "S(ρ)",
+    keyEquation:
+      "S(\\rho) = -\\text{Tr}(\\rho \\log_2 \\rho) = -\\sum_i \\lambda_i \\log_2 \\lambda_i",
+    formulaExplanation:
+      "Sum over eigenvalues of ρ, each weighted by its own logarithm. Pure states (one eigenvalue = 1) give S = 0. Maximally mixed states (all eigenvalues equal) give maximum entropy S = log₂(d). It quantifies quantum uncertainty.",
     relatedTerms: ["density_matrix", "entanglement_entropy", "mutual_information", "purity"],
     categoryId: "information",
   },
@@ -28,6 +32,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How much knowing about subsystem A tells you about subsystem B — and vice versa. Captures both classical and quantum correlations. For a Bell state, I(A:B) = 2 bits — the maximum for two qubits.",
     symbol: "I(A:B)",
+    keyEquation:
+      "I(A:B) = S(\\rho_A) + S(\\rho_B) - S(\\rho_{AB})",
+    formulaExplanation:
+      "The sum of individual entropies minus the joint entropy. If the total state has less entropy than its parts combined, the difference must be correlations. For a Bell state: S(A) = S(B) = 1, S(AB) = 0, so I = 2 bits.",
     relatedTerms: ["von_neumann_entropy", "total_correlation", "entanglement"],
     categoryId: "information",
   },
@@ -39,6 +47,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How much total 'connectedness' exists among all qubits simultaneously. Higher TC means more structure in the distribution. In the framework, TC helps distinguish structured decoherence from random noise.",
     symbol: "TC",
+    keyEquation:
+      "TC = \\sum_i S(\\rho_i) - S(\\rho)",
+    formulaExplanation:
+      "The sum of all individual subsystem entropies minus the total system entropy. Generalizes mutual information to many parties. If the parts have more total entropy than the whole, the 'missing' entropy is stored in correlations.",
     relatedTerms: ["mutual_information", "von_neumann_entropy", "structure_score"],
     categoryId: "information",
   },
@@ -50,6 +62,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How 'similar' two quantum states are — a quantum version of overlap. Fidelity = 1 means identical states; fidelity = 0 means completely distinguishable. Used to assess how well a noisy experiment reproduces the ideal state.",
     symbol: "F(ρ, σ)",
+    keyEquation:
+      "F(\\rho, \\sigma) = \\left( \\text{Tr} \\sqrt{\\sqrt{\\rho}\\, \\sigma \\sqrt{\\rho}} \\right)^2",
+    formulaExplanation:
+      "A nested square root structure that generalizes the overlap |⟨ψ|φ⟩|² to mixed states. Fidelity = 1 means identical states, 0 means perfectly distinguishable. For pure states it simplifies to the squared inner product.",
     relatedTerms: ["trace_distance", "density_matrix"],
     categoryId: "information",
   },
@@ -61,6 +77,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The maximum probability of telling two quantum states apart in a single experiment. Trace distance = 0 means the states are identical; = 1 means perfectly distinguishable. CPTP maps can only decrease trace distance (contractivity).",
     symbol: "D(ρ, σ)",
+    keyEquation:
+      "D(\\rho, \\sigma) = \\frac{1}{2} \\text{Tr} |\\rho - \\sigma| = \\frac{1}{2} \\sum_i |\\lambda_i|",
+    formulaExplanation:
+      "Half the sum of absolute eigenvalues of (ρ - σ). Equals the maximum probability of distinguishing the two states with any single measurement. CPTP maps can only decrease trace distance — noise makes states harder to tell apart.",
     relatedTerms: ["fidelity", "contractivity", "cptp_map"],
     categoryId: "information",
   },
@@ -72,6 +92,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How much uncertainty is in a probability distribution. A fair coin has H = 1 bit (maximum surprise). A loaded coin has H < 1 bit. Used in the framework's metrics for analyzing measurement outcome distributions.",
     symbol: "H(X)",
+    keyEquation:
+      "H(X) = -\\sum_i p_i \\log_2 p_i",
+    formulaExplanation:
+      "Each outcome contributes -p·log(p) to the total entropy. Rare events (small p) contribute more 'surprise' per occurrence. A fair coin has H = 1 bit; a biased coin has H < 1 bit. Von Neumann entropy is the quantum generalization.",
     relatedTerms: ["von_neumann_entropy", "born_rule"],
     categoryId: "information",
   },
@@ -83,6 +107,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A smooth way to measure how different two probability distributions are. Unlike KL divergence, it's symmetric and always finite. The framework uses JSD as the basis for the Structure Score metric.",
     symbol: "JSD(P||Q)",
+    keyEquation:
+      "\\text{JSD}(P \\| Q) = \\frac{1}{2} D_{KL}(P \\| M) + \\frac{1}{2} D_{KL}(Q \\| M), \\quad M = \\frac{P+Q}{2}",
+    formulaExplanation:
+      "Average the KL divergence from each distribution to their midpoint M. Unlike raw KL divergence, JSD is symmetric and always finite. Its square root is a true metric. The framework uses this as the foundation for the Structure Score.",
     relatedTerms: ["structure_score", "shannon_entropy"],
     categoryId: "information",
   },

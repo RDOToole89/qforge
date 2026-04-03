@@ -1,5 +1,4 @@
-"""
-Amplitude Damping Noise for T1 Energy Relaxation Research
+"""Amplitude Damping Noise for T1 Energy Relaxation Research.
 
 # The Amplitude Damping Channel - Fundamental Energy Relaxation
 Amplitude damping represents one of the most fundamental quantum decoherence
@@ -46,7 +45,7 @@ from qiskit_aer.noise import NoiseModel, amplitude_damping_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 # Physical constants for realistic parameter calculations
 BOLTZMANN_CONSTANT = 8.617e-5  # eV/K
@@ -55,8 +54,7 @@ TYPICAL_QUBIT_FREQUENCY = 5.5e9  # Hz (superconducting transmon)
 
 
 class AmplitudeDampingNoise(BaseNoise):
-    """
-    Amplitude damping noise model for T1 energy relaxation research.
+    """Amplitude damping noise model for T1 energy relaxation research.
 
     # Quantum Energy Relaxation Definition
     The amplitude damping channel models spontaneous emission: |1⟩ → |0⟩
@@ -95,8 +93,7 @@ class AmplitudeDampingNoise(BaseNoise):
         gate_time: float = 20e-9,
         temperature: float = 0.015,
     ):
-        """
-        Initialize amplitude damping noise with physics-based validation.
+        """Initialize amplitude damping noise with physics-based validation.
 
         # Physics Parameter Integration
         Supports both phenomenological error rates and physics-based T1 calculations:
@@ -173,8 +170,7 @@ class AmplitudeDampingNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply amplitude damping noise to quantum gates.
+        """Apply amplitude damping noise to quantum gates.
 
         # Energy Relaxation Implementation
         Creates Qiskit amplitude damping error channels that model spontaneous
@@ -258,8 +254,7 @@ class AmplitudeDampingNoise(BaseNoise):
             )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the amplitude damping channel.
+        """Return Kraus operators for the amplitude damping channel.
 
         # Mathematical Construction
         For amplitude damping with damping rate γ:
@@ -290,8 +285,7 @@ class AmplitudeDampingNoise(BaseNoise):
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of amplitude damping.
+        """Return comprehensive physics description of amplitude damping.
 
         Returns:
             Dict with educational physics content about energy relaxation
@@ -309,8 +303,7 @@ class AmplitudeDampingNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to amplitude damping.
+        """Get theoretical quantum properties specific to amplitude damping.
 
         Returns:
             Dict with amplitude damping channel specific properties
@@ -332,8 +325,7 @@ class AmplitudeDampingNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for amplitude damping in pathway studies.
+        """Get research context for amplitude damping in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -373,8 +365,7 @@ class AmplitudeDampingNoise(BaseNoise):
     def _validate_amplitude_damping_params(
         self, error_rate: float, t1: float, gate_time: float, temperature: float
     ) -> None:
-        """
-        Validate amplitude damping parameters against physics constraints.
+        """Validate amplitude damping parameters against physics constraints.
 
         # Physics Constraint Validation
         Ensures all parameters represent realistic amplitude damping scenarios
@@ -404,8 +395,7 @@ class AmplitudeDampingNoise(BaseNoise):
             )
 
     def _calculate_thermal_population(self) -> float:
-        """
-        Calculate thermal population of excited state at operating temperature.
+        """Calculate thermal population of excited state at operating temperature.
 
         # Thermal Physics
         At finite temperature, thermal fluctuations can excite qubits from |0⟩ to |1⟩.
@@ -428,8 +418,7 @@ class AmplitudeDampingNoise(BaseNoise):
         return 1.0 / (1.0 + np.exp(beta_omega))
 
     def _calculate_effective_damping_rate(self) -> float:
-        """
-        Calculate effective damping rate including thermal corrections.
+        """Calculate effective damping rate including thermal corrections.
 
         # Thermal Corrections
         At finite temperature, thermal excitation competes with relaxation:
@@ -447,8 +436,7 @@ class AmplitudeDampingNoise(BaseNoise):
             return base_rate
 
     def _calculate_channel_capacity(self) -> float:
-        """
-        Calculate quantum channel capacity for amplitude damping.
+        """Calculate quantum channel capacity for amplitude damping.
 
         # Information Theory
         Channel capacity for amplitude damping depends on the damping rate
@@ -464,8 +452,7 @@ class AmplitudeDampingNoise(BaseNoise):
             return max(0, 1 - γ)
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for amplitude damping noise.
+        """Get specific pathway prediction for amplitude damping noise.
 
         Returns:
             Amplitude damping specific pathway hypothesis prediction
@@ -477,9 +464,7 @@ class AmplitudeDampingNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess amplitude damping sensitivity to quantum state topology.
-        """
+        """Assess amplitude damping sensitivity to quantum state topology."""
         return (
             "High topology sensitivity expected due to |1⟩-state bias. "
             "Entangled states with more |1⟩ components should show stronger "
@@ -487,9 +472,7 @@ class AmplitudeDampingNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze amplitude damping pathway preferences.
-        """
+        """Analyze amplitude damping pathway preferences."""
         return (
             f"Strong intrinsic pathway preference for |1⟩ → |0⟩ transitions. "
             f"Energy conservation creates directional bias with thermal "

@@ -1,5 +1,4 @@
-"""
-Engine-native experiment runner.
+"""Engine-native experiment runner.
 
 Uses core state preparation and noise models for sophisticated quantum experiments.
 Supports three simulation backends: qasm, statevector, density_matrix.
@@ -23,22 +22,20 @@ logger = logging.getLogger(__name__)
 
 
 class EngineExperimentRunner:
-    """
-    Engine-native experiment runner for quantum circuit execution.
+    """Engine-native experiment runner for quantum circuit execution.
 
     This replaces the legacy core experiment runner with a clean,
     schema-based implementation that integrates directly with the engine.
     """
 
     def __init__(self, experiment_id: str = "engine-run"):
-        """
-        Initialize the engine experiment runner.
+        """Initialize the engine experiment runner.
 
         Args:
             experiment_id: Unique identifier for this experiment run
         """
         self.experiment_id = experiment_id
-        self.logger = logging.getLogger(f"EngineExperimentRunner.{experiment_id}")
+        self.logger = logging.getLogger(f"{__name__}.{experiment_id}")
         self.noise_model = None  # Will be set if noise is enabled
 
     def run_experiment(
@@ -57,13 +54,14 @@ class EngineExperimentRunner:
         custom_params: dict | None = None,
         rng_seed: int | None = None,
         balance: str | None = None,
+        readout_error_rate: float | None = None,
     ) -> tuple[QuantumCircuit, Any]:
-        """
-        Run a quantum experiment with specified parameters.
+        """Run a quantum experiment with specified parameters.
 
         Args:
             num_qubits: Number of qubits in the circuit
-            state_type: Type of quantum state ("GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM")
+            state_type: Type of quantum state
+                ("GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM")
             noise_type: Type of noise model to apply
             noise_enabled: Whether to apply noise
             shots: Number of shots for qasm simulation
@@ -75,6 +73,8 @@ class EngineExperimentRunner:
             t2: T2 dephasing time for THERMAL_RELAXATION noise
             custom_params: Custom parameters for state preparation or noise
             rng_seed: Random seed for reproducibility
+            balance: Optional circuit balancing strategy name.
+            readout_error_rate: Optional measurement readout error probability.
 
         Returns:
             Tuple of (QuantumCircuit, simulation result)
@@ -87,9 +87,19 @@ class EngineExperimentRunner:
         # Apply noise if enabled
         if noise_enabled and noise_type:
             circuit = self._apply_noise(
-                circuit, noise_type, error_rate, z_prob, i_prob, t1, t2,
+                circuit,
+                noise_type,
+                error_rate,
+                z_prob,
+                i_prob,
+                t1,
+                t2,
                 custom_params=custom_params,
+                readout_error_rate=readout_error_rate,
             )
+        elif readout_error_rate is not None and readout_error_rate > 0:
+            # Readout errors can be applied independently of gate noise
+            self._apply_readout_only(circuit.num_qubits, readout_error_rate)
 
         # Execute simulation
         result = self._execute_simulation(circuit, sim_mode, shots, rng_seed)
@@ -100,7 +110,10 @@ class EngineExperimentRunner:
     # ---------- Circuit / noise / simulation internals ----------
 
     def _create_circuit(
-        self, num_qubits: int, state_type: str, custom_params: dict | None,
+        self,
+        num_qubits: int,
+        state_type: str,
+        custom_params: dict | None,
         balance: str | None = None,
     ) -> QuantumCircuit:
         """Create quantum circuit using sophisticated core state preparation."""
@@ -194,6 +207,7 @@ class EngineExperimentRunner:
         t1: float | None,
         t2: float | None,
         custom_params: dict | None = None,
+        readout_error_rate: float | None = None,
     ) -> QuantumCircuit:
         """Apply sophisticated noise using core noise models."""
         try:
@@ -222,6 +236,9 @@ class EngineExperimentRunner:
             if custom_params:
                 noise_params["custom_params"] = custom_params
 
+            if readout_error_rate is not None:
+                noise_params["readout_error_rate"] = readout_error_rate
+
             # Create sophisticated noise model using core
             self.noise_model = create_noise_model(**noise_params)
 
@@ -236,6 +253,18 @@ class EngineExperimentRunner:
             self.logger.warning(f"Noise type '{noise_type}' not applied due to error")
             self.noise_model = None
             return circuit
+
+    def _apply_readout_only(self, num_qubits: int, readout_error_rate: float) -> None:
+        """Apply readout errors without any gate noise."""
+        from qiskit_aer.noise import NoiseModel, ReadoutError
+
+        noise_model = NoiseModel()
+        p = float(readout_error_rate)
+        probs = [[1 - p, p], [p, 1 - p]]
+        for qubit in range(num_qubits):
+            noise_model.add_readout_error(ReadoutError(probs), [qubit])
+        self.noise_model = noise_model
+        self.logger.info(f"Applied readout-only noise (rate={p:.4f}) to {num_qubits} qubits")
 
     def _execute_simulation(
         self,
@@ -281,9 +310,7 @@ class EngineExperimentRunner:
         and 'statevector' (Qiskit Statevector object).
         """
         if self.noise_model is not None:
-            self.logger.warning(
-                "Noise model is set but will be ignored in statevector mode"
-            )
+            self.logger.warning("Noise model is set but will be ignored in statevector mode")
 
         # Prepare a measurement-free copy for statevector extraction
         sv_circuit = circuit.copy()
@@ -347,8 +374,7 @@ class EngineExperimentRunner:
     # ---------- Results helpers ----------
 
     def _extract_canonical_counts(self, result: Any, num_qubits: int) -> dict[str, int]:
-        """
-        Extract counts from a Qiskit Result and canonicalize bitstrings.
+        """Extract counts from a Qiskit Result and canonicalize bitstrings.
 
         - Removes spaces Qiskit may include for registers
         - Pads/truncates to length = num_qubits
@@ -379,8 +405,7 @@ class EngineExperimentRunner:
 
 
 def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
-    """
-    Execute experiment using engine-native runner.
+    """Execute experiment using engine-native runner.
 
     Args:
         config: experiment config dict
@@ -404,5 +429,6 @@ def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
         custom_params=config.get("custom_params"),
         rng_seed=config.get("rng_seed"),
         balance=config.get("balance_circuit"),
+        readout_error_rate=config.get("readout_error_rate"),
     )
     return circuit, raw

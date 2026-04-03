@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1: Does entanglement topology influence decoherence pathways?
+"""SST Hypothesis Q1: Does entanglement topology influence decoherence pathways?
 
 This experiment tests the first operational hypothesis of the Structured Substrate
 Thesis (SST): that entanglement topology creates preferential decoherence pathways.
@@ -26,8 +25,7 @@ from src.experiments.base import BaseExperiment
 
 
 class SSTHypothesisQ1(BaseExperiment):
-    """
-    SST Hypothesis Q1: Entanglement topology influences decoherence pathways.
+    """SST Hypothesis Q1: Entanglement topology influences decoherence pathways.
 
     This is the primary SST experiment testing whether GHZ states under
     depolarizing noise exhibit structured decoherence patterns.
@@ -67,8 +65,7 @@ class SSTHypothesisQ1(BaseExperiment):
         max_error_rate: float = 0.5,
         **overrides: Any,
     ) -> list[ExperimentResult]:
-        """
-        Run a noise sweep experiment varying error_rate.
+        """Run a noise sweep experiment varying error_rate.
 
         This is the canonical SST Q1 protocol: sweep error rates from 0 to max
         and observe how structured decoherence metrics evolve.

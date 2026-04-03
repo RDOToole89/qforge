@@ -1,5 +1,4 @@
-"""
-State Probe Sensitivity Study
+"""State Probe Sensitivity Study.
 
 Three-phase experiment testing which entangled states best detect correlated
 noise topologies using the NTC (Noise Topology Correlation) metric.
@@ -56,6 +55,7 @@ class StateProbeStudy(BaseExperiment):
     description = "Test which entangled states best detect correlated noise topologies via NTC"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for the state probe sensitivity study."""
         return ExperimentConfig(
             num_qubits=DEFAULT_N_QUBITS,
             state_type="GHZ",
@@ -217,9 +217,7 @@ class StateProbeStudy(BaseExperiment):
 
         return rows
 
-    def run_phase3(
-        self, best_state: str, rng_seed: int = 42
-    ) -> list[dict[str, Any]]:
+    def run_phase3(self, best_state: str, rng_seed: int = 42) -> list[dict[str, Any]]:
         """Phase 3: Scaling — 1 state x 5 qubit counts = 5 rows.
 
         Sweeps n in {4,5,6,7,8} at p=0.2, cs=0.6, chain topology.
@@ -238,9 +236,7 @@ class StateProbeStudy(BaseExperiment):
                 best_state, n, p, cs, "chain", test_counts, baseline_counts, seed, rng
             )
             rows.append(row)
-            logger.info(
-                f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}"
-            )
+            logger.info(f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}")
 
         return rows
 
@@ -365,9 +361,7 @@ class StateProbeStudy(BaseExperiment):
 
             logger.info(f"Shuffled control {i + 1}/{n_repeats}")
             baseline_counts = self._run_single("GHZ", n, p, 0.0, "CHAIN", seed)
-            test_counts = self._run_single_custom_topology(
-                "GHZ", n, p, cs, shuffled_adj, seed
-            )
+            test_counts = self._run_single_custom_topology("GHZ", n, p, cs, shuffled_adj, seed)
 
             # NTC computed against TRUE chain adjacency (not shuffled)
             chain_adj = chain_adjacency(n)
@@ -397,15 +391,11 @@ class StateProbeStudy(BaseExperiment):
                 "phase": "shuffled_control",
             }
             rows.append(row)
-            logger.info(
-                f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}"
-            )
+            logger.info(f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}")
 
         return rows
 
-    def run_multi_seed_w(
-        self, n_seeds: int = 10, rng_seed: int = 200
-    ) -> list[dict[str, Any]]:
+    def run_multi_seed_w(self, n_seeds: int = 10, rng_seed: int = 200) -> list[dict[str, Any]]:
         """Multi-seed W state validation at key conditions.
 
         Runs W state at n=6, p=0.2, cs=0.6, chain noise with multiple seeds
@@ -422,14 +412,10 @@ class StateProbeStudy(BaseExperiment):
             logger.info(f"Multi-seed W {i + 1}/{n_seeds} (seed={seed})")
             baseline_counts = self._run_single("W", n, p, 0.0, "CHAIN", seed)
             test_counts = self._run_single("W", n, p, cs, "CHAIN", seed)
-            row = self._compute_row(
-                "W", n, p, cs, "chain", test_counts, baseline_counts, seed, rng
-            )
+            row = self._compute_row("W", n, p, cs, "chain", test_counts, baseline_counts, seed, rng)
             row["phase"] = "multi_seed_w"
             rows.append(row)
-            logger.info(
-                f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}"
-            )
+            logger.info(f"  NTC={row['ntc']:.4f} p={row['p_value']:.3f} d={row['effect_size']:.2f}")
 
         return rows
 
@@ -489,16 +475,18 @@ class StateProbeStudy(BaseExperiment):
                     fv = fingerprint_vector(test_counts, baseline_counts, n)
                     norm = float(np.linalg.norm(fv))
                     vectors.append(fv)
-                    fingerprints.append({
-                        "phase": 1,
-                        "state": state,
-                        "p": p,
-                        "cs": cs,
-                        "topology": "chain",
-                        "seed": seed,
-                        "fingerprint": fv.tolist(),
-                        "norm": norm,
-                    })
+                    fingerprints.append(
+                        {
+                            "phase": 1,
+                            "state": state,
+                            "p": p,
+                            "cs": cs,
+                            "topology": "chain",
+                            "seed": seed,
+                            "fingerprint": fv.tolist(),
+                            "norm": norm,
+                        }
+                    )
                     logger.info(f"  norm={norm:.6f}")
 
         # --- Compute fingerprints for Phase 2 ---
@@ -513,16 +501,18 @@ class StateProbeStudy(BaseExperiment):
                 fv = fingerprint_vector(test_counts, baseline_counts, n)
                 norm = float(np.linalg.norm(fv))
                 vectors.append(fv)
-                fingerprints.append({
-                    "phase": 2,
-                    "state": state,
-                    "p": 0.2,
-                    "cs": 0.6,
-                    "topology": topo.lower(),
-                    "seed": seed,
-                    "fingerprint": fv.tolist(),
-                    "norm": norm,
-                })
+                fingerprints.append(
+                    {
+                        "phase": 2,
+                        "state": state,
+                        "p": 0.2,
+                        "cs": 0.6,
+                        "topology": topo.lower(),
+                        "seed": seed,
+                        "fingerprint": fv.tolist(),
+                        "norm": norm,
+                    }
+                )
                 logger.info(f"  norm={norm:.6f}")
 
         # --- Cosine similarity matrix ---
@@ -536,18 +526,12 @@ class StateProbeStudy(BaseExperiment):
         variance_explained = (S**2) / (S**2).sum()
 
         # --- Summary statistics ---
-        labels = [
-            f"{fp['state']}_{fp['topology']}_p{fp['p']}_cs{fp['cs']}"
-            for fp in fingerprints
-        ]
+        labels = [f"{fp['state']}_{fp['topology']}_p{fp['p']}_cs{fp['cs']}" for fp in fingerprints]
         states_arr = np.array([fp["state"] for fp in fingerprints])
         norms = np.array([fp["norm"] for fp in fingerprints])
 
         # GHZ-only cosine similarities (Phase 1, chain)
-        ghz_mask = np.array([
-            fp["state"] == "GHZ" and fp["phase"] == 1
-            for fp in fingerprints
-        ])
+        ghz_mask = np.array([fp["state"] == "GHZ" and fp["phase"] == 1 for fp in fingerprints])
         ghz_indices = np.where(ghz_mask)[0]
         ghz_sim = sim_matrix[np.ix_(ghz_indices, ghz_indices)]
         ghz_upper = ghz_sim[np.triu_indices(len(ghz_indices), k=1)]
@@ -558,7 +542,8 @@ class StateProbeStudy(BaseExperiment):
             state_stab: dict[str, float] = {}
             for p in PHASE1_ERROR_RATES:
                 idxs = [
-                    i for i, fp in enumerate(fingerprints)
+                    i
+                    for i, fp in enumerate(fingerprints)
                     if fp["state"] == state and fp["p"] == p and fp["phase"] == 1
                 ]
                 if len(idxs) >= 2:
@@ -671,9 +656,14 @@ class StateProbeStudy(BaseExperiment):
         for ax_i, state in enumerate(STATES):
             # Find the Phase 1 fingerprint at p=0.2, cs=0.6
             idx = next(
-                (i for i, fp in enumerate(fingerprints)
-                 if fp["state"] == state and fp["p"] == 0.2
-                 and fp["cs"] == 0.6 and fp["phase"] == 1),
+                (
+                    i
+                    for i, fp in enumerate(fingerprints)
+                    if fp["state"] == state
+                    and fp["p"] == 0.2
+                    and fp["cs"] == 0.6
+                    and fp["phase"] == 1
+                ),
                 None,
             )
             if idx is not None:

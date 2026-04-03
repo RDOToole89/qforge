@@ -33,6 +33,7 @@ from src.engine.visualization import (
 def _has_pylatexenc() -> bool:
     try:
         import pylatexenc  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -63,16 +64,12 @@ class TestConfigValidation:
         assert cfg.export_formats == ["png"]
 
     def test_export_formats_custom(self):
-        cfg = ExperimentConfig(
-            num_qubits=2, state_type="GHZ", export_formats=["png", "pdf", "svg"]
-        )
+        cfg = ExperimentConfig(num_qubits=2, state_type="GHZ", export_formats=["png", "pdf", "svg"])
         assert cfg.export_formats == ["png", "pdf", "svg"]
 
     def test_invalid_export_format_rejected(self):
         with pytest.raises(Exception):
-            ExperimentConfig(
-                num_qubits=2, state_type="GHZ", export_formats=["png", "bmp"]
-            )
+            ExperimentConfig(num_qubits=2, state_type="GHZ", export_formats=["png", "bmp"])
 
 
 # ---------------------------------------------------------------------------
@@ -330,9 +327,7 @@ class TestCircuitDiagramRenderer:
         data = {"circuit": QuantumCircuit(2)}
         assert renderer.can_render("histogram", data) is False
 
-    @pytest.mark.skipif(
-        not _has_pylatexenc(), reason="pylatexenc not installed"
-    )
+    @pytest.mark.skipif(not _has_pylatexenc(), reason="pylatexenc not installed")
     def test_render_produces_artifact(self, tmp_path: Path):
         renderer = CircuitDiagramRenderer()
         qc = QuantumCircuit(2)
@@ -346,9 +341,7 @@ class TestCircuitDiagramRenderer:
         assert artifact.metadata["renderer"] == "CircuitDiagramRenderer"
         assert artifact.metadata["num_qubits"] == 2
 
-    @pytest.mark.skipif(
-        not _has_pylatexenc(), reason="pylatexenc not installed"
-    )
+    @pytest.mark.skipif(not _has_pylatexenc(), reason="pylatexenc not installed")
     def test_integration_circuit_viz(self):
         """Full integration: run experiment with circuit rendering."""
         result = run(
@@ -430,6 +423,7 @@ class TestVizTypeAll:
         # Circuit rendering requires pylatexenc; check if available
         try:
             import pylatexenc  # noqa: F401
+
             assert "circuit" in kinds
         except ImportError:
             pass  # Circuit rendering skipped without pylatexenc

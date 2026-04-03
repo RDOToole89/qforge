@@ -1,5 +1,4 @@
-"""
-Research Integration Module
+"""Research Integration Module.
 
 Bridge between engine API and core analysis metrics.
 Provides clean integration for computing a generic MetricsBundle.
@@ -29,8 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_counts_from_result(raw_result: Any, *, num_qubits: int | None = None) -> dict[str, int]:
-    """
-    Extract measurement counts from Qiskit results and canonicalize.
+    """Extract measurement counts from Qiskit results and canonicalize.
 
     Canonicalization:
       - Remove spaces (Qiskit can space-separate classical registers)
@@ -95,8 +93,7 @@ def compute_metrics_bundle(
     counts: dict[str, int],
     config: ExperimentConfig,
 ) -> MetricsBundle | None:
-    """
-    Compute requested metrics and return a typed MetricsBundle.
+    """Compute requested metrics and return a typed MetricsBundle.
 
     Uses config.metrics (profile name, explicit list, or None) to decide
     which metrics to compute via the core registry.

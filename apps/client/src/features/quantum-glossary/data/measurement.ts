@@ -17,6 +17,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The standard textbook measurement. You project the state onto one of a set of orthogonal directions. After measurement, the state is in the projected direction. Repeated measurement always gives the same result — the state has 'collapsed'.",
     symbol: "{Πₘ}",
+    keyEquation:
+      "P(m) = \\text{Tr}(\\Pi_m \\rho), \\quad \\rho \\to \\frac{\\Pi_m \\rho \\Pi_m}{P(m)}",
+    formulaExplanation:
+      "The probability of outcome m is the trace of the projector times the state. After measurement, the state collapses to the projected subspace, normalized by the outcome probability. This is the standard 'textbook collapse' postulate.",
     relatedTerms: ["measurement", "born_rule", "povm", "observable"],
     categoryId: "measurement",
   },
@@ -28,6 +32,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The most general measurement allowed by quantum mechanics. Unlike projective measurements, POVMs can have more outcomes than the dimension of the system and don't require orthogonal projectors. Useful for optimizing state discrimination.",
     symbol: "{Eₘ}",
+    keyEquation:
+      "P(m) = \\text{Tr}(E_m \\rho), \\quad \\sum_m E_m = I, \\quad E_m \\geq 0",
+    formulaExplanation:
+      "POVM elements Eₘ are positive operators that sum to the identity. They give measurement probabilities without specifying the post-measurement state. More outcomes than dimensions are possible — useful for optimal state discrimination.",
     relatedTerms: ["projective_measurement", "measurement", "born_rule"],
     categoryId: "measurement",
   },
@@ -39,6 +47,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A physical quantity you can measure — like position, spin, or energy. In quantum mechanics, each observable is a matrix, and measurement 'picks' one of its eigenvalues. The Pauli matrices X, Y, Z are the three directions you can measure a qubit along.",
     symbol: "O",
+    keyEquation:
+      "\\langle O \\rangle = \\text{Tr}(\\rho \\, O) = \\sum_i \\lambda_i \\, P(\\lambda_i)",
+    formulaExplanation:
+      "The expected value of measuring O is the trace of ρO, which equals the weighted average of eigenvalues λᵢ. Each eigenvalue is a possible measurement outcome, weighted by its probability.",
     relatedTerms: ["measurement", "hermitian", "eigenvalue", "pauli_x"],
     categoryId: "measurement",
   },
@@ -70,6 +82,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Quantifies how much two parts of a quantum system are correlated. If ⟨ZZ⟩ ≠ ⟨Z⟩⟨Z⟩, the qubits are correlated. In the framework's 2-qubit visualizer, the three axes (ZI, IZ, ZZ) are exactly these correlators.",
     symbol: "⟨O_A O_B⟩",
+    keyEquation:
+      "\\langle O_A O_B \\rangle_c = \\langle O_A O_B \\rangle - \\langle O_A \\rangle \\langle O_B \\rangle",
+    formulaExplanation:
+      "The connected correlator subtracts the product of individual expectations. If this is nonzero, the subsystems are genuinely correlated — knowing about A tells you something about B beyond what their individual statistics reveal.",
     relatedTerms: ["zz_correlator", "entanglement", "mutual_information"],
     categoryId: "measurement",
   },

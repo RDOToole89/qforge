@@ -1,5 +1,4 @@
-"""
-Experiment Configuration Models
+"""Experiment Configuration Models.
 
 Purpose: Define the complete specification for quantum experiment configurations.
 Supports both basic experiments and advanced research configurations with
@@ -24,8 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class ExperimentConfig(BaseModel):
-    """
-    Complete quantum experiment configuration.
+    """Complete quantum experiment configuration.
 
     This model defines all parameters needed to run a quantum experiment,
     from basic circuit parameters to advanced research configurations.
@@ -47,7 +45,8 @@ class ExperimentConfig(BaseModel):
             "Simulation mode: "
             "'qasm' = shot-based measurement sampling (supports noise), "
             "'statevector' = exact noiseless state (counts synthesized via multinomial sampling), "
-            "'density_matrix' = full mixed-state simulation (supports noise, provides density matrix)"
+            "'density_matrix' = full mixed-state simulation "
+            "(supports noise, provides density matrix)"
         ),
     )
 
@@ -89,10 +88,24 @@ class ExperimentConfig(BaseModel):
     t1: float | None = Field(default=None, gt=0.0)
     t2: float | None = Field(default=None, gt=0.0)
 
+    # Readout (measurement) error
+    readout_error_rate: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=0.5,
+        description=(
+            "Per-qubit readout error probability (bit-flip on "
+            "measurement). Independent of gate noise."
+        ),
+    )
+
     # Circuit balancing
     balance_circuit: str | None = Field(
         default=None,
-        description="Circuit balancing strategy. 'gate_count' pads circuits with identity gates to equalize depth across state types.",
+        description=(
+            "Circuit balancing strategy. 'gate_count' pads circuits "
+            "with identity gates to equalize depth across state types."
+        ),
     )
 
     # ===== Research Parameters =====
@@ -187,9 +200,7 @@ class ExperimentConfig(BaseModel):
 
     @model_validator(mode="after")
     def _cross_field_checks(self) -> ExperimentConfig:
-        """
-        Model-level cross-field validations that are safer after all fields are parsed.
-        """
+        """Model-level cross-field validations that are safer after all fields are parsed."""
         if self.t1 is not None and self.t2 is not None:
             if self.t2 > 2 * self.t1:
                 raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2 * self.t1})")
@@ -206,8 +217,7 @@ class ExperimentConfig(BaseModel):
 
 
 class AdvancedNoiseConfig(BaseModel):
-    """
-    Advanced noise configuration for complex noise models.
+    """Advanced noise configuration for complex noise models.
 
     Purpose: Separate complex noise configurations from basic ExperimentConfig
     to keep the main config model clean and focused.

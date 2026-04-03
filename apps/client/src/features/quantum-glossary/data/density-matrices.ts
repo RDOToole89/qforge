@@ -17,6 +17,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A matrix that encodes everything about a quantum state, including classical uncertainty. State vectors can only describe pure states; density matrices handle mixtures too. Essential for describing noisy, real-world quantum systems.",
     symbol: "ρ",
+    keyEquation:
+      "\\rho = \\sum_i p_i |\\psi_i\\rangle\\langle\\psi_i|, \\quad \\text{Tr}(\\rho) = 1, \\quad \\rho \\geq 0",
+    formulaExplanation:
+      "The density matrix is a weighted mixture of pure state projectors. The weights p\u1d62 are classical probabilities summing to 1. The trace-1 condition ensures total probability is conserved, and positive semi-definiteness ensures no negative probabilities.",
     relatedTerms: ["pure_state", "mixed_state", "partial_trace", "purity"],
     categoryId: "density_matrices",
   },
@@ -28,6 +32,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A single number summarizing a matrix. In quantum mechanics, the trace of the density matrix must always equal 1 (total probability = 100%). The trace lets you compute expectation values without explicit state vectors.",
     symbol: "Tr(·)",
+    keyEquation:
+      "\\text{Tr}(A) = \\sum_i A_{ii}, \\quad \\langle O \\rangle = \\text{Tr}(\\rho \\, O)",
+    formulaExplanation:
+      "The trace sums the diagonal entries of a matrix. In quantum mechanics, the expected value of any observable O is simply Tr(\u03c1O) \u2014 this single formula replaces the need for explicit state vectors when computing measurements.",
     relatedTerms: ["density_matrix", "partial_trace", "trace_preserving"],
     categoryId: "density_matrices",
   },
@@ -39,6 +47,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Mathematically 'forgetting' about some qubits to focus on the rest. If you have two entangled qubits and trace out qubit B, you get the reduced state of qubit A — which is typically mixed even if the joint state was pure.",
     symbol: "Tr_B(·)",
+    keyEquation:
+      "\\rho_A = \\text{Tr}_B(\\rho_{AB}) = \\sum_i (I_A \\otimes \\langle i|_B)\\, \\rho_{AB}\\, (I_A \\otimes |i\\rangle_B)",
+    formulaExplanation:
+      "To get the state of subsystem A, sum over all basis states of subsystem B. This 'traces out' B, leaving only A's perspective. If A and B were entangled, \u03c1_A will be mixed even if \u03c1_AB was pure.",
     relatedTerms: ["density_matrix", "entanglement_entropy", "reduced_state"],
     categoryId: "density_matrices",
   },
@@ -50,6 +62,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How 'clean' a quantum state is. Purity = 1 means a perfect pure state (on the Bloch sphere surface). Purity = 1/2 for a single qubit means maximally mixed (center of the Bloch ball). Noise always decreases purity.",
     symbol: "γ = Tr(ρ²)",
+    keyEquation:
+      "\\gamma = \\text{Tr}(\\rho^2), \\quad \\frac{1}{d} \\leq \\gamma \\leq 1",
+    formulaExplanation:
+      "Purity measures how close a state is to being pure. The trace of \u03c1\u00b2 equals 1 for a pure state and 1/d for the maximally mixed state in d dimensions. Decoherence drives purity down; unitary evolution preserves it.",
     relatedTerms: ["pure_state", "mixed_state", "density_matrix", "decoherence"],
     categoryId: "density_matrices",
   },
@@ -81,6 +97,10 @@ export const terms: GlossaryTerm[] = [
       "A multi-partite state ρ that can be written as a convex combination of product states: ρ = Σᵢ pᵢ ρ_A^(i) ⊗ ρ_B^(i). A state that is not separable is entangled. Determining separability is NP-hard in general.",
     intuitiveExplanation:
       "A state that can be prepared using only local operations and classical communication (LOCC) — no quantum entanglement needed. Classically correlated but not quantumly correlated.",
+    keyEquation:
+      "\\rho_{\\text{sep}} = \\sum_i p_i \\, \\rho_A^{(i)} \\otimes \\rho_B^{(i)}",
+    formulaExplanation:
+      "A separable state is a classical mixture of product states \u2014 each term is an uncorrelated state of A and B weighted by classical probability p\u1d62. If a state can't be written this way, it must be entangled.",
     relatedTerms: ["entanglement", "product_state", "density_matrix"],
     categoryId: "density_matrices",
   },

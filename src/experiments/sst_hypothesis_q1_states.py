@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1 (States): W State and Product State
+"""SST Hypothesis Q1 (States): W State and Product State.
 
 This module extends the SST hypothesis testing to different quantum states
 to verify that the "River Scaling" effect is specific to certain entanglement structures.
@@ -17,8 +16,7 @@ from src.experiments.base import BaseExperiment
 
 
 class SSTHypothesisQ1WState(BaseExperiment):
-    """
-    SST Hypothesis Q1 with W State.
+    """SST Hypothesis Q1 with W State.
 
     W states have a different entanglement structure than GHZ states.
     They are robust against particle loss but have different correlation properties.
@@ -42,8 +40,7 @@ class SSTHypothesisQ1WState(BaseExperiment):
 
 
 class SSTHypothesisQ1ProductState(BaseExperiment):
-    """
-    SST Hypothesis Q1 with Product State (Superposition).
+    """SST Hypothesis Q1 with Product State (Superposition).
 
     A separable state (|+>|+>...|+>) has no entanglement.
     Under amplitude damping, errors should be independent on each qubit.

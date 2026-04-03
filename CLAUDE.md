@@ -163,7 +163,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - `pathway_concentration_ratio.py` - Adaptive quartile-based concentration
   - `structure_score.py` - Clean delegation wrapper for all metrics
   - `schema_bridge.py` - v1.0 schema compliance with robust validation
-  - `registry.py` - Centralized metric computation with bootstrap CI
+  - `registry.py` - Declarative MetricSpec pattern with bootstrap CI and status logic
 
 - `src/core/analysis/core/` - **Mathematical foundations**
   - `information_theory.py` - Full-support Jeffreys smoothing, deterministic ordering
@@ -179,15 +179,26 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ### Engine (Primary Interface)
 
-- `src/engine/api.py` - Main entry points: `run()`, `sweep()`
-- `src/engine/models/` - Pydantic models (config, results, research metrics)
-- `src/engine/storage.py` - Deterministic result storage
+- `src/engine/api.py` - Main entry points: `run()`, `sweep()`, `iter_experiment_configs()`
+- `src/engine/provenance.py` - Provenance building (software versions, git SHA, host info)
+- `src/engine/fidelity.py` - Simulation data extraction (statevector, density matrix, fidelity)
+- `src/engine/viz_pipeline.py` - Visualization rendering orchestration
+- `src/engine/models/` - Pydantic models, split into focused submodules:
+  - `config.py` - Experiment configuration
+  - `metadata.py` - Experiment identification and context
+  - `circuit.py` - Quantum circuit statistics with auto-healing validators
+  - `measurement.py` - Measurement results with auto-healing validators
+  - `provenance.py` - Reproducibility provenance tracking
+  - `quality.py` - Quality assessment metrics
+  - `results.py` - Top-level result composition (imports above)
+  - `research.py` - Structured decoherence research models
+  - `sweep.py` - Parameter sweep configuration and results
+  - `storage.py` - Storage, artifacts, and manifest models
 
 ### Core Quantum Mechanics
 
-- `src/core/experiment_runner.py` - Quantum circuit execution
-- `src/core/noise_factory.py` - Physics-compliant noise models
-- `src/core/state_factory.py` - Quantum state preparation
+- `src/core/noise_models/` - Physics-compliant noise model implementations
+- `src/core/state_preparation/` - Quantum state preparation (6 state types)
 
 ### State Preparation (Educational Excellence)
 
@@ -240,11 +251,25 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Hardware Integration**: Real quantum device compatibility
 - **6 State Types**: GHZ, Bell, W, Cluster, Superposition, Custom
 
-**Engine Integration** - ✅ **STABLE**
+**Engine Integration** - ✅ **STABLE & MODULAR**
 
-- Clean API through `run()` and `sweep()` functions
-- Type-safe Pydantic models for all data structures
+- Clean API through `run()`, `sweep()`, and `iter_experiment_configs()`
+- Type-safe Pydantic models split into focused submodules (metadata, circuit, measurement, provenance, quality)
 - Automated structured decoherence metrics computation
+- Extracted provenance, fidelity, and visualization into dedicated modules
+
+**Code Quality** - ✅ **ENFORCED**
+
+- **Linting**: ruff with pydocstyle (D), complexity (C901 max 15), Google convention
+- **Pre-commit hooks**: ruff check + format, trailing whitespace, YAML/JSON/TOML validation
+- **Type checking**: mypy strict mode
+- **Testing**: pytest with 90% coverage on core analysis, 277+ passing tests
+
+**Frontend (Bloch Sphere Visualizer)** - ✅ **REFACTORED**
+
+- BlochSphereScreen split from 1064 lines into hooks + sub-components (~232 lines main screen)
+- Custom hooks: useBuiltInMode, useExperimentMode, useSweepMode, useDragRotation
+- Component hierarchy: Header, BuiltinSidebar, ExperimentSidebar, DataPanel
 
 ### 🚀 **Ready for Next Phase**
 

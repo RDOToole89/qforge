@@ -1,5 +1,4 @@
-"""
-Pathway Concentration Ratio (PCR) - Error Concentration Analysis
+"""Pathway Concentration Ratio (PCR) - Error Concentration Analysis.
 
 # Mathematical Foundation
 The Pathway Concentration Ratio quantifies how concentrated errors are in
@@ -53,8 +52,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ConcentrationAnalysis:
-    """
-    Complete concentration analysis results with economic interpretation.
+    """Complete concentration analysis results with economic interpretation.
 
     This structure provides comprehensive information about error concentration
     including multiple inequality measures and their quantum physics interpretation.
@@ -88,8 +86,7 @@ def compute_pathway_concentration_ratio(
     adaptive_quartiles: bool = True,
     return_analysis: bool = False,
 ) -> Union[float, "ConcentrationAnalysis"]:
-    """
-    Compute Pathway Concentration Ratio - error concentration in top pathways.
+    """Compute Pathway Concentration Ratio - error concentration in top pathways.
 
     Mathematical Definition:
         PCR = (Σ frequencies in top 25%) / (Σ frequencies in bottom 25%)
@@ -234,8 +231,7 @@ def compute_pathway_concentration_ratio(
 
 
 def compute_concentration_with_gini(counts: Mapping[str, int]) -> tuple[float, float]:
-    """
-    Compute both PCR and Gini coefficient for comprehensive inequality analysis.
+    """Compute both PCR and Gini coefficient for comprehensive inequality analysis.
 
     This function provides two complementary measures of concentration:
     - PCR: Quartile-based ratio (robust, intuitive)
@@ -294,7 +290,6 @@ def _generate_concentration_analysis(
     total_counts: int,
 ) -> ConcentrationAnalysis:
     """Generate comprehensive concentration analysis results."""
-
     # Determine concentration evidence level
     if pcr == float("inf") or pcr > 20.0:
         concentration_evidence = "extreme"
@@ -350,8 +345,7 @@ def _generate_concentration_analysis(
 def validate_pcr_properties(
     pcr: float, counts: Mapping[str, int], tolerance: float = 1e-10
 ) -> bool:
-    """
-    Validate mathematical properties of computed PCR.
+    """Validate mathematical properties of computed PCR.
 
     This function performs comprehensive validation of PCR properties to ensure
     numerical correctness and catch potential implementation bugs.
@@ -401,8 +395,7 @@ def validate_pcr_properties(
 
 
 def pathway_concentration_educational_demo() -> dict:
-    """
-    Educational demonstration of PCR behavior across different scenarios.
+    """Educational demonstration of PCR behavior across different scenarios.
 
     This function provides concrete examples showing how PCR responds to
     different types of error concentration patterns, serving as both a validation

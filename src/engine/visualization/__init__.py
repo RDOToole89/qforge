@@ -1,5 +1,4 @@
-"""
-Research-focused visualization system for structured decoherence studies.
+"""Research-focused visualization system for structured decoherence studies.
 
 This package provides clean, extensible visualization capabilities with a
 plugin architecture:

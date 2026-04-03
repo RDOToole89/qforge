@@ -1,5 +1,4 @@
-"""
-Statistical Confidence Methods for Structured Decoherence Metrics
+"""Statistical Confidence Methods for Structured Decoherence Metrics.
 
 # Bootstrap Confidence Intervals for Quantum Measurements
 This module implements bootstrap methods to compute 95% confidence intervals
@@ -25,11 +24,13 @@ This module bridges quantum mechanics with statistical inference:
 - Validation status determination from statistical evidence
 """
 
+from __future__ import annotations
+
 import logging
 import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import numpy as np
 
@@ -47,8 +48,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class MetricWithConfidence:
-    """
-    Structured metric with confidence interval and validation status.
+    """Structured metric with confidence interval and validation status.
 
     # Schema Compliance
     Matches the structure required by structure_metrics.schema.json:
@@ -77,12 +77,11 @@ def bootstrap_confidence_interval(
     n_bootstrap: int = DEFAULT_BOOTSTRAP_B,
     confidence_level: float = 0.95,
     method: str = "percentile",
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator | None = None,
     # compatibility alias; if provided, use it when rng is None
-    random_state: Optional[np.random.Generator] = None,
+    random_state: np.random.Generator | None = None,
 ) -> tuple[float, float]:
-    """
-     Compute bootstrap confidence interval for any metric function.
+    """Compute bootstrap confidence interval for any metric function.
 
      # Bootstrap Resampling Theory
      The bootstrap principle: The sampling distribution of a statistic can be
@@ -114,7 +113,7 @@ def bootstrap_confidence_interval(
      rng: Optional NumPy Generator for reproducible resampling.
      random_state: Deprecated alias; used only if rng is None.
 
-     Returns:
+    Returns:
          Tuple[float, float]: (lower_bound, upper_bound) confidence interval
 
      Educational Notes:
@@ -218,8 +217,7 @@ def bootstrap_confidence_interval(
 def _compute_bca_interval(
     bootstrap_metrics: np.ndarray, original_metric: float, confidence_level: float
 ) -> tuple[float, float]:
-    """
-    Compute BCa (Bias-Corrected and accelerated) confidence interval.
+    """Compute BCa (Bias-Corrected and accelerated) confidence interval.
 
     # BCa Method
     Adjusts percentile endpoints to account for:
@@ -285,8 +283,7 @@ def _normal_cdf(z: float) -> float:
 
 
 def determine_validation_status(ci_width: float, metric_value: float, n_samples: int) -> str:
-    """
-    Determine validation status based on statistical evidence.
+    """Determine validation status based on statistical evidence.
 
     # Status Criteria
     The validation status reflects our confidence in the metric:
@@ -347,11 +344,10 @@ def compute_metric_with_confidence(
     metric_function: Callable[[Mapping[str, int]], float],
     metric_name: str = "metric",
     n_bootstrap: int = DEFAULT_BOOTSTRAP_B,
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator | None = None,
     **metric_kwargs,
 ) -> MetricWithConfidence:
-    """
-    Compute a metric with confidence interval and validation status.
+    """Compute a metric with confidence interval and validation status.
 
     # Complete Statistical Pipeline
     1. Compute metric value from original data
@@ -374,6 +370,7 @@ def compute_metric_with_confidence(
         metric_function: Function to compute metric
         metric_name: Name for logging
         n_bootstrap: Number of bootstrap samples
+        rng: NumPy random generator for reproducible bootstrap sampling.
         **metric_kwargs: Additional arguments for metric function
 
     Returns:

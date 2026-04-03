@@ -1,5 +1,4 @@
-"""
-Experiment Programs Registry
+"""Experiment Programs Registry.
 
 This module provides a registry of available experiment programs.
 Each experiment implements the ExperimentProgram protocol.
@@ -30,9 +29,15 @@ from src.experiments.bell_correlation import (
     compute_bell_metrics,
 )
 from src.experiments.sst_hypothesis_q1 import SSTHypothesisQ1, sst_q1
-from src.experiments.sst_hypothesis_q1_structured import (
-    SSTHypothesisQ1Structured,
-    sst_q1_structured,
+from src.experiments.sst_hypothesis_q1_cluster import (
+    SSTHypothesisQ1Cluster,
+    sst_q1_cluster,
+)
+from src.experiments.sst_hypothesis_q1_extensions import (
+    SSTHypothesisQ1Huge,
+    SSTHypothesisQ1LargeDepolarizing,
+    sst_q1_huge,
+    sst_q1_large_depolarizing,
 )
 from src.experiments.sst_hypothesis_q1_large import (
     SSTHypothesisQ1Large,
@@ -45,20 +50,14 @@ from src.experiments.sst_hypothesis_q1_large_points import (
     sst_q1_large_max_noise,
 )
 from src.experiments.sst_hypothesis_q1_states import (
-    SSTHypothesisQ1WState,
     SSTHypothesisQ1ProductState,
-    sst_q1_w,
+    SSTHypothesisQ1WState,
     sst_q1_product,
+    sst_q1_w,
 )
-from src.experiments.sst_hypothesis_q1_cluster import (
-    SSTHypothesisQ1Cluster,
-    sst_q1_cluster,
-)
-from src.experiments.sst_hypothesis_q1_extensions import (
-    SSTHypothesisQ1LargeDepolarizing,
-    SSTHypothesisQ1Huge,
-    sst_q1_large_depolarizing,
-    sst_q1_huge,
+from src.experiments.sst_hypothesis_q1_structured import (
+    SSTHypothesisQ1Structured,
+    sst_q1_structured,
 )
 from src.experiments.state_probe_sensitivity import (
     StateProbeStudy,
@@ -86,8 +85,7 @@ EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
 
 
 def get_experiment(name: str) -> ExperimentProgram:
-    """
-    Get experiment by name.
+    """Get experiment by name.
 
     Args:
         name: The experiment name (e.g., "sst_q1")
@@ -105,8 +103,7 @@ def get_experiment(name: str) -> ExperimentProgram:
 
 
 def list_experiments() -> list[tuple[str, str]]:
-    """
-    List all available experiments.
+    """List all available experiments.
 
     Returns:
         List of (name, description) tuples

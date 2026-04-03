@@ -1,5 +1,4 @@
-"""
-Application-level runtime context for the engine.
+"""Application-level runtime context for the engine.
 
 Use `AppContext` to hold **process/session configuration** that should *not*
 live in globals and does *not* belong inside per-experiment models
@@ -33,7 +32,7 @@ Nice extensions (what you get)
     during initialization, eliminating “directory not found” errors.
   - `results_path` / `profiles_path` expose normalized absolute paths.
 
-Attributes
+Attributes:
 ----------
 base_results_dir : str
     Root directory for results/artifacts. Auto-created when `ensure_dirs=True`.
@@ -58,7 +57,7 @@ results_path : pathlib.Path (property)
 profiles_path : Optional[pathlib.Path] (property)
     Absolute, normalized path for profiles (or `None`).
 
-Methods
+Methods:
 -------
 resolve_event_bus(default_factory)
     Returns the injected `event_bus` if present; otherwise calls the provided
@@ -78,7 +77,7 @@ Design notes
 - Keep per-run variability (e.g., number of shots) in `ExperimentConfig`.
   Keep longer-lived, process-level concerns (paths, backends) in `AppContext`.
 
-Examples
+Examples:
 --------
 Basic usage with automatic directory creation:
     >>> ctx = AppContext(base_results_dir="~/lab-runs", engine_label="ci")
@@ -106,9 +105,10 @@ Full injection for tests or production:
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 # ---- Minimal structural typing notes (no Protocols to keep stdlib-only) ----
 # event_bus is expected to have: publish(event) and optionally subscribe(...)
@@ -118,6 +118,8 @@ from typing import Any, Callable, Literal
 
 @dataclass
 class AppContext:
+    """Application-wide context providing paths, services, and configuration."""
+
     # --------------------------- Paths & environment ---------------------------
 
     # Where results, artifacts, manifests are written by default.
@@ -182,8 +184,7 @@ class AppContext:
         return self._profiles_path
 
     def resolve_event_bus(self, default_factory: Callable[[], Any]) -> Any:
-        """
-        Return the configured event bus, or create a default if none provided.
+        """Return the configured event bus, or create a default if none provided.
 
         Example:
             bus = ctx.resolve_event_bus(lambda: SimpleEventBus())
@@ -193,8 +194,7 @@ class AppContext:
         return default_factory()
 
     def resolve_storage(self, default_factory: Callable[[str], Any]) -> Any:
-        """
-        Return the configured storage backend, or create a default bound to results_path.
+        """Return the configured storage backend, or create a default bound to results_path.
 
         Example:
             storage = ctx.resolve_storage(lambda base: LocalStorage(base_dir=base))
@@ -204,9 +204,9 @@ class AppContext:
         return default_factory(str(self.results_path))
 
     def resolve_viz_service(self, default_factory: Callable[[], Any]) -> Any:
-        """
-        Return a visualization service from the injected factory if present,
-        otherwise use the provided default_factory.
+        """Return a visualization service from the injected factory if present.
+
+        Falls back to the provided default_factory otherwise.
 
         Example:
             viz = ctx.resolve_viz_service(create_default_service)

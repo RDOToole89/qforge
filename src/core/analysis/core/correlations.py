@@ -1,5 +1,4 @@
-"""
-Correlation Analysis Utilities
+"""Correlation Analysis Utilities.
 
 Mathematical utilities for computing correlation matrices and adjacency
 matrices used in entanglement-error correlation analysis.
@@ -23,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def mi_matrix(counts: Mapping[str, int], *, alpha: float = ALPHA) -> NDArray[np.float64]:
-    """
-    Compute mutual information matrix for all qubit pairs.
+    """Compute mutual information matrix for all qubit pairs.
 
     Mathematical Definition:
         MI_matrix[i,j] = MI(X_i; X_j) for i ≠ j
@@ -86,8 +84,7 @@ def mi_matrix(counts: Mapping[str, int], *, alpha: float = ALPHA) -> NDArray[np.
 
 
 def adjacency_from_distances(distances: np.ndarray, lam: float = EEC_LAMBDA) -> NDArray[np.float64]:
-    """
-    Compute adjacency matrix from distance matrix using exponential decay.
+    """Compute adjacency matrix from distance matrix using exponential decay.
 
     Mathematical Definition:
         A[i,j] = exp(-λ * d[i,j]) for i ≠ j
@@ -167,8 +164,7 @@ def adjacency_from_distances(distances: np.ndarray, lam: float = EEC_LAMBDA) -> 
 
 
 def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.float64]:
-    """
-    Get standard adjacency matrix for common quantum topologies.
+    """Get standard adjacency matrix for common quantum topologies.
 
     Args:
         topology_type: "linear", "ring", "grid", "all_to_all", or "star"
@@ -250,8 +246,7 @@ def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.floa
 
 
 def correlation_upper_triangle(matrix: np.ndarray) -> NDArray[np.float64]:
-    """
-    Extract upper triangle of correlation matrix as 1D array.
+    """Extract upper triangle of correlation matrix as 1D array.
 
     This is useful for correlation analysis where we only need
     unique pairwise values (avoiding double-counting due to symmetry).
@@ -267,7 +262,6 @@ def correlation_upper_triangle(matrix: np.ndarray) -> NDArray[np.float64]:
         >>> mi_values = correlation_upper_triangle(mi_mat)
         >>> print(f"Mean pairwise MI: {np.mean(mi_values):.3f}")
     """
-
     if not np.allclose(matrix, matrix.T, atol=1e-12):
         logger.warning(
             "Matrix not perfectly symmetric; upper-triangle may duplicate inconsistent entries."
@@ -380,7 +374,7 @@ def cosine_similarity_matrix(
         sim[i,j] = dot(v_i, v_j) / (|v_i| * |v_j|).
         Zero vectors produce 0.0 similarity with everything.
     """
-    k = len(vectors)
+    len(vectors)
     mat = np.stack(vectors, axis=0)  # k x d
     norms = np.linalg.norm(mat, axis=1)  # k
     # Avoid division by zero: replace zero norms with 1 (result will be 0 anyway)

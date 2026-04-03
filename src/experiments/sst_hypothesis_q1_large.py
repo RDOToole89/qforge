@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1 (Large Scale): River Scaling Test
+"""SST Hypothesis Q1 (Large Scale): River Scaling Test.
 
 This experiment tests the "River Scaling" hypothesis: that structured decoherence
 pathways become *more* concentrated (higher PCR) as system size increases.
@@ -20,8 +19,7 @@ from src.experiments.sst_hypothesis_q1_structured import SSTHypothesisQ1Structur
 
 
 class SSTHypothesisQ1Large(SSTHypothesisQ1Structured):
-    """
-    SST Q1 Large Scale Experiment (6 Qubits).
+    """SST Q1 Large Scale Experiment (6 Qubits).
 
     Designed to test the scaling of structured decoherence metrics.
     Inherits logic from SSTHypothesisQ1Structured but overrides defaults

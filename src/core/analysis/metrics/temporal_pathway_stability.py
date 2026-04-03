@@ -1,5 +1,4 @@
-"""
-Temporal Pathway Stability (TPS) - Dynamic Pathway Consistency Analysis
+"""Temporal Pathway Stability (TPS) - Dynamic Pathway Consistency Analysis.
 
 # Mathematical Foundation
 Temporal Pathway Stability quantifies how consistently error pathways maintain
@@ -40,9 +39,10 @@ References:
 - Nielsen & Chuang (2010), "Quantum Computation and Quantum Information"
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
-from typing import Optional, Union
 
 import numpy as np
 from scipy.stats import kendalltau, pearsonr, spearmanr
@@ -61,8 +61,7 @@ CRITICAL_DROP = 0.3  # correlation drop considered a transition
 
 @dataclass
 class TemporalAnalysis:
-    """
-    Complete temporal pathway stability analysis with dynamic insights.
+    """Complete temporal pathway stability analysis with dynamic insights.
 
     This structure provides comprehensive information about pathway stability
     across temporal or parametric sequences.
@@ -98,9 +97,8 @@ def compute_temporal_pathway_stability(
     correlation_method: str = "spearman",
     adaptive_top_k: bool = True,
     return_analysis: bool = False,
-) -> Union[float, TemporalAnalysis]:
-    """
-    Compute Temporal Pathway Stability - consistency across experimental conditions.
+) -> float | TemporalAnalysis:
+    """Compute Temporal Pathway Stability - consistency across experimental conditions.
 
     Mathematical Process:
         1. Extract pathway rankings from each experimental condition
@@ -170,7 +168,9 @@ def compute_temporal_pathway_stability(
     # Input validation with research-grade error handling
     if not pathway_rankings or len(pathway_rankings) < PP_MIN_RUNS:
         logger.warning(
-            f"TPS requires ≥{PP_MIN_RUNS} rankings, got {len(pathway_rankings) if pathway_rankings else 0}"
+            "TPS requires "
+            f"≥{PP_MIN_RUNS} rankings, got "
+            f"{len(pathway_rankings) if pathway_rankings else 0}"
         )
         return (
             1.0
@@ -255,10 +255,9 @@ def compute_temporal_pathway_stability(
 
 
 def compute_pathway_persistence_scores(
-    pathway_rankings: list[list[str]], top_k: Optional[int] = None
+    pathway_rankings: list[list[str]], top_k: int | None = None
 ) -> dict[str, float]:
-    """
-    Compute persistence scores for individual pathways across conditions.
+    """Compute persistence scores for individual pathways across conditions.
 
     This function analyzes how consistently each pathway maintains its
     ranking position across different experimental conditions.
@@ -342,8 +341,7 @@ def compute_pathway_persistence_scores(
 def compute_temporal_transition_matrix(
     pathway_rankings: list[list[str]], top_k: int = 5
 ) -> np.ndarray:
-    """
-    Compute transition matrix for pathway rank movements across conditions.
+    """Compute transition matrix for pathway rank movements across conditions.
 
     This function builds a Markov chain transition matrix showing how
     pathways move between different rank positions across conditions.
@@ -493,7 +491,6 @@ def _generate_temporal_analysis(
     all_pathways: set,
 ) -> TemporalAnalysis:
     """Generate comprehensive temporal analysis results."""
-
     # Determine consistency level
     if tps >= 0.8:
         consistency = "highly_stable"
@@ -570,8 +567,7 @@ def _create_empty_temporal_analysis() -> TemporalAnalysis:
 def validate_tps_properties(
     tps: float, pathway_rankings: list[list[str]], tolerance: float = 1e-10
 ) -> bool:
-    """
-    Validate mathematical properties of computed TPS.
+    """Validate mathematical properties of computed TPS.
 
     Validated Properties:
         1. Range: TPS ∈ [0, 1] for stable systems
@@ -599,8 +595,7 @@ def validate_tps_properties(
 
 
 def temporal_pathway_stability_educational_demo() -> dict:
-    """
-    Educational demonstration of TPS behavior across stability scenarios.
+    """Educational demonstration of TPS behavior across stability scenarios.
 
     Returns:
         dict: Demonstration results with time series interpretations

@@ -1,5 +1,4 @@
-"""
-Concentration Index - Canonical alias for Pathway Concentration Ratio
+"""Concentration Index - Canonical alias for Pathway Concentration Ratio.
 
 This module provides the canonical API name for concentration analysis
 while maintaining backward compatibility with the original implementation.

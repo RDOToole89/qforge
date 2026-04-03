@@ -26,6 +26,10 @@ export const terms: GlossaryTerm[] = [
       "A quantum search algorithm finding a marked item in an unstructured database of N items using O(√N) queries. Uses amplitude amplification: alternate between the oracle (marks the target) and the diffusion operator (amplifies marked amplitude).",
     intuitiveExplanation:
       "Searching a phone book quantumly — instead of checking every entry (N steps classically), Grover's algorithm finds the answer in √N steps. For a million items, that's 1000 steps instead of 1,000,000. Provides a provably optimal quadratic speedup.",
+    keyEquation:
+      "O(\\sqrt{N}) \\text{ queries}, \\quad |\\psi\\rangle \\xrightarrow{O(\\sqrt{N})} |\\text{target}\\rangle",
+    formulaExplanation:
+      "Grover's algorithm finds a marked item in √N steps instead of N. The amplitude of the target state is amplified by ~1/√N per iteration, so after ~(π/4)√N iterations the target has probability near 1. Provably optimal for unstructured search.",
     relatedTerms: ["superposition", "interference", "universal_gate_set"],
     categoryId: "algorithms",
   },
@@ -46,6 +50,10 @@ export const terms: GlossaryTerm[] = [
       "A hybrid quantum-classical algorithm for finding ground state energies. A parameterized quantum circuit (ansatz) prepares a trial state |ψ(θ)⟩; the energy ⟨ψ(θ)|H|ψ(θ)⟩ is measured on quantum hardware; a classical optimizer updates θ to minimize the energy.",
     intuitiveExplanation:
       "Use a quantum computer to prepare trial wavefunctions and a classical computer to optimize them. The quantum part handles the exponentially large Hilbert space; the classical part handles the optimization. Designed for near-term noisy quantum devices.",
+    keyEquation:
+      "E(\\theta) = \\langle\\psi(\\theta)|H|\\psi(\\theta)\\rangle \\geq E_0",
+    formulaExplanation:
+      "The variational principle: the energy of any trial state is always above or equal to the true ground state energy E₀. By minimizing E(θ) over circuit parameters θ, VQE converges toward the ground state. The quantum computer evaluates E; the classical computer optimizes θ.",
     relatedTerms: ["hermitian", "eigenvalue", "circuit_depth"],
     categoryId: "algorithms",
   },
@@ -66,6 +74,10 @@ export const terms: GlossaryTerm[] = [
       "The quantum analog of the discrete Fourier transform: QFT|j⟩ = (1/√N) Σₖ e^(2πijk/N)|k⟩. Implemented with O(n²) gates for n qubits. Key subroutine in Shor's algorithm, phase estimation, and quantum simulation.",
     intuitiveExplanation:
       "Transforms quantum states from the 'position' basis to the 'frequency' basis — just like classical Fourier transforms, but exponentially faster. While classical FFT takes O(N log N) steps, QFT takes O(log² N) quantum gates. The engine behind Shor's algorithm.",
+    keyEquation:
+      "\\text{QFT}|j\\rangle = \\frac{1}{\\sqrt{N}} \\sum_{k=0}^{N-1} e^{2\\pi i jk/N} |k\\rangle",
+    formulaExplanation:
+      "Each input basis state |j⟩ maps to a uniform superposition of all states, but with phase factors that encode j in the 'frequency domain'. The exponential e^(2πijk/N) is a rotation in the complex plane — different j values produce different phase patterns.",
     relatedTerms: ["shor_algorithm", "circuit_depth", "universal_gate_set"],
     categoryId: "algorithms",
   },
@@ -76,6 +88,10 @@ export const terms: GlossaryTerm[] = [
       "Using a controllable quantum system to simulate another quantum system. Digital simulation decomposes time evolution e^(-iHt) into gate sequences via Trotterization. Analog simulation directly engineers the target Hamiltonian. Feynman's original motivation for quantum computing.",
     intuitiveExplanation:
       "The most natural application of quantum computers: simulating quantum physics. Classical computers struggle because quantum states grow exponentially with system size. A quantum computer uses its own quantum nature to simulate other quantum systems efficiently.",
+    keyEquation:
+      "e^{-iHt} \\approx \\left( \\prod_k e^{-iH_k t/n} \\right)^n",
+    formulaExplanation:
+      "Trotterization: break the Hamiltonian into simpler pieces Hₖ and alternate small time steps of each. The error shrinks as n increases. This converts continuous-time quantum physics into a discrete gate sequence that a quantum computer can execute.",
     relatedTerms: ["unitary", "circuit_depth", "vqe"],
     categoryId: "algorithms",
   },

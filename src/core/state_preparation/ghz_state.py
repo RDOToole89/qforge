@@ -1,5 +1,4 @@
-"""
-GHZ State Preparation for Decoherence Pathway Research
+"""GHZ State Preparation for Decoherence Pathway Research.
 
 # The Greenberger-Horne-Zeilinger (GHZ) State
 The GHZ state represents maximal multipartite entanglement where all qubits
@@ -27,8 +26,7 @@ from .base_state import BaseState
 
 
 class GHZState(BaseState):
-    """
-    GHZ state preparation for quantum decoherence research.
+    """GHZ state preparation for quantum decoherence research.
 
     # Quantum State Definition
     |GHZ_n⟩ = (|00...0⟩ + |11...1⟩)/√2
@@ -50,8 +48,7 @@ class GHZState(BaseState):
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit that prepares the GHZ state.
+        """Create quantum circuit that prepares the GHZ state.
 
         # Circuit Construction Steps
         1. Start with computational basis: |00...0⟩
@@ -120,8 +117,7 @@ class GHZState(BaseState):
         return circuit
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate the theoretical GHZ state vector for validation.
+        """Calculate the theoretical GHZ state vector for validation.
 
         # Mathematical Definition
         |GHZ_n⟩ = (|00...0⟩ + |11...1⟩)/√2
@@ -154,8 +150,7 @@ class GHZState(BaseState):
         return state_vector
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for GHZ state preparation.
+        """Estimate circuit depth for GHZ state preparation.
 
         # Depth Analysis
         GHZ preparation requires:
@@ -169,8 +164,7 @@ class GHZState(BaseState):
         return max(1, self.num_qubits)  # H + (n-1) CNOTs = n total depth
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for GHZ state preparation.
+        """Get quantum gates required for GHZ state preparation.
 
         # Gate Requirements
         GHZ states use the minimal universal gate set:
@@ -186,8 +180,7 @@ class GHZState(BaseState):
             return ["h", "cx"]  # Hadamard and CNOT
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to GHZ states.
+        """Get theoretical quantum properties specific to GHZ states.
 
         # GHZ State Properties
         These properties are useful for analysis modules and educational
@@ -218,8 +211,7 @@ class GHZState(BaseState):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for structured decoherence pathway studies.
+        """Get research context for structured decoherence pathway studies.
 
         # Research Significance
         GHZ states are particularly valuable for pathway research because:
@@ -260,4 +252,6 @@ class GHZState(BaseState):
         if self.num_qubits == 1:
             return "GHZ(1 qubit) = |0⟩ [no entanglement]"
         else:
-            return f"GHZ({self.num_qubits} qubits) = (|{'0' * self.num_qubits}⟩ + |{'1' * self.num_qubits}⟩)/√2"
+            zeros = "0" * self.num_qubits
+            ones = "1" * self.num_qubits
+            return f"GHZ({self.num_qubits} qubits) = (|{zeros}⟩ + |{ones}⟩)/√2"

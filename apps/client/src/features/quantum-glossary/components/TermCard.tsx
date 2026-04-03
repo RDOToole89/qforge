@@ -11,6 +11,7 @@ import {
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { SymbolBadge } from "./SymbolBadge";
 import { RelatedTermLink } from "./RelatedTermLink";
+import { FormulaSection } from "./FormulaSection";
 import type { GlossaryTerm } from "../types";
 
 if (
@@ -60,6 +61,13 @@ export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
         <View style={styles.details}>
           <Text style={styles.sectionLabel}>Formal Definition</Text>
           <Text style={styles.formal}>{term.formalDefinition}</Text>
+
+          {term.keyEquation && (
+            <FormulaSection
+              latex={term.keyEquation}
+              explanation={term.formulaExplanation}
+            />
+          )}
 
           {term.relatedTerms.length > 0 && (
             <>

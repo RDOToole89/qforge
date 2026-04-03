@@ -1,5 +1,4 @@
-"""
-Storage and Artifact Models
+"""Storage and Artifact Models.
 
 Purpose: Define models for file storage, artifact management, and result persistence.
 These models handle the organization and referencing of all experiment outputs
@@ -26,8 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class ArtifactRef(BaseModel):
-    """
-    Reference to a generated experiment artifact.
+    """Reference to a generated experiment artifact.
 
     Artifacts include plots, reports, raw data files, and any other
     outputs generated during experiment execution and analysis.
@@ -101,8 +99,8 @@ class ArtifactRef(BaseModel):
         publication_ready: bool = False,
         metadata: dict[str, Any] | None = None,
     ) -> ArtifactRef:
-        """
-        Create an ArtifactRef by inspecting an existing file on disk.
+        """Create an ArtifactRef by inspecting an existing file on disk.
+
         Populates size, MIME type, and creation timestamp when available.
         """
         p = Path(file_path).expanduser().resolve()
@@ -137,8 +135,8 @@ class ArtifactRef(BaseModel):
         return str(Path(v).expanduser())
 
     def refresh_file_stats(self) -> ArtifactRef:
-        """
-        Refresh file_size_bytes, mime_type, and creation_timestamp from disk.
+        """Refresh file_size_bytes, mime_type, and creation_timestamp from disk.
+
         Safe to call even if the file is missing.
         """
         p = Path(self.path).expanduser()
@@ -158,8 +156,7 @@ class ArtifactRef(BaseModel):
 
 
 class StorageConfig(BaseModel):
-    """
-    Configuration for experiment result storage.
+    """Configuration for experiment result storage.
 
     Defines how and where experiment results, artifacts, and analysis
     outputs should be stored and organized.
@@ -246,8 +243,7 @@ class StorageConfig(BaseModel):
 
 
 class DirectoryStructure(BaseModel):
-    """
-    Standard directory structure for experiment storage.
+    """Standard directory structure for experiment storage.
 
     Defines the organization of experiment files for consistency
     and easy navigation.
@@ -268,8 +264,7 @@ class DirectoryStructure(BaseModel):
     by_quantum_state: bool = Field(default=False, description="Use quantum-state subdirectories")
 
     def get_path(self, base: Path, category: str, **kwargs) -> Path:
-        """
-        Generate appropriate path for given category and metadata.
+        """Generate appropriate path for given category and metadata.
 
         Args:
             base: Base storage directory
@@ -328,8 +323,7 @@ class DirectoryStructure(BaseModel):
 
 
 class ResultManifest(BaseModel):
-    """
-    Manifest file for tracking experiment results and artifacts.
+    """Manifest file for tracking experiment results and artifacts.
 
     This provides an index of all results and artifacts for efficient
     searching, organization, and cleanup.
@@ -372,8 +366,8 @@ class ResultManifest(BaseModel):
         *,
         artifacts: list[ArtifactRef] | None = None,
     ) -> None:
-        """
-        Add/update an experiment entry and fold in its artifacts.
+        """Add/update an experiment entry and fold in its artifacts.
+
         Safely updates counters and totals.
         """
         self.experiments[entry.experiment_id] = entry

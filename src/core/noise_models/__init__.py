@@ -1,6 +1,5 @@
 # src/quantum_experiment/noise_models/__init__.py
-"""
-Noise models package for quantum experiments.
+"""Noise models package for quantum experiments.
 
 This package includes:
 - BaseNoise class for all noise models.

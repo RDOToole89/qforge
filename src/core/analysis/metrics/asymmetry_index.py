@@ -1,5 +1,4 @@
-"""
-Asymmetry Index (AI) - Structured Decoherence Pathway Detection
+"""Asymmetry Index (AI) - Structured Decoherence Pathway Detection.
 
 # Mathematical Foundation
 The Asymmetry Index quantifies deviation from a uniform error distribution using
@@ -45,7 +44,6 @@ References:
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Union
 
 import numpy as np
 
@@ -74,8 +72,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AsymmetryAnalysis:
-    """
-    Complete asymmetry analysis results with statistical interpretation.
+    """Complete asymmetry analysis results with statistical interpretation.
 
     This structure provides the AI (TVD vs uniform), auxiliary stats,
     and concise research-focused interpretation.
@@ -110,8 +107,7 @@ class AsymmetryAnalysis:
 def _tvd_vs_uniform_from_counts_fast(
     counts: Mapping[str, int], alpha: float
 ) -> tuple[float, int, int]:
-    """
-    Compute TVD(p̃ || uniform) in O(|observed|) using the full-support Jeffreys prior.
+    """Compute TVD(p̃ || uniform) in O(|observed|) using the full-support Jeffreys prior.
 
     Let K = 2^n be the full outcome count (from bitstring length), N = total shots,
     and α the Jeffreys prior added to each of K outcomes.
@@ -152,8 +148,7 @@ def _tvd_vs_uniform_from_counts_fast(
 
 
 def _entropy_full_support_fast(counts: Mapping[str, int], alpha: float) -> float:
-    """
-    Compute H(p̃) in bits on the full 2^n support without enumerating all outcomes.
+    """Compute H(p̃) in bits on the full 2^n support without enumerating all outcomes.
 
     p̃_obs(x) = (c_x + α) / (N + α K) for x in observed set S
     p̃0       = α / (N + α K)         for (K - S) unobserved outcomes
@@ -193,9 +188,8 @@ def compute_asymmetry_index(
     counts: Mapping[str, int],
     alpha: float = ALPHA,
     return_analysis: bool = False,
-) -> Union[float, AsymmetryAnalysis]:
-    """
-    Compute Asymmetry Index — deviation from the uniform error distribution.
+) -> float | AsymmetryAnalysis:
+    """Compute Asymmetry Index — deviation from the uniform error distribution.
 
     Mathematical Definition:
         AI = 0.5 * Σᵢ |p(xᵢ) - 1/K|
@@ -348,8 +342,7 @@ def compute_asymmetry_index_with_null_comparison(
     counts: Mapping[str, int],
     alpha: float = ALPHA,
 ) -> tuple[float, float, str]:
-    """
-    Compute AI with explicit comparison to the factorized null model.
+    """Compute AI with explicit comparison to the factorized null model.
 
     Process:
       1) AI vs uniform (standard, fast closed-form)
@@ -418,8 +411,7 @@ def validate_asymmetry_index_properties(
     counts: Mapping[str, int],
     tolerance: float = 1e-10,
 ) -> bool:
-    """
-    Validate key mathematical properties of the computed Asymmetry Index.
+    """Validate key mathematical properties of the computed Asymmetry Index.
 
     Validated Properties:
       1) Range: AI ∈ [0, 0.5]
@@ -454,8 +446,7 @@ def validate_asymmetry_index_properties(
 
 
 def asymmetry_index_educational_demo() -> dict:
-    """
-    Educational demonstration of Asymmetry Index behavior.
+    """Educational demonstration of Asymmetry Index behavior.
 
     Provides concrete examples illustrating how AI responds to different
     measurement distributions.

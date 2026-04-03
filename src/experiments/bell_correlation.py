@@ -1,5 +1,4 @@
-"""
-Bell State Correlation Experiment
+"""Bell State Correlation Experiment.
 
 This experiment tests quantum correlations in Bell states - the foundational
 demonstration that quantum mechanics violates classical correlation bounds.
@@ -43,9 +42,10 @@ class BellCorrelationMetrics:
     variant: str  # Which Bell state variant
 
 
-def compute_bell_metrics(counts: dict[str, int], variant: str = "phi_plus") -> BellCorrelationMetrics:
-    """
-    Compute Bell state correlation metrics from measurement counts.
+def compute_bell_metrics(
+    counts: dict[str, int], variant: str = "phi_plus"
+) -> BellCorrelationMetrics:
+    """Compute Bell state correlation metrics from measurement counts.
 
     Args:
         counts: Measurement outcomes {"00": n00, "01": n01, "10": n10, "11": n11}
@@ -100,8 +100,7 @@ def compute_bell_metrics(counts: dict[str, int], variant: str = "phi_plus") -> B
 
 
 class BellCorrelation(BaseExperiment):
-    """
-    Bell State Correlation Experiment.
+    """Bell State Correlation Experiment.
 
     Tests quantum correlations in Bell states and compares to classical bounds.
     This demonstrates that the framework supports non-SST experiments.
@@ -139,8 +138,7 @@ class BellCorrelation(BaseExperiment):
         )
 
     def run(self, overrides: dict[str, Any] | None = None) -> ExperimentResult:
-        """
-        Run Bell correlation experiment and compute Bell-specific metrics.
+        """Run Bell correlation experiment and compute Bell-specific metrics.
 
         Returns standard ExperimentResult. Access Bell metrics via:
             result.analysis.counts → compute_bell_metrics(counts, variant)
@@ -150,8 +148,7 @@ class BellCorrelation(BaseExperiment):
     def run_with_bell_metrics(
         self, overrides: dict[str, Any] | None = None
     ) -> tuple[ExperimentResult, BellCorrelationMetrics]:
-        """
-        Run experiment and return both ExperimentResult and Bell metrics.
+        """Run experiment and return both ExperimentResult and Bell metrics.
 
         Args:
             overrides: Config overrides
@@ -188,8 +185,7 @@ class BellCorrelation(BaseExperiment):
         max_error_rate: float = 0.5,
         **overrides: Any,
     ) -> list[tuple[float, ExperimentResult, BellCorrelationMetrics]]:
-        """
-        Sweep over noise levels and track correlation decay.
+        """Sweep over noise levels and track correlation decay.
 
         Args:
             noise_steps: Number of error rate steps
@@ -214,8 +210,7 @@ class BellCorrelation(BaseExperiment):
     def compare_variants(
         self, error_rate: float = 0.05, **overrides: Any
     ) -> dict[str, tuple[ExperimentResult, BellCorrelationMetrics]]:
-        """
-        Compare all four Bell state variants at a given noise level.
+        """Compare all four Bell state variants at a given noise level.
 
         Args:
             error_rate: Noise level to test

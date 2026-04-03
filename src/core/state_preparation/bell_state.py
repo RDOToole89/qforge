@@ -1,5 +1,4 @@
-"""
-Bell State Preparation for Fundamental Entanglement Research
+"""Bell State Preparation for Fundamental Entanglement Research.
 
 # The Bell States (Einstein-Podolsky-Rosen Pairs)
 Bell states represent the fundamental building blocks of quantum entanglement,
@@ -28,8 +27,7 @@ from .base_state import BaseState
 
 
 class BellState(BaseState):
-    """
-    Bell state preparation for fundamental entanglement research.
+    """Bell state preparation for fundamental entanglement research.
 
     # Quantum Entanglement Foundation
     Bell states demonstrate the core phenomenon of quantum mechanics:
@@ -50,8 +48,7 @@ class BellState(BaseState):
     """
 
     def __init__(self, num_qubits: int, custom_params: dict = None, experiment_id: str = "N/A"):
-        """
-        Initialize Bell state with variant specification.
+        """Initialize Bell state with variant specification.
 
         Args:
             num_qubits: Must be exactly 2 for Bell states
@@ -76,8 +73,7 @@ class BellState(BaseState):
             raise ValueError(f"Invalid Bell variant: '{variant}'. Choose from: {valid_variants}")
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit that prepares the specified Bell state.
+        """Create quantum circuit that prepares the specified Bell state.
 
         # Bell State Construction Strategy
         1. Start with computational basis: |00⟩
@@ -151,8 +147,7 @@ class BellState(BaseState):
         return circuit
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate the theoretical Bell state vector for validation.
+        """Calculate the theoretical Bell state vector for validation.
 
         # Mathematical Definitions
         |Φ+⟩ = (|00⟩ + |11⟩)/√2 = [1/√2, 0, 0, 1/√2]
@@ -200,8 +195,7 @@ class BellState(BaseState):
         return state_vector
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for Bell state preparation.
+        """Estimate circuit depth for Bell state preparation.
 
         # Depth Analysis by Variant
         - Φ+: H + CNOT = 2 gates
@@ -222,8 +216,7 @@ class BellState(BaseState):
             return 3  # H + CNOT + combined Z-X transformation
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for Bell state preparation.
+        """Get quantum gates required for Bell state preparation.
 
         Returns:
             List[str]: Required gate names for this Bell variant
@@ -242,8 +235,7 @@ class BellState(BaseState):
             return base_gates
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to Bell states.
+        """Get theoretical quantum properties specific to Bell states.
 
         Returns:
             Dict with Bell-specific theoretical properties
@@ -285,8 +277,7 @@ class BellState(BaseState):
         return base_properties
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for Bell state decoherence studies.
+        """Get research context for Bell state decoherence studies.
 
         Returns:
             Dict with research context and experimental predictions

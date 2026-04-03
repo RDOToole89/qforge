@@ -37,6 +37,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How far the measurement distribution is from 'completely random'. AI = 0 means noise has destroyed all structure. AI = 1 means a single outcome dominates. Higher AI suggests the state retains structure despite noise.",
     symbol: "AI",
+    keyEquation: "\\text{AI} = \\frac{1}{2} \\sum_{i=0}^{2^n-1} |p_i - 2^{-n}|",
+    formulaExplanation:
+      "Total Variation Distance from the uniform distribution. Sums the absolute differences between each observed probability and 1/2\u207f (what you'd expect from pure noise). AI = 0 means the distribution looks completely random; AI near 1 means strong structure persists.",
     relatedTerms: ["structure_score", "pathway_concentration_ratio", "structured_decoherence"],
     categoryId: "structured_decoherence",
   },
@@ -48,6 +51,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Measures how much the qubits are correlated beyond what you'd expect if they were independent. SS = 0 means each qubit's noise is independent. SS > 0 means the noise pattern has genuine multi-qubit structure — evidence for structured decoherence.",
     symbol: "SS",
+    keyEquation: "\\text{SS} = \\text{JSD}(P_{\\text{obs}} \\| P_{\\text{fact}}), \\quad P_{\\text{fact}} = \\prod_i P_i",
+    formulaExplanation:
+      "Jensen-Shannon divergence between the observed distribution and the product of its marginals. If qubits were independent, these would match (SS = 0). Any nonzero SS means genuine multi-qubit correlations exist in the noise pattern.",
     relatedTerms: ["jensen_shannon_divergence", "asymmetry_index", "total_correlation"],
     categoryId: "structured_decoherence",
   },
@@ -59,6 +65,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How concentrated the decoherence is in a few pathways versus spread across many. High PCR means errors funnel through specific channels. Low PCR means errors spread uniformly — more like random fog than a directed river.",
     symbol: "PCR",
+    keyEquation: "\\text{PCR} = \\frac{\\sum_{\\text{top 25\\%}} p_i}{\\sum_{\\text{bottom 25\\%}} p_i}",
+    formulaExplanation:
+      "Ratio of probability mass in the most-likely quarter of outcomes to the least-likely quarter. PCR = 1 means uniform distribution. Large PCR means probability is funneled through a few dominant pathways \u2014 the 'river' signature of structured decoherence.",
     relatedTerms: ["concentration_index", "asymmetry_index", "structured_decoherence"],
     categoryId: "structured_decoherence",
   },
@@ -70,6 +79,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Do errors flow along entanglement connections? EEC measures this directly by comparing the entanglement graph to the error pattern. High EEC means errors preferentially affect connected qubits — strong evidence for the Spring Network Model.",
     symbol: "EEC",
+    keyEquation: "\\text{EEC} = \\text{Pearson}(\\mathbf{A}_{\\text{topo}}, \\mathbf{M}_{\\text{MI}})",
+    formulaExplanation:
+      "Pearson correlation between the entanglement adjacency matrix and the pairwise mutual information matrix. High EEC means errors concentrate along entanglement bonds \u2014 direct evidence that decoherence follows the entanglement network topology.",
     relatedTerms: ["spring_network_model", "mutual_information", "structured_decoherence"],
     categoryId: "structured_decoherence",
   },
@@ -103,6 +115,9 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "How unequal the decoherence pathways are — like the Gini coefficient for wealth inequality, but for quantum noise. CI = 0 means all pathways are equally likely. CI near 1 means almost all probability flows through a few dominant pathways.",
     symbol: "CI",
+    keyEquation: "\\text{CI} = \\frac{2\\sum_{i=1}^{n} i \\cdot p_{(i)} - (n+1)}{n}",
+    formulaExplanation:
+      "A Gini-like formula: sort probabilities, weight each by its rank, normalize. CI = 0 when all outcomes are equally likely. CI approaches 1 when almost all probability sits in a few outcomes \u2014 high inequality in the decoherence pathway distribution.",
     relatedTerms: ["pathway_concentration_ratio", "asymmetry_index", "structured_decoherence"],
     categoryId: "structured_decoherence",
   },

@@ -1,5 +1,4 @@
-"""
-SST Hypothesis Q1 (Structured Noise): Amplitude Damping vs Depolarizing
+"""SST Hypothesis Q1 (Structured Noise): Amplitude Damping vs Depolarizing.
 
 This experiment tests the same hypothesis as Q1 but with structured noise
 (Amplitude Damping) instead of depolarizing noise.
@@ -22,8 +21,7 @@ from src.experiments.base import BaseExperiment
 
 
 class SSTHypothesisQ1Structured(BaseExperiment):
-    """
-    SST Hypothesis Q1 with Amplitude Damping (structured) noise.
+    """SST Hypothesis Q1 with Amplitude Damping (structured) noise.
 
     Uses amplitude damping noise which creates structured errors (|1> -> |0>),
     in contrast to depolarizing noise which creates random errors.
@@ -62,8 +60,7 @@ class SSTHypothesisQ1Structured(BaseExperiment):
         max_error_rate: float = 0.5,
         **overrides: Any,
     ) -> list[ExperimentResult]:
-        """
-        Run a noise sweep experiment varying error_rate.
+        """Run a noise sweep experiment varying error_rate.
 
         Sweeps error rates from 0 to max_error_rate and observes how
         structured decoherence metrics evolve under amplitude damping noise.

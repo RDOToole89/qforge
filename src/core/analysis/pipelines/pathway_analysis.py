@@ -1,5 +1,4 @@
-"""
-Pathway Analysis Pipeline - Orchestration and Convenience Functions
+"""Pathway Analysis Pipeline - Orchestration and Convenience Functions.
 
 This module provides high-level orchestration for structured decoherence analysis,
 keeping the core modules focused and avoiding tight coupling.
@@ -10,9 +9,11 @@ Usage:
     schema_result = run_all_to_schema(counts=measurement_data, rng=rng)
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -26,12 +27,12 @@ from ..metrics.registry import compute_all
 from ..metrics.schema_bridge import metrics_to_schema
 from ..metrics.temporal_pathway_stability import compute_temporal_pathway_stability
 
-logger = logging.getLogger("QuantumExperiment.Analysis.StructuredDecoherence")
+logger = logging.getLogger(__name__)
 
 
 def run_all_to_schema(
     counts: Mapping[str, int],
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator | None = None,
     **kwargs: Any,
 ) -> dict:
     """Convenience pipeline: compute all registered metrics and convert to schema.
@@ -45,12 +46,11 @@ def run_all_to_schema(
 def compute_all_pathway_metrics(
     counts: dict[str, int],
     state_type: str = "GHZ",
-    num_qubits: Optional[int] = None,
-    historical_data: Optional[list[dict[str, int]]] = None,
-    multi_qubit_data: Optional[dict[int, dict[str, int]]] = None,
+    num_qubits: int | None = None,
+    historical_data: list[dict[str, int]] | None = None,
+    multi_qubit_data: dict[int, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
-    """
-    Compute all 5 structured decoherence pathway metrics.
+    """Compute all 5 structured decoherence pathway metrics.
 
     This is the main function for structured decoherence analysis, computing
     all metrics needed for detecting non-random decoherence patterns.
@@ -146,8 +146,7 @@ def analyze_decoherence_structure(
     state_type: str = "GHZ",
     confidence_threshold: float = 0.7,
 ) -> dict[str, Any]:
-    """
-    High-level analysis of decoherence structure with interpretation.
+    """High-level analysis of decoherence structure with interpretation.
 
     Provides structured analysis of whether the decoherence exhibits
     statistically significant structured patterns vs. random behavior.

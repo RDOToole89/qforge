@@ -15,6 +15,7 @@ import * as linearAlgebra from "./linear-algebra";
 import * as structuredDecoherence from "./structured-decoherence";
 import * as hardware from "./hardware";
 import * as algorithms from "./algorithms";
+import * as reconfigurationSpace from "./reconfiguration-space";
 
 const modules = [
   fundamentals,
@@ -30,6 +31,7 @@ const modules = [
   errorCorrection,
   linearAlgebra,
   structuredDecoherence,
+  reconfigurationSpace,
   hardware,
   algorithms,
 ];

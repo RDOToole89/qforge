@@ -17,6 +17,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A 3D globe where every point represents a possible qubit state. North pole = |0⟩, south pole = |1⟩, equator = equal superpositions with different phases. Noise shrinks the sphere inward (toward the maximally mixed center).",
     symbol: "S²",
+    keyEquation:
+      "\\rho = \\frac{I + \\vec{r} \\cdot \\vec{\\sigma}}{2}, \\quad \\vec{\\sigma} = (\\sigma_x, \\sigma_y, \\sigma_z)",
+    formulaExplanation:
+      "Any single-qubit state is the identity plus a Bloch vector dotted with the Pauli vector, divided by 2. The vector r encodes all the physics: its direction is the 'pointing direction' and its length (0 to 1) is the purity.",
     relatedTerms: ["bloch_vector", "pure_state", "mixed_state", "pauli_x"],
     categoryId: "bloch_sphere",
   },
@@ -28,6 +32,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The 'address' of a qubit state on the Bloch sphere. Its three components are the expectation values of the Pauli operators. Noise shrinks the vector toward the origin.",
     symbol: "r = (rₓ, rᵧ, r_z)",
+    keyEquation:
+      "\\vec{r} = (\\langle X \\rangle, \\langle Y \\rangle, \\langle Z \\rangle), \\quad |\\vec{r}| \\leq 1",
+    formulaExplanation:
+      "The three components are expectation values of the Pauli operators — directly measurable quantities. |r| = 1 for pure states (sphere surface), |r| < 1 for mixed states (interior), |r| = 0 for the maximally mixed state (center).",
     relatedTerms: ["bloch_sphere", "pauli_x", "pauli_y", "pauli_z", "purity"],
     categoryId: "bloch_sphere",
   },
@@ -59,6 +67,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A compact way to see what a noise channel does to each Bloch sphere direction. The diagonal tells you how much each axis shrinks; off-diagonal elements show mixing between axes. In our visualizer, you can watch the PTM update as you change the error rate.",
     symbol: "R",
+    keyEquation:
+      "R_{ij} = \\frac{1}{2} \\text{Tr}(\\sigma_i \\, \\varepsilon(\\sigma_j)), \\quad \\vec{r}' = R \\vec{r} + \\vec{t}",
+    formulaExplanation:
+      "The PTM R describes how a channel transforms Bloch vectors: it's a 4x4 matrix acting on the Pauli-basis representation. The first row is always [1,0,0,0] (trace preservation). The lower 3x3 block rotates/shrinks the Bloch vector, and t shifts it.",
     relatedTerms: ["cptp_map", "bloch_vector", "depolarizing_channel"],
     categoryId: "bloch_sphere",
   },
@@ -69,6 +81,10 @@ export const terms: GlossaryTerm[] = [
       "A property of CPTP maps: they cannot increase the trace distance between any two quantum states. Geometrically, CPTP maps map the Bloch ball into a subset of itself (never expanding it).",
     intuitiveExplanation:
       "Quantum noise can only shrink or preserve the Bloch ball — never inflate it. This is why the orange (noisy) point cloud in the visualizer is always inside the blue (original) cloud.",
+    keyEquation:
+      "D(\\varepsilon(\\rho), \\varepsilon(\\sigma)) \\leq D(\\rho, \\sigma)",
+    formulaExplanation:
+      "The trace distance between any two states can only decrease (or stay the same) after a CPTP map. Geometrically: noise shrinks the Bloch ball, never expands it. This is why quantum information, once lost to noise, cannot be recovered without error correction.",
     relatedTerms: ["cptp_map", "bloch_ball", "trace_distance"],
     categoryId: "bloch_sphere",
   },

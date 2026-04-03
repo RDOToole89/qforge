@@ -17,6 +17,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The simplest entangled states — two qubits perfectly correlated. Measure one and you instantly know the other. |Φ+⟩ is the most common: both qubits always agree (both 0 or both 1).",
     symbol: "|Φ+⟩, |Ψ−⟩",
+    keyEquation:
+      "|\\Phi^\\pm\\rangle = \\frac{|00\\rangle \\pm |11\\rangle}{\\sqrt{2}}, \\quad |\\Psi^\\pm\\rangle = \\frac{|01\\rangle \\pm |10\\rangle}{\\sqrt{2}}",
+    formulaExplanation:
+      "Four maximally entangled two-qubit states. Φ states have matching bits (00 and 11), Ψ states have opposite bits (01 and 10). The ± sign is a relative phase — invisible to Z-basis measurement but physically distinct.",
     relatedTerms: ["entanglement", "ghz_state", "cnot", "epr_pair"],
     categoryId: "states",
   },
@@ -28,6 +32,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "All qubits are either ALL 0 or ALL 1 — nothing in between. This extreme correlation makes GHZ the best probe for detecting Z-basis noise. In our framework, GHZ achieved 9/9 detections of correlated noise.",
     symbol: "|GHZ⟩",
+    keyEquation:
+      "|\\text{GHZ}\\rangle = \\frac{|00\\cdots0\\rangle + |11\\cdots1\\rangle}{\\sqrt{2}}",
+    formulaExplanation:
+      "An equal superposition of all-zeros and all-ones. Only two terms out of 2\u207F possibilities — maximally entangled but also maximally fragile. A single bit flip on any qubit is detectable because it breaks the all-same pattern.",
     relatedTerms: ["bell_states", "w_state", "entanglement", "zz_correlator"],
     categoryId: "states",
   },
@@ -39,6 +47,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Exactly one qubit is 'excited' (|1⟩) but you don't know which — the excitation is spread evenly. W states are resilient: lose one qubit and the rest stay entangled. However, their weak ZZ correlations make them poor Z-basis noise probes (0/9 detections in our study).",
     symbol: "|W⟩",
+    keyEquation:
+      "|W\\rangle = \\frac{1}{\\sqrt{n}}(|10\\cdots0\\rangle + |01\\cdots0\\rangle + \\cdots + |00\\cdots1\\rangle)",
+    formulaExplanation:
+      "Exactly one qubit is |1\u27E9, spread equally across all positions. The 1/\u221An normalization ensures probabilities sum to 1. Losing one qubit leaves the rest still entangled — unlike GHZ, which collapses entirely.",
     relatedTerms: ["ghz_state", "entanglement", "hamming_weight"],
     categoryId: "states",
   },
@@ -50,6 +62,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "Qubits entangled in a grid pattern via CZ gates. The entanglement lives in 'stabilizer' correlators (XZ, ZXZ) rather than simple ZZ — which is why cluster states show exactly ZERO signal in Z-basis measurements. This is the Pauli invariance theorem in action.",
     symbol: "|C⟩",
+    keyEquation:
+      "|C\\rangle = \\prod_{(a,b) \\in E} CZ_{ab} \\, |+\\rangle^{\\otimes n}",
+    formulaExplanation:
+      "Start with all qubits in |+\u27E9 (equal superposition), then apply CZ gates along each edge of a graph. The entanglement pattern mirrors the graph structure. This is the universal resource for measurement-based quantum computing.",
     relatedTerms: ["cz_gate", "pauli_invariance", "stabilizer", "graph_state"],
     categoryId: "states",
   },
@@ -71,6 +87,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A state with no classical uncertainty — you know exactly what quantum state the system is in. A qubit pointing at a specific spot on the Bloch sphere surface is pure. Noise turns pure states into mixed states.",
     symbol: "|ψ⟩",
+    keyEquation:
+      "\\rho = |\\psi\\rangle\\langle\\psi|, \\quad \\text{Tr}(\\rho^2) = 1",
+    formulaExplanation:
+      "A pure state's density matrix is a rank-1 projector — it projects onto a single direction in Hilbert space. Purity Tr(\u03C1\u00B2) = 1 confirms there's no classical uncertainty. Any point on the Bloch sphere surface is a pure state.",
     relatedTerms: ["mixed_state", "density_matrix", "purity", "bloch_sphere"],
     categoryId: "states",
   },
@@ -82,6 +102,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A state with classical uncertainty — you don't know which pure state the system is in. Inside the Bloch ball (not on the surface). The maximally mixed state ρ = I/2 is at the center of the Bloch ball, representing complete ignorance.",
     symbol: "ρ",
+    keyEquation:
+      "\\rho = \\sum_i p_i |\\psi_i\\rangle\\langle\\psi_i|, \\quad \\text{Tr}(\\rho^2) < 1",
+    formulaExplanation:
+      "A classical mixture of pure states weighted by probabilities p\u1D62. The purity is strictly less than 1, meaning there's genuine classical uncertainty about which pure state the system is in. Represented by points inside the Bloch ball.",
     relatedTerms: ["pure_state", "density_matrix", "purity", "decoherence"],
     categoryId: "states",
   },

@@ -1,5 +1,4 @@
-"""
-Core Implementation of Structured Decoherence Pathway Metrics
+"""Core Implementation of Structured Decoherence Pathway Metrics.
 
 This module implements the 5 quantitative metrics for detecting structured
 decoherence patterns in quantum measurement data.
@@ -54,8 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 def compute_structure_score(*, counts: dict[str, int], **kwargs) -> dict[str, Any]:
-    """
-    Compute Structure Score (Asymmetry Index).
+    """Compute Structure Score (Asymmetry Index).
 
     This is a thin wrapper around the canonical implementation of Asymmetry Index.
     Confidence intervals and validation status are handled by higher-level
@@ -98,8 +96,7 @@ def compute_structure_score(*, counts: dict[str, int], **kwargs) -> dict[str, An
 
 
 def compute_asymmetry_index(counts: dict[str, int]) -> float:
-    """
-    Compute Asymmetry Index (AI) — deviation from a uniform error distribution.
+    """Compute Asymmetry Index (AI) — deviation from a uniform error distribution.
 
     This function delegates to the project’s canonical `asymmetry_index` module,
     which implements the TVD-from-uniform definition on the full 2^n support
@@ -112,8 +109,7 @@ def compute_asymmetry_index(counts: dict[str, int]) -> float:
 
 
 def compute_pathway_concentration_ratio(counts: dict[str, int]) -> float:
-    """
-    Compute Pathway Concentration Ratio (PCR) — concentration in top error pathways.
+    """Compute Pathway Concentration Ratio (PCR) — concentration in top error pathways.
 
     Delegates to the vetted `pathway_concentration` implementation, which uses
     adaptive quartiles for small n and handles edge cases robustly.
@@ -128,8 +124,7 @@ def compute_entanglement_error_correlation(
     counts: dict[str, int],
     state_type: str = "GHZ",
 ) -> float:
-    """
-    Compute Entanglement–Error Correlation (EEC) — correlation between topology and errors.
+    """Compute Entanglement–Error Correlation (EEC) — correlation between topology and errors.
 
     Delegates to the canonical `eec` implementation, which builds the state-specific
     topology matrix W, computes the error-correlation matrix E from pairwise MI, and
@@ -146,8 +141,7 @@ def compute_entanglement_error_correlation(
 
 
 def compute_temporal_pathway_stability(pathway_rankings: list[list]) -> float:
-    """
-    Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
+    """Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
 
     TPS is computed as the average pairwise Spearman rank correlation ρ across all
     provided rankings, mapped to [0, 1] via (ρ̄ + 1)/2 for interpretability.
@@ -195,8 +189,7 @@ def compute_temporal_pathway_stability(pathway_rankings: list[list]) -> float:
 def compute_complexity_emergence_score(
     multi_qubit_data: dict[int, dict[str, int]],
 ) -> float:
-    """
-    Compute Complexity Emergence Score (CES) — threshold for structured emergence.
+    """Compute Complexity Emergence Score (CES) — threshold for structured emergence.
 
     Delegates to the canonical `complexity_emergence` implementation, which fits
     emergence curves (e.g., logistic) to structure vs. qubit-count data and

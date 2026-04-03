@@ -1,5 +1,4 @@
-"""
-Canonical hashing helpers for stable, reproducible identifiers.
+"""Canonical hashing helpers for stable, reproducible identifiers.
 
 Why this exists
 ---------------
@@ -21,7 +20,7 @@ Key functions
 - blake2_of(data, digest_size=16): Stronger/faster general-purpose hash.
 - hash_file(path, algo="sha1"): Hash a file in chunks (for large artifacts).
 
-Notes
+Notes:
 -----
 - Lists/tuples keep their order (as they should).
 - Dicts are sorted by key.
@@ -49,8 +48,7 @@ def canonical_dumps(
     unicode_normalize: str | None = "NFC",
     float_precision: int | None = None,
 ) -> str:
-    """
-    Serialize a mapping to a stable JSON string.
+    """Serialize a mapping to a stable JSON string.
 
     Parameters
     ----------
@@ -65,7 +63,7 @@ def canonical_dumps(
     float_precision : Optional[int]
         If set, round floats to this many decimal places before dumping.
 
-    Returns
+    Returns:
     -------
     str
         Stable JSON string with separators (',', ':') and ensure_ascii=False.
@@ -101,8 +99,7 @@ def blake2_of(
     *,
     digest_size: int = 16,
 ) -> str:
-    """
-    BLAKE2b hash (hex) of the canonical JSON for `data`.
+    """BLAKE2b hash (hex) of the canonical JSON for `data`.
 
     Use this if you want something faster/stronger than SHA-1 for IDs.
     """
@@ -111,8 +108,7 @@ def blake2_of(
 
 
 def hash_file(path: str | Path, *, algo: str = "sha1", chunk_size: int = 8192) -> str:
-    """
-    Hash a file in chunks; returns hex digest.
+    """Hash a file in chunks; returns hex digest.
 
     Parameters
     ----------
@@ -123,7 +119,7 @@ def hash_file(path: str | Path, *, algo: str = "sha1", chunk_size: int = 8192) -
     chunk_size : int
         Read size for streaming.
 
-    Examples
+    Examples:
     --------
     >>> hash_file("results/foo.json", algo="blake2b")
     """

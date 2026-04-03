@@ -1,5 +1,4 @@
-"""
-Base State Preparation Framework for Quantum Decoherence Research
+"""Base State Preparation Framework for Quantum Decoherence Research.
 
 # Foundation of Quantum State Engineering
 This module provides the abstract foundation for creating quantum states in our
@@ -23,19 +22,20 @@ determined by the underlying entanglement topology, rather than random patterns?
 Different states test different aspects of this hypothesis.
 """
 
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from qiskit import QuantumCircuit
 
-logger = logging.getLogger("QuantumExperiment.StatePreparation")
+logger = logging.getLogger(__name__)
 
 
 class BaseState(ABC):
-    """
-    Abstract base class for quantum state preparation in decoherence research.
+    """Abstract base class for quantum state preparation in decoherence research.
 
     # Quantum Computing Fundamentals
     A quantum state is a complete description of a quantum system. In our research,
@@ -63,12 +63,11 @@ class BaseState(ABC):
     def __init__(
         self,
         num_qubits: int,
-        custom_params: Optional[dict] = None,
+        custom_params: dict | None = None,
         experiment_id: str = "N/A",
-        balance: Optional[str] = None,
+        balance: str | None = None,
     ):
-        """
-        Initialize quantum state preparation.
+        """Initialize quantum state preparation.
 
         # Quantum System Size Considerations
         The number of qubits determines the Hilbert space dimension (2^n) and
@@ -81,6 +80,7 @@ class BaseState(ABC):
             num_qubits: Number of qubits (determines entanglement complexity)
             custom_params: State-specific parameters (angles, topology, etc.)
             experiment_id: Unique identifier for experiment tracking
+            balance: Optional circuit balancing strategy name.
 
         Raises:
             ValueError: If num_qubits is invalid for quantum computation
@@ -110,8 +110,7 @@ class BaseState(ABC):
 
     @abstractmethod
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create the quantum circuit that prepares this state.
+        """Create the quantum circuit that prepares this state.
 
         # Quantum Circuit Construction Principles
         A quantum circuit is a sequence of quantum gates that transforms the
@@ -139,8 +138,7 @@ class BaseState(ABC):
         pass
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate the ideal state vector for educational and validation purposes.
+        """Calculate the ideal state vector for educational and validation purposes.
 
         # Quantum State Mathematics
         The state vector |ψ⟩ is a complex vector in the 2^n dimensional Hilbert space
@@ -166,8 +164,7 @@ class BaseState(ABC):
         return state_vector
 
     def get_basic_properties(self) -> dict[str, Any]:
-        """
-        Get basic quantum state properties for engine coordination.
+        """Get basic quantum state properties for engine coordination.
 
         # State Properties for Research Framework
         Provides essential information that the engine needs to coordinate
@@ -186,8 +183,7 @@ class BaseState(ABC):
         }
 
     def validate_for_hardware(self, backend_constraints: dict[str, Any]) -> list[str]:
-        """
-        Check if this quantum state is suitable for given quantum hardware.
+        """Check if this quantum state is suitable for given quantum hardware.
 
         # Hardware Compatibility Validation
         Real quantum computers have physical limitations that restrict which
@@ -253,8 +249,7 @@ class BaseState(ABC):
         return warnings
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate the circuit depth for this quantum state.
+        """Estimate the circuit depth for this quantum state.
 
         # Circuit Depth Estimation
         Provides rough estimate of quantum gate sequence length.
@@ -267,8 +262,7 @@ class BaseState(ABC):
         return max(1, self.num_qubits)
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get list of quantum gates required for this state preparation.
+        """Get list of quantum gates required for this state preparation.
 
         # Gate Requirements
         Different quantum states require different sets of quantum gates.
@@ -285,8 +279,7 @@ class BaseState(ABC):
     # ========================================================================
 
     def _simulate_circuit_state_vector(self, circuit: QuantumCircuit) -> np.ndarray:
-        """
-        Common state vector simulation helper for states that need circuit simulation.
+        """Common state vector simulation helper for states that need circuit simulation.
 
         # Safe Abstraction Pattern
         This helper eliminates duplicated AerSimulator boilerplate found in
@@ -342,8 +335,7 @@ class BaseState(ABC):
             return self._generate_fallback_state(circuit.num_qubits)
 
     def _validate_large_system(self, operation: str, threshold: int = 10) -> None:
-        """
-        Validate system size for computationally expensive operations.
+        """Validate system size for computationally expensive operations.
 
         # Safe Abstraction Pattern
         Provides consistent size validation across all states that perform
@@ -378,8 +370,7 @@ class BaseState(ABC):
                 logger.warning(warning_msg)
 
     def _generate_fallback_state(self, num_qubits: int) -> np.ndarray:
-        """
-        Generate normalized random fallback state for failed simulations.
+        """Generate normalized random fallback state for failed simulations.
 
         # Safe Abstraction Pattern
         Provides consistent fallback behavior when circuit simulation fails.
@@ -451,8 +442,7 @@ class BaseState(ABC):
         return circuit
 
     def get_research_metadata(self) -> dict[str, Any]:
-        """
-        Generate metadata for structured decoherence research experiments.
+        """Generate metadata for structured decoherence research experiments.
 
         # Research Reproducibility
         Metadata ensures experiments can be reproduced and results properly
@@ -471,9 +461,8 @@ class BaseState(ABC):
             "research_framework": "structured_decoherence_pathways",
         }
 
-    def log_state_creation(self, state_type: str, extra_info: Optional[dict] = None) -> None:
-        """
-        Log quantum state creation with educational context.
+    def log_state_creation(self, state_type: str, extra_info: dict | None = None) -> None:
+        """Log quantum state creation with educational context.
 
         # Research Documentation
         Comprehensive logging enables:

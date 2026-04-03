@@ -16,6 +16,9 @@ export const terms: GlossaryTerm[] = [
       "An element of the stabilizer group S of a quantum code: S is an abelian subgroup of the n-qubit Pauli group such that every state |ψ⟩ in the code space satisfies g|ψ⟩ = |ψ⟩ for all g ∈ S. Stabilizer measurement detects errors without collapsing the encoded state.",
     intuitiveExplanation:
       "An operator that 'checks' whether errors have occurred without revealing the encoded information. Like a parity check in classical coding — it tells you something went wrong without telling you the message. Cluster state correlators (XZ, ZXZ) are stabilizers.",
+    keyEquation: "g|\\psi\\rangle = |\\psi\\rangle \\quad \\forall\\, g \\in S",
+    formulaExplanation:
+      "Every stabilizer operator g leaves the code space unchanged — it acts as the identity on encoded states. Measuring g gives +1 for valid codewords and -1 when an error has occurred, without disturbing the encoded information.",
     relatedTerms: ["syndrome", "cluster_state", "surface_code", "logical_qubit"],
     categoryId: "error_correction",
   },
@@ -37,6 +40,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "A 'armored' qubit made from many physical qubits. The redundancy allows detecting and correcting errors. Like writing a message on three pieces of paper — if one gets smudged, the other two can reconstruct the original.",
     symbol: "|0⟩_L, |1⟩_L",
+    keyEquation:
+      "[[n, k, d]]: \\quad n \\text{ physical} \\to k \\text{ logical}, \\quad \\text{corrects } \\lfloor(d-1)/2\\rfloor \\text{ errors}",
+    formulaExplanation:
+      "A quantum error-correcting code uses n physical qubits to encode k logical qubits with distance d. The code can correct any error affecting up to floor((d-1)/2) qubits. More physical qubits per logical qubit means stronger protection.",
     relatedTerms: ["stabilizer", "surface_code", "threshold_theorem"],
     categoryId: "error_correction",
   },
@@ -58,6 +65,10 @@ export const terms: GlossaryTerm[] = [
     intuitiveExplanation:
       "The 'existence proof' for reliable quantum computing. Below a critical noise rate, you can make computations as long and accurate as you want by adding more physical qubits. Above the threshold, errors multiply faster than you can correct them.",
     symbol: "p < p_th",
+    keyEquation:
+      "p < p_{\\text{th}} \\implies \\text{logical error} \\leq \\left(\\frac{p}{p_{\\text{th}}}\\right)^{\\lfloor d/2 \\rfloor}",
+    formulaExplanation:
+      "Below the threshold error rate, the logical error rate decreases exponentially with code distance d. Each doubling of distance squares the error suppression. This means arbitrarily reliable computation is possible with polynomial overhead.",
     relatedTerms: ["surface_code", "logical_qubit", "decoherence"],
     categoryId: "error_correction",
   },

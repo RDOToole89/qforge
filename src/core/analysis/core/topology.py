@@ -1,5 +1,4 @@
-"""
-Topology adjacency matrix builders.
+"""Topology adjacency matrix builders.
 
 Shared by noise models (correlated depolarizing) and analysis metrics (NTC).
 Each builder returns an n x n symmetric binary adjacency matrix.
@@ -27,7 +26,7 @@ def star_adjacency(n: int) -> NDArray[np.float64]:
 
 def all_to_all_adjacency(n: int) -> NDArray[np.float64]:
     """Complete graph: every pair connected."""
-    return (np.ones((n, n), dtype=np.float64) - np.eye(n, dtype=np.float64))
+    return np.ones((n, n), dtype=np.float64) - np.eye(n, dtype=np.float64)
 
 
 TOPOLOGY_BUILDERS: dict[str, type(chain_adjacency)] = {
