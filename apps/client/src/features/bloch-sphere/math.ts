@@ -520,3 +520,86 @@ export function pairConcurrence(
   const C = Math.max(0, sqrtLambdas[0] - sqrtLambdas[1] - sqrtLambdas[2] - sqrtLambdas[3]);
   return C;
 }
+
+// ── Multipartite entanglement ───────────────────────────────────
+
+/**
+ * Compute the 1-tangle (concurrence of qubit i with the rest of the system)
+ * for a pure global state. For pure states:
+ *   C(i|rest)² = 4 det(ρ_i)
+ * where ρ_i is the single-qubit reduced density matrix.
+ * This equals the linear entropy S_L = 2(1 - Tr(ρ_i²)).
+ */
+export function oneTangle(
+  sv: Complex[],
+  qubitIndex: number,
+  numQubits: number,
+): number {
+  const b = stateVectorToBloch(sv, qubitIndex, numQubits);
+  // |r|² for the Bloch vector
+  const r2 = b.rx * b.rx + b.ry * b.ry + b.rz * b.rz;
+  // For a pure global state, C(i|rest)² = 1 - |r|²
+  // (maximally entangled ↔ r=0, separable ↔ |r|=1)
+  return Math.max(0, 1 - r2);
+}
+
+/**
+ * Compute the 3-tangle (Coffman-Kundu-Wootters residual tangle) for
+ * a 3-qubit pure state. Measures genuinely tripartite entanglement
+ * that cannot be accounted for by pairwise entanglement.
+ *
+ * τ₃(A,B,C) = C²(A|BC) - C²(A,B) - C²(A,C)
+ *
+ * By the CKW monogamy inequality, τ₃ ≥ 0 for all 3-qubit pure states.
+ *
+ * Key examples:
+ * - GHZ = (|000⟩ + |111⟩)/√2: τ₃ = 1 (maximal), C(A,B) = C(A,C) = 0
+ * - W = (|001⟩ + |010⟩ + |100⟩)/√3: τ₃ = 0, C(A,B) = C(A,C) = 2/3
+ * - Product state: τ₃ = 0, all concurrences = 0
+ */
+export function threeTangle(sv: Complex[], numQubits: number): number {
+  if (numQubits !== 3) return 0;
+
+  // C²(A|BC) = 1 - |r_A|² (1-tangle of qubit 0 with rest)
+  const cABC_sq = oneTangle(sv, 0, 3);
+
+  // Pairwise concurrences C(A,B) and C(A,C)
+  const cAB = pairConcurrence(sv, 0, 1, 3);
+  const cAC = pairConcurrence(sv, 0, 2, 3);
+
+  // τ₃ = C²(A|BC) - C²(A,B) - C²(A,C)
+  const tau = cABC_sq - cAB * cAB - cAC * cAC;
+  return Math.max(0, tau);
+}
+
+/**
+ * Generalized multipartite entanglement measure for n-qubit pure states.
+ * Returns:
+ * - For n=2: squared concurrence C²(0,1)
+ * - For n=3: 3-tangle τ₃ (CKW residual tangle)
+ * - For n≥4: average residual tangle across all qubits
+ *   τ_avg = (1/n) Σᵢ [C²(i|rest) - Σⱼ≠ᵢ C²(i,j)]
+ *   This generalizes the CKW monogamy idea to larger systems.
+ */
+export function multipartiteTangle(sv: Complex[], numQubits: number): number {
+  if (numQubits < 2) return 0;
+  if (numQubits === 2) {
+    const c = pairConcurrence(sv, 0, 1, 2);
+    return c * c;
+  }
+  if (numQubits === 3) return threeTangle(sv, numQubits);
+
+  // n ≥ 4: average residual tangle
+  let totalResidual = 0;
+  for (let i = 0; i < numQubits; i++) {
+    const cRest_sq = oneTangle(sv, i, numQubits);
+    let pairSum = 0;
+    for (let j = 0; j < numQubits; j++) {
+      if (j === i) continue;
+      const cij = pairConcurrence(sv, i, j, numQubits);
+      pairSum += cij * cij;
+    }
+    totalResidual += Math.max(0, cRest_sq - pairSum);
+  }
+  return totalResidual / numQubits;
+}

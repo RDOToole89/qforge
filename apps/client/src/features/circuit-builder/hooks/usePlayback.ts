@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { SimSnapshot } from "../types";
-import { stateVectorToBloch, correlationMatrix, pairConcurrence } from "@/src/features/bloch-sphere/math";
+import { stateVectorToBloch, correlationMatrix, pairConcurrence, multipartiteTangle, oneTangle } from "@/src/features/bloch-sphere/math";
 import type { BlochDot } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 
 /** Fixed color palette for qubit dots */
@@ -17,6 +17,10 @@ export interface CorrelationData {
   deltaCov: number[][];
   /** Pairwise concurrence, size numQubits × numQubits (symmetric, diagonal = 0) */
   concurrences: number[][];
+  /** Multipartite tangle: 3-tangle for 3Q, generalized residual tangle for n≥4 */
+  tangle: number;
+  /** Per-qubit 1-tangle: C²(i|rest) — how entangled each qubit is with everything else */
+  oneTangles: number[];
 }
 
 export interface PlaybackState {
@@ -36,6 +40,7 @@ export interface UsePlaybackReturn {
   stepBack: () => void;
   setSpeed: (s: number) => void;
   reset: () => void;
+  seek: (index: number) => void;
   totalSnapshots: number;
 }
 
@@ -90,7 +95,12 @@ function computeFrame(
       }
       concurrences.push(row);
     }
-    correlations = { deltaCov, concurrences };
+    const tangle = multipartiteTangle(sv, numQubits);
+    const oneTangles: number[] = [];
+    for (let i = 0; i < numQubits; i++) {
+      oneTangles.push(oneTangle(sv, i, numQubits));
+    }
+    correlations = { deltaCov, concurrences, tangle, oneTangles };
   }
 
   return { dots, correlations };
@@ -202,6 +212,12 @@ export function usePlayback(
     setT(0);
   }, []);
 
+  const seek = useCallback((index: number) => {
+    setStatus("paused");
+    setT(0);
+    setSnapshotIndex(Math.max(0, Math.min(index, snapshots.length - 1)));
+  }, [snapshots.length]);
+
   return {
     state: { snapshotIndex, t, status, speed, dots, correlations },
     play,
@@ -210,6 +226,7 @@ export function usePlayback(
     stepBack,
     setSpeed,
     reset,
+    seek,
     totalSnapshots: snapshots.length,
   };
 }

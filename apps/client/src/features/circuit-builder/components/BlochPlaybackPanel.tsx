@@ -15,8 +15,8 @@ const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4];
 
 export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybackPanelProps) {
   const [fullscreen, setFullscreen] = useState(false);
-  const [corrMode, setCorrMode] = useState<"correlation" | "concurrence">("correlation");
-  const { state, play, pause, stepBack, stepForward, setSpeed, reset, totalSnapshots } = playback;
+  const [corrMode, setCorrMode] = useState<"correlation" | "concurrence" | "tangle">("correlation");
+  const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, totalSnapshots } = playback;
   const { status, snapshotIndex, speed, dots, correlations } = state;
 
   const hasCircuit = totalSnapshots > 1;
@@ -113,6 +113,7 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
           stepForward={stepForward}
           setSpeed={setSpeed}
           reset={reset}
+          onSeek={seek}
         />
       </div>
 
@@ -272,11 +273,12 @@ interface TransportControlsProps {
   stepForward: () => void;
   setSpeed: (s: number) => void;
   reset: () => void;
+  onSeek?: (index: number) => void;
 }
 
 function TransportControls({
   hasCircuit, status, snapshotIndex, totalSnapshots,
-  speed, play, pause, stepBack, stepForward, setSpeed, reset,
+  speed, play, pause, stepBack, stepForward, setSpeed, reset, onSeek,
 }: TransportControlsProps) {
   return (
     <div style={{
@@ -286,6 +288,29 @@ function TransportControls({
       flexDirection: "column",
       gap: 6,
     }}>
+      {/* Timeline scrubber */}
+      {hasCircuit && totalSnapshots > 2 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>0</span>
+          <input
+            type="range"
+            min={0}
+            max={totalSnapshots - 1}
+            value={snapshotIndex}
+            onChange={(e) => onSeek?.(Number(e.target.value))}
+            style={{
+              flex: 1,
+              accentColor: colors.accent,
+              height: 4,
+              cursor: "pointer",
+            }}
+          />
+          <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>
+            {totalSnapshots - 1}
+          </span>
+        </div>
+      )}
+
       {/* Moment indicator */}
       <div style={{
         fontSize: 11,
@@ -343,14 +368,40 @@ function TransportControls({
   );
 }
 
+type CorrMode = "correlation" | "concurrence" | "tangle";
+
+const CORR_INFO: Record<CorrMode, { title: string; explanation: string; formula: string; example: string }> = {
+  correlation: {
+    title: "\u0394Cov \u2014 Connected Correlation",
+    explanation: "Measures how much two qubits' measurement outcomes are correlated beyond what you'd expect from their individual states. If measuring one qubit tells you something about the other, this value is nonzero.",
+    formula: "\u0394Cov(i,j) = \u27E8Z\u1D62Z\u2C6C\u27E9 \u2212 \u27E8Z\u1D62\u27E9\u27E8Z\u2C6C\u27E9",
+    example: "A Bell state (|00\u27E9+|11\u27E9)/\u221A2 has \u0394Cov = +1.0: measuring q0 as |0\u27E9 guarantees q1 is also |0\u27E9. A product state like |+\u27E9|0\u27E9 has \u0394Cov = 0: the qubits are independent.",
+  },
+  concurrence: {
+    title: "Concurrence \u2014 Pairwise Entanglement",
+    explanation: "Quantifies genuine quantum entanglement between two qubits. Unlike correlation, concurrence is zero for classically correlated states \u2014 it only detects entanglement that has no classical explanation.",
+    formula: "C = max(0, \u221A\u03BB\u2081 \u2212 \u221A\u03BB\u2082 \u2212 \u221A\u03BB\u2083 \u2212 \u221A\u03BB\u2084)  (Wootters)",
+    example: "C = 0 means separable (no entanglement). C = 1 means maximally entangled (Bell state). A GHZ state has C = 0 for all pairs \u2014 the entanglement is genuinely 3-way, not pairwise.",
+  },
+  tangle: {
+    title: "Tangle \u2014 Multipartite Entanglement",
+    explanation: "Measures genuinely multipartite entanglement \u2014 the part that can't be explained by any combination of pairwise entanglement. Uses the Coffman-Kundu-Wootters (CKW) residual tangle for 3 qubits, generalized for larger systems.",
+    formula: "\u03C4\u2083 = C\u00B2(A|BC) \u2212 C\u00B2(A,B) \u2212 C\u00B2(A,C)",
+    example: "GHZ state: \u03C4 = 1.0 (maximal), all pairwise C = 0. The entanglement is entirely tripartite \u2014 you can't split it into pairs. W state: \u03C4 = 0, pairwise C = 2/3. All entanglement is in pairs \u2014 no genuinely 3-way part.",
+  },
+};
+
 function CorrelationPanel({
   correlations, numQubits, corrMode, setCorrMode,
 }: {
   correlations: import("../hooks/usePlayback").CorrelationData;
   numQubits: number;
-  corrMode: "correlation" | "concurrence";
-  setCorrMode: (m: "correlation" | "concurrence") => void;
+  corrMode: CorrMode;
+  setCorrMode: (m: CorrMode) => void;
 }) {
+  const [showInfo, setShowInfo] = useState(false);
+  const info = CORR_INFO[corrMode];
+
   return (
     <div style={{
       padding: "8px 14px",
@@ -360,12 +411,12 @@ function CorrelationPanel({
       alignItems: "center",
       gap: 6,
     }}>
-      {/* Mode toggle */}
-      <div style={{ display: "flex", gap: 2 }}>
-        {([["correlation", "\u0394Cov"], ["concurrence", "Concurrence"]] as const).map(([mode, label]) => (
+      {/* Mode toggle + info button */}
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap", justifyContent: "center" }}>
+        {([["correlation", "\u0394Cov"], ["concurrence", "Concurrence"], ["tangle", "Tangle"]] as const).map(([mode, label]) => (
           <button
             key={mode}
-            onClick={() => setCorrMode(mode)}
+            onClick={() => { setCorrMode(mode); setShowInfo(false); }}
             style={{
               background: corrMode === mode ? colors.accentDim : "transparent",
               color: corrMode === mode ? colors.accentLight : colors.textTertiary,
@@ -381,8 +432,230 @@ function CorrelationPanel({
             {label}
           </button>
         ))}
+        <button
+          onClick={() => setShowInfo((v) => !v)}
+          title="What does this mean?"
+          style={{
+            background: showInfo ? colors.accentDim : "transparent",
+            color: showInfo ? colors.accentLight : colors.textTertiary,
+            border: `1px solid ${showInfo ? colors.accent : colors.border}`,
+            borderRadius: "50%",
+            width: 20,
+            height: 20,
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            marginLeft: 2,
+            fontFamily: fonts.sans,
+          }}
+        >
+          ?
+        </button>
       </div>
-      <CorrelationHeatmap data={correlations} numQubits={numQubits} mode={corrMode} />
+
+      {/* Info tooltip */}
+      {showInfo && (
+        <div style={{
+          background: colors.card,
+          border: `1px solid ${colors.border}`,
+          borderRadius: 8,
+          padding: 12,
+          maxWidth: 280,
+        }}>
+          <div style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: colors.accentLight,
+            marginBottom: 6,
+            fontFamily: fonts.sans,
+          }}>
+            {info.title}
+          </div>
+          <p style={{
+            fontSize: 11,
+            color: colors.text,
+            lineHeight: 1.5,
+            margin: "0 0 8px",
+            fontFamily: fonts.sans,
+          }}>
+            {info.explanation}
+          </p>
+          <div style={{
+            fontSize: 10,
+            color: colors.textSecondary,
+            fontFamily: fonts.mono,
+            background: colors.bg,
+            padding: "4px 8px",
+            borderRadius: 4,
+            marginBottom: 8,
+          }}>
+            {info.formula}
+          </div>
+          <div style={{
+            fontSize: 10,
+            color: colors.textTertiary,
+            lineHeight: 1.5,
+            fontFamily: fonts.sans,
+            borderTop: `1px solid ${colors.border}`,
+            paddingTop: 6,
+          }}>
+            <span style={{ fontWeight: 600, color: colors.textSecondary }}>Example: </span>
+            {info.example}
+          </div>
+        </div>
+      )}
+
+      {/* Matrix views */}
+      {corrMode !== "tangle" && (
+        <CorrelationHeatmap data={correlations} numQubits={numQubits} mode={corrMode} />
+      )}
+
+      {/* Tangle view */}
+      {corrMode === "tangle" && (
+        <TangleDisplay data={correlations} numQubits={numQubits} />
+      )}
+    </div>
+  );
+}
+
+function TangleDisplay({ data, numQubits }: { data: import("../hooks/usePlayback").CorrelationData; numQubits: number }) {
+  const tangleVal = data.tangle;
+  const oneTangles = data.oneTangles;
+
+  // Color: 0 = dark, 1 = bright gold/amber
+  const tangleColor = (v: number) => {
+    const t = Math.min(Math.max(v, 0), 1);
+    if (t < 0.001) return colors.card;
+    const r = Math.round(30 + 225 * t);
+    const g = Math.round(30 + 130 * t);
+    const b = Math.round(46 - 10 * t);
+    return `rgb(${r},${g},${b})`;
+  };
+
+  // Classify the entanglement structure
+  let classification = "";
+  const maxPairC = Math.max(...data.concurrences.flat());
+  if (tangleVal > 0.5 && maxPairC < 0.1) {
+    classification = "Genuinely multipartite \u2014 entanglement cannot be reduced to pairs";
+  } else if (tangleVal < 0.05 && maxPairC > 0.3) {
+    classification = "Pairwise entanglement only \u2014 no genuinely multipartite component";
+  } else if (tangleVal > 0.1 && maxPairC > 0.1) {
+    classification = "Mixed structure \u2014 both pairwise and multipartite entanglement present";
+  } else if (tangleVal < 0.05 && maxPairC < 0.05) {
+    classification = "No significant entanglement \u2014 product state or classical correlations only";
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, width: "100%" }}>
+      {/* Main tangle gauge */}
+      <div style={{ textAlign: "center" }}>
+        <div style={{
+          fontSize: 10,
+          color: colors.textTertiary,
+          fontFamily: fonts.sans,
+          marginBottom: 4,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}>
+          {numQubits === 3 ? "3-Tangle (\u03C4\u2083)" : `Residual Tangle (${numQubits}Q)`}
+        </div>
+        <div style={{
+          fontSize: 28,
+          fontWeight: 700,
+          fontFamily: fonts.mono,
+          color: tangleVal > 0.01 ? tangleColor(tangleVal) : colors.textTertiary,
+          lineHeight: 1,
+        }}>
+          {tangleVal.toFixed(3)}
+        </div>
+        <div style={{
+          width: "100%",
+          height: 6,
+          borderRadius: 3,
+          background: colors.card,
+          marginTop: 6,
+          overflow: "hidden",
+        }}>
+          <div style={{
+            width: `${Math.min(tangleVal * 100, 100)}%`,
+            height: "100%",
+            borderRadius: 3,
+            background: tangleColor(tangleVal),
+            transition: "width 0.3s ease, background 0.3s ease",
+          }} />
+        </div>
+      </div>
+
+      {/* Per-qubit 1-tangles */}
+      <div style={{ width: "100%" }}>
+        <div style={{
+          fontSize: 9,
+          color: colors.textTertiary,
+          fontFamily: fonts.sans,
+          marginBottom: 4,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}>
+          Per-qubit entanglement with rest
+        </div>
+        <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+          {oneTangles.map((ot, i) => (
+            <div key={i} style={{
+              flex: 1,
+              maxWidth: 60,
+              textAlign: "center",
+            }}>
+              <div style={{
+                fontSize: 11,
+                fontFamily: fonts.mono,
+                fontWeight: 600,
+                color: ot > 0.01 ? tangleColor(ot) : colors.textTertiary,
+              }}>
+                {ot.toFixed(2)}
+              </div>
+              <div style={{
+                height: 4,
+                borderRadius: 2,
+                background: colors.card,
+                marginTop: 2,
+                overflow: "hidden",
+              }}>
+                <div style={{
+                  width: `${Math.min(ot * 100, 100)}%`,
+                  height: "100%",
+                  borderRadius: 2,
+                  background: tangleColor(ot),
+                  transition: "width 0.3s ease",
+                }} />
+              </div>
+              <div style={{ fontSize: 8, color: colors.textTertiary, fontFamily: fonts.mono, marginTop: 2 }}>
+                q{i}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Classification */}
+      {classification && (
+        <div style={{
+          fontSize: 10,
+          color: colors.textSecondary,
+          fontFamily: fonts.sans,
+          textAlign: "center",
+          lineHeight: 1.4,
+          padding: "4px 8px",
+          background: `${colors.card}`,
+          borderRadius: 4,
+          width: "100%",
+        }}>
+          {classification}
+        </div>
+      )}
     </div>
   );
 }

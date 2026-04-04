@@ -246,6 +246,148 @@ export function formatDirac(snapshot: SimSnapshot, threshold: number = 0.001): s
   return terms.length > 0 ? `|\u03c8\u27E9 = ${terms.join(" ")}` : "|\u03c8\u27E9 = |0\u27E9";
 }
 
+/**
+ * Recognize named quantum states from a state vector.
+ * Checks amplitudes AND relative phases to distinguish variants.
+ * Returns a human-readable name or null if unrecognized.
+ */
+export function recognizeState(snapshot: SimSnapshot): string | null {
+  const sv = snapshot.stateVector;
+  const n = Math.log2(sv.length);
+  if (!Number.isInteger(n) || n < 1) return null;
+  const dim = sv.length;
+
+  const prob = (i: number) => sv[i][0] * sv[i][0] + sv[i][1] * sv[i][1];
+  const phase = (i: number) => Math.atan2(sv[i][1], sv[i][0]);
+  const nonzeroIndices: number[] = [];
+  for (let i = 0; i < dim; i++) {
+    if (prob(i) > 0.001) nonzeroIndices.push(i);
+  }
+
+  // ── Single basis state ──
+  if (nonzeroIndices.length === 1) {
+    const idx = nonzeroIndices[0];
+    if (idx === 0) return "|0\u27E9 (ground state)";
+    return `|${idx.toString(2).padStart(n, "0")}\u27E9`;
+  }
+
+  // ── 1-qubit named states ──
+  if (n === 1 && nonzeroIndices.length === 2) {
+    const p0 = prob(0), p1 = prob(1);
+    if (Math.abs(p0 - 0.5) < 0.02 && Math.abs(p1 - 0.5) < 0.02) {
+      const relPhase = phase(1) - phase(0);
+      const normPhase = ((relPhase % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      if (normPhase < 0.15 || normPhase > 2 * Math.PI - 0.15) return "|+\u27E9";
+      if (Math.abs(normPhase - Math.PI) < 0.15) return "|\u2212\u27E9";
+      if (Math.abs(normPhase - Math.PI / 2) < 0.15) return "|+i\u27E9 (Y eigenstate)";
+      if (Math.abs(normPhase - 3 * Math.PI / 2) < 0.15) return "|\u2212i\u27E9 (Y eigenstate)";
+      return "Superposition";
+    }
+  }
+
+  // ── Bell states (2 qubits, phase-resolved) ──
+  if (n === 2 && nonzeroIndices.length === 2) {
+    const p00 = prob(0), p01 = prob(1), p10 = prob(2), p11 = prob(3);
+
+    // |Φ±⟩ = (|00⟩ ± |11⟩)/√2
+    if (Math.abs(p00 - 0.5) < 0.02 && Math.abs(p11 - 0.5) < 0.02 && p01 < 0.02 && p10 < 0.02) {
+      const rel = phase(3) - phase(0); // phase of |11⟩ relative to |00⟩
+      const norm = ((rel % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      if (norm < 0.2 || norm > 2 * Math.PI - 0.2) return "Bell |\u03A6\u207A\u27E9";
+      if (Math.abs(norm - Math.PI) < 0.2) return "Bell |\u03A6\u207B\u27E9";
+      return "Bell state (|\u03A6\u27E9 variant)";
+    }
+
+    // |Ψ±⟩ = (|01⟩ ± |10⟩)/√2
+    if (Math.abs(p01 - 0.5) < 0.02 && Math.abs(p10 - 0.5) < 0.02 && p00 < 0.02 && p11 < 0.02) {
+      const rel = phase(2) - phase(1); // phase of |10⟩ relative to |01⟩
+      const norm = ((rel % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      if (norm < 0.2 || norm > 2 * Math.PI - 0.2) return "Bell |\u03A8\u207A\u27E9";
+      if (Math.abs(norm - Math.PI) < 0.2) return "Bell |\u03A8\u207B\u27E9 (singlet)";
+      return "Bell state (|\u03A8\u27E9 variant)";
+    }
+  }
+
+  // ── GHZ state: (|00...0⟩ ± |11...1⟩)/√2 ──
+  if (n >= 2 && nonzeroIndices.length === 2) {
+    if (nonzeroIndices[0] === 0 && nonzeroIndices[1] === dim - 1) {
+      if (Math.abs(prob(0) - 0.5) < 0.02 && Math.abs(prob(dim - 1) - 0.5) < 0.02) {
+        if (n === 2) {
+          // Already handled above as Bell state
+        } else {
+          const rel = phase(dim - 1) - phase(0);
+          const norm = ((rel % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+          const sign = (norm < 0.2 || norm > 2 * Math.PI - 0.2) ? "+" : (Math.abs(norm - Math.PI) < 0.2) ? "\u2212" : "\u00B1";
+          return `GHZ${sign} state (${n}Q)`;
+        }
+      }
+    }
+  }
+
+  // ── W state: equal superposition of single-excitation states ──
+  if (n >= 2) {
+    const expectedProb = 1 / n;
+    let isW = true;
+    let wCount = 0;
+    for (let i = 0; i < dim; i++) {
+      const popcount = i.toString(2).split("").filter((b) => b === "1").length;
+      if (popcount === 1) {
+        if (Math.abs(prob(i) - expectedProb) > 0.03) { isW = false; break; }
+        wCount++;
+      } else {
+        if (prob(i) > 0.02) { isW = false; break; }
+      }
+    }
+    if (isW && wCount === n) return `W state (${n}Q)`;
+  }
+
+  // ── Dicke states: equal superposition of k-excitation states ──
+  if (n >= 3 && nonzeroIndices.length > 2) {
+    // Check if all nonzero states have the same Hamming weight
+    const weights = nonzeroIndices.map((i) => i.toString(2).split("").filter((b) => b === "1").length);
+    const k = weights[0];
+    if (weights.every((w) => w === k)) {
+      // Binomial coefficient C(n,k)
+      const expectedCount = nonzeroIndices.length;
+      const expectedP = 1 / expectedCount;
+      const allEqual = nonzeroIndices.every((i) => Math.abs(prob(i) - expectedP) < 0.03);
+      if (allEqual && k > 1 && k < n) {
+        return `Dicke state D(${n},${k})`;
+      }
+    }
+  }
+
+  // ── Uniform superposition ──
+  const expectedUniform = 1 / dim;
+  let isUniform = true;
+  for (let i = 0; i < dim; i++) {
+    if (Math.abs(prob(i) - expectedUniform) > 0.02) { isUniform = false; break; }
+  }
+  if (isUniform) {
+    // Check if it's |+⟩^⊗n (all real positive amplitudes)
+    let allRealPositive = true;
+    for (let i = 0; i < dim; i++) {
+      if (sv[i][0] < -0.01 || Math.abs(sv[i][1]) > 0.01) { allRealPositive = false; break; }
+    }
+    if (allRealPositive) return `|+\u27E9\u2297${n}`;
+    return "Uniform superposition";
+  }
+
+  // ── Product state detection: check if state is separable ──
+  if (n === 2 && nonzeroIndices.length === 4) {
+    // |ψ⟩ = |a⟩⊗|b⟩ iff sv[00]*sv[11] = sv[01]*sv[10] (as complex numbers)
+    const lhs_re = sv[0][0] * sv[3][0] - sv[0][1] * sv[3][1];
+    const lhs_im = sv[0][0] * sv[3][1] + sv[0][1] * sv[3][0];
+    const rhs_re = sv[1][0] * sv[2][0] - sv[1][1] * sv[2][1];
+    const rhs_im = sv[1][0] * sv[2][1] + sv[1][1] * sv[2][0];
+    if (Math.abs(lhs_re - rhs_re) < 0.02 && Math.abs(lhs_im - rhs_im) < 0.02) {
+      return "Product state (separable)";
+    }
+  }
+
+  return null;
+}
+
 /** React hook: simulate whenever circuit changes */
 export function useSimulator(circuit: Circuit) {
   const snapshots = useMemo(() => simulateCircuit(circuit), [circuit]);

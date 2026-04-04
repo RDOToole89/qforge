@@ -7,6 +7,7 @@ interface CircuitToolbarProps {
   onSetNumQubits: (n: number) => void;
   onClear: () => void;
   onLoadPreset?: (circuit: Circuit) => void;
+  onExport?: () => void;
   onRun?: () => void;
   isRunning?: boolean;
 }
@@ -16,6 +17,7 @@ export default function CircuitToolbar({
   onSetNumQubits,
   onClear,
   onLoadPreset,
+  onExport,
   onRun,
   isRunning,
 }: CircuitToolbarProps) {
@@ -122,6 +124,28 @@ export default function CircuitToolbar({
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
+
+      {/* Export button */}
+      {onExport && (
+        <button
+          onClick={onExport}
+          title="Copy circuit JSON to clipboard"
+          style={{
+            background: "transparent",
+            color: colors.textSecondary,
+            border: `1px solid ${colors.border}`,
+            borderRadius: 6,
+            padding: "6px 14px",
+            fontSize: 12,
+            fontFamily: fonts.sans,
+            fontWeight: 500,
+            cursor: "pointer",
+            transition: "all 0.15s",
+          }}
+        >
+          Export
+        </button>
+      )}
 
       {/* Clear button */}
       <button

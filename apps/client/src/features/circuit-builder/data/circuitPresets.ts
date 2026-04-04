@@ -155,20 +155,36 @@ export const CIRCUIT_PRESETS: CircuitPreset[] = [
   {
     id: "w_state",
     name: "W State (3Q)",
-    description: "W state: (|001⟩ + |010⟩ + |100⟩)/√3. Unlike GHZ, tracing out one qubit preserves entanglement.",
-    learns: "W states, robustness of entanglement, Ry rotations",
+    description: "W state: (|001⟩ + |010⟩ + |100⟩)/\u221A3. Unlike GHZ, tracing out one qubit preserves entanglement. All entanglement is pairwise \u2014 the 3-tangle is exactly zero.",
+    learns: "W states, robustness of entanglement, Givens rotations, monogamy of entanglement",
+    steps: [
+      "X on q0 places a single excitation: |100\u27E9. The W state is a symmetric superposition of all single-excitation states.",
+      "CNOT q0\u2192q1 entangles q0 and q1, preparing for the Givens rotation that will split the excitation.",
+      "Ry(2\u00B7arccos(1/\u221A3)) on q0 redistributes amplitude: 1/\u221A3 stays on q0, \u221A(2/3) moves toward q1. This is a Givens rotation in the single-excitation subspace.",
+      "CNOT q0\u2192q1 completes the first Givens rotation. State is now (1/\u221A3)|100\u27E9 + \u221A(2/3)|010\u27E9 \u2014 the excitation is split 1:2 between q0 and q1.",
+      "CNOT q1\u2192q2 begins the second Givens rotation, splitting q1's excitation with q2.",
+      "Ry(\u03C0/2) on q1 redistributes equally: \u221A(2/3) splits into 1/\u221A3 + 1/\u221A3.",
+      "CNOT q1\u2192q2 completes the second Givens rotation. Final state: (1/\u221A3)(|100\u27E9 + |010\u27E9 + |001\u27E9) = |W\u27E9.",
+    ],
+    applications: [
+      "Robust entanglement: losing one qubit from a W state leaves the other two still entangled (unlike GHZ, which collapses completely)",
+      "Quantum voting protocols and leader election in distributed quantum computing",
+      "Quantum secret sharing with graceful degradation",
+      "Demonstrates entanglement monogamy: all entanglement is pairwise (C \u2248 2/3), none is genuinely tripartite (\u03C4\u2083 = 0)",
+    ],
     circuit: {
       numQubits: 3,
       moments: [
-        // Ry(arccos(1/√3)) on q0 to get amplitude √(1/3)
-        { gates: [{ id: "p1", gateType: "Ry", qubits: [0], params: [Math.acos(1 / Math.sqrt(3)) * 2] }] },
-        // Controlled rotation + CNOT cascade
+        // Place single excitation on q0
+        { gates: [{ id: "p1", gateType: "X", qubits: [0] }] },
+        // Givens rotation 1: split excitation 1/3 to q0, 2/3 to q1
         { gates: [{ id: "p2", gateType: "CNOT", qubits: [0, 1] }] },
-        { gates: [{ id: "p3", gateType: "Ry", qubits: [1], params: [Math.PI / 2] }] },
-        { gates: [{ id: "p4", gateType: "CNOT", qubits: [1, 2] }] },
-        // Fix phases
-        { gates: [{ id: "p5", gateType: "X", qubits: [0] }] },
-        { gates: [{ id: "p6", gateType: "X", qubits: [1] }] },
+        { gates: [{ id: "p3", gateType: "Ry", qubits: [0], params: [2 * Math.acos(1 / Math.sqrt(3))] }] },
+        { gates: [{ id: "p4", gateType: "CNOT", qubits: [0, 1] }] },
+        // Givens rotation 2: split q1's 2/3 equally to q1 and q2
+        { gates: [{ id: "p5", gateType: "CNOT", qubits: [1, 2] }] },
+        { gates: [{ id: "p6", gateType: "Ry", qubits: [1], params: [Math.PI / 2] }] },
+        { gates: [{ id: "p7", gateType: "CNOT", qubits: [1, 2] }] },
       ],
     },
   },
