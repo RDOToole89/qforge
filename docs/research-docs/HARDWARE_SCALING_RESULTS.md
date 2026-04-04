@@ -219,7 +219,7 @@ We tested four quantum states on 6 qubits, each with a fundamentally different e
 | State         | Entanglement     | SS     | TC     | CI     | EEC    | Fidelity | Depth |
 | ------------- | ---------------- | ------ | ------ | ------ | ------ | -------- | ----- |
 | GHZ           | all-to-all       | 0.7445 | 2.9084 | 426.06 | 0.2671 | 0.6398   | 24    |
-| W             | symmetric-share  | 0.8180 | 0.8357 | 711.00 | 0.0000 | 0.9081   | 52    |
+| W             | symmetric-share  | 0.8180 | ~0.5†  | ~313†  | 0.0000 | 0.9081   | 52    |
 | Cluster       | nearest-neighbor | 0.0602 | 0.0097 | 1.48   | 0.2444 | 0.9939   | 9     |
 | Superposition | none             | 0.0610 | 0.0046 | 1.45   | 0.0000 | 0.9946   | 4     |
 
@@ -227,7 +227,7 @@ We tested four quantum states on 6 qubits, each with a fundamentally different e
 
 The data reveals that "structured decoherence" is not a single phenomenon. There are two distinct types:
 
-**Correlated River (GHZ):** Probability concentrates in 2 outcomes (`|000000⟩` at 30.8% and `|111111⟩` at 33.2%). High Total Correlation (TC = 2.91) means knowing one qubit tells you almost everything about the others. Errors are _correlated_ — if one qubit flips, nearby qubits are likely to flip too.
+**Correlated River (GHZ):** Probability concentrates in 2 outcomes (`|000000⟩` at 30.8% and `|111111⟩` at 33.2%). High Total Correlation (TC ≈ 2.9-4.4 depending on run) means knowing one qubit tells you almost everything about the others. Errors are _correlated_ — if one qubit flips, nearby qubits are likely to flip too.
 
 **Distributed River (W):** Probability concentrates in 6 outcomes (single-excitation states, each at ~15%, totaling 90.8%). _Higher_ Structure Score than GHZ (SS = 0.818 vs 0.745) and _higher_ Concentration Index (CI = 711 vs 426). But low Total Correlation (TC = 0.84) — knowing one qubit gives only partial information about the others. Errors are _structured but less globally correlated_ than in GHZ.
 
@@ -803,7 +803,7 @@ Can classical correlated noise produce the same metric signatures as real quantu
 | Source | SS | TC | CI | KL | H |
 |--------|------|------|--------|------|-------|
 | **Real GHZ-6 (hardware)** | **0.899** | **4.350** | **988** | **4.444** | **1.556** |
-| **Real W-6 (hardware)** | **0.730** | **0.836** | **711** | **2.312** | **3.688** |
+| **Real W-6 (hardware)** | **0.730** | **~0.5†** | **~313†** | **2.312** | **3.688** |
 | **Real Cluster-6 (hardware)** | **0.048** | **0.005** | **1.4** | **0.048** | **5.952** |
 | Uniform random | 0.034 | 0.004 | 1.2 | 0.005 | 5.995 |
 | Classical fake-GHZ | 0.868 | 4.038 | 55 | 4.065 | 1.935 |
@@ -851,7 +851,7 @@ The distinguishing signature of quantum structured decoherence is not any single
 
 ```
                     SS        TC        CI
-Real W-6:          0.730     0.836      711
+Real W-6:          0.730     ~0.5†      ~313†
 Classical fake-W:  0.810     0.997       59
                                        ^^^
                                        12x difference
@@ -891,32 +891,28 @@ How well does simulated depolarizing noise predict real hardware behavior? Where
 
 ### W Scaling: Hardware vs Simulation
 
+*W TC values corrected from saved full counts. Original live-session values were inflated due to incomplete count extraction. See errata.*
+
 | N | HW SS | Sim SS | Diff | HW TC | Sim TC | Diff |
 |---|-------|--------|------|-------|--------|------|
-| 2 | 0.396 | 0.438 | +0.043 | 0.548 | 0.666 | +0.118 |
-| 3 | 0.511 | 0.506 | -0.005 | 0.878 | 0.613 | -0.265 |
-| 4 | 0.589 | 0.583 | -0.006 | 1.250 | 0.544 | -0.706 |
-| 5 | 0.697 | 0.650 | -0.048 | 1.871 | 0.450 | -1.421 |
-| 6 | 0.730 | 0.684 | -0.045 | 2.312 | 0.375 | -1.937 |
+| 2 | 0.396 | 0.438 | +0.043 | 0.534 | 0.666 | +0.132 |
+| 3 | 0.511 | 0.506 | -0.005 | 0.623 | 0.613 | -0.010 |
+| 4 | 0.589 | 0.583 | -0.006 | 0.545 | 0.544 | -0.001 |
+| 5 | 0.697 | 0.650 | -0.048 | 0.640 | 0.450 | -0.190 |
+| 6 | 0.730 | 0.684 | -0.045 | 0.427 | 0.375 | -0.052 |
 
-**This is the most interesting finding of the simulation comparison.**
-
-W state on real hardware shows **more structure and dramatically more correlation** than simulation predicts. At 6 qubits:
+W state on real hardware shows slightly more structure than depolarizing simulation predicts. At 6 qubits:
 - SS: hardware 0.730 vs simulation 0.684 (hardware is 7% higher)
-- TC: hardware **2.312** vs simulation **0.375** (hardware is **6.2x higher**)
+- TC: hardware 0.427 vs simulation 0.375 (hardware is ~1.1x, within expected variation)
 
-The depolarizing noise model massively under-predicts W state correlations. Real hardware noise preserves the W state's inter-qubit correlations far better than symmetric depolarizing noise would.
-
-**Why this matters:** Depolarizing noise treats all Pauli errors equally (X, Y, Z flips are equally likely). But real superconducting hardware noise is dominated by **amplitude damping** (T1 relaxation, which causes |1⟩→|0⟩ transitions). The W state is a single-excitation state — most of its probability sits in outcomes with exactly one |1⟩. Amplitude damping moves probability from |1⟩ toward |0⟩, which *concentrates* the W distribution toward |000000⟩ rather than spreading it uniformly. This is a **structured** noise channel that happens to reinforce the W state's natural structure rather than destroying it.
-
-The depolarizing model misses this because it applies random Pauli errors that don't respect the W state's excitation structure.
+The SS difference is modest but consistent: amplitude damping (the dominant real hardware noise) is expected to concentrate the W distribution more than symmetric depolarizing noise. The TC values are comparable, suggesting that inter-qubit correlation behavior is well-captured by the depolarizing model for W states.
 
 ### Topology Comparison: Hardware vs Simulation (6 qubits)
 
 | State | HW SS | Sim SS | Diff | HW TC | Sim TC | Diff |
 |-------|-------|--------|------|-------|--------|------|
 | GHZ | 0.745 | 0.895 | +0.150 | 2.908 | 4.365 | +1.457 |
-| W | 0.818 | 0.684 | -0.134 | 0.836 | 0.375 | -0.461 |
+| W | 0.818 | 0.684 | -0.134 | ~0.5† | 0.375 | ~-0.1 |
 | Cluster | 0.060 | 0.034 | -0.026 | 0.010 | 0.005 | -0.005 |
 | Superposition | 0.061 | 0.034 | -0.027 | 0.005 | 0.005 | +0.000 |
 
@@ -940,18 +936,18 @@ Both agree: Cluster is Fog in all bases, on both hardware and simulation. No dis
                 GHZ                         W
             ┌───────────┐              ┌───────────┐
 Simulation  │ SS = 0.895│              │ SS = 0.684│
-            │ TC = 4.365│              │ TC = 0.375│
             └─────┬─────┘              └─────┬─────┘
-                  │ over-predicts            │ under-predicts
+                  │ over-predicts SS         │ under-predicts SS
                   ▼                          ▼
 Hardware    ┌───────────┐              ┌───────────┐
             │ SS = 0.745│              │ SS = 0.818│
-            │ TC = 2.908│              │ TC = 0.836│
             └───────────┘              └───────────┘
 
 Real hardware is WORSE for GHZ    Real hardware is BETTER for W
-than depolarizing predicts        than depolarizing predicts
+than depolarizing predicts (SS)   than depolarizing predicts (SS)
 ```
+
+†*W TC values corrected. See errata. TC comparison is approximately 1.1x (hardware vs simulation), not the 6x originally reported.*
 
 The depolarizing model is symmetric — it doesn't distinguish between |0⟩→|1⟩ and |1⟩→|0⟩ transitions. Real hardware noise is **asymmetric** (dominated by amplitude damping, which is biased toward |0⟩). This asymmetry:
 - **Hurts GHZ** by breaking the |000000⟩ ↔ |111111⟩ symmetry (|111111⟩ decays toward |000000⟩ faster than vice versa)
@@ -989,11 +985,13 @@ Which simulated noise model better predicts the real hardware results — depola
 
 | Noise Model | SS | TC | CI | ΔSS from HW | ΔTC from HW |
 |------------|------|------|--------|-------------|-------------|
-| **REAL HARDWARE** | **0.730** | **2.312** | **711** | **ref** | **ref** |
-| Depolarizing 2% | 0.684 | 0.375 | 191 | -0.045 | -1.937 |
-| Amplitude damping 2% | 0.764 | 0.495 | 235 | +0.035 | -1.817 |
-| Amplitude damping 5% | 0.638 | 0.151 | 200 | -0.092 | -2.161 |
-| Amplitude damping 10% | 0.551 | 0.019 | 76 | -0.179 | -2.293 |
+| **REAL HARDWARE** | **0.730** | **0.427†** | **313†** | **ref** | **ref** |
+| Depolarizing 2% | 0.684 | 0.375 | 191 | -0.045 | -0.052 |
+| Amplitude damping 2% | 0.764 | 0.495 | 235 | +0.035 | +0.068 |
+| Amplitude damping 5% | 0.638 | 0.151 | 200 | -0.092 | -0.276 |
+| Amplitude damping 10% | 0.551 | 0.019 | 76 | -0.179 | -0.408 |
+
+†*TC and CI corrected from saved full counts. See errata.*
 
 **Winner for W (on SS): Amplitude damping.** Closer match (|ΔSS| = 0.035 vs 0.045) and on the correct side (overshoots slightly rather than undershooting).
 
@@ -1014,21 +1012,16 @@ W-6 Structure Score — where does hardware land?
 
 **The prediction from Experiment 9 is confirmed for Structure Score.** Amplitude damping better predicts W hardware behavior because real hardware noise is dominated by T1 relaxation (|1⟩→|0⟩ decay), which is exactly what amplitude damping models. The W state is a single-excitation state, so this directional noise reinforces its natural structure rather than randomly scrambling it.
 
-**But TC remains unexplained by both models.** Hardware W-6 has TC = 2.312. Both simulations give TC < 0.5. This 6x gap means real hardware creates far more inter-qubit correlation in the W state than either noise model predicts. Possible explanations:
-- **Correlated noise:** real hardware has spatially correlated control errors and crosstalk that neither model includes
-- **Non-Markovian effects:** real noise has memory (previous gate errors affect subsequent gates), which can build up correlations
-- **Readout correlations:** measurement crosstalk between adjacent qubits creates apparent TC
-
-This represents an open modeling gap — and potentially the most interesting finding of the entire study. The *shape* of the decoherence (SS) is well-predicted by simple noise models. The *correlations* (TC) are not. Understanding what drives the hardware TC values beyond what these models predict is a natural direction for follow-up work.
+**TC comparison (corrected):** Hardware W-6 TC ≈ 0.43 vs simulation TC ≈ 0.38 — a ratio of ~1.1x, within expected run-to-run variation. Earlier versions of this document reported a 6x TC gap that was subsequently traced to inflated TC values from incomplete count extraction during the live hardware session. See errata for details.
 
 ### Summary
 
 | State | Best noise model for SS | SS accuracy | TC accuracy |
 |-------|------------------------|-------------|-------------|
 | GHZ-6 | Depolarizing (2%) | ΔSS = 0.004 (excellent) | ΔTC = 0.08 (good) |
-| W-6 | Amplitude damping (2%) | ΔSS = 0.035 (good) | ΔTC = 1.82 (poor — 6x gap) |
+| W-6 | Amplitude damping (2%) | ΔSS = 0.035 (good) | ΔTC ≈ 0.05 (good, corrected) |
 
-Different entanglement topologies are best modeled by different noise channels. This further supports the thesis: **decoherence phenomenology is topology-dependent**, not just in the quantum state's response to noise, but in which *type* of noise dominates the real behavior.
+Different entanglement topologies are best modeled by different noise channels for SS. This further supports the thesis: **decoherence phenomenology is topology-dependent**, not just in the quantum state's response to noise, but in which *type* of noise dominates the real behavior.
 
 ---
 
@@ -1052,9 +1045,9 @@ Different entanglement topologies are best modeled by different noise channels. 
 
 8. **Classical null model (Experiment 8, SIMULATION):** Classical distributions can match SS individually (fake-GHZ gets SS = 0.868 vs real 0.899), but real quantum hardware produces 18x higher Concentration Index (CI = 988 vs 55). The distinguishing signature is not any single metric but the combination: real hardware noise creates correlated, concentrated pathways that no classical model tested could reproduce simultaneously.
 
-9. **Matched simulation comparison (Experiment 9, SIMULATION):** Running the identical experiments in simulation with 2% depolarizing noise reveals where hardware agrees with theory and where it diverges. GHZ: simulation over-predicts structure at small N (sim SS = 0.49 vs HW 0.44 at 2q) but converges at 6q (sim 0.89 vs HW 0.90). W: **hardware shows MORE structure and MORE correlation than simulation predicts** (HW SS = 0.73 vs sim 0.68; HW TC = 2.31 vs sim 0.38 at 6q). This suggests real hardware noise is less destructive to W's excitation-preserving structure than the depolarizing model assumes.
+9. **Matched simulation comparison (Experiment 9, SIMULATION):** Running the identical experiments in simulation with 2% depolarizing noise reveals where hardware agrees with theory and where it diverges. GHZ: simulation over-predicts SS at small N (sim SS = 0.49 vs HW 0.44 at 2q) but converges at 6q (sim 0.89 vs HW 0.90). W: hardware shows ~7% more SS than simulation predicts (HW 0.73 vs sim 0.68 at 6q); TC values are comparable after correction (~1.1x). This suggests real hardware noise is slightly less destructive to W's structure than the depolarizing model assumes, but the difference is modest.
 
-10. **Noise model accuracy (Experiment 10, SIMULATION vs existing HW data):** Amplitude damping simulation matches W hardware better than depolarizing (|ΔSS| = 0.035 vs 0.045), confirming the prediction from Experiment 9. For GHZ, depolarizing wins (|ΔSS| = 0.004). But neither model explains the W TC gap — hardware shows 6x more inter-qubit correlation than either simulation predicts. Different states are best modeled by different noise channels, and real hardware correlations exceed all simple models.
+10. **Noise model accuracy (Experiment 10, SIMULATION vs existing HW data):** Amplitude damping simulation matches W hardware better than depolarizing for SS (|ΔSS| = 0.035 vs 0.045). For GHZ, depolarizing wins (|ΔSS| = 0.004). Different entanglement topologies are best modeled by different noise channels — a further indication that decoherence phenomenology is topology-dependent. *(Note: Earlier versions of this document reported a 6x TC gap that was traced to a reporting artifact. Corrected TC values show hardware and simulation within ~1.1x. See errata.)*
 
 ### Experiment Summary
 
@@ -1069,7 +1062,7 @@ Different entanglement topologies are best modeled by different noise channels. 
 | 7 | Marginal analysis | **Analysis** of hardware data | GHZ = global, W = local structure |
 | 8 | Classical null model | **Simulation** | CI distinguishes quantum from classical (18x) |
 | 9 | Matched simulation | **Simulation** (depol. 2%) | Depolarizing over-predicts GHZ, under-predicts W |
-| 10 | Noise model test | **Simulation** vs HW data | Amp. damping closer for W; TC gap unexplained by both |
+| 10 | Noise model test | **Simulation** vs HW data | Amp. damping closer for W (SS); TC comparable |
 
 *\*GHZ-6q point on ibm_kingston due to auto-selection; see Experiment 5 note.*
 

@@ -10,7 +10,7 @@ import Header from "./components/Header";
 import BuiltinSidebar from "./components/BuiltinSidebar";
 import ExperimentSidebar from "./components/ExperimentSidebar";
 import DataPanel from "./components/DataPanel";
-import BlochScene from "./components/BlochScene";
+import UnifiedBlochSphere from "./components/UnifiedBlochSphere";
 import TwoQubitScene from "./components/TwoQubitScene";
 import ConfigEditor from "./components/ConfigEditor";
 
@@ -136,7 +136,8 @@ export default function BlochSphereScreen() {
           onPointerLeave={drag.onPU}
         >
           {(builtin.tab === "single" || builtin.tab === "ptm" || builtin.tab === "data") && (
-            <BlochScene
+            <UnifiedBlochSphere
+              mode="visualizer"
               runtimeCh={builtin.runtimeCh}
               channel={builtin.channel}
               strength={builtin.strength}

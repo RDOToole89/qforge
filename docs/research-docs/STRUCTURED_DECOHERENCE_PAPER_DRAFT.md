@@ -91,9 +91,11 @@ We observe a clear separation between entangled states that produce structured d
 | State | SS | TC | CI | Fidelity | Depth |
 |-------|------|------|--------|----------|-------|
 | GHZ | 0.745 | 2.908 | 426 | 0.640 | 24 |
-| W | 0.818 | 0.836 | 711 | 0.908 | 52 |
+| W | 0.818 | ~0.5* | ~313* | 0.908 | 52 |
 | Cluster | 0.060 | 0.010 | 1.5 | 0.994 | 9 |
 | Product | 0.061 | 0.005 | 1.5 | 0.995 | 4 |
+
+*\*W-6 TC and CI values from the topology comparison run could not be recomputed (full counts not saved). Values shown are from the later scaling run with full counts. See errata note.*
 
 GHZ and W produce highly structured distributions (SS > 0.7). Cluster and Product produce distributions indistinguishable from independent qubit noise (SS ≈ 0.06). The separation is large: a 12x difference in Structure Score and a 280x difference in Concentration Index.
 
@@ -101,8 +103,8 @@ Notably, the Cluster state is genuinely entangled (it is a stabilizer state with
 
 **The two structured states produce qualitatively different distributions:**
 
-- **GHZ (correlated river)**: Two dominant outcomes — |000000⟩ (30.8%) and |111111⟩ (33.2%) — with errors concentrated in single-bit-flip neighbors. High TC (2.91) indicates strong inter-qubit correlation.
-- **W (distributed river)**: Six dominant outcomes — the single-excitation states |100000⟩ through |000001⟩, each at 14-16% — with |000000⟩ (excitation loss) as a minor seventh peak. Low TC (0.84) indicates each qubit carries structure semi-independently.
+- **GHZ (correlated river)**: Two dominant outcomes — |000000⟩ (30.8%) and |111111⟩ (33.2%) — with errors concentrated in single-bit-flip neighbors. High TC (~2.9-4.4 depending on run) indicates strong inter-qubit correlation.
+- **W (distributed river)**: Six dominant outcomes — the single-excitation states |100000⟩ through |000001⟩, each at 14-16% — with |000000⟩ (excitation loss) as a minor seventh peak. Low TC (~0.4-0.6) indicates each qubit carries structure with weaker inter-qubit dependence.
 
 This suggests that "structured decoherence" is not a single phenomenon but admits at least two distinct modes, determined by the entanglement topology.
 
@@ -175,19 +177,19 @@ Matched simulations with 2% depolarizing noise reveal systematic differences fro
 
 **GHZ**: Simulation over-predicts structure at 2-5 qubits (sim SS 5-8% higher than hardware), converging at 6 qubits. This is expected — real hardware has noise sources beyond depolarizing.
 
-**W**: Hardware shows **more structure than simulation predicts**. At 6 qubits: hardware SS = 0.730 vs simulation SS = 0.684. More strikingly, hardware TC = 2.312 vs simulation TC = 0.375 — a **6.2x difference** in inter-qubit correlation.
+**W**: Hardware shows slightly more structure than depolarizing simulation predicts. At 6 qubits: hardware SS = 0.730 vs simulation SS = 0.684 (7% higher). Hardware TC ≈ 0.43 vs simulation TC = 0.38 — a modest difference consistent with different noise profiles rather than a fundamental gap.
 
 We tested whether amplitude damping (which models T1 relaxation, the dominant noise channel in superconducting hardware) better predicts the W results:
 
-| Model | W-6 SS | W-6 TC | SS error vs HW |
-|-------|--------|--------|---------------|
-| Hardware | 0.730 | 2.312 | — |
-| Depolarizing 2% | 0.684 | 0.375 | 0.045 |
-| Amplitude damping 2% | 0.764 | 0.495 | 0.035 |
+| Model | W-6 SS | SS error vs HW |
+|-------|--------|---------------|
+| Hardware | 0.730 | — |
+| Depolarizing 2% | 0.684 | 0.045 |
+| Amplitude damping 2% | 0.764 | 0.035 |
 
 Amplitude damping is closer for SS (error 0.035 vs 0.045) and on the correct side (slightly over-predicting rather than under-predicting). This is consistent with the physical picture: amplitude damping causes |1⟩→|0⟩ transitions, which concentrates the W distribution toward its natural structure rather than scrambling it.
 
-However, neither model explains the TC gap. This suggests real hardware noise has correlation structure (crosstalk, non-Markovian effects, spatially correlated control errors) that neither simple noise model captures.
+**Note on earlier TC values:** Initial reports from this study claimed a 6x TC gap between hardware and simulation for W states. Upon recomputation from saved full count data, this gap was found to be a reporting artifact — the live session extracted TC from incomplete counts, inflating the values. The corrected hardware TC (~0.43) is within 1.1x of simulation (0.38). See errata document for details. This correction does not affect SS-based findings.
 
 ### 3.7 Classical Null Models (Simulation)
 
@@ -197,7 +199,7 @@ We tested whether classical probability distributions with similar shapes could 
 |--------|------|------|--------|
 | Real GHZ-6 (hardware)* | 0.899 | 4.350 | 988 |
 | Classical fake-GHZ | 0.868 | 4.038 | 55 |
-| Real W-6 (hardware) | 0.730 | 0.836 | 711 |
+| Real W-6 (hardware) | 0.730 | ~0.5* | ~313* |
 | Classical fake-W | 0.810 | 0.997 | 59 |
 
 *\*GHZ-6 reference values here are from the ibm_kingston backend comparison run (best coherence). The topology comparison run on ibm_fez gives SS = 0.745, TC = 2.908, CI = 426. The qualitative conclusion (CI >> classical) holds for both.*
@@ -230,7 +232,7 @@ This manifests in three ways:
 
 - **Mechanism**: We observe correlations between entanglement topology and decoherence structure, but we do not establish a causal mechanism. The structure could arise from entanglement constraining which error transitions are quantum-mechanically accessible, from noise-entanglement interaction effects, or from a combination of factors.
 
-- **Noise model validity**: Our simulation comparisons show where depolarizing and amplitude damping models agree and disagree with hardware. The TC gap (6x for W states) is unexplained by either model. We do not know whether this gap reflects correlated noise, non-Markovian dynamics, readout correlations, or other effects.
+- **Noise model validity**: Our simulation comparisons show where depolarizing and amplitude damping models agree and disagree with hardware for SS. An earlier version of this note reported a large TC discrepancy that was subsequently found to be a reporting artifact (see errata). The corrected comparison shows hardware and simulation TC values within ~1.1x for W states.
 
 - **Precision of specific values**: The numerical values of SS, TC, and CI depend on shot count, hardware calibration, and measurement basis. We consider the *qualitative* patterns (River vs Fog, amplification vs redistribution, global vs local) to be the robust findings.
 
@@ -246,7 +248,7 @@ The "River vs Fog" distinction may be related to the concept of decoherence-free
 
 We present these as directions we find interesting, and where we would welcome input from the community.
 
-**Why does W show more inter-qubit correlation on hardware than any simulation predicts?** The 6x TC gap between hardware and simulation is an open modeling gap that we do not yet understand. Possible explanations include spatially correlated noise on the Heron r2 architecture, non-Markovian memory effects, or readout correlations. We would welcome ideas from the community on what might drive this.
+**How do different noise models compare for TC predictions?** Our corrected comparison shows hardware and simulation TC values are close for W states (~1.1x ratio), but the SS comparison reveals that amplitude damping better predicts W structure while depolarizing better predicts GHZ. What determines which noise model is most appropriate for a given entanglement topology?
 
 **Does the Cluster state show structure under different conditions?** We tested Z and X basis measurement with null results. Would a different hardware architecture (e.g., trapped ions with all-to-all connectivity and lower noise) reveal Cluster structure? Is the absence of detectable structure inherent to the Cluster topology under depolarizing-like noise, or a consequence of our specific noise level and hardware?
 
@@ -254,7 +256,7 @@ We present these as directions we find interesting, and where we would welcome i
 
 **Can structured decoherence be exploited for error correction?** If errors follow predictable pathways, correction could be targeted at those pathways. Has anyone investigated topology-aware error correction that exploits the specific decoherence structure of the logical state being protected?
 
-**What happens with correlated noise models?** Our framework includes correlated depolarizing noise (topology-dependent Pauli correlations). Running the same comparison with more realistic noise models might close the TC gap and reveal which correlation structure best matches hardware.
+**What happens with correlated noise models?** Our framework includes correlated depolarizing noise (topology-dependent Pauli correlations). Running comparisons with more realistic noise models could reveal which correlation structures best match hardware for different state topologies.
 
 **Is the Fog-River distinction related to measurement-induced phase transitions?** The sharp boundary between structured and unstructured decoherence (12x SS gap) is reminiscent of phase transitions. Is there a critical noise threshold where Rivers collapse into Fog? Our simulation noise sweep suggests a continuous degradation, but the hardware data doesn't have enough noise-rate resolution to test this.
 
@@ -273,7 +275,7 @@ We present these as directions we find interesting, and where we would welcome i
 | 7 | Marginal analysis (GHZ/W) | Analysis of HW data | GHZ = global, W = local structure |
 | 8 | Classical null model (7 models) | Simulation | CI distinguishes quantum from classical (18x) |
 | 9 | Matched simulation (depol. 2%) | Simulation | Depolarizing over-predicts GHZ, under-predicts W |
-| 10 | Noise model comparison | Simulation vs HW data | Amp. damping closer for W; TC gap unexplained |
+| 10 | Noise model comparison | Simulation vs HW data | Amp. damping closer for W (SS); TC comparable |
 
 *\*GHZ-6q point in Experiment 5 ran on ibm_kingston due to auto-selection; see Section 3.3.*
 
@@ -350,13 +352,15 @@ All 64 outcomes populated. Near-uniform distribution consistent with fog.
 
 ### A.4 W Scaling Ladder (ibm_fez except 6q*, 8192 shots)
 
+*TC and CI values corrected from saved full counts. See errata.*
+
 | N | Depth | Fidelity | SS | TC | CI |
 |---|-------|----------|------|------|--------|
-| 2 | 14 | 0.894 | 0.396 | 0.548 | 16 |
-| 3 | 22 | 0.884 | 0.511 | 0.878 | 21 |
-| 4 | 33 | 0.833 | 0.589 | 1.250 | 89 |
-| 5 | 44 | 0.847 | 0.697 | 1.871 | 140 |
-| 6 | 52 | 0.763 | 0.730 | 2.312 | 191 |
+| 2 | 14 | 0.894 | 0.396 | 0.534 | 21 |
+| 3 | 22 | 0.884 | 0.511 | 0.623 | 37 |
+| 4 | 33 | 0.833 | 0.589 | 0.545 | 227 |
+| 5 | 44 | 0.847 | 0.697 | 0.640 | 264 |
+| 6 | 52 | 0.763 | 0.730 | 0.427 | 313 |
 
 ### A.5 Cluster Basis Comparison (6 qubits, ibm_fez, 8192 shots)
 
@@ -379,6 +383,8 @@ All 64 outcomes populated. Near-uniform distribution consistent with fog.
 
 | Model | SS | TC | ΔSS from HW |
 |-------|------|------|------------|
-| Hardware | 0.730 | 2.312 | — |
+| Hardware | 0.730 | 0.427* | — |
 | Depolarizing 2% | 0.684 | 0.375 | -0.045 |
 | Amplitude damping 2% | 0.764 | 0.495 | +0.035 |
+
+*\*TC corrected from saved full counts. Originally reported as 2.312 due to incomplete count extraction during live session.*

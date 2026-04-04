@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { CircuitViewer } from "@/src/features/circuit-builder/components/CircuitViewer";
-import MiniBlochSphere from "@/src/features/quantum-glossary/components/MiniBlochSphere";
-import type { BlochDot } from "@/src/features/quantum-glossary/components/MiniBlochSphere";
+import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
+import type { BlochDot } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 import type { Circuit } from "@/src/features/circuit-builder/types";
 import { colors, radii } from "@/src/theme";
 
@@ -215,7 +215,8 @@ export function CircuitPreview({ configJson }: CircuitPreviewProps) {
                       width: "90%",
                     }}
                   >
-                    <MiniBlochSphere
+                    <UnifiedBlochSphere
+                      mode="glossary"
                       dots={blochConfig.dots}
                       caption={blochConfig.caption}
                       size={160}

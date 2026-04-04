@@ -82,6 +82,10 @@ export interface CircuitPreset {
   /** What the student will learn */
   learns: string;
   circuit: Circuit;
+  /** Plain-English explanation of what each moment does */
+  steps?: string[];
+  /** Real-world applications and use cases */
+  applications?: string[];
 }
 
 /** Pattern-matched educational narrative */

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { colors, layout, fonts, momentX, wireY, canvasWidth, canvasHeight } from "../styles";
 import GateBlock from "./GateBlock";
 import type { Circuit } from "../types";
@@ -29,10 +29,24 @@ export default function CircuitCanvas({
 }: CircuitCanvasProps) {
   const { numQubits, moments } = circuit;
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dragQubit, setDragQubit] = useState<number | null>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
 
-  // Compute dimensions -- ensure minimum width fills the container
+  // Track actual container width so wires extend to the edge
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Compute dimensions -- wires extend to full container width
   const contentWidth = canvasWidth(moments.length);
+  const viewBoxWidth = Math.max(contentWidth, containerWidth);
   const height = canvasHeight(numQubits);
 
   // Determine which qubit wire was clicked from the Y coordinate
@@ -101,6 +115,7 @@ export default function CircuitCanvas({
 
   return (
     <div
+      ref={containerRef}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -118,10 +133,10 @@ export default function CircuitCanvas({
         ref={svgRef}
         width="100%"
         height={height}
-        viewBox={`0 0 ${Math.max(contentWidth, 800)} ${height}`}
+        viewBox={`0 0 ${viewBoxWidth} ${height}`}
         preserveAspectRatio="xMinYMid meet"
         onClick={handleSvgClick}
-        style={{ display: "block", minWidth: contentWidth }}
+        style={{ display: "block", minWidth: contentWidth > containerWidth ? contentWidth : undefined }}
       >
         {/* Qubit labels */}
         {Array.from({ length: numQubits }, (_, i) => {
@@ -150,7 +165,7 @@ export default function CircuitCanvas({
               key={`wire-${i}`}
               x1={layout.labelWidth + layout.padding}
               y1={y}
-              x2={Math.max(contentWidth, 800) - layout.padding}
+              x2={viewBoxWidth - layout.padding}
               y2={y}
               stroke={colors.wire}
               strokeWidth={1.5}
@@ -163,7 +178,7 @@ export default function CircuitCanvas({
           <rect
             x={layout.labelWidth + layout.padding - 4}
             y={wireY(dragQubit) - layout.wireSpacing / 2 + 4}
-            width={Math.max(contentWidth, 800) - layout.labelWidth - layout.padding * 2 + 8}
+            width={viewBoxWidth - layout.labelWidth - layout.padding * 2 + 8}
             height={layout.wireSpacing - 8}
             rx={6}
             fill={colors.dropZone}
@@ -258,7 +273,7 @@ export default function CircuitCanvas({
         {/* Empty state indicator */}
         {moments.length === 0 && (
           <text
-            x={Math.max(contentWidth, 800) / 2}
+            x={viewBoxWidth / 2}
             y={height / 2}
             textAnchor="middle"
             dominantBaseline="central"

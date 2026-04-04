@@ -1,20 +1,15 @@
-'use dom';
+/**
+ * Bloch sphere dot configurations for quantum glossary terms.
+ * Each entry maps a glossary term ID to the dots and caption shown on its mini Bloch sphere.
+ */
 
-import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-
+/** A dot rendered on the Bloch sphere */
 export interface BlochDot {
   rx: number;
   ry: number;
   rz: number;
   color: string;
   label?: string;
-}
-
-interface MiniBlochSphereProps {
-  dots: BlochDot[];
-  caption?: string;
-  size?: number;
 }
 
 export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: string }> = {
@@ -634,191 +629,13 @@ export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: st
     ],
     caption: "ℂ^{2ⁿ} state space",
   },
+
+  // ── Reconfiguration Space ──
+  sx_gate: {
+    dots: [
+      { rx: 0, ry: 0, rz: 1, color: "#64748b", label: "|0⟩" },
+      { rx: 0, ry: -1, rz: 0, color: "#f472b6", label: "√X|0⟩" },
+    ],
+    caption: "π/2 rotation about X",
+  },
 };
-
-function buildScene(
-  el: HTMLDivElement,
-  dots: BlochDot[],
-  renderSize: number,
-) {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  camera.position.set(2.5, 1.8, 2.5);
-  camera.lookAt(0, 0, 0);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(renderSize, renderSize);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x000000, 0);
-  el.appendChild(renderer.domElement);
-
-  // Wireframe sphere
-  const sphereGeo = new THREE.SphereGeometry(1, 24, 16);
-  const sphereMat = new THREE.MeshBasicMaterial({
-    color: 0x334155, wireframe: true, transparent: true, opacity: 0.25,
-  });
-  scene.add(new THREE.Mesh(sphereGeo, sphereMat));
-
-  // Equator ring
-  const eqGeo = new THREE.RingGeometry(0.99, 1.01, 48);
-  const eqMat = new THREE.MeshBasicMaterial({
-    color: 0x475569, transparent: true, opacity: 0.2, side: THREE.DoubleSide,
-  });
-  const eqRing = new THREE.Mesh(eqGeo, eqMat);
-  eqRing.rotation.x = Math.PI / 2;
-  scene.add(eqRing);
-
-  // Axes
-  const axisLen = 1.25;
-  [[axisLen, 0, 0], [0, axisLen, 0], [0, 0, axisLen]].forEach(([x, y, z]) => {
-    const geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(-x!, -y!, -z!),
-      new THREE.Vector3(x!, y!, z!),
-    ]);
-    scene.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
-      color: 0x475569, transparent: true, opacity: 0.35,
-    })));
-  });
-
-  // State dots
-  dots.forEach((d) => {
-    const dotGeo = new THREE.SphereGeometry(0.08, 16, 12);
-    const dotMat = new THREE.MeshBasicMaterial({ color: d.color });
-    const dot = new THREE.Mesh(dotGeo, dotMat);
-    dot.position.set(d.rx, d.rz, -d.ry);
-    scene.add(dot);
-
-    // Glow
-    const glowGeo = new THREE.SphereGeometry(0.15, 16, 12);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: d.color, transparent: true, opacity: 0.15,
-    });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    glow.position.copy(dot.position);
-    scene.add(glow);
-  });
-
-  return { scene, camera, renderer };
-}
-
-export default function MiniBlochSphere({
-  dots,
-  caption,
-  size = 120,
-}: MiniBlochSphereProps) {
-  const [expanded, setExpanded] = useState(false);
-  const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<ReturnType<typeof buildScene> | null>(null);
-  const frameRef = useRef(0);
-  const autoRotateRef = useRef(true);
-
-  const currentSize = expanded ? 280 : size;
-
-  useEffect(() => {
-    const el = mountRef.current;
-    if (!el) return;
-
-    // Clear previous
-    while (el.firstChild) el.removeChild(el.firstChild);
-
-    const { scene, camera, renderer } = buildScene(el, dots, currentSize);
-    sceneRef.current = { scene, camera, renderer };
-    autoRotateRef.current = true;
-
-    // Drag to spin
-    let dragging = false;
-    let prevX = 0;
-    const canvas = renderer.domElement;
-
-    const onDown = (e: PointerEvent) => {
-      dragging = true;
-      prevX = e.clientX;
-      autoRotateRef.current = false;
-      canvas.style.cursor = "grabbing";
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      scene.rotation.y += (e.clientX - prevX) * 0.012;
-      prevX = e.clientX;
-    };
-    const onUp = () => {
-      dragging = false;
-      canvas.style.cursor = "grab";
-    };
-
-    canvas.addEventListener("pointerdown", onDown);
-    canvas.addEventListener("pointermove", onMove);
-    canvas.addEventListener("pointerup", onUp);
-    canvas.addEventListener("pointerleave", onUp);
-    canvas.style.cursor = "grab";
-
-    const animate = () => {
-      frameRef.current = requestAnimationFrame(animate);
-      if (autoRotateRef.current) scene.rotation.y += 0.004;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      canvas.removeEventListener("pointerdown", onDown);
-      canvas.removeEventListener("pointermove", onMove);
-      canvas.removeEventListener("pointerup", onUp);
-      canvas.removeEventListener("pointerleave", onUp);
-      renderer.dispose();
-    };
-  }, [dots, currentSize]);
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 4,
-        cursor: "pointer",
-        transition: "all 0.25s ease",
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setExpanded((v) => !v);
-      }}
-      title={expanded ? "Click to shrink" : "Click to expand"}
-    >
-      <div
-        ref={mountRef}
-        style={{
-          width: currentSize,
-          height: currentSize,
-          transition: "width 0.25s ease, height 0.25s ease",
-        }}
-      />
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        marginTop: 3,
-      }}>
-        {caption && (
-          <span style={{
-            color: "#64748b",
-            fontSize: expanded ? 10 : 8,
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-            transition: "font-size 0.2s ease",
-          }}>
-            {caption}
-          </span>
-        )}
-        <span style={{
-          color: "#4f46e5",
-          fontSize: 8,
-          fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-          opacity: 0.7,
-        }}>
-          {expanded ? "▾ shrink" : "▸ expand"}
-        </span>
-      </div>
-    </div>
-  );
-}

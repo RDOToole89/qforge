@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Platform, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 
-import MiniBlochSphere, { STATE_BLOCH_CONFIGS } from "./MiniBlochSphere";
+import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
+import { STATE_BLOCH_CONFIGS } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 
 interface MathFormulaProps {
   latex: string;
@@ -207,7 +208,8 @@ export function MathFormula({
       <View style={styles.formulaSide}>{formulaView}</View>
       {blochConfig && (
         <View style={styles.blochColumn}>
-          <MiniBlochSphere
+          <UnifiedBlochSphere
+            mode="glossary"
             dots={blochConfig.dots}
             caption={blochConfig.caption}
             size={120}

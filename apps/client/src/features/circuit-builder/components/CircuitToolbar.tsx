@@ -1,9 +1,12 @@
 import { colors, fonts } from "../styles";
+import { CIRCUIT_PRESETS } from "../data/circuitPresets";
+import type { Circuit } from "../types";
 
 interface CircuitToolbarProps {
   numQubits: number;
   onSetNumQubits: (n: number) => void;
   onClear: () => void;
+  onLoadPreset?: (circuit: Circuit) => void;
   onRun?: () => void;
   isRunning?: boolean;
 }
@@ -12,6 +15,7 @@ export default function CircuitToolbar({
   numQubits,
   onSetNumQubits,
   onClear,
+  onLoadPreset,
   onRun,
   isRunning,
 }: CircuitToolbarProps) {
@@ -73,6 +77,48 @@ export default function CircuitToolbar({
           ))}
         </select>
       </div>
+
+      {/* Preset selector */}
+      {onLoadPreset && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <label
+            style={{
+              color: colors.textSecondary,
+              fontSize: 12,
+              fontFamily: fonts.sans,
+            }}
+          >
+            Presets
+          </label>
+          <select
+            value=""
+            onChange={(e) => {
+              const preset = CIRCUIT_PRESETS.find((p) => p.id === e.target.value);
+              if (preset) onLoadPreset(preset.circuit);
+            }}
+            style={{
+              background: colors.card,
+              color: colors.text,
+              border: `1px solid ${colors.border}`,
+              borderRadius: 6,
+              padding: "4px 8px",
+              fontSize: 12,
+              fontFamily: fonts.sans,
+              cursor: "pointer",
+              maxWidth: 180,
+            }}
+          >
+            <option value="" disabled>
+              Load a circuit...
+            </option>
+            {CIRCUIT_PRESETS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
