@@ -32,6 +32,12 @@ def extract_simulation_data(
     if sim_mode == "qasm":
         return None, None, None
 
+    if sim_mode == "hardware":
+        # Hardware provides counts only — estimate fidelity from distribution overlap
+        counts = raw.get("counts") if isinstance(raw, dict) else None
+        fidelity = _compute_fidelity_from_counts(counts, state_type, num_qubits) if counts else None
+        return None, None, fidelity
+
     try:
         if sim_mode == "statevector" and isinstance(raw, dict):
             sv_obj = raw.get("statevector")
@@ -85,4 +91,37 @@ def _compute_fidelity_density_matrix(
         return float(np.clip(fidelity, 0.0, 1.0))
     except Exception as e:
         logger.warning(f"Fidelity computation failed (density_matrix): {e}")
+        return None
+
+
+def _compute_fidelity_from_counts(
+    counts: dict[str, int], state_type: str, num_qubits: int
+) -> float | None:
+    """Estimate fidelity from measurement counts via Bhattacharyya coefficient.
+
+    For hardware results where no statevector/density matrix is available,
+    computes the classical fidelity:  F = (Σ_x √(p_ideal(x) · p_obs(x)))²
+
+    This is a lower bound on the true quantum state fidelity.
+    """
+    try:
+        from src.core.state_preparation import create_state_instance
+
+        ideal_sv = create_state_instance(state_type, num_qubits).get_theoretical_state_vector()
+        ideal_probs = np.abs(ideal_sv) ** 2
+
+        total_shots = sum(counts.values())
+        if total_shots == 0:
+            return None
+
+        observed_probs = np.zeros(2**num_qubits)
+        for bitstring, count in counts.items():
+            idx = int(bitstring, 2)
+            if 0 <= idx < len(observed_probs):
+                observed_probs[idx] = count / total_shots
+
+        bc = float(np.sum(np.sqrt(ideal_probs * observed_probs)))
+        return float(np.clip(bc**2, 0.0, 1.0))
+    except Exception as e:
+        logger.warning(f"Counts-based fidelity computation failed: {e}")
         return None

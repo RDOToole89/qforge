@@ -20,9 +20,9 @@ Integration
 
 Notes:
 -----
-- `ArtifactRef` is imported from engine.models to keep a single source of truth.
+- `ArtifactRef` is imported from src.engine.models to keep a single source of truth.
 - This module intentionally stays small; richer policies (archival/retention)
-  can be layered on top later using your models in engine/models/storage.py.
+  can be layered on top later using your models in src/engine/models/storage.py.
 """
 
 from __future__ import annotations

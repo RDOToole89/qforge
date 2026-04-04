@@ -20,6 +20,10 @@ build/
 # logs/
 results/
 
+# Environment variables / secrets
+.env
+.env.*
+
 # Temporary and system files
 *.log
 *.tmp

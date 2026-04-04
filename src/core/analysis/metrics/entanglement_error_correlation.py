@@ -313,6 +313,12 @@ def _construct_entanglement_topology(
     This function builds the theoretical entanglement connectivity matrix
     that represents how strongly different qubit pairs are entangled in
     the ideal quantum state before decoherence.
+
+    Hardware caveat: this matrix assumes *logical* qubit ordering.
+    After transpilation for real hardware, logical-to-physical qubit
+    mapping may change due to SWAP insertion. For hardware results,
+    interpret EEC values as measuring correlation with the *intended*
+    topology, not the physical layout.
     """
     # Initialize symmetric matrix
     W = np.zeros((n_qubits, n_qubits))

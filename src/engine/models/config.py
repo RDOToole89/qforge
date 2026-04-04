@@ -39,14 +39,14 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Simulation Parameters =====
-    sim_mode: Literal["qasm", "statevector", "density_matrix"] = Field(
+    sim_mode: Literal["qasm", "statevector", "density_matrix", "hardware"] = Field(
         default="qasm",
         description=(
-            "Simulation mode: "
-            "'qasm' = shot-based measurement sampling (supports noise), "
-            "'statevector' = exact noiseless state (counts synthesized via multinomial sampling), "
-            "'density_matrix' = full mixed-state simulation "
-            "(supports noise, provides density matrix)"
+            "Execution mode: "
+            "'qasm' = shot-based simulation (supports noise), "
+            "'statevector' = exact noiseless state, "
+            "'density_matrix' = full mixed-state simulation, "
+            "'hardware' = execute on IBM Quantum hardware via qiskit-ibm-runtime"
         ),
     )
 
@@ -158,6 +158,27 @@ class ExperimentConfig(BaseModel):
         description="Random number generator seed for reproducible results",
     )
 
+    # ===== Hardware Execution Parameters =====
+    backend_name: str | None = Field(
+        default=None,
+        description=(
+            "IBM Quantum backend name (e.g. 'ibm_brisbane'). "
+            "If None and sim_mode='hardware', the least busy backend is auto-selected."
+        ),
+    )
+
+    optimization_level: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description="Transpiler optimization level (0-3). Only used for sim_mode='hardware'.",
+    )
+
+    hardware_session: bool = Field(
+        default=False,
+        description="Keep backend reserved across sweep jobs. Only used for sim_mode='hardware'.",
+    )
+
     custom_params: dict[str, Any] | None = Field(
         default=None,
         description="Custom parameters for advanced state preparation or noise models",
@@ -211,6 +232,31 @@ class ExperimentConfig(BaseModel):
                 "sim_mode='statevector' is incompatible with noise_enabled=True. "
                 "The statevector backend computes the exact noiseless state. "
                 "Use sim_mode='density_matrix' for noisy simulations with full state access."
+            )
+
+        # Hardware mode rejects simulated noise (physical noise is the point)
+        if self.sim_mode == "hardware" and self.noise_enabled:
+            raise ValueError(
+                "sim_mode='hardware' is incompatible with noise_enabled=True. "
+                "Real quantum hardware has physical noise; simulated noise models "
+                "cannot be applied."
+            )
+
+        # Hardware is inherently non-deterministic
+        if self.sim_mode == "hardware" and self.rng_seed is not None:
+            raise ValueError(
+                "sim_mode='hardware' does not support rng_seed. "
+                "Quantum hardware measurements are inherently probabilistic."
+            )
+
+        # backend_name only meaningful for hardware mode
+        if self.backend_name is not None and self.sim_mode != "hardware":
+            raise ValueError("backend_name is only valid when sim_mode='hardware'.")
+
+        # IBM hardware shot limit
+        if self.sim_mode == "hardware" and self.shots > 100_000:
+            raise ValueError(
+                f"shots={self.shots} exceeds IBM Quantum hardware limit (100,000)."
             )
 
         return self

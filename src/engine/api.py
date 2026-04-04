@@ -106,6 +106,7 @@ logger = logging.getLogger(__name__)
 def run(
     config: ExperimentConfig | dict[str, Any],
     ctx: AppContext | None = None,
+    _hardware_session: Any = None,
 ) -> ExperimentResult:
     """Run a single experiment and return a validated `ExperimentResult`.
 
@@ -151,7 +152,10 @@ def run(
     import time as _time
 
     _t0 = _time.monotonic()
-    circuit, raw = run_raw(cfg_model.model_dump())
+    raw_config = cfg_model.model_dump()
+    if _hardware_session is not None:
+        raw_config["_hardware_session"] = _hardware_session
+    circuit, raw = run_raw(raw_config)
     _exec_seconds = _time.monotonic() - _t0
 
     # 2) Canonicalize counts (MSB-left, fixed bit-width)
@@ -177,8 +181,18 @@ def run(
     if cfg_model.metrics is not None and counts:
         metrics_bundle = compute_metrics_bundle(counts, cfg_model)
 
-    # 5) Build provenance
-    prov = build_provenance(cfg_model, execution_time_seconds=round(_exec_seconds, 4))
+    # 5) Build provenance (enrich with hardware metadata if applicable)
+    hardware_metadata = None
+    if cfg_model.sim_mode == "hardware" and isinstance(raw, dict):
+        hw_result = raw.get("hardware_result")
+        if hw_result is not None:
+            hardware_metadata = {"hardware_result": hw_result}
+
+    prov = build_provenance(
+        cfg_model,
+        execution_time_seconds=round(_exec_seconds, 4),
+        hardware_metadata=hardware_metadata,
+    )
 
     # 6) Persist analysis to disk (deterministic path via config hash)
     cfg_hash = sha1_of(cfg_model.model_dump(exclude_none=True))[:8]
@@ -256,6 +270,13 @@ def sweep(
     total = _product_len(man.parameter_ranges)
     bus.publish(make_event(SWEEP_START, {"keys": keys, "total": total}))
 
+    # Determine if this is a hardware sweep that should use Sessions
+    _use_hw_session = (
+        base.get("sim_mode") == "hardware" and base.get("hardware_session", False)
+    )
+
+    hw_session = None
+
     # Cartesian expansion (depth-first), honoring stable key order
     def _expand(idx: int, acc: dict[str, Any]) -> None:
         if idx == len(keys):
@@ -263,7 +284,7 @@ def sweep(
             i = len(results)
             bus.publish_progress(fraction=i / total, message=f"Running {i + 1}/{total}")
             cfg = {**base, **(man.override or {}), **acc}
-            results.append(run(cfg, ctx))
+            results.append(run(cfg, ctx, _hardware_session=hw_session))
             return
         key = keys[idx]
         for value in man.parameter_ranges[key]:
@@ -271,7 +292,19 @@ def sweep(
             _expand(idx + 1, acc)
         acc.pop(key, None)
 
-    _expand(0, {})
+    if _use_hw_session:
+        from src.engine.execution.hardware import create_session, resolve_backend
+
+        backend = resolve_backend(
+            backend_name=base.get("backend_name"),
+            min_qubits=int(base.get("num_qubits", 1)),
+        )
+        hw_session = create_session(backend)
+        with hw_session:
+            _expand(0, {})
+    else:
+        _expand(0, {})
+
     bus.publish(make_event(SWEEP_END, {"count": len(results)}))
     return results
 

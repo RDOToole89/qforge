@@ -55,6 +55,9 @@ class EngineExperimentRunner:
         rng_seed: int | None = None,
         balance: str | None = None,
         readout_error_rate: float | None = None,
+        backend_name: str | None = None,
+        optimization_level: int = 1,
+        hardware_session: Any = None,
     ) -> tuple[QuantumCircuit, Any]:
         """Run a quantum experiment with specified parameters.
 
@@ -101,8 +104,13 @@ class EngineExperimentRunner:
             # Readout errors can be applied independently of gate noise
             self._apply_readout_only(circuit.num_qubits, readout_error_rate)
 
-        # Execute simulation
-        result = self._execute_simulation(circuit, sim_mode, shots, rng_seed)
+        # Execute simulation (or hardware)
+        result = self._execute_simulation(
+            circuit, sim_mode, shots, rng_seed,
+            backend_name=backend_name,
+            optimization_level=optimization_level,
+            hardware_session=hardware_session,
+        )
 
         self.logger.info(f"Completed experiment: {self.experiment_id}")
         return circuit, result
@@ -272,14 +280,47 @@ class EngineExperimentRunner:
         sim_mode: str,
         shots: int,
         rng_seed: int | None,
+        backend_name: str | None = None,
+        optimization_level: int = 1,
+        hardware_session: Any = None,
     ) -> Any:
         """Dispatch to the appropriate backend method."""
-        if sim_mode == "statevector":
+        if sim_mode == "hardware":
+            return self._execute_hardware(
+                circuit, shots, backend_name, optimization_level, hardware_session,
+            )
+        elif sim_mode == "statevector":
             return self._execute_statevector(circuit, shots, rng_seed)
         elif sim_mode == "density_matrix":
             return self._execute_density_matrix(circuit, shots, rng_seed)
         else:
             return self._execute_qasm(circuit, shots, rng_seed)
+
+    def _execute_hardware(
+        self,
+        circuit: QuantumCircuit,
+        shots: int,
+        backend_name: str | None = None,
+        optimization_level: int = 1,
+        session: Any = None,
+    ) -> dict[str, Any]:
+        """Execute on IBM Quantum hardware via qiskit-ibm-runtime."""
+        from src.engine.execution.hardware import execute_on_hardware, resolve_backend
+
+        backend = resolve_backend(
+            backend_name=backend_name,
+            min_qubits=circuit.num_qubits,
+        )
+
+        hw_result = execute_on_hardware(
+            circuit=circuit,
+            backend=backend,
+            shots=shots,
+            optimization_level=optimization_level,
+            session=session,
+        )
+
+        return {"counts": hw_result.counts, "hardware_result": hw_result}
 
     def _execute_qasm(
         self,
@@ -393,7 +434,12 @@ class EngineExperimentRunner:
             if len(key) < num_qubits:
                 key = key.rjust(num_qubits, "0")
             elif len(key) > num_qubits:
-                key = key[-num_qubits:]  # keep least significant num_qubits bits
+                self.logger.debug(
+                    "Bitstring '%s' longer than num_qubits=%d; truncating to "
+                    "rightmost %d bits (MSB-left convention).",
+                    key, num_qubits, num_qubits,
+                )
+                key = key[-num_qubits:]
             counts[key] = int(v)
 
         # Ensure non-empty dict for downstream metrics
@@ -430,5 +476,8 @@ def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
         rng_seed=config.get("rng_seed"),
         balance=config.get("balance_circuit"),
         readout_error_rate=config.get("readout_error_rate"),
+        backend_name=config.get("backend_name"),
+        optimization_level=int(config.get("optimization_level", 1)),
+        hardware_session=config.get("_hardware_session"),
     )
     return circuit, raw

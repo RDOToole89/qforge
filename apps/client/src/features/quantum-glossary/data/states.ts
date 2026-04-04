@@ -21,6 +21,16 @@ export const terms: GlossaryTerm[] = [
       "|\\Phi^\\pm\\rangle = \\frac{|00\\rangle \\pm |11\\rangle}{\\sqrt{2}}, \\quad |\\Psi^\\pm\\rangle = \\frac{|01\\rangle \\pm |10\\rangle}{\\sqrt{2}}",
     formulaExplanation:
       "Four maximally entangled two-qubit states. Φ states have matching bits (00 and 11), Ψ states have opposite bits (01 and 10). The ± sign is a relative phase — invisible to Z-basis measurement but physically distinct.",
+    symbolAnnotations: {
+      "Φ": "Phi — Bell states where both qubits match (00 and 11)",
+      "Ψ": "Psi — Bell states where qubits differ (01 and 10)",
+      "±": "Relative phase — invisible to Z-measurement but physically distinct",
+      "00": "Both qubits measured as 0",
+      "11": "Both qubits measured as 1",
+      "01": "First qubit 0, second qubit 1",
+      "10": "First qubit 1, second qubit 0",
+      "√2": "Normalization factor — ensures probabilities sum to 1",
+    },
     relatedTerms: ["entanglement", "ghz_state", "cnot", "epr_pair"],
     categoryId: "states",
   },
@@ -36,6 +46,12 @@ export const terms: GlossaryTerm[] = [
       "|\\text{GHZ}\\rangle = \\frac{|00\\cdots0\\rangle + |11\\cdots1\\rangle}{\\sqrt{2}}",
     formulaExplanation:
       "An equal superposition of all-zeros and all-ones. Only two terms out of 2\u207F possibilities — maximally entangled but also maximally fragile. A single bit flip on any qubit is detectable because it breaks the all-same pattern.",
+    symbolAnnotations: {
+      "GHZ": "Greenberger–Horne–Zeilinger: the discoverers of this state",
+      "00⋯0": "All n qubits in state 0 — one branch of the superposition",
+      "11⋯1": "All n qubits in state 1 — the other branch",
+      "√2": "Normalization factor — ensures total probability sums to 1",
+    },
     relatedTerms: ["bell_states", "w_state", "entanglement", "zz_correlator"],
     categoryId: "states",
   },
@@ -51,6 +67,14 @@ export const terms: GlossaryTerm[] = [
       "|W\\rangle = \\frac{1}{\\sqrt{n}}(|10\\cdots0\\rangle + |01\\cdots0\\rangle + \\cdots + |00\\cdots1\\rangle)",
     formulaExplanation:
       "Exactly one qubit is |1\u27E9, spread equally across all positions. The 1/\u221An normalization ensures probabilities sum to 1. Losing one qubit leaves the rest still entangled — unlike GHZ, which collapses entirely.",
+    symbolAnnotations: {
+      "W": "The W state — named for its shape when written for 3 qubits",
+      "√n": "Normalization: dividing by √n ensures probabilities sum to 1",
+      "10⋯0": "First qubit excited (|1⟩), all others ground (|0⟩)",
+      "01⋯0": "Second qubit excited, all others ground",
+      "00⋯1": "Last qubit excited, all others ground",
+      "⋯": "All n permutations with exactly one qubit in |1⟩",
+    },
     relatedTerms: ["ghz_state", "entanglement", "hamming_weight"],
     categoryId: "states",
   },
@@ -66,6 +90,12 @@ export const terms: GlossaryTerm[] = [
       "|C\\rangle = \\prod_{(a,b) \\in E} CZ_{ab} \\, |+\\rangle^{\\otimes n}",
     formulaExplanation:
       "Start with all qubits in |+\u27E9 (equal superposition), then apply CZ gates along each edge of a graph. The entanglement pattern mirrors the graph structure. This is the universal resource for measurement-based quantum computing.",
+    symbolAnnotations: {
+      "CZ": "Controlled-Z gate — entangles two qubits via a phase flip",
+      "ab": "Qubit pair (a, b) connected by an edge in the graph",
+      "∈E": "For every edge in the graph's edge set E",
+      "⊗n": "Tensor product of n copies — one |+⟩ per qubit",
+    },
     relatedTerms: ["cz_gate", "pauli_invariance", "stabilizer", "graph_state"],
     categoryId: "states",
   },

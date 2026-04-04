@@ -19,6 +19,10 @@ export interface GlossaryTerm {
   keyEquation?: string;
   /** Plain-English explanation of what the key equation represents */
   formulaExplanation?: string;
+  /** Per-symbol annotations for interactive formula hover.
+   *  Keys are the rendered text content (e.g. "W", "n", "1/√n"),
+   *  values are plain-English explanations shown on hover. */
+  symbolAnnotations?: Record<string, string>;
   relatedTerms: string[];
   categoryId: string;
   /** Links to academic resources for deeper study */

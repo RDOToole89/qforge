@@ -66,6 +66,8 @@ export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
             <FormulaSection
               latex={term.keyEquation}
               explanation={term.formulaExplanation}
+              symbolAnnotations={term.symbolAnnotations}
+              termId={term.id}
             />
           )}
 

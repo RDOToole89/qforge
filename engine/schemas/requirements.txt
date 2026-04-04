@@ -1,3 +1,0 @@
-# Schema validation dependencies
-jsonschema>=4.22
-referencing>=0.30

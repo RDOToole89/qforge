@@ -48,6 +48,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="circuit"
+        options={{
+          title: "Circuit",
+          tabBarIcon: ({ color }) => <TabBarIcon name="sitemap" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="registry"
         options={{
           title: "Registry",

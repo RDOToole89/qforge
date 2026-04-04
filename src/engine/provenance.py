@@ -17,8 +17,44 @@ logger = logging.getLogger(__name__)
 def build_provenance(
     cfg: ExperimentConfig,
     execution_time_seconds: float | None = None,
+    hardware_metadata: dict | None = None,
 ) -> Provenance:
-    """Build a Provenance block with software, host, and simulator info."""
+    """Build a Provenance block with software, host, and simulator info.
+
+    When hardware_metadata is provided (from sim_mode='hardware'),
+    populates simulator_info and transpilation_summary with backend,
+    job, calibration, and transpilation details.
+    """
+    if hardware_metadata and hardware_metadata.get("hardware_result"):
+        hw = hardware_metadata["hardware_result"]
+        sim_info = {
+            "sim_mode": "hardware",
+            "backend_name": hw.job_info.backend_name,
+            "job_id": hw.job_info.job_id,
+            "shots": cfg.shots,
+            "execution_time_seconds": hw.job_info.execution_time_seconds,
+        }
+        transp = {
+            "optimization_level": hw.transpilation_info.optimization_level,
+            "original_depth": hw.transpilation_info.original_depth,
+            "transpiled_depth": hw.transpilation_info.transpiled_depth,
+            "original_gate_count": hw.transpilation_info.original_gate_count,
+            "transpiled_gate_count": hw.transpilation_info.transpiled_gate_count,
+            "swap_count": hw.transpilation_info.swap_count,
+            "qubit_layout": hw.transpilation_info.qubit_layout,
+            "basis_gates": hw.transpilation_info.basis_gates,
+            "calibration_snapshot": hw.calibration_snapshot,
+        }
+    else:
+        sim_info = {
+            "sim_mode": cfg.sim_mode,
+            "shots": cfg.shots,
+            "noise_enabled": cfg.noise_enabled,
+            "noise_type": cfg.noise_type,
+            "error_rate": cfg.error_rate,
+        }
+        transp = {}
+
     return Provenance(
         schema_version="1.0.0",
         timestamp=datetime.now().isoformat(),
@@ -26,14 +62,8 @@ def build_provenance(
         host_info=_collect_host_info(),
         git_sha=_get_git_sha(),
         rng_seed=cfg.rng_seed,
-        simulator_info={
-            "sim_mode": cfg.sim_mode,
-            "shots": cfg.shots,
-            "noise_enabled": cfg.noise_enabled,
-            "noise_type": cfg.noise_type,
-            "error_rate": cfg.error_rate,
-        },
-        transpilation_summary={},
+        simulator_info=sim_info,
+        transpilation_summary=transp,
         execution_time_seconds=execution_time_seconds,
         memory_usage_mb=None,
     )
@@ -44,7 +74,7 @@ def _collect_software_versions() -> dict[str, str]:
     import sys
 
     versions: dict[str, str] = {"python": sys.version.split()[0]}
-    for pkg in ("qiskit", "qiskit_aer", "numpy", "pydantic"):
+    for pkg in ("qiskit", "qiskit_aer", "qiskit_ibm_runtime", "numpy", "pydantic"):
         try:
             mod = __import__(pkg)
             versions[pkg] = getattr(mod, "__version__", "unknown")

@@ -12,9 +12,11 @@ import { MathFormula } from "./MathFormula";
 interface FormulaSectionProps {
   latex: string;
   explanation?: string;
+  symbolAnnotations?: Record<string, string>;
+  termId?: string;
 }
 
-export function FormulaSection({ latex, explanation }: FormulaSectionProps) {
+export function FormulaSection({ latex, explanation, symbolAnnotations, termId }: FormulaSectionProps) {
   const [showExplanation, setShowExplanation] = useState(false);
 
   const toggleExplanation = () => {
@@ -55,7 +57,7 @@ export function FormulaSection({ latex, explanation }: FormulaSectionProps) {
         onPress={toggleExplanation}
         style={styles.formulaContainer}
       >
-        <MathFormula latex={latex} />
+        <MathFormula latex={latex} symbolAnnotations={symbolAnnotations} termId={termId} />
       </TouchableOpacity>
 
       {showExplanation && explanation && (

@@ -109,15 +109,17 @@ schema_output = metrics_to_schema(results)  # v1.0 compliant
 metrics/
 ├── registry.py              # MetricResult, compute_all, register
 ├── schema_bridge.py         # v1.0 schema conversion
+├── profiles.py              # Metric profile presets (e.g. "default", "quick")
 ├── asymmetry_index.py       # AI: TVD from uniform (canonical example)
 ├── pathway_concentration_ratio.py  # PCR
-├── entanglement_error_correlation.py  # EEC
+├── entanglement_error_correlation.py  # EEC (hardware caveat: uses logical topology)
 ├── temporal_pathway_stability.py  # TPS
 ├── complexity_emergence_score.py  # CES
 ├── structure_score.py       # SS
 ├── concentration_index.py   # CI (Gini)
 ├── total_correlation.py     # TC
-└── pathway_persistence.py   # Additional temporal analysis
+├── pathway_persistence.py   # Additional temporal analysis
+└── noise_topology_correlation.py  # NTC: covariance-based noise-topology correlation
 ```
 
 ## Adding a New Metric
