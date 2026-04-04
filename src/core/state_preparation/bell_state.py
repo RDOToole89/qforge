@@ -47,16 +47,23 @@ class BellState(BaseState):
     - Ψ-: Both phase and bit flip → combined transformation
     """
 
-    def __init__(self, num_qubits: int, custom_params: dict = None, experiment_id: str = "N/A"):
+    def __init__(
+        self,
+        num_qubits: int,
+        custom_params: dict = None,
+        experiment_id: str = "N/A",
+        **kwargs: Any,
+    ):
         """Initialize Bell state with variant specification.
 
         Args:
-            num_qubits: Must be exactly 2 for Bell states
-            custom_params: Dictionary with 'variant' key specifying Bell state type
-            experiment_id: Unique identifier for experiment tracking
+            num_qubits: Must be exactly 2 for Bell states.
+            custom_params: Dictionary with 'variant' key specifying Bell state type.
+            experiment_id: Unique identifier for experiment tracking.
+            **kwargs: Additional keyword arguments (ignored).
 
         Raises:
-            ValueError: If num_qubits != 2 (Bell states are strictly two-qubit)
+            ValueError: If num_qubits != 2 (Bell states are strictly two-qubit).
         """
         if num_qubits != 2:
             raise ValueError(

@@ -58,7 +58,9 @@ def _extract_metrics(result) -> dict[str, float]:
     mb = result.metrics_bundle
     if mb and mb.metrics:
         for name, m in mb.metrics.items():
-            val = m.value if hasattr(m, "value") else m.get("value") if isinstance(m, dict) else None
+            val = (
+                m.value if hasattr(m, "value") else m.get("value") if isinstance(m, dict) else None
+            )
             if val is not None:
                 metrics[name] = val
     return metrics
@@ -128,9 +130,9 @@ def _base_config(mode: str, **overrides) -> dict[str, Any]:
 
 def run_scaling_ladder(mode: str = "hardware") -> list[dict]:
     """GHZ at 2, 3, 4, 5, 6 qubits."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"SCALING LADDER ({mode})")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     results = []
     for n in [2, 3, 4, 5, 6]:
@@ -147,9 +149,9 @@ def run_scaling_ladder(mode: str = "hardware") -> list[dict]:
 
 def run_topology_comparison(mode: str = "hardware") -> list[dict]:
     """GHZ, W, Cluster, Product at 6 qubits."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"TOPOLOGY COMPARISON ({mode})")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     results = []
     for state in ["GHZ", "W", "CLUSTER", "SUPERPOSITION"]:
@@ -166,9 +168,9 @@ def run_topology_comparison(mode: str = "hardware") -> list[dict]:
 
 def run_backend_comparison() -> list[dict]:
     """GHZ-6 on all available backends (hardware only)."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("BACKEND COMPARISON (hardware only)")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     backends = ["ibm_fez", "ibm_kingston", "ibm_marrakesh"]
     results = []
@@ -200,9 +202,9 @@ def _make_cluster_circuit(n: int, x_basis: bool = False) -> QuantumCircuit:
 
 def run_measurement_basis(mode: str = "hardware") -> list[dict]:
     """Cluster-6 in Z-basis vs X-basis."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"MEASUREMENT BASIS COMPARISON ({mode})")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     results = []
     n = 6
@@ -221,7 +223,13 @@ def run_measurement_basis(mode: str = "hardware") -> list[dict]:
 
             metrics_flat = {}
             for name, m in metrics.items():
-                val = getattr(m, "value", None) if hasattr(m, "value") else m.get("value") if isinstance(m, dict) else None
+                val = (
+                    getattr(m, "value", None)
+                    if hasattr(m, "value")
+                    else m.get("value")
+                    if isinstance(m, dict)
+                    else None
+                )
                 if val is not None:
                     metrics_flat[name] = val
 
@@ -242,7 +250,7 @@ def run_measurement_basis(mode: str = "hardware") -> list[dict]:
         else:
             from qiskit import transpile
             from qiskit_aer import AerSimulator
-            from qiskit_aer.noise import NoiseModel
+
             from src.core.noise_models import create_noise_model
 
             noise_model = create_noise_model("DEPOLARIZING", n, error_rate=0.02)
@@ -261,7 +269,13 @@ def run_measurement_basis(mode: str = "hardware") -> list[dict]:
             metrics = _compute_all_metrics(counts=counts)
             metrics_flat = {}
             for name, m in metrics.items():
-                val = getattr(m, "value", None) if hasattr(m, "value") else m.get("value") if isinstance(m, dict) else None
+                val = (
+                    getattr(m, "value", None)
+                    if hasattr(m, "value")
+                    else m.get("value")
+                    if isinstance(m, dict)
+                    else None
+                )
                 if val is not None:
                     metrics_flat[name] = val
 
@@ -291,19 +305,26 @@ def run_measurement_basis(mode: str = "hardware") -> list[dict]:
 
 def run_optimization_comparison() -> list[dict]:
     """GHZ-6 at optimization levels 0, 1, 3 (hardware only)."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("OPTIMIZATION LEVEL COMPARISON (hardware only)")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     results = []
     for opt_level in [0, 1, 3]:
         cfg = _base_config(
-            "hardware", num_qubits=6, state_type="GHZ", optimization_level=opt_level,
+            "hardware",
+            num_qubits=6,
+            state_type="GHZ",
+            optimization_level=opt_level,
         )
         summary = _run_single(cfg, f"GHZ_6q_opt{opt_level}")
         results.append(summary)
 
-    _save_result("optimization_comparison", "hardware", {"mode": "hardware", "experiments": results})
+    _save_result(
+        "optimization_comparison",
+        "hardware",
+        {"mode": "hardware", "experiments": results},
+    )
     return results
 
 
@@ -312,12 +333,12 @@ def run_optimization_comparison() -> list[dict]:
 
 def run_all(mode: str = "hardware") -> dict[str, list[dict]]:
     """Run the complete study."""
-    print(f"\n{'#'*60}")
-    print(f"HARDWARE DECOHERENCE STRUCTURE STUDY")
+    print(f"\n{'#' * 60}")
+    print("HARDWARE DECOHERENCE STRUCTURE STUDY")
     print(f"Mode: {mode}")
     print(f"Shots: {SHOTS}")
     print(f"Timestamp: {datetime.now().isoformat()}")
-    print(f"{'#'*60}")
+    print(f"{'#' * 60}")
 
     all_results = {
         "scaling": run_scaling_ladder(mode),
@@ -330,11 +351,15 @@ def run_all(mode: str = "hardware") -> dict[str, list[dict]]:
         all_results["optimization"] = run_optimization_comparison()
 
     # Save combined results
-    _save_result("combined", mode, {
-        "mode": mode,
-        "timestamp": datetime.now().isoformat(),
-        "experiments": all_results,
-    })
+    _save_result(
+        "combined",
+        mode,
+        {
+            "mode": mode,
+            "timestamp": datetime.now().isoformat(),
+            "experiments": all_results,
+        },
+    )
 
     return all_results
 

@@ -1,70 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from "react-native";
 
-import ConfigSlider from "@/src/components/ConfigSlider";
 import MetricCard from "@/src/components/MetricCard";
 import ResultChart from "@/src/components/ResultChart";
+import { useExperimentConfig } from "@/src/features/configure/useExperimentConfig";
+import { INFO_TEXT } from "@/src/features/configure/constants";
+import { StateSection } from "@/src/features/configure/components/StateSection";
+import { SimulationSection } from "@/src/features/configure/components/SimulationSection";
+import { NoiseSection } from "@/src/features/configure/components/NoiseSection";
+import { MetricsSection } from "@/src/features/configure/components/MetricsSection";
+import { HardwareSection } from "@/src/features/configure/components/HardwareSection";
+import { ValidationBanner } from "@/src/features/configure/components/ValidationBanner";
+import { CircuitPreview } from "@/src/features/configure/components/CircuitPreview";
+import { InfoModal } from "@/src/features/configure/components/InfoModal";
 import { runExperiment } from "@/src/lib/api";
-import type {
-  ExperimentConfig,
-  ExperimentResult,
-  NoiseType,
-  StateType,
-} from "@/src/lib/types";
-
-const STATE_TYPES: StateType[] = [
-  "GHZ",
-  "W",
-  "CLUSTER",
-  "BELL",
-  "SUPERPOSITION",
-];
-const NOISE_TYPES: NoiseType[] = [
-  "depolarizing",
-  "amplitude_damping",
-  "phase_damping",
-  "bit_flip",
-  "phase_flip",
-];
-const SHOT_OPTIONS = [1024, 4096, 8192, 16384];
+import type { ExperimentResult } from "@/src/lib/types";
+import { colors } from "@/src/theme";
 
 export default function ConfigureScreen() {
-  // ── Config state ──────────────────────────────────────────────────
-  const [numQubits, setNumQubits] = useState(3);
-  const [stateType, setStateType] = useState<StateType>("GHZ");
-  const [shots, setShots] = useState(1024);
-  const [noiseEnabled, setNoiseEnabled] = useState(true);
-  const [noiseType, setNoiseType] = useState<NoiseType>("depolarizing");
-  const [errorRate, setErrorRate] = useState(0.05);
-  const [researchMetrics, setResearchMetrics] = useState(true);
+  const config = useExperimentConfig();
 
-  // ── Execution state ───────────────────────────────────────────────
+  // Memoize config JSON to avoid redundant circuit preview fetches
+  const configJson = useMemo(
+    () => JSON.stringify(config.buildConfig()),
+    [config.stateType, config.numQubits, config.simMode, config.noiseEnabled, config.noiseType, config.errorRate],
+  );
+
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<ExperimentResult | null>(null);
+  const [infoKey, setInfoKey] = useState<string | null>(null);
+  const [metricsOpen, setMetricsOpen] = useState(false);
 
   const handleRun = async () => {
+    if (!config.isValid) return;
     setRunning(true);
     setResult(null);
     try {
-      const config: ExperimentConfig = {
-        num_qubits: numQubits,
-        state_type: stateType,
-        shots,
-        noise_enabled: noiseEnabled,
-        ...(noiseEnabled && { noise_type: noiseType, error_rate: errorRate }),
-        metrics: researchMetrics ? "structured_decoherence" : undefined,
-        visualization_type: "none",
-      };
-      const res = await runExperiment(config);
+      const res = await runExperiment(config.buildConfig());
       setResult(res);
     } catch (err) {
       Alert.alert(
@@ -77,122 +57,97 @@ export default function ConfigureScreen() {
   };
 
   const metrics = result?.metrics_bundle;
+  const infoEntry = infoKey ? INFO_TEXT[infoKey] : null;
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      {/* ── State Type ──────────────────────────────────────────── */}
-      <Text style={styles.section}>State Type</Text>
-      <View style={styles.segmented}>
-        {STATE_TYPES.map((st) => (
-          <Pressable
-            key={st}
-            onPress={() => setStateType(st)}
-            style={[styles.seg, stateType === st && styles.segActive]}
-          >
-            <Text
-              style={[styles.segText, stateType === st && styles.segTextActive]}
-            >
-              {st}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      <Text style={styles.title}>Configure</Text>
 
-      {/* ── Qubits ─────────────────────────────────────────────── */}
-      <ConfigSlider
-        label="Qubits"
-        value={numQubits}
-        min={1}
-        max={12}
-        step={1}
-        onValueChange={(v) => setNumQubits(Math.round(v))}
+      <StateSection
+        stateType={config.stateType}
+        setStateType={config.setStateType}
+        numQubits={config.numQubits}
+        setNumQubits={config.setNumQubits}
+        onInfo={() => setInfoKey("state")}
       />
 
-      {/* ── Shots ──────────────────────────────────────────────── */}
-      <Text style={styles.section}>Shots</Text>
-      <View style={styles.segmented}>
-        {SHOT_OPTIONS.map((s) => (
-          <Pressable
-            key={s}
-            onPress={() => setShots(s)}
-            style={[styles.seg, shots === s && styles.segActive]}
-          >
-            <Text style={[styles.segText, shots === s && styles.segTextActive]}>
-              {s >= 1000 ? `${s / 1000}k` : s}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      <SimulationSection
+        simMode={config.simMode}
+        setSimMode={config.setSimMode}
+        shots={config.shots}
+        setShots={config.setShots}
+        rngSeed={config.rngSeed}
+        setRngSeed={config.setRngSeed}
+        showHardwareSection={config.showHardwareSection}
+        onInfo={() => setInfoKey("simulation")}
+      />
 
-      {/* ── Noise ──────────────────────────────────────────────── */}
-      <View style={styles.toggleRow}>
-        <Text style={styles.section}>Noise</Text>
-        <Switch
-          value={noiseEnabled}
-          onValueChange={setNoiseEnabled}
-          trackColor={{ false: "#334155", true: "#6366f1" }}
-          thumbColor="#e2e8f0"
+      <NoiseSection
+        noiseEnabled={config.noiseEnabled}
+        setNoiseEnabled={config.setNoiseEnabled}
+        noiseType={config.noiseType}
+        setNoiseType={config.setNoiseType}
+        errorRate={config.errorRate}
+        setErrorRate={config.setErrorRate}
+        t1={config.t1}
+        setT1={config.setT1}
+        t2={config.t2}
+        setT2={config.setT2}
+        readoutErrorRate={config.readoutErrorRate}
+        setReadoutErrorRate={config.setReadoutErrorRate}
+        balanceCircuit={config.balanceCircuit}
+        setBalanceCircuit={config.setBalanceCircuit}
+        noiseDisabledReason={config.noiseDisabledReason}
+        showThermalParams={config.showThermalParams}
+        onInfo={() => setInfoKey("noise")}
+      />
+
+      <MetricsSection
+        metricsEnabled={config.metricsEnabled}
+        setMetricsEnabled={config.setMetricsEnabled}
+        metricsMode={config.metricsMode}
+        setMetricsMode={config.setMetricsMode}
+        selectedProfile={config.selectedProfile}
+        setSelectedProfile={config.setSelectedProfile}
+        selectedMetrics={config.selectedMetrics}
+        setSelectedMetrics={config.setSelectedMetrics}
+        researchType={config.researchType}
+        setResearchType={config.setResearchType}
+        multipleRuns={config.multipleRuns}
+        setMultipleRuns={config.setMultipleRuns}
+        trackConvergence={config.trackConvergence}
+        setTrackConvergence={config.setTrackConvergence}
+        collapsed={!metricsOpen}
+        onToggleCollapse={() => setMetricsOpen((v) => !v)}
+        onInfo={() => setInfoKey("metrics")}
+      />
+
+      {config.showHardwareSection && (
+        <HardwareSection
+          backendName={config.backendName}
+          setBackendName={config.setBackendName}
+          optimizationLevel={config.optimizationLevel}
+          setOptimizationLevel={config.setOptimizationLevel}
+          hardwareSession={config.hardwareSession}
+          setHardwareSession={config.setHardwareSession}
+          onInfo={() => setInfoKey("hardware")}
         />
-      </View>
-
-      {noiseEnabled && (
-        <>
-          <Text style={styles.subsection}>Noise Type</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.chipScroll}
-          >
-            {NOISE_TYPES.map((nt) => (
-              <Pressable
-                key={nt}
-                onPress={() => setNoiseType(nt)}
-                style={[styles.chip, noiseType === nt && styles.chipActive]}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    noiseType === nt && styles.chipTextActive,
-                  ]}
-                >
-                  {nt.replace(/_/g, " ")}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-
-          <ConfigSlider
-            label="Error Rate"
-            value={errorRate}
-            min={0}
-            max={0.5}
-            step={0.01}
-            onValueChange={setErrorRate}
-            formatValue={(v) => v.toFixed(2)}
-          />
-        </>
       )}
 
-      {/* ── Research Metrics ───────────────────────────────────── */}
-      <View style={styles.toggleRow}>
-        <Text style={styles.section}>Research Metrics</Text>
-        <Switch
-          value={researchMetrics}
-          onValueChange={setResearchMetrics}
-          trackColor={{ false: "#334155", true: "#6366f1" }}
-          thumbColor="#e2e8f0"
-        />
-      </View>
+      <ValidationBanner warnings={config.warnings} />
 
-      {/* ── Run Button ─────────────────────────────────────────── */}
+      {/* Circuit Preview -- auto-updates when config changes */}
+      <CircuitPreview configJson={configJson} />
+
+      {/* Run Button */}
       <Pressable
         style={({ pressed }) => [
           styles.runBtn,
-          running && styles.runBtnDisabled,
-          pressed && !running && styles.pressed,
+          (!config.isValid || running) && styles.runBtnDisabled,
+          pressed && config.isValid && !running && styles.pressed,
         ]}
         onPress={handleRun}
-        disabled={running}
+        disabled={!config.isValid || running}
       >
         {running ? (
           <ActivityIndicator color="#fff" />
@@ -201,50 +156,40 @@ export default function ConfigureScreen() {
         )}
       </Pressable>
 
-      {/* ── Results ────────────────────────────────────────────── */}
+      {/* Results */}
       {result && (
         <View style={styles.results}>
           <Text style={styles.resultHeader}>Results</Text>
 
-          {/* Circuit stats */}
           <View style={styles.statsRow}>
-            <Stat
-              label="Depth"
-              value={result.analysis.circuit_statistics.depth}
-            />
-            <Stat
-              label="Gates"
-              value={result.analysis.circuit_statistics.num_gates}
-            />
-            <Stat
-              label="Outcomes"
-              value={result.analysis.measurement_results.unique_outcomes}
-            />
+            <Stat label="Depth" value={result.analysis.circuit_statistics.depth} />
+            <Stat label="Gates" value={result.analysis.circuit_statistics.num_gates} />
+            <Stat label="Outcomes" value={result.analysis.measurement_results.unique_outcomes} />
           </View>
 
-          {/* Counts chart */}
-          <ResultChart
-            counts={result.analysis.measurement_results.raw_counts}
-          />
+          <ResultChart counts={result.analysis.measurement_results.raw_counts} />
 
-          {/* Research metrics */}
           {metrics && (
             <View style={{ marginTop: 16 }}>
               <Text style={styles.resultHeader}>
                 {metrics.profile ? `Metrics (${metrics.profile})` : "Metrics"}
               </Text>
               {Object.entries(metrics.metrics).map(([name, entry]) => (
-                <MetricCard
-                  key={name}
-                  name={name}
-                  value={entry.value}
-                  subtitle={entry.status}
-                />
+                <MetricCard key={name} name={name} value={entry.value} subtitle={entry.status} />
               ))}
             </View>
           )}
         </View>
       )}
+
+      {/* Info Modal */}
+      <InfoModal
+        visible={!!infoKey}
+        infoKey={infoKey}
+        onClose={() => setInfoKey(null)}
+      />
+
+      {/* (Bloch expand handled natively by MiniBlochSphere's click-to-expand) */}
     </ScrollView>
   );
 }
@@ -259,47 +204,17 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#0f172a" },
+  screen: { flex: 1, backgroundColor: colors.bg.primary },
   content: { padding: 16, paddingBottom: 80 },
-  section: { color: "#e2e8f0", fontSize: 16, fontWeight: "700", marginTop: 16, marginBottom: 8 },
-  subsection: { color: "#94a3b8", fontSize: 13, fontWeight: "600", marginBottom: 6 },
-
-  segmented: { flexDirection: "row", gap: 6, flexWrap: "wrap", marginBottom: 16 },
-  seg: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-  },
-  segActive: { backgroundColor: "#6366f1", borderColor: "#6366f1" },
-  segText: { color: "#94a3b8", fontSize: 13, fontWeight: "600" },
-  segTextActive: { color: "#fff" },
-
-  chipScroll: { marginBottom: 12 },
-  chip: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    marginRight: 8,
-  },
-  chipActive: { backgroundColor: "#4f46e5", borderColor: "#6366f1" },
-  chipText: { color: "#94a3b8", fontSize: 12 },
-  chipTextActive: { color: "#fff" },
-
-  toggleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 8,
+  title: {
+    color: colors.text.primary,
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 8,
   },
 
   runBtn: {
-    backgroundColor: "#6366f1",
+    backgroundColor: colors.accent.base,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
@@ -310,18 +225,28 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
 
   results: { marginTop: 24 },
-  resultHeader: { color: "#e2e8f0", fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  resultHeader: {
+    color: colors.text.primary,
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
 
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
   stat: {
     flex: 1,
-    backgroundColor: "#1e293b",
+    backgroundColor: colors.bg.surface,
     borderRadius: 12,
     padding: 12,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: colors.border,
   },
-  statValue: { color: "#e2e8f0", fontSize: 22, fontWeight: "700", fontFamily: "SpaceMono" },
-  statLabel: { color: "#64748b", fontSize: 11, marginTop: 4 },
+  statValue: {
+    color: colors.text.primary,
+    fontSize: 22,
+    fontWeight: "700",
+    fontFamily: "SpaceMono",
+  },
+  statLabel: { color: colors.text.tertiary, fontSize: 11, marginTop: 4 },
 });

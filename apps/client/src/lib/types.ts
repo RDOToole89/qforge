@@ -19,6 +19,10 @@ export type NoiseType =
   | "thermal_relaxation"
   | "correlated_depolarizing";
 
+export type SimMode = "qasm" | "statevector" | "density_matrix" | "hardware";
+export type ResearchType = "structured_decoherence" | "parameter_sweep" | "noise_comparison" | "control" | "scaling" | "convergence";
+export type VisualizationType = "histogram" | "density_matrix" | "correlation" | "circuit" | "all" | "none";
+
 export interface ExperimentConfig {
   num_qubits: number;
   state_type: StateType;
@@ -30,7 +34,16 @@ export interface ExperimentConfig {
   research_type?: string;
   balance_circuit?: string;
   rng_seed?: number;
-  visualization_type?: "histogram" | "none";
+  visualization_type?: VisualizationType;
+  sim_mode?: SimMode;
+  t1?: number;
+  t2?: number;
+  readout_error_rate?: number;
+  multiple_runs?: number;
+  track_convergence?: boolean;
+  backend_name?: string;
+  optimization_level?: number;
+  hardware_session?: boolean;
 }
 
 // ── Metrics ──────────────────────────────────────────────────────────

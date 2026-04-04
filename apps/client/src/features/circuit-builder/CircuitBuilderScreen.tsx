@@ -26,6 +26,7 @@ export default function CircuitBuilderScreen() {
 
   const [selectedGateId, setSelectedGateId] = useState<string | null>(null);
   const [activeGateType, setActiveGateType] = useState<GateType | null>(null);
+  const [showGrid, setShowGrid] = useState(false);
 
   // Toggle gate selection from palette
   const handlePaletteSelect = useCallback((gateType: GateType) => {
@@ -33,15 +34,16 @@ export default function CircuitBuilderScreen() {
     setSelectedGateId(null);
   }, []);
 
-  // Click on canvas to place active gate
-  const handleCanvasClick = useCallback(() => {
-    setSelectedGateId(null);
-    // If a gate is selected from palette, place it at the next available moment on qubit 0
-    if (activeGateType) {
-      addGate(activeGateType, 0);
-      // Don't deselect — let them keep placing
-    }
-  }, [activeGateType, addGate]);
+  // Click on canvas to place active gate on the clicked qubit wire
+  const handleCanvasClick = useCallback(
+    (qubit: number) => {
+      setSelectedGateId(null);
+      if (activeGateType) {
+        addGate(activeGateType, qubit);
+      }
+    },
+    [activeGateType, addGate],
+  );
 
   // Click on a placed gate
   const handleGateClick = useCallback((gateId: string) => {
@@ -112,18 +114,49 @@ export default function CircuitBuilderScreen() {
               {getGateDef(activeGateType).name}
             </span>
             <span style={{ color: colors.textSecondary }}>
-              Click on the circuit to place. Click gate again to deselect.
+              Click on a qubit wire to place, or drag and drop onto a wire. Click gate again to deselect.
             </span>
           </div>
         )}
 
         {/* Circuit Canvas */}
-        <CircuitCanvas
-          circuit={circuit}
-          selectedGateId={selectedGateId}
-          onGateClick={handleGateClick}
-          onCanvasClick={handleCanvasClick}
-        />
+        <div style={{ position: "relative" }}>
+          <CircuitCanvas
+            circuit={circuit}
+            selectedGateId={selectedGateId}
+            onGateClick={handleGateClick}
+            onGateDoubleClick={undefined}
+            onCanvasClick={handleCanvasClick}
+            onDrop={(gateType, qubit) => {
+              addGate(gateType as GateType, qubit);
+            }}
+            showGrid={showGrid}
+          />
+          {/* Grid toggle */}
+          <button
+            onClick={() => setShowGrid((v) => !v)}
+            title={showGrid ? "Hide moment grid" : "Show moment grid"}
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              border: `1px solid ${showGrid ? colors.accent : colors.border}`,
+              background: showGrid ? colors.accentDim : colors.card,
+              color: showGrid ? colors.accentLight : colors.textTertiary,
+              fontFamily: fonts.mono,
+              fontSize: 14,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            #
+          </button>
+        </div>
 
         {/* Gate Info Panel (when a placed gate is selected) */}
         {selectedGate && selectedGateDef && (

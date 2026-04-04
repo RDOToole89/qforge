@@ -141,10 +141,32 @@ export function useCircuit() {
 
   const addGate = useCallback(
     (gateType: GateType, qubit: number, momentIndex?: number) => {
-      const mi = momentIndex ?? circuit.moments.length;
-      dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex: mi });
+      if (momentIndex !== undefined) {
+        dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex });
+        return;
+      }
+      // Find the earliest moment where this gate's qubits are free
+      const def = getGateDef(gateType);
+      const gateQubits: number[] =
+        def.numQubits === 1
+          ? [qubit]
+          : def.numQubits === 2
+            ? [Math.max(0, qubit - 1), qubit]
+            : [Math.max(0, qubit - 2), Math.max(0, qubit - 1), qubit];
+
+      let targetMoment = circuit.moments.length; // default: new moment
+      for (let mi = 0; mi < circuit.moments.length; mi++) {
+        const usedQubits = new Set(
+          circuit.moments[mi].gates.flatMap((g) => g.qubits),
+        );
+        if (gateQubits.every((q) => !usedQubits.has(q))) {
+          targetMoment = mi;
+          break;
+        }
+      }
+      dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex: targetMoment });
     },
-    [circuit.moments.length]
+    [circuit.moments],
   );
 
   const removeGate = useCallback((gateId: string) => {

@@ -9,6 +9,46 @@ interface GatePaletteProps {
 }
 
 export default function GatePalette({ onGateSelect, activeGate, numQubits }: GatePaletteProps) {
+  const renderGateButton = (gt: GateType, disabled = false) => {
+    const def = getGateDef(gt);
+    const isActive = activeGate === gt;
+
+    return (
+      <button
+        key={gt}
+        onClick={() => !disabled && onGateSelect(gt)}
+        draggable={!disabled}
+        onDragStart={(e) => {
+          if (disabled) { e.preventDefault(); return; }
+          e.dataTransfer.setData("gate-type", gt);
+          e.dataTransfer.effectAllowed = "copy";
+          onGateSelect(gt);
+        }}
+        title={disabled ? `Needs ${def.numQubits}+ qubits` : `${def.name} — click or drag to place`}
+        disabled={disabled}
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 6,
+          border: `1.5px solid ${disabled ? colors.border : isActive ? colors.accentLight : def.color}`,
+          background: isActive ? colors.accentDim : colors.card,
+          color: disabled ? colors.textTertiary : isActive ? colors.accentLight : def.color,
+          fontFamily: fonts.mono,
+          fontSize: gt === "Toffoli" || gt === "SWAP" ? 11 : 13,
+          fontWeight: 600,
+          cursor: disabled ? "not-allowed" : "grab",
+          opacity: disabled ? 0.5 : 1,
+          transition: "all 0.15s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {def.label}
+      </button>
+    );
+  };
+
   return (
     <div style={{
       display: "flex",
@@ -20,36 +60,7 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
       flexWrap: "wrap",
       alignItems: "center",
     }}>
-      {/* Single-qubit gates */}
-      {SINGLE_QUBIT_GATES.map((gt) => {
-        const def = getGateDef(gt);
-        const isActive = activeGate === gt;
-        return (
-          <button
-            key={gt}
-            onClick={() => onGateSelect(gt)}
-            title={def.name}
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 6,
-              border: `1.5px solid ${isActive ? colors.accentLight : def.color}`,
-              background: isActive ? colors.accentDim : colors.card,
-              color: isActive ? colors.accentLight : def.color,
-              fontFamily: fonts.mono,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {def.label}
-          </button>
-        );
-      })}
+      {SINGLE_QUBIT_GATES.map((gt) => renderGateButton(gt))}
 
       {/* Separator */}
       <div style={{
@@ -59,38 +70,9 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
         margin: "0 4px",
       }} />
 
-      {/* Multi-qubit gates */}
       {MULTI_QUBIT_GATES.map((gt) => {
         const def = getGateDef(gt);
-        const isActive = activeGate === gt;
-        const disabled = numQubits < def.numQubits;
-        return (
-          <button
-            key={gt}
-            onClick={() => !disabled && onGateSelect(gt)}
-            title={disabled ? `Needs ${def.numQubits}+ qubits` : def.name}
-            disabled={disabled}
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 6,
-              border: `1.5px solid ${disabled ? colors.border : isActive ? colors.accentLight : def.color}`,
-              background: isActive ? colors.accentDim : colors.card,
-              color: disabled ? colors.textTertiary : isActive ? colors.accentLight : def.color,
-              fontFamily: fonts.mono,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: disabled ? "not-allowed" : "pointer",
-              opacity: disabled ? 0.5 : 1,
-              transition: "all 0.15s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {def.label}
-          </button>
-        );
+        return renderGateButton(gt, numQubits < def.numQubits);
       })}
     </div>
   );

@@ -153,7 +153,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ## File Organization
 
-### Analysis Framework (Research-Grade, December 2024)
+### Analysis Framework (Research-Grade, Hardened Dec 2024)
 
 - `src/core/analysis/metrics/` - **Individual metric implementations**
   - `asymmetry_index.py` - Fast closed-form TVD with educational documentation
@@ -161,15 +161,21 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - `entanglement_error_correlation.py` - Multi-topology support with statistical testing
   - `temporal_pathway_stability.py` - Advanced time series analysis with transition matrices
   - `pathway_concentration_ratio.py` - Adaptive quartile-based concentration
+  - `concentration_index.py` - Gini-like pathway concentration measure
+  - `pathway_persistence.py` - Pathway persistence measurement
+  - `total_correlation.py` - Multi-information (total correlation) across all qubits
+  - `noise_topology_correlation.py` - Noise-topology correlation analysis
   - `structure_score.py` - Clean delegation wrapper for all metrics
   - `schema_bridge.py` - v1.0 schema compliance with robust validation
   - `registry.py` - Declarative MetricSpec pattern with bootstrap CI and status logic
+  - `profiles.py` - Metric selection profiles (structured_decoherence, minimal, full)
 
 - `src/core/analysis/core/` - **Mathematical foundations**
   - `information_theory.py` - Full-support Jeffreys smoothing, deterministic ordering
   - `null_models.py` - SciPy-free factorized models with reproducible sampling
   - `correlations.py` - Topology analysis with adjacency matrix construction
   - `bootstrap.py` - Reproducible confidence intervals with RNG plumbing
+  - `topology.py` - Topology builders for noise model and metric computation
 
 - `src/core/analysis/pipelines/` - **High-level orchestration**
   - `pathway_analysis.py` - Complete research pipeline with schema output
@@ -180,6 +186,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 ### Engine (Primary Interface)
 
 - `src/engine/api.py` - Main entry points: `run()`, `sweep()`, `iter_experiment_configs()`
+- `src/engine/bloch_math.py` - Bloch sphere coordinate math for visualization
 - `src/engine/provenance.py` - Provenance building (software versions, git SHA, host info)
 - `src/engine/fidelity.py` - Simulation data extraction (statevector, density matrix, fidelity)
 - `src/engine/viz_pipeline.py` - Visualization rendering orchestration
@@ -207,7 +214,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - Hardware compatibility and validation
   - Clean factory pattern and registry system
 
-## Current Development Status (Updated December 2024)
+## Current Development Status (Updated April 2026)
 
 ### ✅ **MAJOR ACHIEVEMENT: Research-Grade Analysis Framework Complete**
 
@@ -265,11 +272,13 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Type checking**: mypy strict mode
 - **Testing**: pytest with 90% coverage on core analysis, 277+ passing tests
 
-**Frontend (Bloch Sphere Visualizer)** - ✅ **REFACTORED**
+**Frontend (React Native / Expo)** - ✅ **REFACTORED**
 
 - BlochSphereScreen split from 1064 lines into hooks + sub-components (~232 lines main screen)
 - Custom hooks: useBuiltInMode, useExperimentMode, useSweepMode, useDragRotation
 - Component hierarchy: Header, BuiltinSidebar, ExperimentSidebar, DataPanel
+- Quantum Glossary: searchable reference of 100+ quantum computing terms across 16 categories
+- Expo Router file-based navigation with 6 tabs (configure, results, visualizer, circuit, registry, glossary)
 
 ### 🚀 **Ready for Next Phase**
 
@@ -361,10 +370,11 @@ def run_experiment(name: str, override: list[str] = []):
 ### Metrics Stay General, Interpretation Specializes
 
 - `src/core/analysis/metrics/` — **strictly general** (no SST language)
-- `StructuredDecoherenceMetrics` — one *view* over the metric bundle
+- `StructuredDecoherenceMetrics` — one _view_ over the metric bundle
 - Future: `BenchmarkMetrics`, `EntanglementMetrics`, etc.
 
 The engine routes via `research_type`:
+
 - `research_type="structured_decoherence"` → SST metrics
 - `research_type="benchmark"` → hardware benchmark metrics
 - etc.
@@ -383,7 +393,6 @@ The engine routes via `research_type`:
 
 ### DO NOT (without being asked)
 
-- Strip out SST language from docs — it's important research context
 - "Simplify" metrics just to make code shorter — they are research-grade on purpose
 - Fold `core` and `engine` together — the layered architecture is a feature
 - Turn this into a product-like framework with web UI, auth, etc.
@@ -402,6 +411,7 @@ The engine routes via `research_type`:
 **Rule:** Remove old code, don't wrap it. Clean breaks > cruft.
 
 When refactoring:
+
 - Delete procedural code, replace with class-based implementations
 - Don't keep old function signatures "for compatibility"
 - Don't add `# deprecated` comments — just remove the code

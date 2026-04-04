@@ -24,7 +24,7 @@ export const layout = {
   /** Vertical spacing between qubit wires */
   wireSpacing: 56,
   /** Horizontal width of each moment column */
-  momentWidth: 64,
+  momentWidth: 72,
   /** Width of qubit labels on the left */
   labelWidth: 52,
   /** Size of gate blocks (square) */

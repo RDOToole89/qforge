@@ -255,9 +255,7 @@ class ExperimentConfig(BaseModel):
 
         # IBM hardware shot limit
         if self.sim_mode == "hardware" and self.shots > 100_000:
-            raise ValueError(
-                f"shots={self.shots} exceeds IBM Quantum hardware limit (100,000)."
-            )
+            raise ValueError(f"shots={self.shots} exceeds IBM Quantum hardware limit (100,000).")
 
         return self
 

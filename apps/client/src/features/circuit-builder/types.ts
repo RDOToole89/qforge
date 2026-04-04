@@ -6,6 +6,7 @@ export type GateType =
   | "Z"
   | "S"
   | "T"
+  | "SX"
   | "Rx"
   | "Ry"
   | "Rz"

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from qiskit import QuantumCircuit
@@ -97,9 +97,7 @@ def resolve_backend(
             logger.info(f"Using specified backend: {backend.name}")
             return backend
         except Exception as e:
-            raise RuntimeError(
-                f"Backend '{backend_name}' not found or not accessible: {e}"
-            ) from e
+            raise RuntimeError(f"Backend '{backend_name}' not found or not accessible: {e}") from e
 
     backend = service.least_busy(
         operational=True,
@@ -107,9 +105,7 @@ def resolve_backend(
         min_num_qubits=min_qubits,
     )
     if backend is None:
-        raise RuntimeError(
-            f"No operational hardware backends found with >= {min_qubits} qubits."
-        )
+        raise RuntimeError(f"No operational hardware backends found with >= {min_qubits} qubits.")
     logger.info(f"Auto-selected least busy backend: {backend.name}")
     return backend
 
@@ -171,9 +167,7 @@ def transpile_for_hardware(
     return isa_circuit, info
 
 
-def _extract_qubit_layout(
-    isa_circuit: QuantumCircuit, num_logical_qubits: int
-) -> list[int]:
+def _extract_qubit_layout(isa_circuit: QuantumCircuit, num_logical_qubits: int) -> list[int]:
     """Extract logical→physical qubit mapping from transpiled circuit layout."""
     layout = getattr(isa_circuit, "layout", None)
     if layout is None:
@@ -186,10 +180,7 @@ def _extract_qubit_layout(
     ):
         if layout_map is not None:
             try:
-                return [
-                    layout_map[isa_circuit.qubits[i]]
-                    for i in range(num_logical_qubits)
-                ]
+                return [layout_map[isa_circuit.qubits[i]] for i in range(num_logical_qubits)]
             except (KeyError, IndexError):
                 pass
 
@@ -273,9 +264,7 @@ def execute_on_hardware(
     from qiskit_ibm_runtime import SamplerV2 as Sampler
 
     # 1. Transpile for target hardware
-    isa_circuit, transpilation_info = transpile_for_hardware(
-        circuit, backend, optimization_level
-    )
+    isa_circuit, transpilation_info = transpile_for_hardware(circuit, backend, optimization_level)
 
     # 2. Capture calibration snapshot before submission
     calibration_snapshot = capture_calibration_snapshot(backend)
@@ -286,8 +275,7 @@ def execute_on_hardware(
     sampler.options.default_shots = shots
 
     logger.info(
-        f"Submitting job to {backend.name} "
-        f"(shots={shots}, opt_level={optimization_level})..."
+        f"Submitting job to {backend.name} (shots={shots}, opt_level={optimization_level})..."
     )
 
     t0 = time.monotonic()

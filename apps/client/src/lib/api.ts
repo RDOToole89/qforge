@@ -60,6 +60,15 @@ export function runExperiment(
   });
 }
 
+export function previewCircuit(
+  config: ExperimentConfig,
+): Promise<{ circuit: unknown; diagram: string; stats: { depth: number; num_gates: number; num_qubits: number } }> {
+  return request("/experiments/preview", {
+    method: "POST",
+    body: JSON.stringify(config),
+  });
+}
+
 // ── Stored results ────────────────────────────────────────────────────
 
 export function listResults(

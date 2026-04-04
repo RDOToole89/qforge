@@ -2,15 +2,40 @@ import { colors, layout, fonts, momentX, wireY } from "../styles";
 import { getGateDef } from "../data/gateLibrary";
 import type { PlacedGate } from "../types";
 
+/** Format a rotation angle as a readable pi fraction. */
+function formatAngle(radians: number): string {
+  const ratio = radians / Math.PI;
+  // Common fractions
+  const fracs: [number, string][] = [
+    [1, "\u03c0"], [-1, "-\u03c0"],
+    [0.5, "\u03c0/2"], [-0.5, "-\u03c0/2"],
+    [0.25, "\u03c0/4"], [-0.25, "-\u03c0/4"],
+    [0.125, "\u03c0/8"], [-0.125, "-\u03c0/8"],
+    [0.375, "3\u03c0/8"], [-0.375, "-3\u03c0/8"],
+    [0.625, "5\u03c0/8"], [-0.625, "-5\u03c0/8"],
+    [0.75, "3\u03c0/4"], [-0.75, "-3\u03c0/4"],
+    [2, "2\u03c0"], [-2, "-2\u03c0"],
+  ];
+  for (const [frac, label] of fracs) {
+    if (Math.abs(ratio - frac) < 1e-6) return label;
+  }
+  // Fallback: show as decimal * pi or raw value
+  if (Math.abs(ratio) > 0.01) {
+    return `${ratio.toFixed(2)}\u03c0`;
+  }
+  return radians.toFixed(3);
+}
+
 interface GateBlockProps {
   gate: PlacedGate;
   momentIndex: number;
   selected: boolean;
   onClick: (gateId: string) => void;
+  onDoubleClick?: (gateId: string) => void;
 }
 
 /** Renders a single gate on the SVG circuit canvas */
-export default function GateBlock({ gate, momentIndex, selected, onClick }: GateBlockProps) {
+export default function GateBlock({ gate, momentIndex, selected, onClick, onDoubleClick }: GateBlockProps) {
   const def = getGateDef(gate.gateType);
   const x = momentX(momentIndex);
   const targetQubit = gate.qubits[gate.qubits.length - 1];
@@ -22,6 +47,11 @@ export default function GateBlock({ gate, momentIndex, selected, onClick }: Gate
     onClick(gate.id);
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDoubleClick?.(gate.id);
+  };
+
   // Multi-qubit gate: draw connection line + control dots
   if (def.numQubits >= 2 && gate.qubits.length >= 2) {
     const controlQubits = gate.qubits.slice(0, -1);
@@ -31,7 +61,7 @@ export default function GateBlock({ gate, momentIndex, selected, onClick }: Gate
     const yBot = wireY(maxQ);
 
     return (
-      <g onClick={handleClick} style={{ cursor: "pointer" }}>
+      <g onClick={handleClick} onDoubleClick={handleDoubleClick} style={{ cursor: "pointer" }}>
         {/* Vertical connection line */}
         <line
           x1={x}
@@ -154,7 +184,7 @@ export default function GateBlock({ gate, momentIndex, selected, onClick }: Gate
   // Single-qubit gate: labeled box
   const paramText =
     def.parametric && gate.params?.[0] !== undefined
-      ? `(${(gate.params[0] / Math.PI).toFixed(1)}\u03c0)`
+      ? `(${formatAngle(gate.params[0])})`
       : "";
 
   return (

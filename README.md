@@ -182,6 +182,30 @@ make test        # pytest with 90% coverage
 
 ---
 
+## Learning Path
+
+New to the framework? Here's the recommended progression:
+
+1. **Run a pre-built experiment** -- `python -m src.cli list` to see available experiments, then `python -m src.cli run sst_q1` to run one. Read the output metrics.
+2. **Use the engine API directly** -- Write a short script with `run(ExperimentConfig(...))` for custom configurations. See `src/engine/README.md`.
+3. **Explore the analysis pipeline** -- Feed your own measurement data to `run_all_to_schema(counts)`. See `src/core/analysis/README.md` for all 8 metrics.
+4. **Build a custom experiment** -- Subclass `ExperimentProgram` in `src/experiments/`. See `src/experiments/README.md` for the registry pattern.
+5. **Launch the visualizer** -- Start the API + Expo app to see Bloch sphere visualizations. See `apps/client/README.md`.
+
+### Key Concepts
+
+A few terms you'll encounter throughout the codebase:
+
+- **GHZ state**: Greenberger-Horne-Zeilinger state -- maximal entanglement across all qubits. The superposition `(|000...0> + |111...1>) / sqrt(2)`. Primary probe state for noise detection.
+- **CPTP map**: Completely Positive, Trace-Preserving map -- the mathematical requirement for valid quantum noise channels. Every physical noise process is a CPTP map.
+- **Bloch sphere**: Geometric representation of a single qubit's state as a point on (pure) or inside (mixed) a unit sphere.
+- **TVD**: Total Variation Distance -- statistical distance between two probability distributions. Used by the Asymmetry Index metric.
+- **Structured decoherence**: The hypothesis that quantum decoherence follows the entanglement network topology ("river") rather than spreading uniformly ("fog").
+
+For a comprehensive reference of 100+ quantum terms, see the Quantum Glossary feature in the visualizer app (`apps/client/src/features/quantum-glossary/`).
+
+---
+
 ## Architecture
 
 ```

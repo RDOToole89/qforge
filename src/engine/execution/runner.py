@@ -78,6 +78,9 @@ class EngineExperimentRunner:
             rng_seed: Random seed for reproducibility
             balance: Optional circuit balancing strategy name.
             readout_error_rate: Optional measurement readout error probability.
+            backend_name: IBM Quantum backend name (hardware mode only).
+            optimization_level: Transpiler optimization level (0-3).
+            hardware_session: Pre-existing hardware session for batch runs.
 
         Returns:
             Tuple of (QuantumCircuit, simulation result)
@@ -106,7 +109,10 @@ class EngineExperimentRunner:
 
         # Execute simulation (or hardware)
         result = self._execute_simulation(
-            circuit, sim_mode, shots, rng_seed,
+            circuit,
+            sim_mode,
+            shots,
+            rng_seed,
             backend_name=backend_name,
             optimization_level=optimization_level,
             hardware_session=hardware_session,
@@ -287,7 +293,11 @@ class EngineExperimentRunner:
         """Dispatch to the appropriate backend method."""
         if sim_mode == "hardware":
             return self._execute_hardware(
-                circuit, shots, backend_name, optimization_level, hardware_session,
+                circuit,
+                shots,
+                backend_name,
+                optimization_level,
+                hardware_session,
             )
         elif sim_mode == "statevector":
             return self._execute_statevector(circuit, shots, rng_seed)
@@ -437,7 +447,9 @@ class EngineExperimentRunner:
                 self.logger.debug(
                     "Bitstring '%s' longer than num_qubits=%d; truncating to "
                     "rightmost %d bits (MSB-left convention).",
-                    key, num_qubits, num_qubits,
+                    key,
+                    num_qubits,
+                    num_qubits,
                 )
                 key = key[-num_qubits:]
             counts[key] = int(v)

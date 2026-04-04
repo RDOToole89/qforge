@@ -271,9 +271,7 @@ def sweep(
     bus.publish(make_event(SWEEP_START, {"keys": keys, "total": total}))
 
     # Determine if this is a hardware sweep that should use Sessions
-    _use_hw_session = (
-        base.get("sim_mode") == "hardware" and base.get("hardware_session", False)
-    )
+    _use_hw_session = base.get("sim_mode") == "hardware" and base.get("hardware_session", False)
 
     hw_session = None
 

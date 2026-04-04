@@ -176,10 +176,24 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     glossaryTermId: "toffoli",
     qiskitName: "ccx",
   },
+  SX: {
+    type: "SX",
+    name: "Sqrt-X (SX)",
+    numQubits: 1,
+    parametric: false,
+    matrixLatex:
+      "\\frac{1}{2}\\begin{pmatrix}1+i&1-i\\\\1-i&1+i\\end{pmatrix}",
+    description:
+      "Square root of Pauli-X. Applying SX twice gives X. Common in transpiled circuits on IBM hardware.",
+    color: "#ec4899",
+    label: "\u221AX",
+    glossaryTermId: "sqrt_x",
+    qiskitName: "sx",
+  },
 };
 
 /** All single-qubit gates */
-export const SINGLE_QUBIT_GATES: GateType[] = ["H", "X", "Y", "Z", "S", "T", "Rx", "Ry", "Rz"];
+export const SINGLE_QUBIT_GATES: GateType[] = ["H", "X", "Y", "Z", "S", "T", "SX", "Rx", "Ry", "Rz"];
 
 /** All multi-qubit gates */
 export const MULTI_QUBIT_GATES: GateType[] = ["CNOT", "CZ", "SWAP", "Toffoli"];
