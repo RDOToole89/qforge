@@ -464,17 +464,27 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }:
 
     buildScaffold(scene, { background: 0x08090e, detail: "full" });
 
-    // Create dot + glow meshes for each qubit
+    // Create dot + glow + label meshes for each qubit
     const currentDots = dotsRef.current;
     const dotMeshes: THREE.Mesh[] = [];
     const glowMeshes: THREE.Mesh[] = [];
-    for (const d of currentDots) {
+    const labelSprites: THREE.Sprite[] = [];
+    for (let qi = 0; qi < currentDots.length; qi++) {
+      const d = currentDots[qi];
       const dotGeo = new THREE.SphereGeometry(0.07, 16, 12);
       const dotMat = new THREE.MeshBasicMaterial({ color: d.color });
       const dot = new THREE.Mesh(dotGeo, dotMat);
       dot.position.copy(blochToThree(d.rx, d.ry, d.rz));
       scene.add(dot);
       dotMeshes.push(dot);
+
+      // Label sprite (hidden by default, shown when qubit is active)
+      const label = makeTextSprite(`q${qi}`, d.color, 0.08);
+      label.visible = false;
+      label.position.copy(dot.position);
+      label.position.y += 0.18; // offset above the dot
+      scene.add(label);
+      labelSprites.push(label);
 
       const glowGeo = new THREE.SphereGeometry(0.14, 16, 12);
       const glowMat = new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.2 });
@@ -556,6 +566,16 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }:
         const glowScale = isActive ? 1.0 + 0.5 * decay : 1.0;
         glowMeshes[i].scale.setScalar(glowScale);
         (glowMeshes[i].material as THREE.MeshBasicMaterial).opacity = isActive ? 0.2 + 0.2 * decay : 0.2;
+
+        // Label: visible when active, fades with decay, follows dot position
+        if (i < labelSprites.length) {
+          labelSprites[i].visible = isActive && decay > 0.1;
+          labelSprites[i].position.copy(pos);
+          labelSprites[i].position.y += 0.18;
+          if (isActive) {
+            (labelSprites[i].material as THREE.SpriteMaterial).opacity = Math.min(1, decay * 2);
+          }
+        }
       }
 
       renderer.render(scene, camera);

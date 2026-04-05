@@ -16,11 +16,15 @@ interface BlochPlaybackPanelProps {
   previewCaption?: string | null;
   /** Qubits currently being operated on — highlighted on Bloch sphere */
   activeQubits?: number[];
+  /** Current gate being applied, e.g. "H(q0)" — shown as "now playing" */
+  activeGateLabel?: string | null;
+  /** Color of the active gate */
+  activeGateColor?: string | null;
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4];
 
-export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption, activeQubits }: BlochPlaybackPanelProps) {
+export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption, activeQubits, activeGateLabel, activeGateColor }: BlochPlaybackPanelProps) {
   const [internalFs, setInternalFs] = useState(false);
   // Sync external fullscreen control
   useEffect(() => {
@@ -126,6 +130,34 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             </div>
           )}
         </div>
+
+        {/* Now playing: current gate */}
+        {activeGateLabel && (
+          <div style={{
+            padding: "4px 14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}>
+            <div style={{
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              background: activeGateColor ?? colors.accent,
+              animation: "fadeIn 0.2s ease",
+            }} />
+            <span style={{
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: fonts.mono,
+              color: activeGateColor ?? colors.accentLight,
+              animation: "fadeIn 0.2s ease",
+            }}>
+              {activeGateLabel}
+            </span>
+          </div>
+        )}
 
         {/* Zoom slider */}
         {(hasCircuit || previewCaption) && (
@@ -294,6 +326,30 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
                 </div>
               )}
             </div>
+
+            {/* Now playing in modal */}
+            {activeGateLabel && (
+              <div style={{
+                padding: "4px 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}>
+                <div style={{
+                  width: 6, height: 6, borderRadius: 3,
+                  background: activeGateColor ?? colors.accent,
+                }} />
+                <span style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  fontFamily: fonts.mono,
+                  color: activeGateColor ?? colors.accentLight,
+                }}>
+                  {activeGateLabel}
+                </span>
+              </div>
+            )}
 
             {/* Zoom slider in modal */}
             {hasCircuit && (
@@ -492,7 +548,6 @@ function TransportControls({
               height: 4,
               borderRadius: 2,
               background: colors.accent,
-              transition: isDraggingRef.current ? "none" : "width 0.1s ease",
             }} />
             {/* Step tick marks */}
             {stepTicks.map((tick, i) => (
@@ -520,7 +575,6 @@ function TransportControls({
               border: "2px solid #fff",
               transform: "translateX(-6px)",
               boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              transition: isDraggingRef.current ? "none" : "left 0.1s ease",
             }} />
           </div>
           <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>

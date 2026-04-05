@@ -1361,6 +1361,37 @@ export default function CircuitBuilderScreen() {
               if (!moment) return undefined;
               return [...new Set(moment.gates.flatMap((g: { qubits: number[] }) => g.qubits))] as number[];
             })()}
+            activeGateLabel={(() => {
+              const { snapshotIndex, t, status } = playback.state;
+              if (status === "idle") return null;
+              if (t === 0 && snapshotIndex === 0) return null;
+              const totalSnaps = playback.totalSnapshots;
+              if (snapshotIndex >= totalSnaps - 1 && t === 0) return null;
+              const momentIdx = t > 0 ? snapshotIndex : Math.max(0, snapshotIndex - 1);
+              const moments = isPreviewActive && activeGateType
+                ? GATE_PREVIEW_CIRCUITS[activeGateType]?.circuit?.moments
+                : circuit.moments;
+              const moment = moments?.[momentIdx];
+              if (!moment) return null;
+              return moment.gates.map((g: { gateType: string; qubits: number[] }) => {
+                const def = getGateDef(g.gateType as any);
+                return `${def.label}(${g.qubits.map((q: number) => `q${q}`).join(",")})`;
+              }).join(", ");
+            })()}
+            activeGateColor={(() => {
+              const { snapshotIndex, t, status } = playback.state;
+              if (status === "idle") return null;
+              if (t === 0 && snapshotIndex === 0) return null;
+              const totalSnaps = playback.totalSnapshots;
+              if (snapshotIndex >= totalSnaps - 1 && t === 0) return null;
+              const momentIdx = t > 0 ? snapshotIndex : Math.max(0, snapshotIndex - 1);
+              const moments = isPreviewActive && activeGateType
+                ? GATE_PREVIEW_CIRCUITS[activeGateType]?.circuit?.moments
+                : circuit.moments;
+              const moment = moments?.[momentIdx];
+              if (!moment || !moment.gates[0]) return null;
+              return getGateDef(moment.gates[0].gateType as any).color;
+            })()}
           />
         </div>
       </div>
