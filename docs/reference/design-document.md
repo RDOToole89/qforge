@@ -34,14 +34,14 @@
 
 The **Qiskit Experiment Framework** is a research-grade quantum experimentation platform with **production-style software architecture** (schema validation, provenance tracking, modular layering). It is designed to investigate **structured decoherence pathways** in quantum systems—a novel research direction that treats decoherence as potentially structured rather than purely random.
 
-**Current Focus:** Testing the Structured Substrate Thesis (SST) through quantitative metrics and reproducible experiments.
+**Current Focus:** Testing the structured decoherence hypothesis through quantitative metrics and reproducible experiments.
 
-**Future Vision:** Although the current experiments are focused on SST and structured decoherence, the component-driven architecture is explicitly designed as a **general quantum experiment engine**. New research programs (e.g., benchmarking, entanglement witnesses, variational circuits, circuit synthesis, sensor protocols) can be implemented by:
+**Future Vision:** Although the current experiments focus on structured decoherence, the component-driven architecture is explicitly designed as a **general quantum experiment engine**. New research programs (e.g., benchmarking, entanglement witnesses, variational circuits, circuit synthesis, sensor protocols) can be implemented by:
 - reusing the **core** physics layer,
 - orchestrating runs via the **engine**,
 - and adding new experiments under `src/experiments/`.
 
-The clean separation between core physics, execution engine, and experiment implementations is intentional: SST is the first use case, not the only one.
+The clean separation between core physics, execution engine, and experiment implementations is intentional: structured decoherence is the first use case, not the only one.
 
 ### 1.2 Key Capabilities
 
@@ -70,7 +70,7 @@ Python Version:     3.11+
 
 ### 2.1 The Central Hypothesis
 
-**Structured Substrate Thesis (SST):** Quantum decoherence follows structured pathways determined by the entanglement network topology, rather than occurring randomly across all qubits.
+**structured decoherence hypothesis:** Quantum decoherence follows structured pathways determined by the entanglement network topology, rather than occurring randomly across all qubits.
 
 Traditional View:
 ```
@@ -78,7 +78,7 @@ Decoherence = Random noise affecting all qubits equally
              (Like fog spreading uniformly)
 ```
 
-SST View:
+Structured decoherence view:
 ```
 Decoherence = Structured flow along entanglement "springs"
              (Like water flowing through channels)
@@ -118,11 +118,11 @@ Initial experiments using this framework revealed a **"Fog vs River"** pattern i
 
 The combination of entanglement topology and noise model produces directional "currents" in outcome space. Depolarizing channels remain isotropic at the single-qubit level, but the entangled state's structure creates "river-like" channels in the resulting distribution.
 
-**Important clarification:** The depolarizing channel itself is isotropic—it applies X, Y, and Z errors with equal probability. The structure ("River" behavior) emerges from how those symmetric errors interact with the entangled state's topology. The SST hypothesis posits that this interaction is predictable and follows the entanglement "springs."
+**Important clarification:** The depolarizing channel itself is isotropic—it applies X, Y, and Z errors with equal probability. The structure ("River" behavior) emerges from how those symmetric errors interact with the entangled state's topology. The structured decoherence hypothesis posits that this interaction is predictable and follows the entanglement "springs."
 
 ### 2.5 Operational Hypotheses
 
-The framework is designed to test three concrete, falsifiable operational hypotheses derived from the SST:
+The framework is designed to test three concrete, falsifiable operational hypotheses derived from the hypothesis:
 
 | Hypothesis | Statement | Test Metric | Pass Criterion |
 |------------|-----------|-------------|----------------|
@@ -135,14 +135,14 @@ The framework is designed to test three concrete, falsifiable operational hypoth
 - **H_Q2**: ⏳ Planned (requires depth-sweep experiments)
 - **H_Q3**: ⏳ Planned (requires sensor-qubit protocol implementation)
 
-These hypotheses transform the abstract SST into measurable predictions that the framework can systematically evaluate.
+These hypotheses transform the abstract hypothesis into measurable predictions that the framework can systematically evaluate.
 
 ### 2.6 Connection to Structured Substrate Thesis
 
-The **Structured Substrate Thesis (SST)** posits that quantum decoherence is not purely random, but follows structured pathways determined by the underlying entanglement network. This framework provides the experimental apparatus to test SST:
+The **structured decoherence hypothesis** posits that quantum decoherence is not purely random, but follows structured pathways determined by the underlying entanglement network. This framework provides the experimental apparatus to test it:
 
 ```
-SST Claim                           Framework Component
+Hypothesis Claim                    Framework Component
 ─────────────────────────────────────────────────────────────
 Entanglement creates "springs"  →   State preparation (GHZ, W, Cluster)
 Springs guide error flow        →   Noise models + EEC metric
@@ -150,13 +150,13 @@ Structure is measurable         →   8-metric suite (AI, PCR, EEC, etc.)
 Structure is reproducible       →   Provenance tracking + RNG plumbing
 ```
 
-**Why this matters:** If SST is correct, decoherence becomes partially predictable—opening paths for error correction strategies that leverage structure rather than fighting against noise uniformly.
+**Why this matters:** If the hypothesis is correct, decoherence becomes partially predictable—opening paths for error correction strategies that leverage structure rather than fighting against noise uniformly.
 
-### 2.7 Beyond SST: General Experiment Use
+### 2.7 Beyond Structured Decoherence: General Experiment Use
 
 While the initial design and metrics suite were motivated by the Structured Substrate Thesis, the framework is intentionally **domain-general**:
 
-- The **core layer** (`src/core/`) is agnostic to SST. It exposes:
+- The **core layer** (`src/core/`) is agnostic to any specific hypothesis. It exposes:
   - state factories (GHZ, W, Bell, Cluster, Superposition, Custom),
   - noise models,
   - and information-theoretic tools (entropy, mutual information, divergences).
@@ -166,7 +166,7 @@ While the initial design and metrics suite were motivated by the Structured Subs
   - runs Qiskit backends,
   - collects counts,
   - and persists results with provenance.
-- The **experiments layer** (`src/experiments/`) is where "research programs" live. SST is one such program; others can be added without touching the existing architecture.
+- The **experiments layer** (`src/experiments/`) is where "research programs" live. Structured decoherence is one such program; others can be added without touching the existing architecture.
 
 In practice, this means the same framework could be reused for:
 - cross-noise-model robustness studies,
@@ -175,7 +175,7 @@ In practice, this means the same framework could be reused for:
 - sensor-qubit protocols,
 - or educational demos of canonical quantum states.
 
-SST is currently the **flagship** research line, but the framework itself is deliberately **general-purpose and reusable**.
+Structured decoherence is currently the **flagship** research line, but the framework itself is deliberately **general-purpose and reusable**.
 
 ---
 
@@ -279,7 +279,7 @@ qiskit-experiment-framework/
 │   │   └── visualization/             # Plotting (optional)
 │   │
 │   └── experiments/                   # Concrete implementations
-│       ├── sst_hypothesis_q1.py       # Primary SST experiment
+│       ├── sst_hypothesis_q1.py       # Primary structured decoherence experiment
 │       └── sst_hypothesis_q1_structured.py
 │
 ├── tests/                             # Test suite (128 tests)
@@ -820,7 +820,7 @@ circuit = prepare_state_for_hardware(
 | Entanglement Depth | O(n) | O(n²) | O(1) | O(n) |
 | Single-Qubit Loss | Destroys entanglement | Preserves (n-1)-partite | N/A | Local damage |
 | Error Sensitivity | High (fragile) | Medium (robust) | Medium | Low |
-| SST Signal | Strong (River) | Medium | Medium | Weak |
+| Structure Signal | Strong (River) | Medium | Medium | Weak |
 
 ### 7.5 Circuit Diagrams
 
@@ -1306,7 +1306,7 @@ print(f"Is Structured: {metrics.is_structured}")
 ### 14.3 Running Existing Experiments
 
 ```bash
-# Run SST Hypothesis Q1
+# Run Structured Decoherence Hypothesis Q1
 python -m src.experiments.sst_hypothesis_q1
 
 # Run structured version
@@ -1361,7 +1361,7 @@ To be explicit about research positioning:
 
 - **NOT** a production quantum computing platform
 - **NOT** validated on real quantum hardware (yet)
-- **NOT** claiming SST is proven—framework tests the hypothesis
+- **NOT** claiming the hypothesis is proven—framework tests the hypothesis
 - **NOT** a complete theory of decoherence—provides measurement tools
 
 The framework's value is in providing **rigorous, reproducible tools** to investigate structured decoherence, not in making claims about the underlying physics.
@@ -1410,7 +1410,7 @@ The framework's value is in providing **rigorous, reproducible tools** to invest
 
 | Term | Definition |
 |------|------------|
-| **SST** | Structured Substrate Thesis |
+| **Structured decoherence** | Hypothesis that decoherence follows topology-dependent pathways |
 | **GHZ State** | Greenberger-Horne-Zeilinger state |
 | **W State** | Dicke state with single excitation |
 | **TVD** | Total Variation Distance |

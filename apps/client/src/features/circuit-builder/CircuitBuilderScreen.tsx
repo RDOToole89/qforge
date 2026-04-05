@@ -1,6 +1,6 @@
 "use dom";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { colors, fonts } from "./styles";
 import { useCircuit } from "./hooks/useCircuit";
 import { useSimulator, formatDirac, recognizeState } from "./hooks/useSimulator";
@@ -11,9 +11,13 @@ import GatePalette from "./components/GatePalette";
 import CircuitCanvas from "./components/CircuitCanvas";
 import ProbabilityDisplay from "./components/ProbabilityDisplay";
 import BlochPlaybackPanel from "./components/BlochPlaybackPanel";
+import OnboardingOverlay, { OnboardingResetButton } from "./components/OnboardingOverlay";
+import type { OnboardingActions } from "./components/OnboardingOverlay";
 import { getGateDef } from "./data/gateLibrary";
 import { CIRCUIT_PRESETS } from "./data/circuitPresets";
 import { IDEAL_STATES, idealStateToSnapshot } from "./data/idealStates";
+import { GATE_PREVIEW_CIRCUITS } from "./data/gatePreviewCircuits";
+import { simulateCircuit } from "./hooks/useSimulator";
 import type { GateType, CircuitPreset, SimSnapshot } from "./types";
 
 export default function CircuitBuilderScreen() {
@@ -84,19 +88,76 @@ export default function CircuitBuilderScreen() {
   const directNumQubits = directSnapshot ? Math.log2(directSnapshot.stateVector.length) : 2;
   const directSnapshots = useMemo(() => directSnapshot ? [directSnapshot] : [], [directSnapshot]);
 
+  const [activeGateType, setActiveGateType] = useState<GateType | null>(null);
+
+  // Gate preview: when a gate is selected in palette, show its effect on the Bloch sphere
+  const gatePreview = useMemo(() => {
+    if (!activeGateType || inputMode !== "circuit") return null;
+    const preview = GATE_PREVIEW_CIRCUITS[activeGateType];
+    if (!preview) return null;
+    return {
+      caption: preview.caption,
+      snapshots: simulateCircuit(preview.circuit),
+      numQubits: preview.circuit.numQubits,
+    };
+  }, [activeGateType, inputMode]);
+
   // Choose which snapshots to feed the playback system
-  const snapshots = inputMode === "direct" ? directSnapshots : circuitSnapshots;
-  const finalSnapshot = inputMode === "direct" ? directSnapshot : circuitFinalSnapshot;
-  const activeNumQubits = inputMode === "direct" ? directNumQubits : circuit.numQubits;
+  // Priority: gate preview > direct state > circuit
+  const isPreviewActive = gatePreview !== null;
+  const snapshots = isPreviewActive
+    ? gatePreview!.snapshots
+    : inputMode === "direct"
+      ? directSnapshots
+      : circuitSnapshots;
+  const finalSnapshot = isPreviewActive
+    ? gatePreview!.snapshots[gatePreview!.snapshots.length - 1]
+    : inputMode === "direct"
+      ? directSnapshot
+      : circuitFinalSnapshot;
+  const activeNumQubits = isPreviewActive
+    ? gatePreview!.numQubits
+    : inputMode === "direct"
+      ? directNumQubits
+      : circuit.numQubits;
 
   const playback = usePlayback(snapshots, activeNumQubits);
   const narratives = useNarrative(circuit, circuitSnapshots);
 
+  // Auto-play when gate preview activates — show the transformation
+  const prevPreviewRef = useRef<string | null>(null);
+  useEffect(() => {
+    const currentGate = activeGateType;
+    if (currentGate && currentGate !== prevPreviewRef.current) {
+      // Small delay so playback hook has the new snapshots
+      const t = setTimeout(() => playback.play(), 50);
+      prevPreviewRef.current = currentGate;
+      return () => clearTimeout(t);
+    }
+    if (!currentGate) prevPreviewRef.current = null;
+  }, [activeGateType, playback]);
+
   const [selectedGateId, setSelectedGateId] = useState<string | null>(null);
-  const [activeGateType, setActiveGateType] = useState<GateType | null>(null);
   const [showGrid, setShowGrid] = useState(false);
   const [activePreset, setActivePreset] = useState<CircuitPreset | null>(null);
   const [exportCopied, setExportCopied] = useState(false);
+  const [blochFullscreen, setBlochFullscreen] = useState(false);
+
+  // Onboarding actions
+  const onboardingActions = useMemo((): OnboardingActions => ({
+    loadBellPreset: () => {
+      const bellPreset = CIRCUIT_PRESETS.find((p) => p.id === "bell");
+      if (bellPreset) {
+        loadPreset(bellPreset.circuit);
+        setActivePreset(bellPreset);
+        setInputMode("circuit");
+      }
+    },
+    playBloch: () => playback.play(),
+    resetBloch: () => playback.reset(),
+    openFullscreen: () => setBlochFullscreen(true),
+    closeFullscreen: () => setBlochFullscreen(false),
+  }), [loadPreset, playback]);
 
   const handleExport = useCallback(() => {
     const json = JSON.stringify(circuit, null, 2);
@@ -149,12 +210,28 @@ export default function CircuitBuilderScreen() {
     setSelectedGateId(null);
   }, []);
 
+  // Placement error popover
+  const [placementError, setPlacementError] = useState<{ message: string; x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!placementError) return;
+    const t = setTimeout(() => setPlacementError(null), 4000);
+    return () => clearTimeout(t);
+  }, [placementError]);
+
   // Click on canvas to place active gate on the clicked qubit wire
   const handleCanvasClick = useCallback(
-    (qubit: number) => {
+    (qubit: number, event?: React.MouseEvent) => {
       setSelectedGateId(null);
+      setPlacementError(null);
       if (activeGateType) {
-        addGate(activeGateType, qubit);
+        const error = addGate(activeGateType, qubit);
+        if (error && event) {
+          setPlacementError({
+            message: error,
+            x: event.clientX,
+            y: event.clientY,
+          });
+        }
       }
     },
     [activeGateType, addGate],
@@ -185,6 +262,9 @@ export default function CircuitBuilderScreen() {
         overflow: "hidden",
       }}
     >
+      {/* Onboarding overlay (first visit only) */}
+      <OnboardingOverlay actions={onboardingActions} />
+
       {/* Side-by-side: circuit left, Bloch right */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         {/* Left: circuit content */}
@@ -199,60 +279,66 @@ export default function CircuitBuilderScreen() {
             gap: 10,
           }}
         >
-          {/* Mode toggle: Circuit vs Direct State */}
-          <div style={{
-            display: "flex",
-            gap: 2,
-            background: colors.surface,
-            borderRadius: 8,
-            padding: 3,
-            border: `1px solid ${colors.border}`,
-            width: "fit-content",
-          }}>
-            {([["circuit", "Circuit Builder"], ["direct", "Direct State"]] as const).map(([mode, label]) => (
-              <button
-                key={mode}
-                onClick={() => setInputMode(mode)}
-                style={{
-                  background: inputMode === mode ? colors.accent : "transparent",
-                  color: inputMode === mode ? "#fff" : colors.textSecondary,
-                  border: "none",
-                  borderRadius: 6,
-                  padding: "6px 16px",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  fontFamily: fonts.sans,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Mode toggle: Circuit vs Direct State + Tour button */}
+          <div data-onboarding="mode-toggle" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{
+              display: "flex",
+              gap: 2,
+              background: colors.surface,
+              borderRadius: 8,
+              padding: 3,
+              border: `1px solid ${colors.border}`,
+            }}>
+              {([["circuit", "Circuit Builder"], ["direct", "Direct State"]] as const).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  onClick={() => setInputMode(mode)}
+                  style={{
+                    background: inputMode === mode ? colors.accent : "transparent",
+                    color: inputMode === mode ? "#fff" : colors.textSecondary,
+                    border: "none",
+                    borderRadius: 6,
+                    padding: "6px 16px",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontFamily: fonts.sans,
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <OnboardingResetButton />
           </div>
 
           {/* ── Circuit mode ── */}
           {inputMode === "circuit" && (
             <>
           {/* Toolbar */}
-          <CircuitToolbar
-            numQubits={circuit.numQubits}
-            onSetNumQubits={(n) => { setNumQubits(n); setActivePreset(null); }}
-            onClear={() => { clear(); setActivePreset(null); }}
-            onExport={handleExport}
-            onLoadPreset={(c) => {
-              loadPreset(c);
-              const preset = CIRCUIT_PRESETS.find((p) => p.circuit === c) ?? null;
-              setActivePreset(preset);
-            }}
-          />
+          <div data-onboarding="toolbar">
+            <CircuitToolbar
+              numQubits={circuit.numQubits}
+              onSetNumQubits={(n) => { setNumQubits(n); setActivePreset(null); }}
+              onClear={() => { clear(); setActivePreset(null); }}
+              onExport={handleExport}
+              onLoadPreset={(c) => {
+                loadPreset(c);
+                const preset = CIRCUIT_PRESETS.find((p) => p.circuit === c) ?? null;
+                setActivePreset(preset);
+              }}
+            />
+          </div>
 
           {/* Gate Palette */}
-          <GatePalette
-            onGateSelect={handlePaletteSelect}
-            activeGate={activeGateType}
-            numQubits={circuit.numQubits}
-          />
+          <div data-onboarding="palette">
+            <GatePalette
+              onGateSelect={handlePaletteSelect}
+              activeGate={activeGateType}
+              numQubits={circuit.numQubits}
+            />
+          </div>
 
           {/* Active gate hint */}
           {activeGateType && (
@@ -279,15 +365,18 @@ export default function CircuitBuilderScreen() {
           )}
 
           {/* Circuit Canvas */}
-          <div style={{ position: "relative" }}>
+          <div data-onboarding="canvas" style={{ position: "relative" }}>
             <CircuitCanvas
               circuit={circuit}
               selectedGateId={selectedGateId}
               onGateClick={handleGateClick}
               onGateDoubleClick={undefined}
               onCanvasClick={handleCanvasClick}
-              onDrop={(gateType, qubit) => {
-                addGate(gateType as GateType, qubit);
+              onDrop={(gateType, qubit, event) => {
+                const error = addGate(gateType as GateType, qubit);
+                if (error && event) {
+                  setPlacementError({ message: error, x: event.clientX, y: event.clientY });
+                }
               }}
               showGrid={showGrid}
             />
@@ -315,6 +404,53 @@ export default function CircuitBuilderScreen() {
             >
               #
             </button>
+
+            {/* Placement error popover */}
+            {placementError && (
+              <div
+                style={{
+                  position: "fixed",
+                  left: Math.min(placementError.x + 12, window.innerWidth - 320),
+                  top: Math.max(12, placementError.y - 60),
+                  maxWidth: 300,
+                  padding: "12px 16px",
+                  background: colors.bg,
+                  border: `1px solid ${colors.danger}80`,
+                  borderRadius: 10,
+                  boxShadow: `0 0 20px ${colors.danger}20, 0 8px 24px rgba(0,0,0,0.4)`,
+                  zIndex: 9000,
+                  animation: "fadeIn 0.15s ease",
+                }}
+                onClick={() => setPlacementError(null)}
+              >
+                <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                <div style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: colors.danger,
+                  marginBottom: 4,
+                  fontFamily: fonts.sans,
+                }}>
+                  Invalid Placement
+                </div>
+                <div style={{
+                  fontSize: 12,
+                  color: colors.textSecondary,
+                  lineHeight: 1.5,
+                  fontFamily: fonts.sans,
+                }}>
+                  {placementError.message}
+                </div>
+                <div style={{
+                  fontSize: 10,
+                  color: colors.textTertiary,
+                  marginTop: 6,
+                  fontFamily: fonts.sans,
+                }}>
+                  Click to dismiss
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Gate Info Panel (when a placed gate is selected) */}
@@ -476,8 +612,9 @@ export default function CircuitBuilderScreen() {
           )}
 
           {/* State Evolution Narrative */}
-          {snapshots.length > 1 && (
+          {circuitSnapshots.length > 1 && (
             <div
+              data-onboarding="state-evolution"
               style={{
                 padding: 12,
                 background: colors.surface,
@@ -498,9 +635,10 @@ export default function CircuitBuilderScreen() {
                 State Evolution
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {snapshots.map((snap, i) => {
+                {circuitSnapshots.map((snap, i) => {
                   if (i === 0) return null;
                   const moment = circuit.moments[i - 1];
+                  if (!moment) return null;
                   const gateDescs = moment.gates
                     .map((g) => {
                       const def = getGateDef(g.gateType);
@@ -610,7 +748,7 @@ export default function CircuitBuilderScreen() {
           )}
 
           {/* Probability Display */}
-          <ProbabilityDisplay snapshot={finalSnapshot} />
+          <ProbabilityDisplay snapshot={circuitFinalSnapshot} />
 
           {/* Preset Info Panel — shown for manual presets or auto-detected states */}
           {displayPreset && (
@@ -952,10 +1090,13 @@ export default function CircuitBuilderScreen() {
         </div>
 
         {/* Right: Bloch sphere playback panel */}
-        <div style={{ width: 320, flexShrink: 0 }}>
+        <div data-onboarding="bloch-sphere" style={{ width: 320, flexShrink: 0 }}>
           <BlochPlaybackPanel
             playback={playback}
             numQubits={activeNumQubits}
+            fullscreenOpen={blochFullscreen}
+            onFullscreenChange={setBlochFullscreen}
+            previewCaption={gatePreview?.caption ?? null}
           />
         </div>
       </div>

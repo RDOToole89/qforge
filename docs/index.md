@@ -118,7 +118,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed design blueprint and [FR
 - **Getting Started**: Installation, quickstart, and basic usage
 - **User Guide**: Comprehensive analysis workflows and metric explanations
 - **API Reference**: Complete function and class documentation
-- **Research**: [Structured Substrate Thesis (SST)](research-docs/sst-ext.md) and [Research Plan](research-docs/RESEARCH_PLAN.md)
+- **Research**: [Research Direction](research/research-direction.md) and [Hardware Results](research/2026-04-04-hardware-scaling-results.md)
 - **[Architecture](architecture/ARCHITECTURE.md)**: System design and integration patterns
 - **Examples**: Practical tutorials and use cases
 

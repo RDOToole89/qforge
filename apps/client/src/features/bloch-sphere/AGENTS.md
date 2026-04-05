@@ -34,7 +34,11 @@ types.ts              Types only. No logic. Change here first when adding new da
                       Includes ExperimentalDataEntry for fingerprint loading.
 config.ts             DEFAULT_CONFIG. All probe states, channels, topologies defined here.
                       To add a state/channel/topology: add an entry, it auto-appears in UI.
-math.ts               Pure functions. V3(), spherePoints(), compileBlochMap(), buildRuntime().
+math.ts               Pure functions. V3(), spherePoints(), compileBlochMap(), buildRuntime(),
+                      stateVectorToBloch() (partial trace → Pauli expectations),
+                      blochToThree() (canonical coordinate swap),
+                      correlationMatrix() (ΔCov), pairConcurrence() (Wootters formula),
+                      threeTangle() (CKW), multipartiteTangle(), oneTangle().
                       compileBlochMap() uses new Function() to compile string expressions
                       like "(1-p)*rx" into executable Bloch map functions.
                       buildRuntime() takes config.channels and returns RuntimeChannel objects
@@ -49,11 +53,17 @@ BlochSphereScreen.tsx  Main orchestrator. Manages all state: tab, mode (builtin/
                       experiment result selection, sweep config/animation.
                       Contains inline MIMatrixHeatmap component.
                       USE DOM component.
+data/
+  stateBlochConfigs.ts  90+ BlochDot configs for glossary terms (extracted from old MiniBlochSphere).
+                        Maps glossary term IDs to {dots, caption} for mini Bloch sphere rendering.
+
 components/
-  BlochScene.tsx       Three.js scene: wireframe sphere, axes, great circles, pole dots,
-                      state Bloch vector arrow, point clouds (blue original + orange transformed).
-                      In experiment mode: renders additionalStates as colored spheres,
-                      skips transformed cloud. Controlled rotation via parent. USE DOM.
+  UnifiedBlochSphere.tsx  Single Bloch sphere component serving ALL use cases via discriminated
+                          union props (mode: "glossary" | "visualizer" | "circuit").
+                          - glossary: auto-rotate, drag-to-spin, expand, dot glow meshes
+                          - visualizer: external rotation, point clouds, channel transforms
+                          - circuit: gentle auto-rotate, dots updated via refs (no rebuild)
+                          Replaces both old BlochScene.tsx and MiniBlochSphere.tsx. USE DOM.
   TwoQubitScene.tsx    Three.js scene: 3-axis correlator space (ZI, IZ, ZZ).
                       Multiple topology clouds with distinct colors. Supports "all" mode.
                       Controlled rotation via parent. USE DOM.

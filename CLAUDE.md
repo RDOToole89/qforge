@@ -8,7 +8,7 @@ This is a **research-grade quantum experiment framework** built on Qiskit for co
 
 ## Research Focus: Structured Decoherence Pathways
 
-**Central Hypothesis**: Quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns. The framework implements the **Spring Network Model** where entanglement bonds act as springs and decoherence flows along tension patterns.
+**Central Hypothesis**: Quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns. The framework uses a **Spring Network Model** where entanglement bonds act as springs and decoherence flows along tension patterns.
 
 **Complete Research Metrics Suite (v1.0 Schema Compliant):**
 
@@ -312,11 +312,11 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ## Framework Generalizability
 
-**Key insight**: Although the current flagship is **SST and structured decoherence**, the architecture is **deliberately general**:
+**Key insight**: Although the current flagship is **structured decoherence research**, the architecture is **deliberately general**:
 
-- `src/core/` is not tied to SST — it's pure physics + metrics
+- `src/core/` is not tied to any specific hypothesis — it's pure physics + metrics
 - `src/engine/` doesn't know what "structured decoherence" means — it just orchestrates
-- Only `src/experiments/` carries SST-specific semantics
+- Only `src/experiments/` carries research-specific semantics
 
 ### ExperimentProgram Abstraction
 
@@ -346,7 +346,7 @@ class ExperimentProgram(Protocol):
 # src/experiments/__init__.py
 EXPERIMENT_REGISTRY = {
     "sst_q1": SSTHypothesisQ1(),
-    "bell_chsh": BellCHSH(),  # future: non-SST proof of generality
+    "bell_chsh": BellCHSH(),  # non-decoherence experiment, proves generality
     # "vqe_benchmark": VQEBenchmark(),
 }
 ```
@@ -369,13 +369,13 @@ def run_experiment(name: str, override: list[str] = []):
 
 ### Metrics Stay General, Interpretation Specializes
 
-- `src/core/analysis/metrics/` — **strictly general** (no SST language)
+- `src/core/analysis/metrics/` — **strictly general** (no research-specific language)
 - `StructuredDecoherenceMetrics` — one _view_ over the metric bundle
 - Future: `BenchmarkMetrics`, `EntanglementMetrics`, etc.
 
 The engine routes via `research_type`:
 
-- `research_type="structured_decoherence"` → SST metrics
+- `research_type="structured_decoherence"` → decoherence pathway metrics
 - `research_type="benchmark"` → hardware benchmark metrics
 - etc.
 
@@ -388,7 +388,7 @@ The engine routes via `research_type`:
 - Respect the layered architecture (`experiments → engine → core`)
 - Keep everything deterministic and reproducible
 - Keep metrics mathematically and physically faithful
-- Treat SST as **one experiment program**, not the framework's identity
+- Treat structured decoherence as **one experiment program**, not the framework's identity
 - Keep CLI/UI layers thin — they call into the framework, not the reverse
 
 ### DO NOT (without being asked)

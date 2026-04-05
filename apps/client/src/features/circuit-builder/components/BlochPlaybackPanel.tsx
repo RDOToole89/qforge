@@ -1,6 +1,6 @@
 "use dom";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import type { UsePlaybackReturn } from "../hooks/usePlayback";
@@ -9,15 +9,26 @@ import { colors, fonts } from "../styles";
 interface BlochPlaybackPanelProps {
   playback: UsePlaybackReturn;
   numQubits: number;
+  /** Externally control fullscreen (for onboarding) */
+  fullscreenOpen?: boolean;
+  onFullscreenChange?: (open: boolean) => void;
+  /** When set, shows a preview caption above the sphere */
+  previewCaption?: string | null;
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4];
 
-export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybackPanelProps) {
-  const [fullscreen, setFullscreen] = useState(false);
+export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption }: BlochPlaybackPanelProps) {
+  const [internalFs, setInternalFs] = useState(false);
+  // Sync external fullscreen control
+  useEffect(() => {
+    if (fullscreenOpen !== undefined) setInternalFs(fullscreenOpen);
+  }, [fullscreenOpen]);
+  const fullscreen = internalFs;
+  const setFullscreen = (v: boolean) => { setInternalFs(v); onFullscreenChange?.(v); };
   const [corrMode, setCorrMode] = useState<"correlation" | "concurrence" | "tangle">("correlation");
-  const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, totalSnapshots } = playback;
-  const { status, snapshotIndex, speed, dots, correlations } = state;
+  const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, scrubTo, snapToStep, totalSnapshots } = playback;
+  const { status, snapshotIndex, speed, dots, correlations, progress } = state;
 
   const hasCircuit = totalSnapshots > 1;
 
@@ -45,8 +56,9 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
           alignItems: "center",
           justifyContent: "space-between",
         }}>
-          <span>Bloch Sphere</span>
+          <span>{previewCaption ? "Gate Preview" : "Bloch Sphere"}</span>
           <button
+            data-onboarding="expand-bloch"
             onClick={() => setFullscreen(true)}
             title="Expand to fullscreen"
             style={{
@@ -68,6 +80,21 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
           </button>
         </div>
 
+        {/* Preview caption */}
+        {previewCaption && (
+          <div style={{
+            padding: "6px 14px",
+            fontSize: 11,
+            color: colors.accentLight,
+            fontFamily: fonts.sans,
+            lineHeight: 1.4,
+            borderBottom: `1px solid ${colors.border}`,
+            background: `${colors.accentDim}40`,
+          }}>
+            {previewCaption}
+          </div>
+        )}
+
         {/* Sphere */}
         <div style={{
           flex: 1,
@@ -77,7 +104,7 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
           justifyContent: "center",
           padding: 8,
         }}>
-          {hasCircuit ? (
+          {(hasCircuit || previewCaption) ? (
             <UnifiedBlochSphere mode="circuit" dots={dots} size={260} />
           ) : (
             <div style={{
@@ -98,7 +125,9 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
 
         {/* Correlation heatmap */}
         {hasCircuit && correlations && numQubits >= 2 && (
-          <CorrelationPanel correlations={correlations} numQubits={numQubits} corrMode={corrMode} setCorrMode={setCorrMode} />
+          <div data-onboarding="correlation-panel">
+            <CorrelationPanel correlations={correlations} numQubits={numQubits} corrMode={corrMode} setCorrMode={setCorrMode} />
+          </div>
         )}
 
         <TransportControls
@@ -107,13 +136,15 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
           snapshotIndex={snapshotIndex}
           totalSnapshots={totalSnapshots}
           speed={speed}
+          progress={progress}
           play={play}
           pause={pause}
           stepBack={stepBack}
           stepForward={stepForward}
           setSpeed={setSpeed}
           reset={reset}
-          onSeek={seek}
+          onScrub={scrubTo}
+          onScrubEnd={snapToStep}
         />
       </div>
 
@@ -184,7 +215,7 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
             </div>
 
             {/* Large sphere */}
-            <div style={{
+            <div data-onboarding="modal-sphere" style={{
               flex: 1,
               display: "flex",
               alignItems: "center",
@@ -211,23 +242,26 @@ export default function BlochPlaybackPanel({ playback, numQubits }: BlochPlaybac
               <QubitLegend dots={dots} hasCircuit={hasCircuit} />
             </div>
             {hasCircuit && correlations && numQubits >= 2 && (
-              <div style={{ padding: "0 20px", display: "flex", justifyContent: "center" }}>
+              <div data-onboarding="modal-correlation" style={{ padding: "0 20px", display: "flex", justifyContent: "center" }}>
                 <CorrelationPanel correlations={correlations} numQubits={numQubits} corrMode={corrMode} setCorrMode={setCorrMode} />
               </div>
             )}
-            <div style={{ padding: "0 20px 16px" }}>
+            <div data-onboarding="modal-controls" style={{ padding: "0 20px 16px" }}>
               <TransportControls
                 hasCircuit={hasCircuit}
                 status={status}
                 snapshotIndex={snapshotIndex}
                 totalSnapshots={totalSnapshots}
                 speed={speed}
+                progress={progress}
                 play={play}
                 pause={pause}
                 stepBack={stepBack}
                 stepForward={stepForward}
                 setSpeed={setSpeed}
                 reset={reset}
+                onScrub={scrubTo}
+                onScrubEnd={snapToStep}
               />
             </div>
           </div>
@@ -267,19 +301,53 @@ interface TransportControlsProps {
   snapshotIndex: number;
   totalSnapshots: number;
   speed: number;
+  progress: number;
   play: () => void;
   pause: () => void;
   stepBack: () => void;
   stepForward: () => void;
   setSpeed: (s: number) => void;
   reset: () => void;
-  onSeek?: (index: number) => void;
+  onScrub?: (progress: number) => void;
+  onScrubEnd?: () => void;
 }
 
 function TransportControls({
   hasCircuit, status, snapshotIndex, totalSnapshots,
-  speed, play, pause, stepBack, stepForward, setSpeed, reset, onSeek,
+  speed, progress, play, pause, stepBack, stepForward, setSpeed, reset, onScrub, onScrubEnd,
 }: TransportControlsProps) {
+  const scrubberRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+
+  const handleScrubFromEvent = useCallback((clientX: number) => {
+    const el = scrubberRef.current;
+    if (!el || !onScrub) return;
+    const rect = el.getBoundingClientRect();
+    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    onScrub(p);
+  }, [onScrub]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDraggingRef.current = true;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    handleScrubFromEvent(e.clientX);
+  }, [handleScrubFromEvent]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    handleScrubFromEvent(e.clientX);
+  }, [handleScrubFromEvent]);
+
+  const handlePointerUp = useCallback(() => {
+    isDraggingRef.current = false;
+    onScrubEnd?.();
+  }, [onScrubEnd]);
+
+  // Step tick marks as fractions
+  const stepTicks = totalSnapshots > 1
+    ? Array.from({ length: totalSnapshots }, (_, i) => i / (totalSnapshots - 1))
+    : [];
+
   return (
     <div style={{
       padding: "8px 14px",
@@ -288,23 +356,73 @@ function TransportControls({
       flexDirection: "column",
       gap: 6,
     }}>
-      {/* Timeline scrubber */}
-      {hasCircuit && totalSnapshots > 2 && (
+      {/* Continuous timeline scrubber */}
+      {hasCircuit && totalSnapshots > 1 && (
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>0</span>
-          <input
-            type="range"
-            min={0}
-            max={totalSnapshots - 1}
-            value={snapshotIndex}
-            onChange={(e) => onSeek?.(Number(e.target.value))}
+          <div
+            ref={scrubberRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
             style={{
               flex: 1,
-              accentColor: colors.accent,
-              height: 4,
+              height: 20,
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              touchAction: "none",
             }}
-          />
+          >
+            {/* Track background */}
+            <div style={{
+              position: "absolute",
+              left: 0, right: 0, top: 8,
+              height: 4,
+              borderRadius: 2,
+              background: colors.border,
+            }} />
+            {/* Filled track */}
+            <div style={{
+              position: "absolute",
+              left: 0, top: 8,
+              width: `${progress * 100}%`,
+              height: 4,
+              borderRadius: 2,
+              background: colors.accent,
+              transition: isDraggingRef.current ? "none" : "width 0.1s ease",
+            }} />
+            {/* Step tick marks */}
+            {stepTicks.map((tick, i) => (
+              <div key={i} style={{
+                position: "absolute",
+                left: `${tick * 100}%`,
+                top: 5,
+                width: 2,
+                height: 10,
+                borderRadius: 1,
+                background: i <= snapshotIndex ? colors.accentLight : colors.textTertiary,
+                opacity: 0.5,
+                transform: "translateX(-1px)",
+              }} />
+            ))}
+            {/* Thumb */}
+            <div style={{
+              position: "absolute",
+              left: `${progress * 100}%`,
+              top: 4,
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              background: colors.accent,
+              border: "2px solid #fff",
+              transform: "translateX(-6px)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              transition: isDraggingRef.current ? "none" : "left 0.1s ease",
+            }} />
+          </div>
           <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>
             {totalSnapshots - 1}
           </span>

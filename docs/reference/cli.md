@@ -24,7 +24,7 @@ $ qxf list
 ┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
 │ sst_q1            │ Test whether entanglement topology influences            │
 │                   │ decoherence pathways                                     │
-│ sst_q1_structured │ SST Q1 with amplitude damping (structured) noise         │
+│ sst_q1_structured │ Structured decoherence Q1 with amplitude damping noise   │
 │ bell_correlation  │ Bell state correlation test - quantum vs classical       │
 │                   │ bounds                                                   │
 └───────────────────┴──────────────────────────────────────────────────────────┘

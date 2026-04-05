@@ -8,9 +8,9 @@ interface CircuitCanvasProps {
   selectedGateId: string | null;
   onGateClick: (gateId: string) => void;
   onGateDoubleClick?: (gateId: string) => void;
-  onCanvasClick: (qubit: number) => void;
+  onCanvasClick: (qubit: number, event?: React.MouseEvent) => void;
   /** Called when a gate is dropped from the palette onto a qubit wire */
-  onDrop?: (gateType: string, qubit: number) => void;
+  onDrop?: (gateType: string, qubit: number, event?: React.DragEvent) => void;
   /** Show moment column grid lines */
   showGrid?: boolean;
   /** Highlight column/wire during drag */
@@ -67,7 +67,7 @@ export default function CircuitCanvas({
           closest = i;
         }
       }
-      onCanvasClick(closest);
+      onCanvasClick(closest, e);
     },
     [numQubits, onCanvasClick],
   );
@@ -107,7 +107,7 @@ export default function CircuitCanvas({
       setDragQubit(null);
       const gateType = e.dataTransfer.getData("gate-type");
       if (gateType && onDrop) {
-        onDrop(gateType, closestQubit(e));
+        onDrop(gateType, closestQubit(e), e);
       }
     },
     [closestQubit, onDrop],

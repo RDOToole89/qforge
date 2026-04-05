@@ -7,14 +7,40 @@ function genId(): string {
   return `g${nextId++}`;
 }
 
-function createGate(gateType: GateType, qubit: number, params?: number[]): PlacedGate {
+function createGate(gateType: GateType, qubit: number, numQubits: number, params?: number[]): PlacedGate {
   const def = getGateDef(gateType);
-  const qubits: number[] =
-    def.numQubits === 1
-      ? [qubit]
-      : def.numQubits === 2
-        ? [Math.max(0, qubit - 1), qubit] // default control = qubit above target
-        : [Math.max(0, qubit - 2), Math.max(0, qubit - 1), qubit]; // Toffoli
+  let qubits: number[];
+
+  if (def.numQubits === 1) {
+    qubits = [qubit];
+  } else if (def.numQubits === 2) {
+    // Control above target, but ensure they're different qubits
+    const control = qubit > 0 ? qubit - 1 : qubit + 1;
+    qubits = [Math.min(control, numQubits - 1), qubit];
+    // If still the same (only 1 qubit in circuit), this will be caught by validation
+  } else {
+    // Toffoli: two controls above target
+    const c1 = qubit > 1 ? qubit - 2 : (qubit + 1 < numQubits ? qubit + 1 : qubit);
+    const c2 = qubit > 0 ? qubit - 1 : (qubit + 2 < numQubits ? qubit + 2 : qubit);
+    qubits = [c1, c2, qubit];
+  }
+
+  // Ensure all qubits are distinct
+  const unique = [...new Set(qubits)];
+  if (unique.length < qubits.length) {
+    // Reassign to fill distinct qubits
+    qubits = [];
+    let next = 0;
+    for (let i = 0; i < def.numQubits; i++) {
+      while (qubits.includes(next) && next < numQubits) next++;
+      if (next < numQubits) qubits.push(next);
+      next++;
+    }
+    // Target is always last
+    if (!qubits.includes(qubit) && qubits.length > 0) {
+      qubits[qubits.length - 1] = qubit;
+    }
+  }
 
   return {
     id: genId(),
@@ -24,10 +50,33 @@ function createGate(gateType: GateType, qubit: number, params?: number[]): Place
   };
 }
 
+/** Validate whether a gate can be placed. Returns error message or null if valid. */
+export function validateGatePlacement(
+  gateType: GateType,
+  qubit: number,
+  numQubits: number,
+): string | null {
+  const def = getGateDef(gateType);
+
+  if (def.numQubits > numQubits) {
+    return `${def.name} requires ${def.numQubits} qubits, but the circuit only has ${numQubits}. Increase the qubit count first.`;
+  }
+
+  if (def.numQubits === 2 && numQubits < 2) {
+    return `${def.name} is a 2-qubit gate \u2014 it needs a control and a target on different qubits. Add at least 2 qubits to your circuit.`;
+  }
+
+  if (def.numQubits === 3 && numQubits < 3) {
+    return `${def.name} (Toffoli) needs 3 distinct qubits \u2014 two controls and one target. Add at least 3 qubits to your circuit.`;
+  }
+
+  return null;
+}
+
 function circuitReducer(state: Circuit, action: CircuitAction): Circuit {
   switch (action.type) {
     case "ADD_GATE": {
-      const gate = createGate(action.gateType, action.qubit, action.params);
+      const gate = createGate(action.gateType, action.qubit, state.numQubits, action.params);
       const moments = [...state.moments];
 
       // Ensure enough moments exist
@@ -140,33 +189,50 @@ export function useCircuit() {
   const [circuit, dispatch] = useReducer(circuitReducer, INITIAL_CIRCUIT);
 
   const addGate = useCallback(
-    (gateType: GateType, qubit: number, momentIndex?: number) => {
+    (gateType: GateType, qubit: number, momentIndex?: number): string | null => {
+      // Validate placement
+      const error = validateGatePlacement(gateType, qubit, circuit.numQubits);
+      if (error) return error;
+
       if (momentIndex !== undefined) {
         dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex });
-        return;
+        return null;
       }
-      // Find the earliest moment where this gate's qubits are free
-      const def = getGateDef(gateType);
-      const gateQubits: number[] =
-        def.numQubits === 1
-          ? [qubit]
-          : def.numQubits === 2
-            ? [Math.max(0, qubit - 1), qubit]
-            : [Math.max(0, qubit - 2), Math.max(0, qubit - 1), qubit];
 
-      let targetMoment = circuit.moments.length; // default: new moment
+      // Compute which qubits this gate will occupy
+      const testGate = createGate(gateType, qubit, circuit.numQubits);
+      const gateQubits = testGate.qubits;
+
+      // Find the latest moment where any of this gate's qubits are used,
+      // then place at the next moment. This preserves circuit ordering.
+      let latestUsed = -1;
       for (let mi = 0; mi < circuit.moments.length; mi++) {
         const usedQubits = new Set(
           circuit.moments[mi].gates.flatMap((g) => g.qubits),
         );
-        if (gateQubits.every((q) => !usedQubits.has(q))) {
-          targetMoment = mi;
-          break;
+        if (gateQubits.some((q) => usedQubits.has(q))) {
+          latestUsed = mi;
         }
       }
+
+      // Try to share the moment after latestUsed if those qubits are free there
+      let targetMoment = latestUsed + 1;
+
+      // If targetMoment exists and has room, use it; otherwise append
+      if (targetMoment < circuit.moments.length) {
+        const usedInTarget = new Set(
+          circuit.moments[targetMoment].gates.flatMap((g) => g.qubits),
+        );
+        if (!gateQubits.every((q) => !usedInTarget.has(q))) {
+          // Conflict — use a new moment at the end
+          targetMoment = circuit.moments.length;
+        }
+      }
+
       dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex: targetMoment });
+      return null;
     },
-    [circuit.moments],
+    [circuit.moments, circuit.numQubits],
   );
 
   const removeGate = useCallback((gateId: string) => {

@@ -30,6 +30,8 @@ export interface PlaybackState {
   speed: number;
   dots: BlochDot[];
   correlations: CorrelationData | null;
+  /** Continuous progress 0..1 across the entire animation */
+  progress: number;
 }
 
 export interface UsePlaybackReturn {
@@ -41,6 +43,10 @@ export interface UsePlaybackReturn {
   setSpeed: (s: number) => void;
   reset: () => void;
   seek: (index: number) => void;
+  /** Scrub to a continuous position (0..1). Pauses playback. */
+  scrubTo: (progress: number) => void;
+  /** Snap to the nearest step boundary. Call on mouseUp after scrubbing. */
+  snapToStep: () => void;
   totalSnapshots: number;
 }
 
@@ -127,11 +133,17 @@ export function usePlayback(
   const frameRef = useRef(0);
   const lastTimeRef = useRef(0);
 
-  // Reset when circuit changes
+  // Reset when circuit actually changes (new snapshot count or qubit count)
+  const prevLenRef = useRef(snapshots.length);
+  const prevQubitsRef = useRef(numQubits);
   useEffect(() => {
-    setSnapshotIndex(0);
-    setT(0);
-    setStatus("idle");
+    if (snapshots.length !== prevLenRef.current || numQubits !== prevQubitsRef.current) {
+      setSnapshotIndex(0);
+      setT(0);
+      setStatus("idle");
+      prevLenRef.current = snapshots.length;
+      prevQubitsRef.current = numQubits;
+    }
   }, [snapshots.length, numQubits]);
 
   const { dots, correlations } = computeFrame(snapshots, numQubits, snapshotIndex, t);
@@ -213,13 +225,40 @@ export function usePlayback(
   }, []);
 
   const seek = useCallback((index: number) => {
+    cancelAnimationFrame(frameRef.current);
     setStatus("paused");
     setT(0);
-    setSnapshotIndex(Math.max(0, Math.min(index, snapshots.length - 1)));
+    setSnapshotIndex(index);
+  }, []);
+
+  // Continuous scrubbing: progress 0..1 maps to snapshotIndex + t
+  const scrubTo = useCallback((progress: number) => {
+    cancelAnimationFrame(frameRef.current);
+    setStatus("paused");
+    const maxIdx = Math.max(snapshots.length - 1, 1);
+    const continuous = progress * maxIdx;
+    const idx = Math.floor(continuous);
+    const frac = continuous - idx;
+    setSnapshotIndex(Math.min(idx, snapshots.length - 1));
+    setT(idx >= snapshots.length - 1 ? 0 : frac);
   }, [snapshots.length]);
 
+  // Snap to nearest step on release
+  const snapToStep = useCallback(() => {
+    setT((currentT) => {
+      if (currentT > 0.5) {
+        setSnapshotIndex((i) => Math.min(i + 1, snapshots.length - 1));
+      }
+      return 0;
+    });
+  }, [snapshots.length]);
+
+  // Compute continuous progress
+  const maxIdx = Math.max(snapshots.length - 1, 1);
+  const progress = (snapshotIndex + t) / maxIdx;
+
   return {
-    state: { snapshotIndex, t, status, speed, dots, correlations },
+    state: { snapshotIndex, t, status, speed, dots, correlations, progress },
     play,
     pause,
     stepForward,
@@ -227,6 +266,8 @@ export function usePlayback(
     setSpeed,
     reset,
     seek,
+    scrubTo,
+    snapToStep,
     totalSnapshots: snapshots.length,
   };
 }
