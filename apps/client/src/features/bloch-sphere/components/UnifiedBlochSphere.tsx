@@ -34,9 +34,31 @@ interface CircuitMode {
   mode: "circuit";
   dots: BlochDot[];
   size?: number;
+  /** Camera zoom: 1.0 = default, < 1 = zoomed in, > 1 = zoomed out */
+  zoom?: number;
 }
 
 export type UnifiedBlochSphereProps = GlossaryMode | VisualizerMode | CircuitMode;
+
+// ── Text sprite helper ──────────────────────────────────────────
+
+function makeTextSprite(text: string, color: string, size = 0.12): THREE.Sprite {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 64, 32);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(size * 4, size * 2, 1);
+  return sprite;
+}
 
 // ── Shared scaffold builder ─────────────────────────────────────
 
@@ -81,6 +103,21 @@ function buildScaffold(scene: THREE.Scene, opts: { background: number; detail: "
       m.position.copy(blochToThree(pos.x, pos.y, pos.z));
       scene.add(m);
     });
+
+    // Axis labels + pole labels
+    const labelData: [number, number, number, string, string][] = [
+      [1.45, 0, 0, "X", "#ff4466"],    // +X axis
+      [-1.45, 0, 0, "-X", "#ff4466"],
+      [0, 1.45, 0, "Y", "#44ff88"],    // +Y axis
+      [0, -1.45, 0, "-Y", "#44ff88"],
+      [0, 0, 1.25, "|0\u27E9", "#4488ff"],  // +Z = |0⟩ (north pole)
+      [0, 0, -1.25, "|1\u27E9", "#4488ff"],  // -Z = |1⟩ (south pole)
+    ];
+    for (const [bx, by, bz, text, color] of labelData) {
+      const sprite = makeTextSprite(text, color, text.length > 2 ? 0.14 : 0.1);
+      sprite.position.copy(blochToThree(bx, by, bz));
+      scene.add(sprite);
+    }
 
     // Great circles
     [0, 1, 2].forEach((ax) => {
@@ -369,11 +406,13 @@ function VisualizerSphere({
 
 // ── Circuit mode ────────────────────────────────────────────────
 
-function CircuitSphere({ dots, size }: CircuitMode) {
+function CircuitSphere({ dots, size, zoom = 1 }: CircuitMode) {
   const mountRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const dotsRef = useRef(dots);
   useEffect(() => { dotsRef.current = dots; }, [dots]);
+  const zoomRef = useRef(zoom);
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
 
   const dotMeshesRef = useRef<THREE.Mesh[]>([]);
   const glowMeshesRef = useRef<THREE.Mesh[]>([]);
@@ -422,10 +461,19 @@ function CircuitSphere({ dots, size }: CircuitMode) {
     dotMeshesRef.current = dotMeshes;
     glowMeshesRef.current = glowMeshes;
 
+    const baseDistance = 3.5; // default camera distance from origin
+
     const animate = () => {
       frameRef.current = requestAnimationFrame(animate);
       // Gentle auto-rotate
       scene.rotation.y += 0.002;
+
+      // Apply zoom to camera distance
+      const z = zoomRef.current;
+      const dist = baseDistance * z;
+      const angle = performance.now() * 0.0001; // slow orbit for variety
+      camera.position.set(dist * 0.72, dist * 0.52, dist * 0.72);
+      camera.lookAt(0, 0, 0);
 
       // Update dot positions from ref (no scene rebuild needed)
       const curDots = dotsRef.current;

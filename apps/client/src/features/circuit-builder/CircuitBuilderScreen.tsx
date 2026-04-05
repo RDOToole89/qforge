@@ -352,10 +352,12 @@ export default function CircuitBuilderScreen() {
               onSetNumQubits={(n) => { setNumQubits(n); setActivePreset(null); }}
               onClear={() => { clear(); setActivePreset(null); }}
               onExport={handleExport}
+              activePresetId={activePreset?.id ?? null}
               onLoadPreset={(c) => {
                 loadPreset(c);
                 const preset = CIRCUIT_PRESETS.find((p) => p.circuit === c) ?? null;
                 setActivePreset(preset);
+                setActiveGateType(null); // clear gate preview so Bloch shows the circuit
               }}
             />
           </div>

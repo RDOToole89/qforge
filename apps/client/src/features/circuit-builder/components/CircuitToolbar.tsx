@@ -7,6 +7,7 @@ interface CircuitToolbarProps {
   onSetNumQubits: (n: number) => void;
   onClear: () => void;
   onLoadPreset?: (circuit: Circuit) => void;
+  activePresetId?: string | null;
   onExport?: () => void;
   onRun?: () => void;
   isRunning?: boolean;
@@ -17,6 +18,7 @@ export default function CircuitToolbar({
   onSetNumQubits,
   onClear,
   onLoadPreset,
+  activePresetId,
   onExport,
   onRun,
   isRunning,
@@ -93,7 +95,7 @@ export default function CircuitToolbar({
             Presets
           </label>
           <select
-            value=""
+            value={activePresetId ?? ""}
             onChange={(e) => {
               const preset = CIRCUIT_PRESETS.find((p) => p.id === e.target.value);
               if (preset) onLoadPreset(preset.circuit);

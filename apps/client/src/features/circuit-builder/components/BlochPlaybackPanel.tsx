@@ -27,6 +27,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
   const fullscreen = internalFs;
   const setFullscreen = (v: boolean) => { setInternalFs(v); onFullscreenChange?.(v); };
   const [corrMode, setCorrMode] = useState<"correlation" | "concurrence" | "tangle">("correlation");
+  const [blochZoom, setBlochZoom] = useState(1.0);
   const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, scrubTo, snapToStep, totalSnapshots } = playback;
   const { status, snapshotIndex, speed, dots, correlations, progress } = state;
 
@@ -105,7 +106,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           padding: 8,
         }}>
           {(hasCircuit || previewCaption) ? (
-            <UnifiedBlochSphere mode="circuit" dots={dots} size={260} />
+            <UnifiedBlochSphere mode="circuit" dots={dots} size={260} zoom={blochZoom} />
           ) : (
             <div style={{
               color: colors.textTertiary,
@@ -121,7 +122,59 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           )}
         </div>
 
+        {/* Zoom slider */}
+        {(hasCircuit || previewCaption) && (
+          <div style={{
+            padding: "2px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}>
+            <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono }}>-</span>
+            <input
+              type="range"
+              min={0.5}
+              max={2.0}
+              step={0.05}
+              value={blochZoom}
+              onChange={(e) => setBlochZoom(parseFloat(e.target.value))}
+              style={{ flex: 1, accentColor: colors.textTertiary, height: 3, cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono }}>+</span>
+          </div>
+        )}
+
         <QubitLegend dots={dots} hasCircuit={hasCircuit} />
+
+        {/* Live Bloch state readout */}
+        {hasCircuit && dots.length > 0 && (
+          <div style={{
+            padding: "4px 14px 6px",
+            borderTop: `1px solid ${colors.border}`,
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}>
+            {dots.map((d, i) => {
+              const len = Math.sqrt(d.rx * d.rx + d.ry * d.ry + d.rz * d.rz);
+              const purity = len > 0.95 ? "pure" : len < 0.15 ? "mixed" : `${(len * 100).toFixed(0)}%`;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, fontFamily: fonts.mono }}>
+                  <div style={{ width: 6, height: 6, borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                  <span style={{ color: colors.textTertiary, minWidth: 16 }}>q{i}</span>
+                  <span style={{ color: colors.textSecondary }}>
+                    ({d.rx >= 0 ? "+" : ""}{d.rx.toFixed(2)},
+                    {d.ry >= 0 ? " +" : " "}{d.ry.toFixed(2)},
+                    {d.rz >= 0 ? " +" : " "}{d.rz.toFixed(2)})
+                  </span>
+                  <span style={{ color: len > 0.95 ? colors.success : len < 0.15 ? colors.warning : colors.textTertiary, fontSize: 8 }}>
+                    {purity}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Correlation heatmap */}
         {hasCircuit && correlations && numQubits >= 2 && (
@@ -224,7 +277,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
               minHeight: 400,
             }}>
               {hasCircuit ? (
-                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} />
+                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} zoom={blochZoom} />
               ) : (
                 <div style={{
                   color: colors.textTertiary,
