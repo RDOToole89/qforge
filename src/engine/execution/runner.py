@@ -246,9 +246,13 @@ class EngineExperimentRunner:
             if t2 is not None:
                 noise_params["t2"] = t2
 
-            # Pass custom_params through for noise models that need them
+            # Pass noise-relevant custom_params only (allowlist of noise keys)
             if custom_params:
-                noise_params["custom_params"] = custom_params
+                noise_keys = {"correlation_strength", "topology", "temperature",
+                              "gate_time", "dt", "qubit_frequency"}
+                filtered = {k: v for k, v in custom_params.items() if k in noise_keys}
+                if filtered:
+                    noise_params["custom_params"] = filtered
 
             if readout_error_rate is not None:
                 noise_params["readout_error_rate"] = readout_error_rate

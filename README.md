@@ -1,23 +1,151 @@
 # Qiskit Experiment Framework
 
-A research-grade quantum experiment framework built on Qiskit for investigating structured decoherence pathways in quantum systems — and for learning how quantum computing actually works.
+**A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware.**
 
-I started building this about a year ago as a side project to teach myself quantum mechanics and Qiskit. It grew into something I think is genuinely useful: a framework that sits between a learning tool and a research instrument. Educational enough to teach concepts, rigorous enough to produce results worth publishing. I'm open-sourcing it because I think others might find it useful too — whether you're learning quantum computing, running experiments, or building your own analysis tools on top.
+I'm a software engineer, not a physicist. I fell in love with quantum mechanics as a kid watching BBC science programs — Schrodinger's cat completely blew my mind. When I asked my teacher about it, she said: *"We're not discussing that in this class."* I never ended up in physics.
 
-This is still actively developing. Comments, ideas, and contributions are welcome. Feel free to use it however you like.
+About eight years ago, stuck in the Australian outback on a working-holiday visa — isolated from the world for three months with nothing but an internet connection — I started watching physics lectures from the Royal Institution. Sean Carroll's clarity and elegance in explaining physics was addictive. I fell in love with the topic all over again and went deep: thousands of hours of lectures and videos from all kinds of thinkers. I'm particularly inspired by Deutsch and Marletto's constructor theory — the idea that physics should be framed in terms of what transformations are and aren't possible.
+
+That inspiration led to a specific question: **if we can characterize the *structure* of how quantum states decohere — not just how fast, but in what pattern — could we predict decoherence pathways and build smarter error correction?** That's speculative, and I'd be the first to admit it. But the question drove me to build this framework, which grew into something much more general than my original research direction.
+
+The core idea is simple: **abstract away the hard parts of quantum experimentation**. You pick a quantum state, choose a noise model, configure your simulation (or point it at real hardware), and hit run. The framework handles circuit construction, noise application, execution, measurement canonicalization, and structured analysis output — all through a clean two-function API. Results come back as typed Pydantic models with provenance, metrics with confidence intervals, and schema-compliant output you can actually analyze programmatically.
+
+This framework sits between a teaching tool and a research instrument. It's educational enough to learn from (interactive Bloch sphere, 135-term glossary, 22 preset circuits with step-by-step explanations) and rigorous enough to produce results worth discussing (8 information-theoretic metrics with bootstrap CIs, 4 simulation backends, real IBM Quantum hardware integration with full provenance). I've used it to run experiments on three IBM quantum processors, and the results were interesting enough to write up.
+
+I'm open-sourcing it because I believe quantum computing should be accessible to anyone willing to tinker — you don't need a physics PhD to set up an experiment, visualize a quantum state, or explore how noise shapes entanglement. I hope this framework helps spark that curiosity in others the way Sean Carroll's lectures sparked it in me.
 
 ---
 
-## What It Does
+## What Makes This Different
 
-### Quantum Experiment Engine (Python)
+Most quantum computing tools are either toy tutorials or impenetrable research code. This framework tries to be the bridge:
 
-Run structured quantum experiments with a clean two-function API:
+- **Learn by doing** — 22 preset circuits with step-by-step explanations, animated Bloch sphere playback, entanglement analysis at every gate
+- **Progress to research** — same engine that teaches Bell states also runs 47-condition sensitivity studies on real hardware
+- **See the physics** — every experiment produces visualizable output: Bloch vectors, correlator spaces, mutual information heatmaps, decoherence sweeps
+- **Run on real hardware** — `sim_mode="hardware"` sends your circuit to IBM Quantum with full transpilation and calibration capture
+
+---
+
+## Architecture
+
+The framework has three clean layers. The engine doesn't know about decoherence. The core doesn't know about experiments. Each layer is independently useful.
+
+```mermaid
+graph TB
+    subgraph "Experiments Layer"
+        B1[basics/]
+        B2[advanced/]
+        B3[decoherence/]
+        B4[hardware/]
+    end
+
+    subgraph "Engine Layer"
+        E1["run() / sweep()"]
+        E2[Pydantic Models]
+        E3[Provenance]
+        E4[Fidelity]
+        E5[Visualization Pipeline]
+    end
+
+    subgraph "Core Layer"
+        C1[State Preparation<br/>7 state types]
+        C2[Noise Models<br/>8 noise channels]
+        C3[Analysis<br/>13 metrics + pipelines]
+    end
+
+    subgraph "Execution Backends"
+        X1[AerSimulator<br/>qasm / statevector / density_matrix]
+        X2[IBM Quantum<br/>SamplerV2 / hardware]
+    end
+
+    B1 & B2 & B3 & B4 --> E1
+    E1 --> C1 & C2
+    E1 --> X1 & X2
+    E1 --> C3
+    E1 --> E2 & E3 & E4 & E5
+```
+
+```mermaid
+graph LR
+    subgraph "Python Backend"
+        API[FastAPI<br/>11 endpoints]
+        ENG[Engine]
+        CORE[Core Physics]
+    end
+
+    subgraph "Frontend App"
+        VIZ[Bloch Sphere<br/>Visualizer]
+        CB[Circuit Builder<br/>+ Playback]
+        GL[Quantum Glossary<br/>135 terms]
+        CFG[Experiment<br/>Configurator]
+    end
+
+    API --> ENG --> CORE
+    VIZ & CB & GL & CFG --> API
+```
+
+**Key principle**: `src/core/` is pure physics — it has no idea what "structured decoherence" means. `src/engine/` orchestrates without domain knowledge. Only `src/experiments/` carries research-specific semantics. This means you can build completely new research programs on top of the same engine.
+
+---
+
+## Features at a Glance
+
+### Python Engine
+
+| | |
+|---|---|
+| **State types** | GHZ, W, Bell, Cluster, Superposition, Custom (pass any QuantumCircuit) |
+| **Noise models** | Depolarizing, amplitude damping, phase damping, bit flip, phase flip, thermal relaxation, correlated depolarizing, readout error |
+| **Simulation modes** | `qasm` (shot-based), `statevector` (exact), `density_matrix` (mixed state), `hardware` (IBM Quantum) |
+| **Metrics** | 8 information-theoretic metrics with bootstrap 95% CIs and v1.0 schema |
+| **Experiments** | 39 pre-built programs: basics (11 steps + 10 deep dives) → advanced (8 steps + 7 deep dives) → decoherence (4 research) → hardware |
+| **Hardware** | IBM Quantum via SamplerV2, auto-backend selection, transpilation capture, calibration snapshots |
+| **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
+| **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
+| **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
+| **Tests** | 382 passing, 90% coverage on core analysis |
+
+### Frontend App (React Native / Expo)
+
+| Feature | What it does |
+|---------|-------------|
+| **Bloch Sphere Visualizer** | Interactive 3D noise channel visualization. Watch decoherence deform the Bloch ball. Sweep error rates. Compare probe states and topologies. Load real experiment results. |
+| **Circuit Builder** | Drag-and-drop circuit construction with 14 gate types. 22 preset circuits (Bell, GHZ, QFT, QPE, Teleportation, Grover, etc.). Step-by-step Bloch sphere playback with entanglement analysis at every gate. |
+| **Quantum Glossary** | 135 terms across 16 categories. Formal definitions, intuitive explanations, LaTeX equations, cross-linked navigation. |
+| **Experiment Configurator** | Full GUI for building experiment configs: state type, noise model, simulation mode, hardware backend, metrics. Live circuit preview. |
+| **Results Browser** | Browse, sort, and inspect past experiment results. |
+| **Experiment Registry** | Discover and launch pre-built experiments with one tap. |
+
+---
+
+## Quick Start
+
+### Run an Experiment (Python)
+
+```bash
+git clone https://github.com/rootoole/qiskit-experiment-framework.git
+cd qiskit-experiment-framework
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# List available experiments
+python -m src.cli list
+
+# Run your first experiment
+python -m src.cli run bell_state
+
+# Run with overrides
+python -m src.cli run ghz_exploration -s num_qubits=5 -s error_rate=0.1
+```
+
+### Use the Engine API
 
 ```python
 from src.engine.api import run
 from src.engine.models import ExperimentConfig
 
+# Simple experiment
 result = run(ExperimentConfig(
     num_qubits=4,
     state_type="GHZ",
@@ -28,223 +156,130 @@ result = run(ExperimentConfig(
     metrics="structured_decoherence",
 ))
 
+# Results are typed Pydantic models
 print(f"Fidelity: {result.analysis.measurement_results.fidelity:.4f}")
 for name, m in result.metrics_bundle.metrics.items():
-    print(f"  {name}: {m.value:.4f} (95% CI: {m.ci95})")
+    print(f"  {name}: {m.value:.4f}")
 ```
 
-Or run the analysis pipeline directly on any measurement data:
+### Run on Real Hardware
 
 ```python
-from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
+result = run(ExperimentConfig(
+    num_qubits=6,
+    state_type="GHZ",
+    sim_mode="hardware",      # Send to IBM Quantum
+    shots=8192,
+    metrics="structured_decoherence",
+))
 
-results = run_all_to_schema({"000": 400, "111": 400, "001": 100, "110": 100})
-print(f"Structure Score: {results['structure_score']['value']:.4f}")
+print(f"Backend: {result.provenance.simulator_info['backend_name']}")
+print(f"Job ID: {result.provenance.simulator_info['job_id']}")
 ```
 
-### Interactive Visualizer (React Native / Expo)
+See [Hardware Setup Guide](docs/guides/hardware-setup.md) for IBM Quantum credentials.
 
-A full-screen Bloch sphere visualizer with two modes:
-
-- **Built-in mode**: Hardcoded educational examples — watch how 5 noise channels deform the Bloch sphere in real-time, compare probe state responses, explore 2-qubit correlator space
-- **Experiment mode**: Live data from the Python engine — per-qubit Bloch vectors from partial traces, real correlators, mutual information heatmaps, animated decoherence sweeps
-
-### Quantum Glossary
-
-A searchable reference of ~100+ quantum computing terms across 16 categories, with formal definitions, intuitive explanations, key equations, symbol annotations, and cross-linked related terms. Built into the app as a learning companion.
-
----
-
-## Features
-
-### Simulation Modes
-
-| Mode | Description | Noise Support |
-|------|-------------|---------------|
-| `qasm` | Shot-based measurement sampling | Yes |
-| `statevector` | Exact noiseless state (counts via multinomial) | No |
-| `density_matrix` | Full mixed-state simulation | Yes |
-| `hardware` | Real IBM Quantum devices via SamplerV2 | Physical |
-
-### Quantum States (6 types)
-
-| State | Entanglement | Use Case |
-|-------|-------------|----------|
-| **GHZ** | Global (all-to-all) | Primary structured decoherence probe |
-| **W** | Symmetric single-excitation | Non-global entanglement studies |
-| **Bell** | Maximal bipartite | 2-qubit correlation benchmarks |
-| **Cluster** | Nearest-neighbor graph | Topological structure analysis |
-| **Superposition** | None (product state) | Control baseline |
-| **Custom** | User-defined | Extensibility |
-
-### Noise Models (7 types)
-
-- **Depolarizing** — uniform random Pauli errors
-- **Amplitude Damping** — energy relaxation (T1)
-- **Phase Damping** — pure dephasing (T2*)
-- **Bit Flip** / **Phase Flip** — single-axis stochastic errors
-- **Thermal Relaxation** — combined T1 + T2 + temperature
-- **Correlated Depolarizing** — topology-dependent multi-qubit errors
-
-### Research Metrics (8 metrics with bootstrap CIs)
-
-| Metric | What It Measures |
-|--------|-----------------|
-| **Asymmetry Index** | TVD from uniform distribution (structure detection) |
-| **Pathway Concentration Ratio** | Top vs bottom quartile concentration |
-| **Entanglement-Error Correlation** | Topology-error pattern correlation |
-| **Temporal Pathway Stability** | Rank correlation across conditions |
-| **Complexity Emergence Score** | Phase transition detection (logistic fit) |
-| **Structure Score** | Jensen-Shannon divergence from null model |
-| **Concentration Index** | Gini-like pathway concentration |
-| **Total Correlation** | Multi-information across all qubits |
-
-All metrics include 95% bootstrap confidence intervals and v1.0 schema compliance.
-
-### Bloch Sphere Visualizer
-
-| View | What You See |
-|------|-------------|
-| **1-Qubit** | Bloch sphere with original + noise-transformed point clouds, state vector arrow |
-| **2-Qubit** | 3D correlator space (ZI, IZ, ZZ) with multi-topology comparison |
-| **PTM** | 4x4 Pauli Transfer Matrix heatmap |
-| **Data** | Experimental fingerprint norms + cosine similarity matrix |
-
-Features: drag-to-rotate, error rate slider, sweep animation, per-qubit selection, educational explainer panels, JSON config editor with import/export.
-
-### Hardware Integration
-
-Run experiments on real IBM Quantum devices:
-
-- Backend auto-selection or manual specification
-- Session management for parameter sweeps
-- Full provenance capture: transpilation details, calibration snapshots, job metadata
-- Counts-based fidelity estimation (Bhattacharyya coefficient)
-
-### Additional Features
-
-- **13 pre-built experiment programs** (SST hypothesis tests, Bell correlations, state probe sensitivity)
-- **CLI** (`qxf list`, `qxf run <experiment>`) with parameter overrides
-- **REST API** (FastAPI) with 8 endpoints for experiments, results, and Bloch visualization
-- **Full provenance tracking**: software versions, git SHA, host info, execution time
-- **Deterministic reproducibility**: RNG plumbing, canonical ordering, seed control
-- **Pre-commit hooks**: ruff linting + formatting, YAML/TOML/JSON validation
-
----
-
-## Quick Start
-
-### Python Engine
-
-```bash
-git clone https://github.com/your-username/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
-python -m venv venv && source venv/bin/activate
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# List available experiments
-python -m src.cli list
-
-# Run an experiment
-python -m src.cli run sst_q1
-```
-
-### Frontend (Bloch Sphere Visualizer)
+### Launch the Frontend
 
 ```bash
 # Start the API server
-venv/bin/python -m uvicorn apps.api.main:app --reload --port 8000
+uvicorn apps.api.main:app --reload --port 8000
 
-# In another terminal, start the Expo app
-cd apps/client
-pnpm install
-pnpm run web
-```
-
-### Development
-
-```bash
-# Set up pre-commit hooks
-pre-commit install
-
-# Lint, format, type-check, test (mirrors CI)
-make check
-
-# Or individually
-make lint        # ruff check
-make format      # ruff format
-make typecheck   # mypy strict
-make test        # pytest with 90% coverage
+# In another terminal
+cd apps/client && pnpm install && pnpm run web
 ```
 
 ---
 
 ## Learning Path
 
-New to the framework? Here's the recommended progression:
+```
+Start here                      Go deeper                        Do research
+    │                               │                                │
+    ▼                               ▼                                ▼
+┌──────────┐                 ┌──────────────┐                ┌──────────────┐
+│ basics/  │                 │  advanced/   │                │ decoherence/ │
+│          │                 │              │                │              │
+│ Bell     │    ────────►    │ Shor's       │   ────────►    │ Topology     │
+│ GHZ      │                 │ Grover's     │                │ Scaling      │
+│ Noise    │                 │ Teleportation│                │ Noise sweep  │
+│ Compare  │                 │ VQE / QAOA   │                │ State probe  │
+└──────────┘                 └──────────────┘                └──────────────┘
+                                                                     │
+                                                                     ▼
+                                                             ┌──────────────┐
+                                                             │  hardware/   │
+                                                             │              │
+                                                             │ IBM Quantum  │
+                                                             │ 3 backends   │
+                                                             │ Provenance   │
+                                                             └──────────────┘
+```
 
-1. **Run a pre-built experiment** -- `python -m src.cli list` to see available experiments, then `python -m src.cli run sst_q1` to run one. Read the output metrics.
-2. **Use the engine API directly** -- Write a short script with `run(ExperimentConfig(...))` for custom configurations. See `src/engine/README.md`.
-3. **Explore the analysis pipeline** -- Feed your own measurement data to `run_all_to_schema(counts)`. See `src/core/analysis/README.md` for all 8 metrics.
-4. **Build a custom experiment** -- Subclass `ExperimentProgram` in `src/experiments/`. See `src/experiments/README.md` for the registry pattern.
-5. **Launch the visualizer** -- Start the API + Expo app to see Bloch sphere visualizations. See `apps/client/README.md`.
+**New to quantum?** Start with `01_superposition` and work through all 11 steps in order. By step 11 you'll understand superposition, entanglement, noise, and why decoherence structure matters. Then open the Circuit Builder and play with the 22 presets.
 
-### Key Concepts
+**Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/experiments/AGENTS.md) for the full guide.
 
-A few terms you'll encounter throughout the codebase:
-
-- **GHZ state**: Greenberger-Horne-Zeilinger state -- maximal entanglement across all qubits. The superposition `(|000...0> + |111...1>) / sqrt(2)`. Primary probe state for noise detection.
-- **CPTP map**: Completely Positive, Trace-Preserving map -- the mathematical requirement for valid quantum noise channels. Every physical noise process is a CPTP map.
-- **Bloch sphere**: Geometric representation of a single qubit's state as a point on (pure) or inside (mixed) a unit sphere.
-- **TVD**: Total Variation Distance -- statistical distance between two probability distributions. Used by the Asymmetry Index metric.
-- **Structured decoherence**: The hypothesis that quantum decoherence follows the entanglement network topology ("river") rather than spreading uniformly ("fog").
-
-For a comprehensive reference of 100+ quantum terms, see the Quantum Glossary feature in the visualizer app (`apps/client/src/features/quantum-glossary/`).
+**Want to run on real hardware?** See [hardware setup](docs/guides/hardware-setup.md). One config change: `sim_mode="hardware"`.
 
 ---
 
-## Architecture
+## Research: Structured Decoherence on Real Hardware
 
-```
-src/
-  experiments/         Pluggable experiment programs (13 registered)
-      |
-      v
-  engine/              Orchestration: run(), sweep(), Pydantic models
-      |                  provenance.py, fidelity.py, viz_pipeline.py, bloch_math.py
-      v
-  core/                Pure physics — no experiment-specific logic
-      |-- analysis/       8 research metrics, pipelines, schema bridge
-      |-- noise_models/   7 physics-compliant noise channels
-      |-- state_preparation/  6 quantum state types
+The framework's flagship research investigates how entanglement topology shapes the structure of decoherence. We ran experiments on three IBM Heron r2 processors (ibm_fez, ibm_kingston, ibm_marrakesh) and found:
 
-apps/
-  api/                 FastAPI REST API (experiments, results, Bloch endpoints)
-  client/              React Native (Expo) app
-      |-- bloch-sphere/   Interactive 3D Bloch sphere visualizer
-      |-- quantum-glossary/  Searchable quantum computing reference (~100+ terms)
-```
+- **GHZ states** produce concentrated, correlated error patterns (Structure Score = 0.80-0.90). Probability funnels into |000...0⟩ and |111...1⟩ and their single-bit-flip neighbors.
+- **W states** produce distributed, locally structured patterns (SS = 0.73). Probability spreads across N single-excitation outcomes.
+- **Cluster and product states** produce near-uniform distributions (SS ≈ 0.06) — no detectable structure.
+- **Structure is consistent across three independent processors** (CV = 5.7%), suggesting it's a property of the quantum state, not the chip.
+- **Structure grows with qubit count** (SS: 0.45 → 0.79 for 2→6 qubits), even as fidelity decreases.
 
-- **`src/core/`** is pure quantum mechanics, information theory, and statistics — no experiment-specific logic
-- **`src/engine/`** orchestrates experiments without domain knowledge
-- **`src/experiments/`** carries research-specific semantics
-- **`apps/`** contains the API and frontend — thin layers over the engine
+These findings are preliminary and exploratory. The full analysis, raw data, and an honest discussion of limitations are in [docs/research/](docs/research/).
+
+> *Different entanglement topologies do not merely decohere at different rates. They decohere into qualitatively different classical structures.*
 
 ---
 
-## Research Background
+## Experiments
 
-The framework's flagship research investigates the **Spring Network Model** hypothesis: that quantum decoherence follows structured pathways determined by entanglement topology, rather than random patterns. Key findings so far:
+### Basics — 11-Step Learning Path
 
-- GHZ states detect correlated noise patterns with 100% sensitivity across tested conditions
-- Cluster and product states are provably Pauli-invariant under Z-basis measurement
-- Noise fingerprints **scale** (same direction, growing magnitude) rather than shift — mean cosine similarity 0.874
-- The "Fog vs River" phenomenon: decoherence in some regimes looks like uniform fog (random), in others like a river following the entanglement topology
+| Step | Experiment | What it teaches |
+|------|-----------|----------------|
+| 1 | `01_superposition` | What IS a qubit? |0⟩, |1⟩, and |+⟩ |
+| 2 | `02_measurement` | Probability, collapse, and the Born rule |
+| 3 | `03_single_gates` | X, H, Z, Y, S, T — what each gate does |
+| 4 | `04_two_qubits` | Independent vs entangled — the CNOT gate |
+| 5 | `05_bell_states` | All four Bell states and hidden phase |
+| 6 | `06_ghz_states` | Scale entanglement from 2 to 6 qubits |
+| 7 | `07_w_states` | Distributed excitation — a different topology |
+| 8 | `08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis |
+| 9 | `09_noise_intro` | What noise does to a qubit |
+| 10 | `10_noise_types` | Five noise models compared on the same state |
+| 11 | `11_noise_and_entanglement` | River vs Fog — entanglement shapes error patterns |
 
-See `docs/research-docs/` for detailed findings and hypotheses.
+### Advanced (classic algorithms)
+
+| Experiment | What it teaches |
+|-----------|----------------|
+| `shor` | Factor integers with quantum period-finding |
+| `grover` | Search with quadratic speedup via amplitude amplification |
+| `teleportation` | Transfer a state using entanglement + classical bits |
+| `vqe` | Find molecular ground states with hybrid quantum-classical loops |
+| `qaoa` | Solve combinatorial optimization (MaxCut) |
+
+### Decoherence (research)
+
+| Experiment | What it tests |
+|-----------|--------------|
+| `topology_comparison` | Do GHZ, W, Cluster, Product decohere differently? |
+| `scaling_ladder` | Does structure grow with qubit count? |
+| `noise_sweep` | How robust is structure under increasing noise? |
+| `state_probe` | Which states detect correlated noise best? |
+
+### Hardware
+
+Run any experiment on real IBM Quantum processors with `sim_mode="hardware"`. Full provenance capture, transpilation tracking, calibration snapshots. See [docs/guides/hardware-setup.md](docs/guides/hardware-setup.md).
 
 ---
 
@@ -254,37 +289,35 @@ See `docs/research-docs/` for detailed findings and hypotheses.
 |-------|-----------|
 | Quantum simulation | Qiskit 2.1, Qiskit Aer 0.17 |
 | Hardware execution | Qiskit IBM Runtime (SamplerV2) |
-| Engine | Python 3.9+, Pydantic 2, NumPy, SciPy |
+| Engine | Python 3.12+, Pydantic 2, NumPy |
 | API | FastAPI, Uvicorn |
-| Frontend | React Native 0.81, Expo SDK 54, TypeScript 5.9 |
-| 3D Visualization | Three.js 0.183 |
-| Monorepo | Turborepo, pnpm |
-| Code quality | ruff, mypy (strict), pytest (90% coverage), pre-commit |
-
----
-
-## Status
-
-This is **Beta (v0.2)** — actively developing. The core engine and analysis framework are stable and research-grade. Breaking changes are allowed and preferred over backward-compatibility shims.
-
-What's solid:
-- All 8 research metrics with bootstrap CIs and schema compliance
-- Engine API (`run()`, `sweep()`) with full provenance
-- Bloch sphere visualizer with built-in and experiment modes
-- Hardware integration via IBM Quantum
-- 277+ passing tests with 90% coverage on core analysis
-
-What's next:
-- Measurement basis selection (X/Y basis, not just Z)
-- Non-Markovian noise models
-- Performance benchmarking for large-scale studies
-- More experiment programs beyond SST
+| Frontend | React Native 0.81, Expo SDK 54, TypeScript 5.9, Three.js |
+| Code quality | ruff, mypy (strict), pytest (382 tests), pre-commit hooks |
 
 ---
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
+Contributions, ideas, and feedback are welcome. A few areas where help would be especially valuable:
+
+- **Physics and math review** — I'm a software engineer learning quantum mechanics. If you spot errors in the physics, metric definitions, or circuit constructions, please open an issue. Correctness matters more than features.
+- **New experiment programs** — The engine is general-purpose. Entanglement witnesses, error correction studies, variational algorithms, hardware benchmarking — anything that fits the "prepare → noise → measure → analyze" pattern.
+- **Frontend** — The visualizer works but could be better. Better mobile support, more visualization types, accessibility improvements.
+- **Documentation** — Better explanations, more examples, tutorials for specific use cases.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## About
+
+I built this alongside my full-time job because quantum mechanics is endlessly fascinating and I wanted tools that let me explore it hands-on. I hope this framework helps spark interest in quantum computing for people who, like me, don't have physics PhDs but are curious enough to start tinkering.
+
+The best way to learn quantum mechanics is to build something with it. This framework is designed to make that easy — from your first Bell state to your first real hardware experiment.
+
+If you find it useful, interesting, or have ideas for making it better, I'd love to hear from you.
+
+---
 
 ## License
 

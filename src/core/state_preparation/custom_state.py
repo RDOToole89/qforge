@@ -53,7 +53,7 @@ class CustomState(BaseState):
 
     # Custom Parameters Schema
     Required:
-    - source: 'gates' | 'builder' | 'openqasm'
+    - source: 'gates' | 'builder' | 'openqasm' | 'circuit'
 
     For 'gates' source:
     - num_qubits: int (positive)
@@ -131,12 +131,28 @@ class CustomState(BaseState):
         validate = bool(params.get("validate", True))
         metadata = params.get("metadata", {})
 
-        if source not in {"gates", "builder", "openqasm"}:
+        if source not in {"gates", "builder", "openqasm", "circuit"}:
             raise ValueError(
-                "CustomState requires 'source' to be one of 'gates'|'builder'|'openqasm'"
+                "CustomState requires 'source' to be one of "
+                "'gates'|'builder'|'openqasm'|'circuit'"
             )
 
-        if source == "gates":
+        if source == "circuit":
+            # Direct QuantumCircuit passthrough — the most flexible option.
+            # Experiments build their own circuit and pass it directly.
+            qc = params.get("circuit")
+            if not isinstance(qc, QuantumCircuit):
+                raise ValueError(
+                    "'circuit' source requires a QuantumCircuit object "
+                    "in custom_params['circuit']"
+                )
+            if validate and qc.num_qubits != self.num_qubits:
+                raise ValueError(
+                    f"Circuit has {qc.num_qubits} qubits but "
+                    f"num_qubits={self.num_qubits} was specified"
+                )
+
+        elif source == "gates":
             num_qubits = params.get("num_qubits")
             if not isinstance(num_qubits, int) or num_qubits <= 0:
                 raise ValueError("'num_qubits' must be a positive integer for gates source")

@@ -57,3 +57,9 @@ execution/
 - Propagate `rng_seed` to the backend for reproducibility (simulation only)
 - Log backend method, noise model status, and hardware job IDs
 - Capture transpilation and calibration metadata for hardware provenance
+
+## Important: custom_params Separation
+
+`custom_params` carries both state-preparation keys (e.g., `source`, `circuit`, `target`) and noise-model keys (e.g., `correlation_strength`, `topology`, `temperature`). The runner uses an **allowlist** to pass only noise-relevant keys to `create_noise_model()`. State-prep keys stay with the circuit builder.
+
+If you add a new noise parameter that needs to flow through `custom_params`, add it to the allowlist in `runner.py` (`_apply_noise` method).

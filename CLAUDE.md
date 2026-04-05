@@ -345,9 +345,11 @@ class ExperimentProgram(Protocol):
 ```python
 # src/experiments/__init__.py
 EXPERIMENT_REGISTRY = {
-    "sst_q1": SSTHypothesisQ1(),
-    "bell_chsh": BellCHSH(),  # non-decoherence experiment, proves generality
-    # "vqe_benchmark": VQEBenchmark(),
+    "bell_state": BellExperiment(),
+    "topology_comparison": TopologyComparison(),
+    "scaling_ladder": ScalingLadder(),
+    "shor": ShorExperiment(),
+    # ... 13 experiments across basics/, advanced/, decoherence/, hardware/
 }
 ```
 

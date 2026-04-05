@@ -1,4 +1,4 @@
-"""Bell State Correlation Experiment.
+"""Deep Dive: Bell Correlations — Quantum vs classical bounds.
 
 This experiment tests quantum correlations in Bell states - the foundational
 demonstration that quantum mechanics violates classical correlation bounds.
@@ -18,7 +18,24 @@ Background:
     - Bell state fidelity: overlap with ideal state
     - Classical violation: how much quantum exceeds classical bounds
 
-This is a NON-SST experiment demonstrating framework generality.
+CIRCUIT (Bell Φ+):
+  q0: ─H──●── M
+  q1: ────X── M
+
+  Measures quantum correlation strength across all 4 Bell variants.
+  Quantum correlations exceed classical bounds (Bell inequality violation).
+
+WHAT YOU'LL EXPLORE:
+  - Correlation coefficient across all 4 Bell state variants
+  - Whether quantum correlations exceed the classical bound of 0.5
+  - How noise erodes the quantum advantage in correlation strength
+
+TRY IT:
+    from src.experiments.basics.deep_dives.dd_bell_correlations import bell_correlation
+
+    result, metrics = bell_correlation.run_with_bell_metrics()
+    print(f"Correlation: {metrics.correlation_coefficient:.3f}")
+    print(f"Exceeds classical: {metrics.exceeds_classical}")
 """
 
 from __future__ import annotations
@@ -100,7 +117,7 @@ def compute_bell_metrics(
 
 
 class BellCorrelation(BaseExperiment):
-    """Bell State Correlation Experiment.
+    """Deep Dive: Bell Correlations — Quantum vs classical bounds.
 
     Tests quantum correlations in Bell states and compares to classical bounds.
     This demonstrates that the framework supports non-SST experiments.
