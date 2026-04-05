@@ -189,14 +189,15 @@ export function useCircuit() {
   const [circuit, dispatch] = useReducer(circuitReducer, INITIAL_CIRCUIT);
 
   const addGate = useCallback(
-    (gateType: GateType, qubit: number, momentIndex?: number): string | null => {
+    (gateType: GateType, qubit: number, momentIndex?: number): { error: string } | { placed: { qubits: number[]; momentIndex: number } } | null => {
       // Validate placement
       const error = validateGatePlacement(gateType, qubit, circuit.numQubits);
-      if (error) return error;
+      if (error) return { error };
 
       if (momentIndex !== undefined) {
         dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex });
-        return null;
+        const testGate = createGate(gateType, qubit, circuit.numQubits);
+        return { placed: { qubits: testGate.qubits, momentIndex } };
       }
 
       // Compute which qubits this gate will occupy
@@ -230,7 +231,7 @@ export function useCircuit() {
       }
 
       dispatch({ type: "ADD_GATE", gateType, qubit, momentIndex: targetMoment });
-      return null;
+      return { placed: { qubits: testGate.qubits, momentIndex: targetMoment } };
     },
     [circuit.moments, circuit.numQubits],
   );

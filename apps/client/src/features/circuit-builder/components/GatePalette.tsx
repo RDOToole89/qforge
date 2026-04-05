@@ -12,6 +12,7 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
   const renderGateButton = (gt: GateType, disabled = false) => {
     const def = getGateDef(gt);
     const isActive = activeGate === gt;
+    const isMultiQubit = def.numQubits >= 2;
 
     return (
       <button
@@ -31,6 +32,9 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
           height: 38,
           borderRadius: 6,
           border: `1.5px solid ${disabled ? colors.border : isActive ? colors.accentLight : def.color}`,
+          borderBottom: isMultiQubit
+            ? `3px solid ${disabled ? colors.border : isActive ? colors.accentLight : def.color}`
+            : `1.5px solid ${disabled ? colors.border : isActive ? colors.accentLight : def.color}`,
           background: isActive ? colors.accentDim : colors.card,
           color: disabled ? colors.textTertiary : isActive ? colors.accentLight : def.color,
           fontFamily: fonts.mono,
@@ -42,9 +46,26 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
         }}
       >
         {def.label}
+        {/* Multi-qubit badge */}
+        {isMultiQubit && (
+          <span style={{
+            position: "absolute",
+            bottom: -1,
+            right: 1,
+            fontSize: 7,
+            fontWeight: 700,
+            fontFamily: fonts.mono,
+            color: disabled ? colors.textTertiary : isActive ? colors.accentLight : def.color,
+            opacity: 0.7,
+            lineHeight: 1,
+          }}>
+            {def.numQubits}Q
+          </span>
+        )}
       </button>
     );
   };

@@ -8,6 +8,7 @@ interface CircuitCanvasProps {
   selectedGateId: string | null;
   onGateClick: (gateId: string) => void;
   onGateDoubleClick?: (gateId: string) => void;
+  onGateContextMenu?: (gateId: string, event: React.MouseEvent) => void;
   onCanvasClick: (qubit: number, event?: React.MouseEvent) => void;
   /** Called when a gate is dropped from the palette onto a qubit wire */
   onDrop?: (gateType: string, qubit: number, event?: React.DragEvent) => void;
@@ -23,6 +24,7 @@ export default function CircuitCanvas({
   onGateClick,
   onCanvasClick,
   onGateDoubleClick,
+  onGateContextMenu,
   onDrop,
   showGrid = false,
   dropTarget,
@@ -266,6 +268,7 @@ export default function CircuitCanvas({
               selected={gate.id === selectedGateId}
               onClick={onGateClick}
               onDoubleClick={onGateDoubleClick}
+              onContextMenu={onGateContextMenu}
             />
           )),
         )}

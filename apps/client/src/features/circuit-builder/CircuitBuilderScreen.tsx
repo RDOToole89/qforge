@@ -210,32 +210,60 @@ export default function CircuitBuilderScreen() {
     setSelectedGateId(null);
   }, []);
 
-  // Placement error popover
-  const [placementError, setPlacementError] = useState<{ message: string; x: number; y: number } | null>(null);
+  // Placement popover (error or info)
+  const [placementPopover, setPlacementPopover] = useState<{
+    message: string; x: number; y: number; kind: "error" | "info";
+  } | null>(null);
   useEffect(() => {
-    if (!placementError) return;
-    const t = setTimeout(() => setPlacementError(null), 4000);
+    if (!placementPopover) return;
+    const t = setTimeout(() => setPlacementPopover(null), placementPopover.kind === "error" ? 4000 : 2500);
     return () => clearTimeout(t);
-  }, [placementError]);
+  }, [placementPopover]);
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    gateId: string; x: number; y: number;
+  } | null>(null);
+
+  const handleGatePlacementResult = useCallback(
+    (result: ReturnType<typeof addGate>, event?: { clientX: number; clientY: number }) => {
+      if (!result || !event) return;
+      if ("error" in result) {
+        setPlacementPopover({ message: result.error, x: event.clientX, y: event.clientY, kind: "error" });
+      } else if ("placed" in result && result.placed.qubits.length >= 2) {
+        const def = getGateDef(activeGateType!);
+        const qLabels = result.placed.qubits.map((q, i) => {
+          if (i === result.placed.qubits.length - 1) return `target q${q}`;
+          return `control q${q}`;
+        }).join(", ");
+        setPlacementPopover({
+          message: `${def.name} placed: ${qLabels}`,
+          x: event.clientX, y: event.clientY, kind: "info",
+        });
+      }
+    },
+    [activeGateType],
+  );
 
   // Click on canvas to place active gate on the clicked qubit wire
   const handleCanvasClick = useCallback(
     (qubit: number, event?: React.MouseEvent) => {
       setSelectedGateId(null);
-      setPlacementError(null);
+      setContextMenu(null);
+      setPlacementPopover(null);
       if (activeGateType) {
-        const error = addGate(activeGateType, qubit);
-        if (error && event) {
-          setPlacementError({
-            message: error,
-            x: event.clientX,
-            y: event.clientY,
-          });
-        }
+        const result = addGate(activeGateType, qubit);
+        handleGatePlacementResult(result, event);
       }
     },
-    [activeGateType, addGate],
+    [activeGateType, addGate, handleGatePlacementResult],
   );
+
+  // Right-click context menu on placed gates
+  const handleGateContextMenu = useCallback((gateId: string, event: React.MouseEvent) => {
+    setContextMenu({ gateId, x: event.clientX, y: event.clientY });
+    setSelectedGateId(gateId);
+  }, []);
 
   // Click on a placed gate
   const handleGateClick = useCallback((gateId: string) => {
@@ -371,12 +399,13 @@ export default function CircuitBuilderScreen() {
               selectedGateId={selectedGateId}
               onGateClick={handleGateClick}
               onGateDoubleClick={undefined}
+              onGateContextMenu={handleGateContextMenu}
               onCanvasClick={handleCanvasClick}
               onDrop={(gateType, qubit, event) => {
-                const error = addGate(gateType as GateType, qubit);
-                if (error && event) {
-                  setPlacementError({ message: error, x: event.clientX, y: event.clientY });
-                }
+                setActiveGateType(gateType as GateType);
+                const result = addGate(gateType as GateType, qubit);
+                handleGatePlacementResult(result, event);
+                setActiveGateType(null);
               }}
               showGrid={showGrid}
             />
@@ -405,52 +434,218 @@ export default function CircuitBuilderScreen() {
               #
             </button>
 
-            {/* Placement error popover */}
-            {placementError && (
+            {/* Placement popover (error or info) */}
+            {placementPopover && (
               <div
                 style={{
                   position: "fixed",
-                  left: Math.min(placementError.x + 12, window.innerWidth - 320),
-                  top: Math.max(12, placementError.y - 60),
+                  left: Math.min(placementPopover.x + 12, window.innerWidth - 320),
+                  top: Math.max(12, placementPopover.y - 60),
                   maxWidth: 300,
-                  padding: "12px 16px",
+                  padding: "10px 14px",
                   background: colors.bg,
-                  border: `1px solid ${colors.danger}80`,
+                  border: `1px solid ${placementPopover.kind === "error" ? colors.danger : colors.accent}80`,
                   borderRadius: 10,
-                  boxShadow: `0 0 20px ${colors.danger}20, 0 8px 24px rgba(0,0,0,0.4)`,
+                  boxShadow: `0 0 20px ${placementPopover.kind === "error" ? colors.danger : colors.accent}20, 0 8px 24px rgba(0,0,0,0.4)`,
                   zIndex: 9000,
                   animation: "fadeIn 0.15s ease",
                 }}
-                onClick={() => setPlacementError(null)}
+                onClick={() => setPlacementPopover(null)}
               >
                 <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
                 <div style={{
                   fontSize: 12,
-                  fontWeight: 700,
-                  color: colors.danger,
-                  marginBottom: 4,
+                  fontWeight: 600,
+                  color: placementPopover.kind === "error" ? colors.danger : colors.accentLight,
                   fontFamily: fonts.sans,
                 }}>
-                  Invalid Placement
+                  {placementPopover.kind === "error" ? "Invalid Placement" : placementPopover.message}
                 </div>
-                <div style={{
-                  fontSize: 12,
-                  color: colors.textSecondary,
-                  lineHeight: 1.5,
-                  fontFamily: fonts.sans,
-                }}>
-                  {placementError.message}
-                </div>
-                <div style={{
-                  fontSize: 10,
-                  color: colors.textTertiary,
-                  marginTop: 6,
-                  fontFamily: fonts.sans,
-                }}>
-                  Click to dismiss
-                </div>
+                {placementPopover.kind === "error" && (
+                  <div style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.5, fontFamily: fonts.sans, marginTop: 4 }}>
+                    {placementPopover.message}
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Right-click context menu */}
+            {contextMenu && (() => {
+              const gate = circuit.moments.flatMap((m) => m.gates).find((g) => g.id === contextMenu.gateId);
+              if (!gate) return null;
+              const def = getGateDef(gate.gateType);
+              const MARGIN = 16;
+              const menuW = 260;
+              const menuX = Math.min(contextMenu.x, window.innerWidth - menuW - MARGIN);
+              const menuY = Math.max(MARGIN, Math.min(contextMenu.y, window.innerHeight - 300));
+
+              return (
+                <>
+                  {/* Backdrop to dismiss */}
+                  <div
+                    style={{ position: "fixed", inset: 0, zIndex: 8999 }}
+                    onClick={() => setContextMenu(null)}
+                    onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
+                  />
+                  <div style={{
+                    position: "fixed",
+                    left: menuX,
+                    top: menuY,
+                    width: menuW,
+                    background: colors.bg,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 10,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                    zIndex: 9000,
+                    overflow: "hidden",
+                    animation: "fadeIn 0.1s ease",
+                  }}>
+                    {/* Header */}
+                    <div style={{
+                      padding: "10px 14px",
+                      borderBottom: `1px solid ${colors.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}>
+                      <span style={{
+                        background: `${def.color}20`,
+                        color: def.color,
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontFamily: fonts.mono,
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}>
+                        {def.label}
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: colors.text, fontFamily: fonts.sans }}>
+                        {def.name}
+                      </span>
+                      {def.numQubits >= 2 && (
+                        <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono }}>
+                          {def.numQubits}Q
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <div style={{
+                      padding: "8px 14px",
+                      fontSize: 11,
+                      color: colors.textSecondary,
+                      lineHeight: 1.5,
+                      fontFamily: fonts.sans,
+                      borderBottom: `1px solid ${colors.border}`,
+                    }}>
+                      {def.description}
+                    </div>
+
+                    {/* Qubits info */}
+                    <div style={{
+                      padding: "6px 14px",
+                      fontSize: 11,
+                      color: colors.textTertiary,
+                      fontFamily: fonts.mono,
+                      borderBottom: `1px solid ${colors.border}`,
+                    }}>
+                      {gate.qubits.map((q, i) => {
+                        const role = def.numQubits >= 2
+                          ? (i === gate.qubits.length - 1 ? "target" : "control")
+                          : "qubit";
+                        return `${role}: q${q}`;
+                      }).join("  \u00B7  ")}
+                    </div>
+
+                    {/* Parameter slider for parametric gates */}
+                    {def.parametric && (
+                      <div style={{ padding: "8px 14px", borderBottom: `1px solid ${colors.border}` }}>
+                        <div style={{ fontSize: 10, color: colors.textSecondary, marginBottom: 4, fontFamily: fonts.sans }}>
+                          {def.paramLabels?.[0] ?? "\u03B8"} = {((gate.params?.[0] ?? Math.PI / 2) / Math.PI).toFixed(2)}\u03C0
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={2 * Math.PI}
+                          step={0.01}
+                          value={gate.params?.[0] ?? Math.PI / 2}
+                          onChange={(e) => {
+                            setParams(gate.id, [parseFloat(e.target.value)]);
+                          }}
+                          style={{ width: "100%", accentColor: def.color }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div style={{ padding: "4px 0" }}>
+                      {/* Change control qubit (multi-qubit only) */}
+                      {def.numQubits >= 2 && def.type !== "CZ" && def.type !== "SWAP" && (
+                        <div style={{
+                          padding: "6px 14px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontSize: 12,
+                          color: colors.text,
+                          fontFamily: fonts.sans,
+                        }}>
+                          <span style={{ color: colors.textSecondary }}>Control:</span>
+                          <select
+                            value={gate.qubits[0]}
+                            onChange={(e) => {
+                              setControl(gate.id, Number(e.target.value));
+                            }}
+                            style={{
+                              background: colors.card,
+                              color: colors.text,
+                              border: `1px solid ${colors.border}`,
+                              borderRadius: 4,
+                              padding: "2px 6px",
+                              fontSize: 11,
+                              fontFamily: fonts.mono,
+                            }}
+                          >
+                            {Array.from({ length: circuit.numQubits }, (_, i) => i)
+                              .filter((i) => i !== gate.qubits[gate.qubits.length - 1])
+                              .map((i) => (
+                                <option key={i} value={i}>q{i}</option>
+                              ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Delete */}
+                      <button
+                        onClick={() => {
+                          removeGate(contextMenu.gateId);
+                          setContextMenu(null);
+                          setSelectedGateId(null);
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "8px 14px",
+                          background: "transparent",
+                          border: "none",
+                          color: colors.danger,
+                          fontSize: 12,
+                          fontFamily: fonts.sans,
+                          cursor: "pointer",
+                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                        onMouseEnter={(e) => { (e.target as HTMLElement).style.background = `${colors.danger}15`; }}
+                        onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                      >
+                        Delete gate
+                      </button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* Gate Info Panel (when a placed gate is selected) */}
