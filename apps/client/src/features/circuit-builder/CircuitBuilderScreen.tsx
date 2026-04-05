@@ -13,6 +13,7 @@ import CircuitCanvas from "./components/CircuitCanvas";
 import ProbabilityDisplay from "./components/ProbabilityDisplay";
 import BlochPlaybackPanel from "./components/BlochPlaybackPanel";
 import OnboardingOverlay, { OnboardingResetButton } from "./components/OnboardingOverlay";
+import LearnMode from "./components/LearnMode";
 import type { OnboardingActions } from "./components/OnboardingOverlay";
 import { getGateDef } from "./data/gateLibrary";
 import { CIRCUIT_PRESETS } from "./data/circuitPresets";
@@ -145,6 +146,7 @@ export default function CircuitBuilderScreen() {
   const [activePreset, setActivePreset] = useState<CircuitPreset | null>(null);
   const [exportCopied, setExportCopied] = useState(false);
   const [blochFullscreen, setBlochFullscreen] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
   const [blochPanelWidth, setBlochPanelWidth] = useState(480);
   const resizingRef = useRef(false);
   const resizeStartRef = useRef({ x: 0, width: 0 });
@@ -299,6 +301,9 @@ export default function CircuitBuilderScreen() {
       {/* Onboarding overlay (first visit only) */}
       <OnboardingOverlay actions={onboardingActions} />
 
+      {/* Learn mode modal */}
+      {learnOpen && <LearnMode onClose={() => setLearnOpen(false)} />}
+
       {/* Side-by-side: circuit left, Bloch right */}
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         {/* Left: circuit content */}
@@ -345,6 +350,25 @@ export default function CircuitBuilderScreen() {
               ))}
             </div>
             <OnboardingResetButton />
+            <button
+              onClick={() => setLearnOpen(true)}
+              title="Interactive quantum computing lessons"
+              style={{
+                background: "transparent",
+                color: colors.textTertiary,
+                border: `1px solid ${colors.border}`,
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: 11,
+                fontFamily: fonts.sans,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              {"\uD83C\uDF93"} Learn
+            </button>
           </div>
 
           {/* ── Circuit mode ── */}
