@@ -37,8 +37,9 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
   const setFullscreen = (v: boolean) => { setInternalFs(v); onFullscreenChange?.(v); };
   const [corrMode, setCorrMode] = useState<"correlation" | "concurrence" | "tangle">("correlation");
   const [blochZoom, setBlochZoom] = useState(1.25);
+  const [showSprings, setShowSprings] = useState(true);
   const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, scrubTo, snapToStep, totalSnapshots } = playback;
-  const { status, snapshotIndex, speed, dots, correlations, progress } = state;
+  const { status, snapshotIndex, speed, dots, actualDots, correlations, progress } = state;
 
   const hasCircuit = totalSnapshots > 1;
 
@@ -118,7 +119,11 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           title="Double-click to expand"
         >
           {(hasCircuit || previewCaption) ? (
-            <UnifiedBlochSphere mode="circuit" dots={dots} zoom={blochZoom} activeQubits={activeQubits} stepProgress={state.t} />
+            <UnifiedBlochSphere mode="circuit" dots={dots} zoom={blochZoom} activeQubits={activeQubits} stepProgress={state.t}
+              entanglementLinks={showSprings && correlations ? correlations.concurrences.flatMap((row, i) =>
+                row.slice(i + 1).map((c, j) => ({ i, j: i + j + 1, concurrence: c })).filter(l => l.concurrence > 0.05)
+              ) : undefined}
+            />
           ) : (
             <div style={{
               color: colors.textTertiary,
@@ -164,7 +169,26 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
 
         {/* Animation mode toggle + Zoom slider */}
         {(hasCircuit || previewCaption) && (
-          <InterpToggle interpMode={interpMode} onInterpModeChange={onInterpModeChange} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <InterpToggle interpMode={interpMode} onInterpModeChange={onInterpModeChange} />
+            <button
+              onClick={() => setShowSprings((v) => !v)}
+              title={showSprings ? "Hide entanglement springs" : "Show entanglement springs"}
+              style={{
+                background: showSprings ? colors.accentDim : "transparent",
+                color: showSprings ? colors.accentLight : colors.textTertiary,
+                border: `1px solid ${showSprings ? colors.accent : colors.border}`,
+                borderRadius: 4,
+                padding: "2px 8px",
+                fontSize: 9,
+                fontFamily: fonts.sans,
+                cursor: "pointer",
+                fontWeight: showSprings ? 600 : 400,
+              }}
+            >
+              Springs
+            </button>
+          </div>
         )}
         {(hasCircuit || previewCaption) && (
           <div style={{
@@ -189,8 +213,8 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
 
         <QubitLegend dots={dots} hasCircuit={hasCircuit} />
 
-        {/* Live Bloch state readout */}
-        {hasCircuit && dots.length > 0 && (
+        {/* Live Bloch state readout — always shows actual physical state, not display position */}
+        {hasCircuit && actualDots.length > 0 && (
           <div style={{
             padding: "4px 14px 6px",
             borderTop: `1px solid ${colors.border}`,
@@ -198,7 +222,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             flexDirection: "column",
             gap: 3,
           }}>
-            {dots.map((d, i) => {
+            {actualDots.map((d, i) => {
               const len = Math.sqrt(d.rx * d.rx + d.ry * d.ry + d.rz * d.rz);
               const purity = len > 0.95 ? "pure" : len < 0.15 ? "mixed" : `${(len * 100).toFixed(0)}%`;
               return (
@@ -379,10 +403,10 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
               <QubitLegend dots={dots} hasCircuit={hasCircuit} />
             </div>
 
-            {/* Live state readout in modal */}
-            {hasCircuit && dots.length > 0 && (
+            {/* Live state readout in modal — always actual physical state */}
+            {hasCircuit && actualDots.length > 0 && (
               <div style={{ padding: "4px 34px 6px", display: "flex", flexWrap: "wrap", gap: "2px 16px", justifyContent: "center" }}>
-                {dots.map((d, i) => {
+                {actualDots.map((d, i) => {
                   const len = Math.sqrt(d.rx * d.rx + d.ry * d.ry + d.rz * d.rz);
                   const purity = len > 0.95 ? "pure" : len < 0.15 ? "mixed" : `${(len * 100).toFixed(0)}%`;
                   return (

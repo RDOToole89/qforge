@@ -65,7 +65,7 @@ class NoiseComparison(BaseExperiment):
             error_rate=0.05,
             shots=4096,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_comparison(self) -> list[ExperimentResult]:
         """Run GHZ-4 under both depolarizing and amplitude damping."""

@@ -94,7 +94,7 @@ class DeutschJozsaExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_both_oracles(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run with constant and balanced oracles, compare outcomes."""

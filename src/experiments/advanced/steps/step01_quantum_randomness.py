@@ -67,7 +67,7 @@ class QuantumRandomnessExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": qc},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_bit_independence_test(self) -> list[ExperimentResult]:
         """Run at 1, 2, 4, 8 qubits to verify independence scales."""

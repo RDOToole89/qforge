@@ -127,7 +127,7 @@ class QAOAExperiment(BaseExperiment):
                 "p": 1,
                 "edges": edges,
             },
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_depth_sweep(self, **overrides: Any) -> list[ExperimentResult]:
         """Run QAOA at increasing depths to see solution quality improve."""

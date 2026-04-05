@@ -74,7 +74,7 @@ class GHZExploration(BaseExperiment):
             error_rate=0.05,
             shots=4096,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_scaling(
         self, qubit_range: list[int] | None = None, **overrides: Any,

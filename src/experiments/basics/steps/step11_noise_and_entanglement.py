@@ -69,7 +69,7 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_all_topologies(self) -> list[ExperimentResult]:
         """Compare four entanglement topologies under the same noise."""

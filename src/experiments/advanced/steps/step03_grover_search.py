@@ -100,7 +100,7 @@ class GroverSearchExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_iteration_sweep(self) -> list[ExperimentResult]:
         """See how success probability changes with iteration count."""

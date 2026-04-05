@@ -64,7 +64,7 @@ class ClassicalNullExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type="all",)
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run quantum GHZ and a 'control' product state for comparison."""

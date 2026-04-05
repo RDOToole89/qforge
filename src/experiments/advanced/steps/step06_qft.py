@@ -93,7 +93,7 @@ class QFTExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_input_comparison(self) -> list[ExperimentResult]:
         """Run QFT on different input states to see different output patterns."""

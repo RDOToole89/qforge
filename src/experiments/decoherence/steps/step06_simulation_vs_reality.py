@@ -60,7 +60,7 @@ class SimVsRealityExperiment(BaseExperiment):
             error_rate=0.02,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_noise_model_comparison(self) -> tuple[list[ExperimentResult], list[ExperimentResult]]:
         """Run GHZ and W under both depolarizing and amplitude damping."""

@@ -57,7 +57,7 @@ class HardwareVsSimulationExperiment(BaseExperiment):
             sim_mode="hardware",
             shots=8192,
             optimization_level=1,
-            visualization_type="none",
+            visualization_type="histogram",
         )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:

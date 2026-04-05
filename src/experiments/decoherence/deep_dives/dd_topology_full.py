@@ -49,7 +49,7 @@ class TopologyComparison(BaseExperiment):
             error_rate=0.1,
             shots=8192,
             metrics="structured_decoherence",
-        )
+            visualization_type="all",)
 
     def run_all_states(self) -> list[ExperimentResult]:
         """Run all four topologies for comparison."""

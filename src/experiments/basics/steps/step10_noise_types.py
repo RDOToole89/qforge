@@ -74,7 +74,7 @@ class NoiseTypesExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_all_types(self) -> list[ExperimentResult]:
         """Run GHZ-4 under five different noise models."""

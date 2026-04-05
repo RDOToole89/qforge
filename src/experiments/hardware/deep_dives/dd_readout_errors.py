@@ -57,7 +57,7 @@ class ReadoutErrorsExperiment(BaseExperiment):
             error_rate=0.02,
             readout_error_rate=0.05,
             rng_seed=42,
-            visualization_type="none",
+            visualization_type="histogram",
         )
 
     def run_noise_source_comparison(self) -> list[ExperimentResult]:

@@ -118,7 +118,8 @@ class GroverExperiment(BaseExperiment):
         target = "1010"
         circuit = _build_grover_circuit(len(target), target)
         return ExperimentConfig(
-            num_qubits=len(target),
+            num_qubits=len(target,
+            visualization_type=["histogram", "circuit"],),
             state_type="CUSTOM",
             shots=4096,
             noise_enabled=False,

@@ -40,6 +40,8 @@ interface CircuitMode {
   activeQubits?: number[];
   /** Interpolation progress within current step (0=start, 1=end) — drives enlargement decay */
   stepProgress?: number;
+  /** Pairwise concurrence values — draws spring lines between entangled qubits */
+  entanglementLinks?: { i: number; j: number; concurrence: number }[];
 }
 
 export type UnifiedBlochSphereProps = GlossaryMode | VisualizerMode | CircuitMode;
@@ -410,7 +412,7 @@ function VisualizerSphere({
 
 // ── Circuit mode ────────────────────────────────────────────────
 
-function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }: CircuitMode) {
+function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0, entanglementLinks }: CircuitMode) {
   const mountRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const dotsRef = useRef(dots);
@@ -421,6 +423,8 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }:
   useEffect(() => { activeQubitsRef.current = activeQubits ?? []; }, [activeQubits]);
   const stepProgressRef = useRef(stepProgress);
   useEffect(() => { stepProgressRef.current = stepProgress; }, [stepProgress]);
+  const linksRef = useRef<{ i: number; j: number; concurrence: number }[]>(entanglementLinks ?? []);
+  useEffect(() => { linksRef.current = entanglementLinks ?? []; }, [entanglementLinks]);
 
   const dotMeshesRef = useRef<THREE.Mesh[]>([]);
   const glowMeshesRef = useRef<THREE.Mesh[]>([]);
@@ -495,6 +499,23 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }:
     }
     dotMeshesRef.current = dotMeshes;
     glowMeshesRef.current = glowMeshes;
+
+    // Entanglement spring lines — pre-allocate for all possible pairs
+    const maxLinks = currentDots.length * (currentDots.length - 1) / 2;
+    const springLines: THREE.Line[] = [];
+    for (let k = 0; k < maxLinks; k++) {
+      const geo = new THREE.BufferGeometry().setFromPoints([V3(0, 0, 0), V3(0, 0, 0)]);
+      const mat = new THREE.LineBasicMaterial({
+        color: 0xff6688,
+        transparent: true,
+        opacity: 0,
+        linewidth: 2,
+      });
+      const line = new THREE.Line(geo, mat);
+      line.visible = false;
+      scene.add(line);
+      springLines.push(line);
+    }
 
     const baseDistance = 4.0;
     const autoRotateRef = { current: true };
@@ -575,6 +596,39 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }:
           if (isActive) {
             (labelSprites[i].material as THREE.SpriteMaterial).opacity = Math.min(1, decay * 2);
           }
+        }
+      }
+
+      // Update entanglement spring lines
+      const links = linksRef.current;
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.003);
+      let linkIdx = 0;
+      for (let k = 0; k < springLines.length; k++) {
+        if (linkIdx < links.length) {
+          const link = links[linkIdx];
+          const c = link.concurrence;
+          if (c > 0.05 && link.i < dotMeshes.length && link.j < dotMeshes.length) {
+            springLines[k].visible = true;
+            const posA = dotMeshes[link.i].position;
+            const posB = dotMeshes[link.j].position;
+            const positions = springLines[k].geometry.attributes.position.array as Float32Array;
+            positions[0] = posA.x; positions[1] = posA.y; positions[2] = posA.z;
+            positions[3] = posB.x; positions[4] = posB.y; positions[5] = posB.z;
+            springLines[k].geometry.attributes.position.needsUpdate = true;
+            // Color intensity and opacity based on concurrence
+            const mat = springLines[k].material as THREE.LineBasicMaterial;
+            mat.opacity = Math.min(0.8, c * 0.8 + pulse * 0.1);
+            // Color: low concurrence = dim blue, high = bright pink
+            const r = 0.4 + c * 0.6;
+            const g = 0.2 + (1 - c) * 0.3;
+            const b2 = 0.6 + (1 - c) * 0.2;
+            mat.color.setRGB(r, g, b2);
+          } else {
+            springLines[k].visible = false;
+          }
+          linkIdx++;
+        } else {
+          springLines[k].visible = false;
         }
       }
 

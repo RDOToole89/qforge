@@ -64,7 +64,7 @@ class StateProbeStudy(BaseExperiment):
             error_rate=0.2,
             shots=DEFAULT_SHOTS,
             balance_circuit="gate_count",
-            visualization_type="none",
+            visualization_type="all",
             custom_params={"correlation_strength": 0.6, "topology": "CHAIN"},
         )
 
@@ -93,7 +93,7 @@ class StateProbeStudy(BaseExperiment):
                 error_rate=p,
                 shots=DEFAULT_SHOTS,
                 balance_circuit="gate_count",
-                visualization_type="none",
+                visualization_type="all",
                 rng_seed=seed,
             )
         else:
@@ -105,7 +105,7 @@ class StateProbeStudy(BaseExperiment):
                 error_rate=p,
                 shots=DEFAULT_SHOTS,
                 balance_circuit="gate_count",
-                visualization_type="none",
+                visualization_type="all",
                 rng_seed=seed,
                 custom_params={
                     "correlation_strength": cs,
@@ -326,7 +326,7 @@ class StateProbeStudy(BaseExperiment):
             error_rate=p,
             shots=DEFAULT_SHOTS,
             balance_circuit="gate_count",
-            visualization_type="none",
+            visualization_type="all",
             rng_seed=seed,
             custom_params={
                 "correlation_strength": cs,

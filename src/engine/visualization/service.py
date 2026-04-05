@@ -194,10 +194,12 @@ def create_default_service() -> VisualizationService:
     Add new renderers here or register them at runtime in your pipeline.
     """
     from .renderers import (  # local import to avoid import cycles
+        BlochSphereRenderer,
         CircuitDiagramRenderer,
         CorrelationRenderer,
         DensityMatrixRenderer,
         HistogramRenderer,
+        MetricsSummaryRenderer,
     )
 
     service = VisualizationService()
@@ -205,4 +207,6 @@ def create_default_service() -> VisualizationService:
     service.register_renderer(DensityMatrixRenderer())
     service.register_renderer(CorrelationRenderer())
     service.register_renderer(CircuitDiagramRenderer())
+    service.register_renderer(MetricsSummaryRenderer())
+    service.register_renderer(BlochSphereRenderer())
     return service

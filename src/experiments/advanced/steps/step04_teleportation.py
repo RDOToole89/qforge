@@ -91,7 +91,7 @@ class TeleportationExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_three_states(self) -> list[ExperimentResult]:
         """Teleport |0⟩, |1⟩, and |+⟩."""

@@ -140,11 +140,14 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Output Parameters =====
-    visualization_type: Literal[
-        "histogram", "density_matrix", "correlation", "circuit", "all", "none"
-    ] = Field(
+    visualization_type: list[str] | str = Field(
         default="histogram",
-        description="Type of visualization to generate (research-focused)",
+        description=(
+            "Visualization type(s) to generate. "
+            "String for single type, list for multiple. "
+            "Valid: 'histogram', 'density_matrix', 'correlation', 'circuit', "
+            "'metrics_summary', 'bloch_sphere', 'all', 'none'"
+        ),
     )
 
     export_formats: list[Literal["png", "pdf", "svg"]] = Field(
@@ -185,6 +188,26 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Field normalizers / validators =====
+    @field_validator("visualization_type", mode="before")
+    @classmethod
+    def _validate_visualization_type(cls, v: list[str] | str) -> list[str] | str:
+        """Validate visualization_type values against allowed set."""
+        valid = {
+            "histogram", "density_matrix", "correlation", "circuit",
+            "metrics_summary", "bloch_sphere", "sweep_line", "comparison",
+            "all", "none",
+        }
+        if isinstance(v, str):
+            if v not in valid:
+                raise ValueError(f"Invalid visualization_type '{v}'. Valid: {valid}")
+            return v
+        if isinstance(v, list):
+            for item in v:
+                if item not in valid:
+                    raise ValueError(f"Invalid visualization_type '{item}'. Valid: {valid}")
+            return v
+        return v
+
     @field_validator("state_type", mode="before")
     @classmethod
     def _normalize_state_type(cls, v: str) -> str:

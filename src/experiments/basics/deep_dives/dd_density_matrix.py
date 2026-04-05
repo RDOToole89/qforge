@@ -67,7 +67,7 @@ class DensityMatrixExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-        )
+            visualization_type=["histogram", "density_matrix"],)
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run GHZ-3 clean (statevector) and noisy (density_matrix)."""

@@ -88,7 +88,7 @@ class DesignYourOwnExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_hypothesis_test(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run the structured state and the control state.

@@ -65,7 +65,7 @@ class NoiseResilienceExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_sweep(self, steps: int = 8, max_error: float = 0.20, **overrides: Any) -> list[ExperimentResult]:
         """Sweep noise rate and track structure."""

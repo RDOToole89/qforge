@@ -108,7 +108,7 @@ class ErrorCorrectionExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_error_positions(self) -> list[ExperimentResult]:
         """Run with error on qubit 0, 1, 2, and no error."""

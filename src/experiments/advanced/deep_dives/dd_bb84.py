@@ -88,7 +88,7 @@ class BB84Experiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_with_and_without_eve(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run with and without noise (noise simulates eavesdropping)."""

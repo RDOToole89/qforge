@@ -65,7 +65,7 @@ class TranspilationExperiment(BaseExperiment):
             sim_mode="hardware",
             shots=4096,
             optimization_level=1,
-            visualization_type="none",
+            visualization_type="histogram",
         )
 
     def run_optimization_sweep(self) -> list[ExperimentResult]:

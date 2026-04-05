@@ -60,7 +60,7 @@ class ScalingExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_ghz_ladder(self, qubit_range: list[int] | None = None, **overrides: Any) -> list[ExperimentResult]:
         """Run GHZ at 2-6 qubits."""

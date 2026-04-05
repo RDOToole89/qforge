@@ -107,7 +107,7 @@ class VQEExperiment(BaseExperiment):
                 "bond_distance": 0.735,
                 "ansatz_depth": 1,
             },
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_bond_sweep(self, **overrides: Any) -> list[ExperimentResult]:
         """Sweep H-H bond distance to trace the potential energy surface."""

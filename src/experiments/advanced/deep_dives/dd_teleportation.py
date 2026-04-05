@@ -136,7 +136,7 @@ class TeleportationExperiment(BaseExperiment):
                 "circuit": circuit,
                 "state": state,
             },
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_noise_sweep(
         self, steps: int = 8, max_error: float = 0.2, **overrides: Any,

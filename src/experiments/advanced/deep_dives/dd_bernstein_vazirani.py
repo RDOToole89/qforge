@@ -73,7 +73,7 @@ class BernsteinVaziraniExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run_hidden_strings(self) -> list[ExperimentResult]:
         """Find several different hidden strings."""

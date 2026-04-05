@@ -53,7 +53,7 @@ class ScalingLadder(BaseExperiment):
             error_rate=0.1,
             shots=8192,
             metrics="structured_decoherence",
-        )
+            visualization_type="all",)
 
     def run_ghz_ladder(
         self, qubit_range: list[int] | None = None, **overrides: Any,

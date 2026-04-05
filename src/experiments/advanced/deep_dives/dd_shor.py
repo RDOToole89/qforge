@@ -228,7 +228,7 @@ class ShorExperiment(BaseExperiment):
                 "a": a,
                 "n_count": n_count,
             },
-        )
+            visualization_type=["histogram", "circuit"],)
 
     def run(self, overrides: dict[str, Any] | None = None) -> ExperimentResult:
         """Run Shor's algorithm and report factoring results.

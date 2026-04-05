@@ -111,7 +111,10 @@ export interface PlaybackState {
   t: number;
   status: PlaybackStatus;
   speed: number;
+  /** Display dots (affected by interpolation mode — may hold positions in ideal mode) */
   dots: BlochDot[];
+  /** Actual physical Bloch coordinates (always from real state vector, unaffected by display mode) */
+  actualDots: BlochDot[];
   correlations: CorrelationData | null;
   /** Continuous progress 0..1 across the entire animation */
   progress: number;
@@ -278,6 +281,10 @@ export function usePlayback(
   }, [snapshots.length, numQubits]);
 
   const { dots, correlations } = computeFrame(snapshots, numQubits, snapshotIndex, t, interpMode);
+  // Always compute actual physical dots (direct/lerp mode) for the state readout
+  const actualDots = interpMode === "direct"
+    ? dots
+    : computeFrame(snapshots, numQubits, snapshotIndex, t, "direct").dots;
 
   const startAnimation = useCallback(() => {
     lastTimeRef.current = performance.now();
@@ -389,7 +396,7 @@ export function usePlayback(
   const progress = (snapshotIndex + t) / maxIdx;
 
   return {
-    state: { snapshotIndex, t, status, speed, dots, correlations, progress },
+    state: { snapshotIndex, t, status, speed, dots, actualDots, correlations, progress },
     play,
     pause,
     stepForward,

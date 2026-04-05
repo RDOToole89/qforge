@@ -69,7 +69,7 @@ class GlobalVsLocalExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-        )
+            visualization_type=["histogram", "metrics_summary"],)
 
     def run_both(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run GHZ-6 and W-6 for marginal comparison."""

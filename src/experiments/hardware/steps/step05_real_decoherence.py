@@ -62,7 +62,7 @@ class RealDecoherenceExperiment(BaseExperiment):
             shots=8192,
             optimization_level=1,
             metrics="structured_decoherence",
-            visualization_type="none",
+            visualization_type="histogram",
         )
 
     def run_topology_comparison(self) -> list[ExperimentResult]:
