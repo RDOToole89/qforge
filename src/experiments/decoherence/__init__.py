@@ -1,40 +1,33 @@
 """Structured decoherence research experiments.
 
-These experiments investigate how entanglement topology determines
-the structure of decoherence pathways in quantum systems.
+This is the author's primary research interest: investigating how
+entanglement topology determines the structure of decoherence pathways.
 
-Progression:
-  1. topology_comparison — Compare GHZ, W, Cluster, Product at 6 qubits.
-     The foundational experiment: does entanglement type matter?
+Organized into two parts:
 
-  2. scaling_ladder — GHZ and W from 2 to 8 qubits.
-     Does structure grow with system size? How?
-
-  3. noise_sweep — Structure Score vs noise rate.
-     How robust is the structure? Does it degrade smoothly or collapse?
-
-  4. state_probe — 47-condition sensitivity study.
-     Which states detect correlated noise topologies best?
+  steps/       — 6-step guided research progression
+  deep_dives/  — Full research experiments and validation
 """
 
-from src.experiments.decoherence.noise_sweep import NoiseSweep, noise_sweep
-from src.experiments.decoherence.scaling_ladder import ScalingLadder, scaling_ladder
-from src.experiments.decoherence.state_probe import (
+# Steps
+from src.experiments.decoherence.steps.step01_river_vs_fog import river_vs_fog
+from src.experiments.decoherence.steps.step02_topology_matters import topology_matters
+from src.experiments.decoherence.steps.step03_scaling import scaling
+from src.experiments.decoherence.steps.step04_noise_resilience import noise_resilience
+from src.experiments.decoherence.steps.step05_global_vs_local import global_vs_local
+from src.experiments.decoherence.steps.step06_simulation_vs_reality import sim_vs_reality
+
+# Deep dives
+from src.experiments.decoherence.deep_dives.dd_classical_null import classical_null
+from src.experiments.decoherence.deep_dives.dd_state_probe import (
     StateProbeStudy,
-    state_probe_sensitivity as state_probe,
-)
-from src.experiments.decoherence.topology_comparison import (
-    TopologyComparison,
-    topology_comparison,
+    state_probe_sensitivity,
 )
 
+state_probe = state_probe_sensitivity
+
 __all__ = [
-    "TopologyComparison",
-    "topology_comparison",
-    "ScalingLadder",
-    "scaling_ladder",
-    "NoiseSweep",
-    "noise_sweep",
-    "StateProbeStudy",
-    "state_probe",
+    "river_vs_fog", "topology_matters", "scaling",
+    "noise_resilience", "global_vs_local", "sim_vs_reality",
+    "classical_null", "StateProbeStudy", "state_probe",
 ]

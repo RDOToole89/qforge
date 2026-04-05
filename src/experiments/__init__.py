@@ -74,17 +74,30 @@ from src.experiments.advanced.deep_dives.dd_grover import GroverExperiment, grov
 from src.experiments.advanced.deep_dives.dd_vqe import VQEExperiment, vqe_experiment
 from src.experiments.advanced.deep_dives.dd_qaoa import QAOAExperiment, qaoa_experiment
 
-# Decoherence — core research experiments
-from src.experiments.decoherence.noise_sweep import NoiseSweep, noise_sweep
-from src.experiments.decoherence.scaling_ladder import ScalingLadder, scaling_ladder
-from src.experiments.decoherence.state_probe import (
+# Decoherence — steps
+from src.experiments.decoherence.steps.step01_river_vs_fog import river_vs_fog
+from src.experiments.decoherence.steps.step02_topology_matters import topology_matters
+from src.experiments.decoherence.steps.step03_scaling import scaling as dec_scaling
+from src.experiments.decoherence.steps.step04_noise_resilience import noise_resilience
+from src.experiments.decoherence.steps.step05_global_vs_local import global_vs_local
+from src.experiments.decoherence.steps.step06_simulation_vs_reality import sim_vs_reality
+
+# Decoherence — deep dives
+from src.experiments.decoherence.deep_dives.dd_classical_null import classical_null
+from src.experiments.decoherence.deep_dives.dd_state_probe import (
     StateProbeStudy,
     state_probe_sensitivity,
 )
-from src.experiments.decoherence.topology_comparison import (
-    TopologyComparison,
-    topology_comparison,
-)
+
+# Hardware — steps
+from src.experiments.hardware.steps.step01_first_hardware_run import first_hardware
+from src.experiments.hardware.steps.step02_hardware_vs_simulation import hardware_vs_sim
+from src.experiments.hardware.steps.step03_transpilation import transpilation as hw_transpilation
+from src.experiments.hardware.steps.step04_backend_exploration import backend_exploration
+from src.experiments.hardware.steps.step05_real_decoherence import real_decoherence
+
+# Hardware — deep dives
+from src.experiments.hardware.deep_dives.dd_readout_errors import readout_errors
 
 # Alias for state probe
 state_probe = state_probe_sensitivity
@@ -130,11 +143,24 @@ EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
     "grover": grover_experiment,
     "vqe": vqe_experiment,
     "qaoa": qaoa_experiment,
-    # Decoherence research
-    "topology_comparison": topology_comparison,
-    "scaling_ladder": scaling_ladder,
-    "noise_sweep": noise_sweep,
+    # Decoherence steps
+    "dec_01_river_vs_fog": river_vs_fog,
+    "dec_02_topology_matters": topology_matters,
+    "dec_03_scaling": dec_scaling,
+    "dec_04_noise_resilience": noise_resilience,
+    "dec_05_global_vs_local": global_vs_local,
+    "dec_06_simulation_vs_reality": sim_vs_reality,
+    # Decoherence deep dives
+    "dd_classical_null": classical_null,
     "state_probe": state_probe,
+    # Hardware steps (require IBM Quantum credentials)
+    "hw_01_first_hardware_run": first_hardware,
+    "hw_02_hardware_vs_simulation": hardware_vs_sim,
+    "hw_03_transpilation": hw_transpilation,
+    "hw_04_backend_exploration": backend_exploration,
+    "hw_05_real_decoherence": real_decoherence,
+    # Hardware deep dives
+    "dd_readout_errors": readout_errors,
 }
 
 

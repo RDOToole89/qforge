@@ -15,8 +15,8 @@ For development and testing:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/qiskit-experiments.git
-cd qiskit-experiments
+git clone https://github.com/your-org/qforge.git
+cd qforge
 
 # Create virtual environment
 python -m venv venv
@@ -35,7 +35,7 @@ pip install -e .
 For production use:
 
 ```bash
-pip install qiskit-experiment-framework
+pip install qforge
 ```
 
 ## Verification
@@ -107,7 +107,7 @@ export QISKIT_EXPERIMENTS_CACHE_DIR=/path/to/cache
 After installation, your project structure should look like:
 
 ```
-qiskit-experiments/
+qforge/
 ├── src/
 │   ├── engine/              # Engine API
 │   └── core/

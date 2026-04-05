@@ -1,4 +1,4 @@
-# Qiskit Experiment Framework: Comprehensive Design Document
+# QForge: Comprehensive Design Document
 
 **Version:** 0.2 (Beta)
 **Author:** Roibín O'Toole, Research Engineering
@@ -32,7 +32,7 @@
 
 ### 1.1 What Is This Framework?
 
-The **Qiskit Experiment Framework** is a research-grade quantum experimentation platform with **production-style software architecture** (schema validation, provenance tracking, modular layering). It is designed to investigate **structured decoherence pathways** in quantum systems—a novel research direction that treats decoherence as potentially structured rather than purely random.
+The **QForge** is a research-grade quantum experimentation platform with **production-style software architecture** (schema validation, provenance tracking, modular layering). It is designed to investigate **structured decoherence pathways** in quantum systems—a novel research direction that treats decoherence as potentially structured rather than purely random.
 
 **Current Focus:** Testing the structured decoherence hypothesis through quantitative metrics and reproducible experiments.
 
@@ -218,7 +218,7 @@ The framework follows a strict **three-layer architecture** with unidirectional 
 ### 3.2 Directory Structure
 
 ```
-qiskit-experiment-framework/
+qforge/
 ├── src/
 │   ├── core/                          # Pure physics (no IO)
 │   │   ├── analysis/                  # Research metrics & pipelines
@@ -1259,7 +1259,7 @@ pytest --cov=src tests/
 ```bash
 # Clone repository
 git clone <repository-url>
-cd qiskit-experiment-framework
+cd qforge
 
 # Create virtual environment
 python -m venv venv

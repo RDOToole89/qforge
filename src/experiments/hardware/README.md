@@ -1,69 +1,102 @@
-# Hardware — Real Quantum Hardware Experiments
+# Hardware — Real Quantum Processors
 
-Run experiments on IBM Quantum processors. Requires an IBM Quantum account and saved credentials.
+You've mastered simulation. Now run on real IBM Quantum hardware and see how physical noise shapes quantum states.
+
+```
+hardware/
+├── steps/              5-step progression to real decoherence
+│   ├── step01 → step05
+│   └── README.md
+└── deep_dives/         Full research suites
+    ├── dd_full_study
+    ├── dd_readout_errors
+    └── README.md
+```
 
 ## Prerequisites
 
-See `docs/guides/hardware-setup.md` for full setup instructions.
+You need IBM Quantum credentials. See [docs/guides/hardware-setup.md](../../../docs/guides/hardware-setup.md).
 
-Quick version:
 ```python
 from qiskit_ibm_runtime import QiskitRuntimeService
 QiskitRuntimeService.save_account(
-    channel="ibm_quantum_platform",
-    token="YOUR_TOKEN",
-    set_as_default=True,
+    channel="ibm_quantum_platform", token="YOUR_TOKEN", set_as_default=True
 )
 ```
 
-## Experiments
+---
 
-### `hardware_study` — Complete structured decoherence study
+## The Hardware Journey
 
-A documented 10-experiment suite designed for systematic comparison between simulation and real hardware. Includes:
+### Connect and Compare (Steps 1-2)
 
-1. GHZ scaling ladder (2-6 qubits)
-2. Topology comparison (GHZ, W, Cluster, Product)
-3. Backend comparison (same experiment on all available processors)
-4. Measurement basis comparison (Z vs X basis on Cluster)
-5. Optimization level comparison (transpiler impact)
+| Step | Run | What you'll learn |
+|------|-----|-------------------|
+| 1 | `python -m src.cli run hw_01_first_hardware_run` | Your first real quantum computer — see real physical noise |
+| 2 | `python -m src.cli run hw_02_hardware_vs_simulation` | Same circuit on hardware vs simulation — where do models break down? |
+
+### Understand the Machine (Steps 3-4)
+
+| Step | Run | What you'll learn |
+|------|-----|-------------------|
+| 3 | `python -m src.cli run hw_03_transpilation` | See your logical circuit become physical gates — SWAP insertion, depth changes |
+| 4 | `python -m src.cli run hw_04_backend_exploration` | Try different processors — is your result chip-independent? |
+
+### Real Decoherence (Step 5)
+
+| Step | Run | What you'll learn |
+|------|-----|-------------------|
+| 5 | `python -m src.cli run hw_05_real_decoherence` | River vs Fog on real hardware — the culmination of your journey |
+
+---
+
+## Deep Dives
+
+| After step | Run | What you'll explore |
+|------------|-----|---------------------|
+| 2 | `python -m src.cli run dd_readout_errors` | Gate noise vs readout noise vs both — where errors come from |
+| 5 | Run `dd_full_study` programmatically | The complete 10-experiment structured decoherence study |
+
+The full study is a documented research suite (not a single CLI command):
 
 ```python
-# Run everything
-from src.experiments.hardware.hardware_study import run_all
-results = run_all(mode="hardware")
-
-# Run in simulation for comparison
-results = run_all(mode="simulation")
-
-# Run individual experiments
-from src.experiments.hardware.hardware_study import run_scaling_ladder
-results = run_scaling_ladder(mode="hardware")
+from src.experiments.hardware.deep_dives.dd_full_study import run_all
+results = run_all(mode="hardware")    # Real hardware
+results = run_all(mode="simulation")  # Matched simulation for comparison
 ```
 
-### Running decoherence experiments on hardware
+---
 
-Any experiment from `decoherence/` can also run on hardware by overriding `sim_mode`:
+## The Complete Arc
 
-```python
-from src.experiments import get_experiment
-
-result = get_experiment("topology_comparison").run({
-    "sim_mode": "hardware",
-    "shots": 8192,
-})
+```
+Basics (11 steps)     Advanced (8 steps)     Hardware (5 steps)
+────────────────      ────────────────       ─────────────────
+What is a qubit?  →   Quantum superpowers →  First hardware run
+Entanglement      →   Entanglement tools  →  HW vs simulation
+Noise & fog       →   QFT + error corr.  →  Transpilation
+River vs Fog      →   Design your own    →  Backend comparison
+                                          →  REAL DECOHERENCE
+                                                   ↓
+                                          Full 10-experiment
+                                          research study
 ```
 
-## Results
+After Step 5, you've completed the full journey — from "what is a qubit?" to "structured decoherence confirmed on real quantum hardware." You're now equipped to design and run your own quantum experiments on real processors.
 
-All hardware results include full provenance:
-- Backend name, job ID, execution time
-- Transpilation details (depth, SWAP count, qubit layout)
-- Calibration snapshot (T1/T2 medians)
-- Software versions and git SHA
+---
 
-Results are saved to `results/hardware_study/` as JSON.
+## QPU Time Usage
 
-## What we found
+Each step uses minimal QPU time:
 
-See `docs/research/2026-04-hardware-decoherence/` for the complete analysis of our hardware experiments on three IBM Heron r2 processors.
+| Step | Shots | QPU time |
+|------|-------|----------|
+| 1 | 4096 | ~5 seconds |
+| 2 | 8192 | ~7 seconds |
+| 3 | 4096 × 3 | ~15 seconds |
+| 4 | 8192 × 3 | ~20 seconds |
+| 5 | 8192 × 3 | ~20 seconds |
+| **Total** | | **~1-2 minutes** |
+
+The free IBM Quantum tier provides 10 minutes per month — plenty for the full hardware journey.

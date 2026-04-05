@@ -1,5 +1,5 @@
 {
-  "name": "qiskit-experiment-framework",
+  "name": "qforge",
   "private": true,
   "scripts": {
     "dev": "turbo dev",

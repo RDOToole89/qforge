@@ -3,9 +3,9 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "qiskit-experiments"
+name = "qforge"
 dynamic = ["version"]
-description = "Research-grade quantum experiment framework for structured decoherence analysis"
+description = "A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [{name = "Quantum Research Team"}]
@@ -37,7 +37,7 @@ docs = [
 ]
 
 [project.scripts]
-qxf = "src.cli:main"
+qforge = "src.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -1,45 +1,45 @@
 # CLI Reference
 
-The `qxf` command-line tool provides quick access to the quantum experiment framework without writing Python code.
+The `qforge` command-line tool provides quick access to the quantum experiment framework without writing Python code.
 
 ## Installation
 
-After installing the package, the `qxf` command is available:
+After installing the package, the `qforge` command is available:
 
 ```bash
 pip install -e .
-qxf --help
+qforge --help
 ```
 
 ## Commands
 
-### `qxf list`
+### `qforge list`
 
 List all registered experiment programs.
 
 ```bash
-$ qxf list
+$ qforge list
 ┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Name              ┃ Description                                              ┃
 ┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ sst_q1            │ Test whether entanglement topology influences            │
+│ 01_superposition            │ Test whether entanglement topology influences            │
 │                   │ decoherence pathways                                     │
-│ sst_q1_structured │ Structured decoherence Q1 with amplitude damping noise   │
+│ 01_superposition_structured │ Structured decoherence Q1 with amplitude damping noise   │
 │ bell_correlation  │ Bell state correlation test - quantum vs classical       │
 │                   │ bounds                                                   │
 └───────────────────┴──────────────────────────────────────────────────────────┘
 ```
 
-### `qxf run <name>`
+### `qforge run <name>`
 
 Run a registered experiment by name.
 
 ```bash
-qxf run <experiment_name> [OPTIONS]
+qforge run <experiment_name> [OPTIONS]
 ```
 
 **Arguments:**
-- `name` - Experiment name from registry (use `qxf list` to see available)
+- `name` - Experiment name from registry (use `qforge list` to see available)
 
 **Options:**
 - `-s, --set KEY=VALUE` - Override config values (can be used multiple times)
@@ -49,25 +49,25 @@ qxf run <experiment_name> [OPTIONS]
 
 ```bash
 # Run with defaults
-qxf run sst_q1
+qforge run 01_superposition
 
 # Override parameters
-qxf run sst_q1 -s num_qubits=3 -s error_rate=0.1
+qforge run 01_superposition -s num_qubits=3 -s error_rate=0.1
 
 # Multiple overrides
-qxf run bell_correlation -s shots=8192 -s error_rate=0.05
+qforge run bell_correlation -s shots=8192 -s error_rate=0.05
 
 # JSON output for scripting
-qxf run sst_q1 --json > result.json
+qforge run 01_superposition --json > result.json
 
 # Disable noise
-qxf run sst_q1 -s noise_enabled=false
+qforge run 01_superposition -s noise_enabled=false
 ```
 
 **Output:**
 
 ```
-Running experiment: sst_q1
+Running experiment: 01_superposition
 Overrides: {'num_qubits': 3, 'error_rate': 0.1}
 
 Status: completed
@@ -92,12 +92,12 @@ Top outcomes:
   001: 23 (2.2%)
 ```
 
-### `qxf run-config <path>`
+### `qforge run-config <path>`
 
 Run an experiment from a JSON configuration file.
 
 ```bash
-qxf run-config <config_path> [OPTIONS]
+qforge run-config <config_path> [OPTIONS]
 ```
 
 **Arguments:**
@@ -124,8 +124,8 @@ qxf run-config <config_path> [OPTIONS]
 **Usage:**
 
 ```bash
-qxf run-config my_experiment.json
-qxf run-config my_experiment.json --json > results.json
+qforge run-config my_experiment.json
+qforge run-config my_experiment.json --json > results.json
 ```
 
 ## Configuration Options
@@ -150,7 +150,7 @@ When using `-s` overrides or JSON config files, these parameters are available:
 ```bash
 #!/bin/bash
 for rate in 0.01 0.05 0.1 0.2; do
-  qxf run sst_q1 -s error_rate=$rate --json >> sweep_results.jsonl
+  qforge run 01_superposition -s error_rate=$rate --json >> sweep_results.jsonl
 done
 ```
 
@@ -158,10 +158,10 @@ done
 
 ```bash
 # Extract asymmetry index from result
-qxf run sst_q1 --json | jq '.structured_decoherence_metrics.asymmetry_index'
+qforge run 01_superposition --json | jq '.structured_decoherence_metrics.asymmetry_index'
 
 # Get measurement counts
-qxf run bell_correlation --json | jq '.analysis.measurement_results.raw_counts'
+qforge run bell_correlation --json | jq '.analysis.measurement_results.raw_counts'
 ```
 
 ### Compare experiments
@@ -170,7 +170,7 @@ qxf run bell_correlation --json | jq '.analysis.measurement_results.raw_counts'
 # Run same config with different states
 for state in GHZ W Cluster; do
   echo "=== $state ==="
-  qxf run sst_q1 -s state_type=$state
+  qforge run 01_superposition -s state_type=$state
 done
 ```
 
@@ -184,8 +184,8 @@ done
 Each command has built-in help:
 
 ```bash
-qxf --help
-qxf run --help
-qxf run-config --help
-qxf list --help
+qforge --help
+qforge run --help
+qforge run-config --help
+qforge list --help
 ```

@@ -16,8 +16,8 @@ from rich.console import Console
 from rich.table import Table
 
 app = typer.Typer(
-    name="qxf",
-    help="Quantum Experiment Framework CLI",
+    name="qforge",
+    help="QForge — quantum experiment engine",
     add_completion=False,
 )
 
@@ -42,7 +42,7 @@ def main_callback(
         typer.Option("--results-dir", help="Override results directory"),
     ] = os.getenv("QEF_RESULTS_DIR"),
 ) -> None:
-    """Quantum Experiment Framework."""
+    """QForge."""
     from src.engine.infrastructure.logging import setup_logging
 
     effective_level = "ERROR" if quiet else log_level.upper()

@@ -1,13 +1,13 @@
 # Contributing
 
-Thank you for your interest in contributing to the Qiskit Experiment Framework. This guide covers the development workflow, code quality standards, and how to add new components.
+Thank you for your interest in contributing to the QForge. This guide covers the development workflow, code quality standards, and how to add new components.
 
 ## Development Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
+git clone https://github.com/your-org/qforge.git
+cd qforge
 
 # Create and activate a virtual environment
 python -m venv .venv

@@ -148,15 +148,54 @@ function computeFrame(
 
   const dots: BlochDot[] = [];
   for (let q = 0; q < numQubits; q++) {
-    const a = stateVectorToBloch(svA, q, numQubits);
+    let a = stateVectorToBloch(svA, q, numQubits);
     let rx = a.rx, ry = a.ry, rz = a.rz;
+
+    if (interpMode === "ideal") {
+      // In ideal mode: if current state is mixed, find the last pure state
+      // for this qubit and use that position instead (don't collapse to center)
+      const lenA = Math.sqrt(a.rx * a.rx + a.ry * a.ry + a.rz * a.rz);
+      if (lenA < 0.3 && snapshotIndex > 0) {
+        for (let si = snapshotIndex - 1; si >= 0; si--) {
+          const prev = stateVectorToBloch(snapshots[si].stateVector, q, numQubits);
+          const prevLen = Math.sqrt(prev.rx * prev.rx + prev.ry * prev.ry + prev.rz * prev.rz);
+          if (prevLen >= 0.3) {
+            a = prev;
+            rx = prev.rx; ry = prev.ry; rz = prev.rz;
+            break;
+          }
+        }
+      }
+    }
 
     if (svB && t > 0) {
       const b = stateVectorToBloch(svB, q, numQubits);
       if (interpMode === "ideal") {
-        // Slerp: follow great circle on sphere surface (shows ideal rotation)
-        const s = slerp(a, b, t);
-        rx = s.rx; ry = s.ry; rz = s.rz;
+        const lenA2 = Math.sqrt(a.rx * a.rx + a.ry * a.ry + a.rz * a.rz);
+        const lenB2 = Math.sqrt(b.rx * b.rx + b.ry * b.ry + b.rz * b.rz);
+
+        if (lenA2 < 0.3 && lenB2 < 0.3) {
+          // Both mixed — stay at whatever position we have
+        } else if (lenB2 < 0.3) {
+          // Becoming/staying entangled — hold position
+        } else if (lenA2 < 0.3) {
+          // Emerging from entanglement — animate to endpoint
+          rx = b.rx * t;
+          ry = b.ry * t;
+          rz = b.rz * t;
+        } else {
+          // Both pure — slerp for great circle rotation
+          const s = slerp(a, b, t);
+          rx = s.rx; ry = s.ry; rz = s.rz;
+          // Renormalize to stay on surface
+          const curLen = Math.sqrt(rx * rx + ry * ry + rz * rz);
+          const targetLen = Math.max(lenA2, lenB2);
+          if (curLen > 0.01) {
+            rx *= targetLen / curLen;
+            ry *= targetLen / curLen;
+            rz *= targetLen / curLen;
+          }
+        }
       } else {
         // Lerp: direct path through interior (shows actual reduced state)
         rx += (b.rx - rx) * t;

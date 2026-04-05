@@ -1,11 +1,11 @@
-# Qiskit Experiment Framework: Comprehensive Architecture & Capabilities
+# QForge: Comprehensive Architecture & Capabilities
 
 **Version:** 0.2.0 (Refactor/Simplify Branch)
 **Status:** Beta (Stable Core, Research-Ready)
 
 ## 1. Executive Summary
 
-The Qiskit Experiment Framework is a specialized Python library designed for **Structured Decoherence Research**. Unlike general-purpose quantum tools, it focuses specifically on analyzing how quantum information decays in entangled systems. It provides a rigorous, "physics-first" environment for testing hypotheses about the relationship between entanglement topology and error propagation.
+The QForge is a specialized Python library designed for **Structured Decoherence Research**. Unlike general-purpose quantum tools, it focuses specifically on analyzing how quantum information decays in entangled systems. It provides a rigorous, "physics-first" environment for testing hypotheses about the relationship between entanglement topology and error propagation.
 
 ## 2. System Architecture
 

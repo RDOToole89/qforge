@@ -59,11 +59,16 @@ hooks/
                             Bell (Φ+/Φ-/Ψ+/Ψ-), GHZ±, W, Dicke, |+⟩/|−⟩/|±i⟩,
                             uniform superposition, product states.
 
-  usePlayback.ts            Playback state machine: play/pause/step/seek/speed control.
+  usePlayback.ts            Playback state machine: play/pause/step/seek/scrub/speed control.
                             Uses requestAnimationFrame for smooth animation.
                             Computes per-qubit BlochDots via stateVectorToBloch(),
                             CorrelationData (ΔCov matrix, concurrence matrix, tangle,
                             per-qubit 1-tangles) at each frame.
+                            Two interpolation modes: "direct" (lerp — actual reduced state)
+                            and "ideal" (slerp — great circle rotation on surface).
+                            Slerp handles edge cases: antipodal vectors, mixed states,
+                            near-parallel vectors. Ideal mode holds position when qubits
+                            become entangled (doesn't collapse to center).
 
   useNarrative.ts           Dynamic narrative engine. Generates contextual explanations
                             for each circuit step by analyzing:
@@ -74,19 +79,41 @@ hooks/
                             Falls back gracefully when preset step text exists.
 
 components/
-  CircuitToolbar.tsx         Toolbar: qubit count selector, presets dropdown, export button, clear.
-  GatePalette.tsx            Gate buttons (click to select, draggable). Split into single/multi-qubit groups.
+  CircuitToolbar.tsx         Toolbar: qubit count selector, presets dropdown (remembers selection),
+                             export button, clear. activePresetId prop tracks selected preset.
+  GatePalette.tsx            Gate buttons (click to select, draggable). Split into single/multi-qubit
+                             groups with "2Q"/"3Q" badges and thicker bottom border on multi-qubit gates.
   CircuitCanvas.tsx          SVG circuit rendering. Qubit wires, gate blocks, drag-and-drop placement.
                              Uses ResizeObserver for full-width wires.
+                             Invisible HTML overlay divs on placed gates enable native drag-to-reposition.
+                             Drop handler distinguishes new gates (gate-type) from moves (gate-move-id).
+                             Gates snap to closest qubit wire + moment column at drop position.
   GateBlock.tsx              SVG gate rendering: single-qubit boxes, CNOT cross-circles,
-                             CZ dots, SWAP X marks, selection highlights.
+                             CZ dots, SWAP X marks.
+                             Selection: marching ants animated border (@keyframes marching-ants),
+                             subtle scale(1.08) transform, accent glow background.
+                             Full bounding box for multi-qubit gates covers connection lines.
+                             Right-click context menu via onContextMenu prop.
   ProbabilityDisplay.tsx     Horizontal bar chart of measurement probabilities.
   CircuitViewer.tsx          Read-only circuit viewer (used in configure tab preview).
-  BlochPlaybackPanel.tsx     Right-side panel: UnifiedBlochSphere in circuit mode,
-                             qubit legend, correlation heatmap/tangle, transport controls,
-                             timeline scrubber, speed selector. Fullscreen modal with
-                             external control (for onboarding). Uses data-onboarding
-                             attributes for guided tour targeting.
+  BlochPlaybackPanel.tsx     Right-side panel (resizable 280-700px via drag handle):
+                             UnifiedBlochSphere in circuit mode (fills available space,
+                             auto-fit camera based on aspect ratio, drag-to-rotate,
+                             zoom slider, double-click to open fullscreen modal).
+                             "Now playing" gate indicator shows current operation.
+                             Actual/Ideal interpolation mode toggle with ? info card.
+                             Active qubit dots enlarge + glow, decaying with step progress.
+                             Qubit labels flash above active dots during animation.
+                             Live Bloch state readout: per-qubit (rx,ry,rz) + purity.
+                             Qubit legend, correlation heatmap/tangle, transport controls.
+                             Custom pointer-event scrubber with continuous 0-1 progress,
+                             step tick marks, snap-to-step on release.
+                             Speed selector (0.25x-4x).
+                             Fullscreen modal with all controls replicated.
+                             Right-click context menu on gates (delete, params, control qubit).
+                             Placement feedback popovers (success/error).
+                             Gate preview: clicking palette gate shows demo on Bloch sphere.
+                             Uses data-onboarding attributes for guided tour targeting.
   CorrelationHeatmap.tsx     Heatmap for ΔCov or concurrence matrices. Color scales:
                              blue-to-red (ΔCov), dark-to-magenta (concurrence).
   OnboardingOverlay.tsx      12-step guided tour with spotlight highlighting (CSS clip-path),
@@ -103,6 +130,10 @@ data/
   idealStates.ts             16 ideal state vectors for Direct State mode.
                              Bell variants, GHZ/W/Dicke at various qubit counts, cluster state.
                              idealStateToSnapshot() converts to SimSnapshot.
+  gatePreviewCircuits.ts     Per-gate demo circuits for palette preview. Each gate has a
+                             carefully chosen initial state to maximize visual effect:
+                             phase gates start in |+⟩, entangling gates start with
+                             superposition on control, SWAP uses visually distinct states.
 ```
 
 ## Key Architectural Patterns
@@ -165,21 +196,63 @@ Single component with discriminated union props (`mode: "glossary" | "visualizer
 
 - **glossary**: auto-rotate, drag-to-spin, click-to-expand, dot glow meshes
 - **visualizer**: external rotation, point clouds, channel transform animation
-- **circuit**: gentle auto-rotate, dot positions updated via refs (no scene rebuild per frame)
+- **circuit**: drag-to-rotate, zoom prop, activeQubits highlighting, stepProgress
+  decay, qubit label sprites, ResizeObserver for responsive sizing, auto-fit camera
+  based on container aspect ratio (1/√aspect distance factor)
 
 ### Playback Architecture
 
 ```
 useSimulator(circuit) → SimSnapshot[]
                               ↓
-usePlayback(snapshots, n) → { dots, correlations, snapshotIndex, status }
+usePlayback(snapshots, n, interpMode) → { dots, correlations, progress, ... }
                               ↓
-BlochPlaybackPanel → UnifiedBlochSphere(mode="circuit", dots)
-                   → CorrelationHeatmap(data=correlations)
-                   → TangleDisplay(data=correlations)
+BlochPlaybackPanel → UnifiedBlochSphere(mode="circuit", dots, zoom, activeQubits, stepProgress)
+                   → "Now playing" gate indicator (label + color)
+                   → Actual/Ideal toggle with ? info
+                   → Zoom slider
+                   → Live state readout (rx, ry, rz, purity)
+                   → CorrelationHeatmap / TangleDisplay
+                   → Custom scrubber (continuous 0-1, step ticks, snap on release)
+                   → Transport controls (play/pause/step/speed)
 ```
 
-The playback hook uses `requestAnimationFrame` with refs to avoid re-renders during animation. Interpolates Bloch vectors between snapshots for smooth movement.
+The playback hook uses `requestAnimationFrame` with refs to avoid re-renders during animation.
+
+### Interpolation Modes
+
+- **Actual (lerp)**: Direct linear path through Bloch ball interior. Shows true reduced state.
+  When CNOT entangles, dots honestly fall toward the center.
+- **Ideal (slerp)**: Spherical interpolation on sphere surface. Shows gate rotation geometry.
+  When qubits become entangled (mixed), holds the last pure-state position instead of
+  collapsing to center. Renormalizes to surface. Falls back to lerp for mixed states,
+  handles antipodal vectors via perpendicular great circle detour.
+
+### Active Qubit Highlighting
+
+During playback, qubits being operated on in the current step:
+- Dot scales up (1.35x → 1.0x, decaying with step progress `t`)
+- Glow opacity increases (40% → 20%, same decay)
+- Label sprite ("q0") appears above dot, fades out as step progresses
+- "Now playing" bar shows gate operation (e.g., "CX(q0,q1)") in gate color
+
+### Gate Preview
+
+When clicking a gate in the palette (not placed yet):
+- A demo circuit from `gatePreviewCircuits.ts` is simulated
+- The Bloch panel switches to show the preview
+- Auto-plays the animation
+- Each gate's demo uses a carefully chosen initial state for max visual effect
+- Deactivates when gate is deselected or a preset is loaded
+
+### Drag-to-Reposition Placed Gates
+
+- Invisible HTML `<div>` overlays positioned on each gate in the canvas
+- Natively `draggable` — click-and-hold initiates HTML5 drag
+- `gate-move-id` in dataTransfer distinguishes moves from new placements
+- Drop handler computes closest qubit wire + moment column
+- `MOVE_GATE` reducer preserves multi-qubit offset pattern
+- Marching ants selection visible during drag, deselects on drop
 
 ### Narrative Engine
 
@@ -285,3 +358,9 @@ Add detection logic to `recognizeState()` in `useSimulator.ts`. Check amplitudes
 - Do NOT remove the Givens rotation W state circuit — it was carefully verified to produce exact W state (τ₃ = 0)
 - Do NOT merge the three correlation modes into one view — ΔCov, concurrence, and tangle measure fundamentally different things
 - Do NOT skip the viewport clamping in tooltip positioning — tooltips must never go under the tab bar or off-screen
+- Do NOT use `<input type="range">` for the playback scrubber — it doesn't work reliably in `'use dom'` webviews. Use the custom pointer-event scrubber.
+- Do NOT use `setPointerCapture` on SVG `<g>` elements — it captures events away from the parent SVG. Use HTML overlay divs for drag interactions.
+- Do NOT set `dropEffect` explicitly in `handleDragOver` — let the browser match it to `effectAllowed`. Forcing it breaks palette drag.
+- Do NOT use CSS transitions on scrubber elements during playback — causes the thumb to jump instead of tracking smoothly
+- Do NOT use slerp when either Bloch vector length < 0.3 — falls back to lerp to prevent normalization flicker on mixed states
+- Do NOT slerp antipodal vectors directly — use perpendicular great circle detour (cross product method)

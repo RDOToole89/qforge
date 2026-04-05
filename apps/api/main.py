@@ -1,4 +1,4 @@
-"""FastAPI application for the Quantum Experiment Framework.
+"""FastAPI application for the QForge.
 
 Exposes the engine's run() and sweep() APIs over HTTP, plus experiment
 registry browsing and stored result retrieval.
@@ -15,7 +15,7 @@ from apps.api.routes import bloch, experiments, results
 app = FastAPI(
     title="Quantum Experiment API",
     version="0.1.0",
-    description="REST API for the Qiskit Experiment Framework.",
+    description="REST API for the QForge.",
 )
 
 app.add_middleware(

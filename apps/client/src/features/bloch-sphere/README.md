@@ -1,6 +1,6 @@
 # Bloch Sphere CPTP Visualizer
 
-Interactive 3D visualization of quantum noise channels, probe state sensitivity, and structured decoherence — built to work with the Qiskit Experiment Framework's research data.
+Interactive 3D visualization of quantum noise channels, probe state sensitivity, and structured decoherence — built to work with the QForge's research data.
 
 ## What This Component Does
 

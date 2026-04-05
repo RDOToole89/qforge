@@ -1,4 +1,4 @@
-# Quantum Decoherence Analysis Framework
+# QForge
 
 A research-grade quantum experiment framework for structured decoherence analysis built on Qiskit.
 
@@ -41,13 +41,13 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 
 ```bash
 # List available experiments
-qxf list
+qforge list
 
 # Run an experiment
-qxf run sst_q1
+qforge run 01_superposition
 
 # With custom parameters
-qxf run sst_q1 -s error_rate=0.1 -s num_qubits=3
+qforge run 01_superposition -s error_rate=0.1 -s num_qubits=3
 ```
 
 See [CLI Reference](cli.md) for full documentation.
@@ -55,13 +55,13 @@ See [CLI Reference](cli.md) for full documentation.
 **Using ExperimentProgram (Recommended):**
 
 ```python
-from src.experiments import sst_q1
+from src.experiments import 01_superposition
 
 # Run with defaults
-result = sst_q1.run()
+result = 01_superposition.run()
 
 # Or customize parameters
-result = sst_q1.run({"num_qubits": 3, "error_rate": 0.1})
+result = 01_superposition.run({"num_qubits": 3, "error_rate": 0.1})
 
 # Access metrics
 metrics = result.structured_decoherence_metrics

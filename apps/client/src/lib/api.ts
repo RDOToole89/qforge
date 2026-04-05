@@ -1,5 +1,5 @@
 /**
- * Typed API client for the Quantum Experiment Framework backend.
+ * Typed API client for the QForge backend.
  *
  * All functions throw on non-2xx responses.
  */

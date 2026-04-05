@@ -283,7 +283,7 @@ We present these as directions we find interesting, and where we would welcome i
 
 ## 7. Data and Reproducibility
 
-All experiments were conducted using the Qiskit Experiment Framework, an open-source research tool built on Qiskit. The framework provides:
+All experiments were conducted using the QForge, an open-source research tool built on Qiskit. The framework provides:
 
 - Automated circuit preparation for GHZ, W, Cluster, Bell, and Product states
 - Readout error support and noise model configuration

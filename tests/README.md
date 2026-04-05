@@ -1,6 +1,6 @@
 # Test Suite
 
-277+ tests with 90% minimum coverage on core analysis. Tests are organized by layer (core, engine, integration, physics, schemas) with custom pytest markers.
+296+ tests with 90% minimum coverage on core analysis. Tests are organized by layer (core, engine, integration, physics, schemas) with custom pytest markers.
 
 ---
 

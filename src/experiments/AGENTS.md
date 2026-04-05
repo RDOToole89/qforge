@@ -5,165 +5,221 @@ Last updated: 2026-04-05
 
 ## Purpose
 
-Pluggable experiment programs built on a **general-purpose quantum experiment engine**. The current research focus is structured decoherence, but the engine and experiment infrastructure are designed to support any quantum experiment — entanglement witnesses, variational circuits, benchmarking, error correction studies, or anything else that can be expressed as "prepare state → apply noise/operations → measure → analyze."
+Pluggable experiment programs built on a **general-purpose quantum experiment engine**. The current research focus is structured decoherence, but the engine supports any quantum experiment — entanglement witnesses, variational circuits, benchmarking, error correction, or anything that fits "prepare state → apply noise/operations → measure → analyze."
 
-New experiment types that have nothing to do with decoherence are welcome. The `basics/` folder already includes Bell correlation experiments that are general quantum mechanics, not decoherence-specific. The architecture deliberately separates the engine (which is domain-agnostic) from the experiments (which carry research semantics).
-
-Experiments are organized into three progressive levels so users can learn, research, and deploy to hardware through a consistent interface.
+Every folder follows the same pattern: `steps/` for guided progressions and `deep_dives/` for extended explorations. New experiment types and new research directions are welcome.
 
 ## Structure
 
 ```
 experiments/
-├── __init__.py              # Registry: EXPERIMENT_REGISTRY, get_experiment(), list_experiments()
+├── __init__.py              # Registry: 49 experiments, get_experiment(), list_experiments()
 ├── base.py                  # ExperimentProgram protocol + BaseExperiment helper
 ├── README.md                # User-facing overview with quick start
 ├── AGENTS.md                # This file — agent guidance
 │
-├── basics/                  # Level 1: Learning experiments
-│   ├── README.md            # Explains each experiment, suggested order
-│   ├── bell_state.py        # BellExperiment — 2-qubit entanglement
-│   ├── bell_correlation.py  # BellCorrelation — full Bell metrics + variants
-│   ├── ghz_exploration.py   # GHZExploration — multi-qubit GHZ + structure metrics
-│   └── noise_comparison.py  # NoiseComparison — depolarizing vs amplitude damping
+├── basics/                  # Learn quantum computing (11 steps + 10 deep dives)
+│   ├── steps/
+│   │   ├── step01_superposition.py         # What IS a qubit?
+│   │   ├── step02_measurement.py           # Probability and collapse
+│   │   ├── step03_single_gates.py          # X, H, Z, Y, S, T gates
+│   │   ├── step04_two_qubits.py            # Independent vs entangled
+│   │   ├── step05_bell_states.py           # The four Bell states
+│   │   ├── step06_ghz_states.py            # Multi-qubit GHZ
+│   │   ├── step07_w_states.py              # W states
+│   │   ├── step08_cluster_states.py        # Cluster states
+│   │   ├── step09_noise_intro.py           # What noise does
+│   │   ├── step10_noise_types.py           # Five noise models
+│   │   └── step11_noise_and_entanglement.py # River vs Fog (capstone)
+│   └── deep_dives/
+│       ├── dd_bloch_geometry.py            # Gates as Bloch rotations
+│       ├── dd_bell_basics.py               # Bell with noise sweeps
+│       ├── dd_bell_correlations.py         # Full Bell metrics
+│       ├── dd_teleportation_intro.py       # Teleportation protocol
+│       ├── dd_ghz_structure_metrics.py     # SS, TC, CI on GHZ
+│       ├── dd_entanglement_fragility.py    # GHZ fragile, W robust
+│       ├── dd_measurement_basis.py         # Z vs X basis
+│       ├── dd_noise_model_comparison.py    # Side-by-side noise
+│       ├── dd_density_matrix.py            # Full quantum state
+│       └── dd_structure_scaling.py         # SS grows with qubits
 │
-├── advanced/                # Classic quantum algorithms and protocols
-│   ├── README.md            # Algorithm descriptions and usage
-│   ├── shor.py              # ShorExperiment — integer factoring via period-finding
-│   ├── grover.py            # GroverExperiment — unstructured search with quadratic speedup
-│   ├── teleportation.py     # TeleportationExperiment — state transfer via entanglement
-│   ├── vqe.py               # VQEExperiment — variational eigensolver for H2
-│   └── qaoa.py              # QAOAExperiment — approximate optimization for MaxCut
+├── advanced/                # Quantum algorithms (8 steps + 7 deep dives)
+│   ├── steps/
+│   │   ├── step01_quantum_randomness.py    # True randomness
+│   │   ├── step02_deutsch_jozsa.py         # First quantum speedup
+│   │   ├── step03_grover_search.py         # Amplitude amplification
+│   │   ├── step04_teleportation.py         # Entanglement as resource
+│   │   ├── step05_superdense_coding.py     # 2 bits from 1 qubit
+│   │   ├── step06_qft.py                   # Quantum Fourier Transform
+│   │   ├── step07_error_correction.py      # 3-qubit bit-flip code
+│   │   └── step08_design_your_own.py       # Experiment template
+│   └── deep_dives/
+│       ├── dd_shor.py                      # Shor's factoring
+│       ├── dd_grover.py                    # Extended Grover's
+│       ├── dd_teleportation.py             # Extended teleportation
+│       ├── dd_vqe.py                       # Variational Eigensolver
+│       ├── dd_qaoa.py                      # QAOA optimization
+│       ├── dd_bernstein_vazirani.py        # Hidden string
+│       └── dd_bb84.py                      # Quantum key distribution
 │
-├── decoherence/             # Level 2: Core structured decoherence research
-│   ├── README.md            # Research context, experiment progression
-│   ├── topology_comparison.py  # TopologyComparison — GHZ/W/Cluster/Product
-│   ├── scaling_ladder.py       # ScalingLadder — 2→6+ qubits, GHZ and W
-│   ├── noise_sweep.py          # NoiseSweep — structure vs noise rate
-│   └── state_probe.py          # StateProbeStudy — 47-condition NTC sensitivity
+├── decoherence/             # Structured decoherence research (6 steps + 2 deep dives)
+│   ├── steps/
+│   │   ├── step01_river_vs_fog.py          # Foundational observation
+│   │   ├── step02_topology_matters.py      # Four topologies compared
+│   │   ├── step03_scaling.py               # Structure grows with qubits
+│   │   ├── step04_noise_resilience.py      # How robust is structure?
+│   │   ├── step05_global_vs_local.py       # GHZ global, W local
+│   │   └── step06_simulation_vs_reality.py # Where models break down
+│   └── deep_dives/
+│       ├── dd_state_probe.py               # 47-condition sensitivity
+│       ├── dd_classical_null.py            # Classical null model test
+│       ├── dd_topology_full.py             # Full topology comparison
+│       ├── dd_scaling_full.py              # Complete scaling ladder
+│       └── dd_noise_sweep_full.py          # Comprehensive noise sweep
 │
-└── hardware/                # Level 3: Real IBM Quantum hardware
-    ├── README.md            # Prerequisites, setup, what we found
-    └── hardware_study.py    # 10-experiment hardware decoherence suite
+└── hardware/                # Real IBM Quantum (5 steps + 3 deep dives)
+    ├── steps/
+    │   ├── step01_first_hardware_run.py    # First real QPU
+    │   ├── step02_hardware_vs_simulation.py # HW vs sim comparison
+    │   ├── step03_transpilation.py         # Logical → physical
+    │   ├── step04_backend_exploration.py   # Compare processors
+    │   └── step05_real_decoherence.py      # River vs Fog on hardware
+    └── deep_dives/
+        ├── dd_full_study.py                # 10-experiment research suite
+        └── dd_readout_errors.py            # Gate vs readout noise
 ```
 
 ## Registry
 
-All experiments are registered in `__init__.py` under `EXPERIMENT_REGISTRY`. Current entries:
+All experiments registered in `__init__.py` under `EXPERIMENT_REGISTRY` (49 total):
 
-| Key | Class | Folder | Description |
-|-----|-------|--------|-------------|
-| `bell_state` | BellExperiment | basics/ | Two-qubit Bell state |
-| `bell_correlation` | BellCorrelation | basics/ | Bell metrics + variant comparison |
-| `ghz_exploration` | GHZExploration | basics/ | Multi-qubit GHZ + structure metrics |
-| `noise_comparison` | NoiseComparison | basics/ | Depolarizing vs amplitude damping |
-| `topology_comparison` | TopologyComparison | decoherence/ | GHZ/W/Cluster/Product comparison |
-| `scaling_ladder` | ScalingLadder | decoherence/ | Structure scaling with qubit count |
-| `noise_sweep` | NoiseSweep | decoherence/ | Structure resilience under noise |
-| `state_probe` | StateProbeStudy | decoherence/ | Correlated noise sensitivity study |
-| `shor` | ShorExperiment | advanced/ | Shor's algorithm for integer factoring |
-| `grover` | GroverExperiment | advanced/ | Grover's search with quadratic speedup |
-| `teleportation` | TeleportationExperiment | advanced/ | Quantum state transfer via entanglement |
-| `vqe` | VQEExperiment | advanced/ | Variational Quantum Eigensolver for H2 |
-| `qaoa` | QAOAExperiment | advanced/ | QAOA for MaxCut optimization |
+### Basics (21)
 
-Hardware experiments (`hardware/hardware_study.py`) are run directly via their module functions, not through the registry, because they manage backend connections and sessions internally.
+| Key | Folder | Description |
+|-----|--------|-------------|
+| `01_superposition` | basics/steps/ | What IS a qubit? |
+| `02_measurement` | basics/steps/ | Probability and collapse |
+| `03_single_gates` | basics/steps/ | X, H, Z, Y, S, T gates |
+| `04_two_qubits` | basics/steps/ | Independent vs entangled |
+| `05_bell_states` | basics/steps/ | The four Bell states |
+| `06_ghz_states` | basics/steps/ | Multi-qubit GHZ |
+| `07_w_states` | basics/steps/ | W states |
+| `08_cluster_states` | basics/steps/ | Cluster states |
+| `09_noise_intro` | basics/steps/ | What noise does |
+| `10_noise_types` | basics/steps/ | Five noise models |
+| `11_noise_and_entanglement` | basics/steps/ | River vs Fog |
+| `dd_bloch_geometry` | basics/deep_dives/ | Gates as Bloch rotations |
+| `dd_bell_correlations` | basics/deep_dives/ | Full Bell metrics |
+| `dd_teleportation_intro` | basics/deep_dives/ | Teleportation protocol |
+| `dd_ghz_structure_metrics` | basics/deep_dives/ | SS, TC, CI on GHZ |
+| `dd_entanglement_fragility` | basics/deep_dives/ | GHZ fragile, W robust |
+| `dd_measurement_basis` | basics/deep_dives/ | Z vs X basis |
+| `dd_noise_model_comparison` | basics/deep_dives/ | Side-by-side noise |
+| `dd_density_matrix` | basics/deep_dives/ | Density matrix mode |
+| `dd_structure_scaling` | basics/deep_dives/ | SS scaling |
+| `bell_state` | basics/deep_dives/ | Bell with noise sweep |
+
+### Advanced (15)
+
+| Key | Folder | Description |
+|-----|--------|-------------|
+| `adv_01_quantum_randomness` | advanced/steps/ | True randomness |
+| `adv_02_deutsch_jozsa` | advanced/steps/ | First quantum speedup |
+| `adv_03_grover_search` | advanced/steps/ | Amplitude amplification |
+| `adv_04_teleportation` | advanced/steps/ | Entanglement as resource |
+| `adv_05_superdense_coding` | advanced/steps/ | 2 bits from 1 qubit |
+| `adv_06_qft` | advanced/steps/ | QFT |
+| `adv_07_error_correction` | advanced/steps/ | 3-qubit bit-flip code |
+| `adv_08_design_your_own` | advanced/steps/ | Experiment template |
+| `dd_bernstein_vazirani` | advanced/deep_dives/ | Hidden string |
+| `dd_bb84` | advanced/deep_dives/ | BB84 QKD |
+| `shor` | advanced/deep_dives/ | Shor's factoring |
+| `grover` | advanced/deep_dives/ | Extended Grover's |
+| `vqe` | advanced/deep_dives/ | VQE for H2 |
+| `qaoa` | advanced/deep_dives/ | QAOA MaxCut |
+
+### Decoherence (8)
+
+| Key | Folder | Description |
+|-----|--------|-------------|
+| `dec_01_river_vs_fog` | decoherence/steps/ | Foundational observation |
+| `dec_02_topology_matters` | decoherence/steps/ | Four topologies |
+| `dec_03_scaling` | decoherence/steps/ | Structure grows with qubits |
+| `dec_04_noise_resilience` | decoherence/steps/ | Noise robustness |
+| `dec_05_global_vs_local` | decoherence/steps/ | GHZ global, W local |
+| `dec_06_simulation_vs_reality` | decoherence/steps/ | Model accuracy |
+| `dd_classical_null` | decoherence/deep_dives/ | Classical null model |
+| `state_probe` | decoherence/deep_dives/ | 47-condition study |
+
+### Hardware (6 registered + 1 programmatic)
+
+| Key | Folder | Description |
+|-----|--------|-------------|
+| `hw_01_first_hardware_run` | hardware/steps/ | First real QPU |
+| `hw_02_hardware_vs_simulation` | hardware/steps/ | HW vs sim |
+| `hw_03_transpilation` | hardware/steps/ | Logical → physical |
+| `hw_04_backend_exploration` | hardware/steps/ | Compare processors |
+| `hw_05_real_decoherence` | hardware/steps/ | River vs Fog on hardware |
+| `dd_readout_errors` | hardware/deep_dives/ | Gate vs readout noise |
+
+Hardware `dd_full_study` is run programmatically (not via registry) because it manages backend sessions internally.
 
 ## How to Add a New Experiment
 
 ### 1. Decide which folder it belongs in
 
-- **basics/** — Teaches a concept. Simple config, clear output, good docstring with "What you'll learn" and "Try it" sections. Aimed at newcomers. Can be about any quantum topic (entanglement, noise, gates, etc.).
-- **decoherence/** — Tests a hypothesis about structured decoherence. Has a research question, uses `metrics="structured_decoherence"`, documents expected findings. This is the current research focus.
-- **hardware/** — Requires IBM Quantum credentials. Manages backend connections. Saves full provenance.
-- **New folders welcome** — If a new research direction doesn't fit decoherence (e.g., `benchmarking/`, `error_correction/`, `variational/`), create a new folder at the same level with its own README.md.
-
-If unsure, default to **basics/** for learning experiments or create a new folder for a new research direction.
+- **basics/steps/** — Teaches a single quantum concept. Numbered sequentially.
+- **basics/deep_dives/** — Goes deeper on a concept from the steps. Prefixed `dd_`.
+- **advanced/steps/** — Teaches an algorithm or protocol technique. Numbered `adv_NN_`.
+- **advanced/deep_dives/** — Applies techniques to real problems. Prefixed `dd_`.
+- **decoherence/steps/** — Guided structured decoherence research. Numbered `dec_NN_`.
+- **decoherence/deep_dives/** — Full research experiments. Prefixed `dd_`.
+- **hardware/steps/** — Hardware learning path. Numbered `hw_NN_`.
+- **hardware/deep_dives/** — Advanced hardware experiments. Prefixed `dd_`.
+- **New folders welcome** — Create `benchmarking/`, `error_correction/`, etc. as needed.
 
 ### 2. Create the module
 
-Follow this template (see `basics/bell_state.py` for the minimal version):
+Every experiment file MUST have in its docstring:
+- **WHAT YOU'LL LEARN / EXPLORE** — educational context
+- **CIRCUIT** — ASCII circuit diagram showing the quantum circuit
+- **TRY IT** — code example with import and run
 
-```python
-"""One-line title — What this experiment tests.
-
-What you'll learn / What this tests:
-  - Point 1
-  - Point 2
-
-Usage:
-    from src.experiments.{folder}.{module} import {instance}
-    result = {instance}.run()
-"""
-
-from __future__ import annotations
-
-from src.engine.models import ExperimentConfig
-from src.experiments.base import BaseExperiment
-
-
-class MyExperiment(BaseExperiment):
-    """One-line description."""
-
-    name = "my_experiment"
-    description = "Short description for the registry listing"
-
-    def default_config(self) -> ExperimentConfig:
-        return ExperimentConfig(
-            num_qubits=4,
-            state_type="GHZ",
-            noise_enabled=True,
-            noise_type="depolarizing",
-            error_rate=0.05,
-            shots=4096,
-            metrics="structured_decoherence",
-        )
-
-
-my_experiment = MyExperiment()
-```
+Follow the template in `advanced/steps/step08_design_your_own.py`.
 
 ### 3. Register it
 
-Add to **three** places:
+Add to **four** places:
+1. The folder's `__init__.py`
+2. `src/experiments/__init__.py` — import and add to `EXPERIMENT_REGISTRY`
+3. The folder's `README.md`
+4. **This file** — update the registry table
 
-1. **The folder's `__init__.py`** — import the class and instance
-2. **`src/experiments/__init__.py`** — import and add to `EXPERIMENT_REGISTRY` and `__all__`
-3. **The folder's `README.md`** — add a section explaining the experiment
+### 4. Test it
 
-### 4. Update this file
-
-Add a row to the registry table above so the next agent knows what exists.
-
-## Naming Conventions
-
-- **File names**: lowercase-kebab or lowercase-underscore (e.g., `noise_sweep.py`)
-- **Class names**: PascalCase (e.g., `NoiseSweep`)
-- **Instance names**: snake_case, matching the registry key (e.g., `noise_sweep`)
-- **Registry keys**: snake_case, descriptive (e.g., `"topology_comparison"`)
+```bash
+python -m src.cli run my_experiment_name
+```
 
 ## Architecture Rules
 
 ### DO
 
-- Subclass `BaseExperiment` — it provides `run()`, `sweep()`, and config merging for free
-- Define `name`, `description`, and `default_config()` — these are the protocol contract
-- Add convenience methods for common workflows (e.g., `run_all_states()`, `run_noise_sweep()`)
-- Use `metrics="structured_decoherence"` for research experiments
-- Include a module-level instance for convenience imports
-- Write docstrings with usage examples — these are the primary documentation
+- Subclass `BaseExperiment`
+- Define `name`, `description`, and `default_config()`
+- Include CIRCUIT diagrams and educational docstrings
+- Add convenience methods (`run_comparison()`, `run_sweep()`, etc.)
+- Keep experiments self-contained
 
 ### DO NOT
 
-- Import from `src.engine.models` beyond `ExperimentConfig` and `ExperimentResult`
-- Put analysis logic in experiments — that belongs in `src/core/analysis/`
-- Put visualization logic here — that's handled by the engine
-- Hardcode backend names or hardware-specific logic in basics/ or decoherence/ experiments
-- Reference SST, SQM, or other personal theory branding — use "structured decoherence"
+- Put analysis logic in experiments (belongs in `src/core/analysis/`)
+- Put visualization logic here (handled by the engine)
+- Reference SST, SQM, or personal theory branding — use "structured decoherence"
+- Hardcode hardware-specific logic in basics/ or advanced/ experiments
 
 ### ALWAYS
 
-- Update the folder's README.md when adding an experiment
-- Update this AGENTS.md registry table when adding or removing experiments
-- Update `__init__.py` at both the folder and root level
-- Keep experiments self-contained — each module should be runnable independently
+- Update ALL four places when adding/removing experiments (see step 3 above)
+- Test via CLI before committing
+- Include WHAT YOU'LL LEARN, CIRCUIT, and TRY IT in every docstring

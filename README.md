@@ -1,4 +1,4 @@
-# Qiskit Experiment Framework
+# QForge
 
 **A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware.**
 
@@ -99,12 +99,12 @@ graph LR
 | **Noise models** | Depolarizing, amplitude damping, phase damping, bit flip, phase flip, thermal relaxation, correlated depolarizing, readout error |
 | **Simulation modes** | `qasm` (shot-based), `statevector` (exact), `density_matrix` (mixed state), `hardware` (IBM Quantum) |
 | **Metrics** | 8 information-theoretic metrics with bootstrap 95% CIs and v1.0 schema |
-| **Experiments** | 39 pre-built programs: basics (11 steps + 10 deep dives) → advanced (8 steps + 7 deep dives) → decoherence (4 research) → hardware |
+| **Experiments** | 49 pre-built programs: basics (11 steps + 10 deep dives) → advanced (8 steps + 7 deep dives) → decoherence (6 steps + 2 deep dives) → hardware (5 steps + 3 deep dives) |
 | **Hardware** | IBM Quantum via SamplerV2, auto-backend selection, transpilation capture, calibration snapshots |
 | **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
 | **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
-| **Tests** | 382 passing, 90% coverage on core analysis |
+| **Tests** | 296+ passing, 90% coverage on core analysis |
 
 ### Frontend App (React Native / Expo)
 
@@ -124,8 +124,8 @@ graph LR
 ### Run an Experiment (Python)
 
 ```bash
-git clone https://github.com/rootoole/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
+git clone https://github.com/rootoole/qforge.git
+cd qforge
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
@@ -268,18 +268,28 @@ These findings are preliminary and exploratory. The full analysis, raw data, and
 | `vqe` | Find molecular ground states with hybrid quantum-classical loops |
 | `qaoa` | Solve combinatorial optimization (MaxCut) |
 
-### Decoherence (research)
+### Decoherence — 6-Step Research Path
 
-| Experiment | What it tests |
-|-----------|--------------|
-| `topology_comparison` | Do GHZ, W, Cluster, Product decohere differently? |
-| `scaling_ladder` | Does structure grow with qubit count? |
-| `noise_sweep` | How robust is structure under increasing noise? |
-| `state_probe` | Which states detect correlated noise best? |
+| Step | Experiment | What it tests |
+|------|-----------|--------------|
+| 1 | `dec_01_river_vs_fog` | The foundational observation — structured vs uniform errors |
+| 2 | `dec_02_topology_matters` | Four topologies, four different behaviors |
+| 3 | `dec_03_scaling` | Does structure grow with qubit count? |
+| 4 | `dec_04_noise_resilience` | How robust is structure under increasing noise? |
+| 5 | `dec_05_global_vs_local` | GHZ structure is global, W is local |
+| 6 | `dec_06_simulation_vs_reality` | Where do noise models break down? |
 
-### Hardware
+### Hardware — 5-Step Path to Real Quantum Processors
 
-Run any experiment on real IBM Quantum processors with `sim_mode="hardware"`. Full provenance capture, transpilation tracking, calibration snapshots. See [docs/guides/hardware-setup.md](docs/guides/hardware-setup.md).
+| Step | Experiment | What it teaches |
+|------|-----------|----------------|
+| 1 | `hw_01_first_hardware_run` | Your first real quantum computer |
+| 2 | `hw_02_hardware_vs_simulation` | Same circuit, hardware vs simulation |
+| 3 | `hw_03_transpilation` | See your logical circuit become physical gates |
+| 4 | `hw_04_backend_exploration` | Compare processors — is your result chip-independent? |
+| 5 | `hw_05_real_decoherence` | River vs Fog on real hardware — the culmination |
+
+Requires IBM Quantum credentials. See [docs/guides/hardware-setup.md](docs/guides/hardware-setup.md).
 
 ---
 
@@ -292,7 +302,7 @@ Run any experiment on real IBM Quantum processors with `sim_mode="hardware"`. Fu
 | Engine | Python 3.12+, Pydantic 2, NumPy |
 | API | FastAPI, Uvicorn |
 | Frontend | React Native 0.81, Expo SDK 54, TypeScript 5.9, Three.js |
-| Code quality | ruff, mypy (strict), pytest (382 tests), pre-commit hooks |
+| Code quality | ruff, mypy (strict), pytest (296+ tests), pre-commit hooks |
 
 ---
 
