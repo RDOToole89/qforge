@@ -6,6 +6,89 @@ import type { BlochDot } from "@/src/features/bloch-sphere/data/stateBlochConfig
 /** Fixed color palette for qubit dots */
 const QUBIT_COLORS = ["#818cf8", "#f472b6", "#34d399", "#fb923c", "#38bdf8", "#a78bfa"];
 
+export type InterpolationMode = "direct" | "ideal";
+
+/**
+ * Spherical linear interpolation (slerp) for Bloch vectors.
+ * Follows the great circle arc on the sphere surface.
+ */
+function slerp(
+  a: { rx: number; ry: number; rz: number },
+  b: { rx: number; ry: number; rz: number },
+  t: number,
+): { rx: number; ry: number; rz: number } {
+  const lenA = Math.sqrt(a.rx * a.rx + a.ry * a.ry + a.rz * a.rz);
+  const lenB = Math.sqrt(b.rx * b.rx + b.ry * b.ry + b.rz * b.rz);
+
+  // If either is near the origin (mixed/entangled state), fall back to lerp —
+  // slerp can't normalize near-zero vectors without flickering
+  if (lenA < 0.3 || lenB < 0.3) {
+    return {
+      rx: a.rx + (b.rx - a.rx) * t,
+      ry: a.ry + (b.ry - a.ry) * t,
+      rz: a.rz + (b.rz - a.rz) * t,
+    };
+  }
+
+  // If start and end are very close, no interpolation needed
+  const dx = b.rx - a.rx, dy = b.ry - a.ry, dz = b.rz - a.rz;
+  const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (dist < 0.01) return { rx: a.rx, ry: a.ry, rz: a.rz };
+
+  // Normalize to unit sphere
+  const ax = a.rx / lenA, ay = a.ry / lenA, az = a.rz / lenA;
+  const bx = b.rx / lenB, by = b.ry / lenB, bz = b.rz / lenB;
+
+  // Dot product (cosine of angle between)
+  let dot = ax * bx + ay * by + az * bz;
+  dot = Math.max(-1, Math.min(1, dot));
+
+  // Nearly parallel — use lerp
+  if (dot > 0.9999) {
+    return {
+      rx: a.rx + (b.rx - a.rx) * t,
+      ry: a.ry + (b.ry - a.ry) * t,
+      rz: a.rz + (b.rz - a.rz) * t,
+    };
+  }
+
+  // Nearly antipodal (opposite directions) — slerp is undefined,
+  // choose a perpendicular great circle through a fixed axis
+  if (dot < -0.9999) {
+    // Find a perpendicular vector to create a detour
+    let px = 0, py = 0, pz = 0;
+    if (Math.abs(ax) < 0.9) { px = 1; } else { py = 1; }
+    // Cross product a × p to get perpendicular direction
+    const cx = ay * pz - az * py;
+    const cy = az * px - ax * pz;
+    const cz = ax * py - ay * px;
+    const clen = Math.sqrt(cx * cx + cy * cy + cz * cz);
+    const nx = cx / clen, ny = cy / clen, nz = cz / clen;
+    // Go through the perpendicular midpoint
+    const angle = Math.PI * t;
+    const cosA = Math.cos(angle), sinA = Math.sin(angle);
+    const len = lenA + (lenB - lenA) * t;
+    return {
+      rx: (ax * cosA + nx * sinA) * len,
+      ry: (ay * cosA + ny * sinA) * len,
+      rz: (az * cosA + nz * sinA) * len,
+    };
+  }
+
+  const theta = Math.acos(dot);
+  const sinTheta = Math.sin(theta);
+  const wA = Math.sin((1 - t) * theta) / sinTheta;
+  const wB = Math.sin(t * theta) / sinTheta;
+
+  const len = lenA + (lenB - lenA) * t;
+
+  return {
+    rx: (wA * ax + wB * bx) * len,
+    ry: (wA * ay + wB * by) * len,
+    rz: (wA * az + wB * bz) * len,
+  };
+}
+
 /** Duration of one step in ms at speed=1 */
 const STEP_DURATION_MS = 800;
 
@@ -55,6 +138,7 @@ function computeFrame(
   numQubits: number,
   snapshotIndex: number,
   t: number,
+  interpMode: InterpolationMode = "direct",
 ): { dots: BlochDot[]; correlations: CorrelationData | null } {
   const svA = snapshots[snapshotIndex]?.stateVector;
   if (!svA) return { dots: [], correlations: null };
@@ -69,9 +153,16 @@ function computeFrame(
 
     if (svB && t > 0) {
       const b = stateVectorToBloch(svB, q, numQubits);
-      rx += (b.rx - rx) * t;
-      ry += (b.ry - ry) * t;
-      rz += (b.rz - rz) * t;
+      if (interpMode === "ideal") {
+        // Slerp: follow great circle on sphere surface (shows ideal rotation)
+        const s = slerp(a, b, t);
+        rx = s.rx; ry = s.ry; rz = s.rz;
+      } else {
+        // Lerp: direct path through interior (shows actual reduced state)
+        rx += (b.rx - rx) * t;
+        ry += (b.ry - ry) * t;
+        rz += (b.rz - rz) * t;
+      }
     }
 
     dots.push({
@@ -115,6 +206,7 @@ function computeFrame(
 export function usePlayback(
   snapshots: SimSnapshot[],
   numQubits: number,
+  interpMode: InterpolationMode = "direct",
 ): UsePlaybackReturn {
   const [snapshotIndex, setSnapshotIndex] = useState(0);
   const [t, setT] = useState(0);
@@ -146,7 +238,7 @@ export function usePlayback(
     }
   }, [snapshots.length, numQubits]);
 
-  const { dots, correlations } = computeFrame(snapshots, numQubits, snapshotIndex, t);
+  const { dots, correlations } = computeFrame(snapshots, numQubits, snapshotIndex, t, interpMode);
 
   const startAnimation = useCallback(() => {
     lastTimeRef.current = performance.now();

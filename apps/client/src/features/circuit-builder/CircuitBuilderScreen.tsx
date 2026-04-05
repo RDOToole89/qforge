@@ -6,6 +6,7 @@ import { useCircuit } from "./hooks/useCircuit";
 import { useSimulator, formatDirac, recognizeState } from "./hooks/useSimulator";
 import { useNarrative } from "./hooks/useNarrative";
 import { usePlayback } from "./hooks/usePlayback";
+import type { InterpolationMode } from "./hooks/usePlayback";
 import CircuitToolbar from "./components/CircuitToolbar";
 import GatePalette from "./components/GatePalette";
 import CircuitCanvas from "./components/CircuitCanvas";
@@ -122,7 +123,8 @@ export default function CircuitBuilderScreen() {
       ? directNumQubits
       : circuit.numQubits;
 
-  const playback = usePlayback(snapshots, activeNumQubits);
+  const [interpMode, setInterpMode] = useState<InterpolationMode>("direct");
+  const playback = usePlayback(snapshots, activeNumQubits, interpMode);
   const narratives = useNarrative(circuit, circuitSnapshots);
 
   // Auto-play when gate preview activates — show the transformation
@@ -1392,6 +1394,8 @@ export default function CircuitBuilderScreen() {
               if (!moment || !moment.gates[0]) return null;
               return getGateDef(moment.gates[0].gateType as any).color;
             })()}
+            interpMode={interpMode}
+            onInterpModeChange={setInterpMode}
           />
         </div>
       </div>

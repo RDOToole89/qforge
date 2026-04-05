@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
 import CorrelationHeatmap from "./CorrelationHeatmap";
-import type { UsePlaybackReturn } from "../hooks/usePlayback";
+import type { UsePlaybackReturn, InterpolationMode } from "../hooks/usePlayback";
 import { colors, fonts } from "../styles";
 
 interface BlochPlaybackPanelProps {
@@ -20,11 +20,14 @@ interface BlochPlaybackPanelProps {
   activeGateLabel?: string | null;
   /** Color of the active gate */
   activeGateColor?: string | null;
+  /** Interpolation mode toggle */
+  interpMode: InterpolationMode;
+  onInterpModeChange: (mode: InterpolationMode) => void;
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4];
 
-export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption, activeQubits, activeGateLabel, activeGateColor }: BlochPlaybackPanelProps) {
+export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption, activeQubits, activeGateLabel, activeGateColor, interpMode, onInterpModeChange }: BlochPlaybackPanelProps) {
   const [internalFs, setInternalFs] = useState(false);
   // Sync external fullscreen control
   useEffect(() => {
@@ -159,7 +162,10 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           </div>
         )}
 
-        {/* Zoom slider */}
+        {/* Animation mode toggle + Zoom slider */}
+        {(hasCircuit || previewCaption) && (
+          <InterpToggle interpMode={interpMode} onInterpModeChange={onInterpModeChange} />
+        )}
         {(hasCircuit || previewCaption) && (
           <div style={{
             padding: "2px 14px",
@@ -963,5 +969,92 @@ function TransportButton({
     >
       {children}
     </button>
+  );
+}
+
+function InterpToggle({ interpMode, onInterpModeChange }: {
+  interpMode: import("../hooks/usePlayback").InterpolationMode;
+  onInterpModeChange: (m: import("../hooks/usePlayback").InterpolationMode) => void;
+}) {
+  const [showInfo, setShowInfo] = useState(false);
+
+  return (
+    <div style={{
+      padding: "2px 14px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 4,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+        {([["direct", "Actual"], ["ideal", "Ideal"]] as const).map(([mode, label]) => (
+          <button
+            key={mode}
+            onClick={() => onInterpModeChange(mode)}
+            style={{
+              background: interpMode === mode ? colors.accentDim : "transparent",
+              color: interpMode === mode ? colors.accentLight : colors.textTertiary,
+              border: `1px solid ${interpMode === mode ? colors.accent : "transparent"}`,
+              borderRadius: 4,
+              padding: "2px 8px",
+              fontSize: 9,
+              fontFamily: fonts.sans,
+              cursor: "pointer",
+              fontWeight: interpMode === mode ? 600 : 400,
+            }}
+          >
+            {label}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowInfo((v) => !v)}
+          style={{
+            background: showInfo ? colors.accentDim : "transparent",
+            color: showInfo ? colors.accentLight : colors.textTertiary,
+            border: `1px solid ${showInfo ? colors.accent : colors.border}`,
+            borderRadius: "50%",
+            width: 16,
+            height: 16,
+            fontSize: 9,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            marginLeft: 2,
+            fontFamily: fonts.sans,
+          }}
+        >
+          ?
+        </button>
+      </div>
+      {showInfo && (
+        <div style={{
+          background: colors.card,
+          border: `1px solid ${colors.border}`,
+          borderRadius: 8,
+          padding: 10,
+          maxWidth: 260,
+          fontSize: 10,
+          lineHeight: 1.5,
+          fontFamily: fonts.sans,
+        }}>
+          <div style={{ fontWeight: 700, color: colors.accentLight, marginBottom: 4 }}>
+            Animation Mode
+          </div>
+          <div style={{ color: colors.text, marginBottom: 6 }}>
+            <span style={{ fontWeight: 600, color: interpMode === "direct" ? colors.accentLight : colors.textSecondary }}>Actual</span>
+            {" \u2014 "}
+            Shows the true reduced state. Dots move through the sphere interior when entanglement makes individual qubits mixed. This is what you would measure.
+          </div>
+          <div style={{ color: colors.text }}>
+            <span style={{ fontWeight: 600, color: interpMode === "ideal" ? colors.accentLight : colors.textSecondary }}>Ideal</span>
+            {" \u2014 "}
+            Shows the gate rotation geometry. Dots follow great circle arcs on the sphere surface, as if each qubit were isolated. Useful for visualizing rotation axes.
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
