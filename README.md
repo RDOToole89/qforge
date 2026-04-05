@@ -106,16 +106,27 @@ graph LR
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
 | **Tests** | 296+ passing, 90% coverage on core analysis |
 
-### Frontend App (React Native / Expo)
+### Visual Quantum Laboratory (React Native / Expo)
+
+The frontend isn't just a dashboard — it's an **interactive quantum laboratory**. The Circuit Builder with live Bloch sphere playback is, as far as we know, unique: no existing tool combines drag-and-drop circuit construction, step-by-step 3D state visualization, and real-time entanglement analysis in a single integrated view.
 
 | Feature | What it does |
 |---------|-------------|
-| **Bloch Sphere Visualizer** | Interactive 3D noise channel visualization. Watch decoherence deform the Bloch ball. Sweep error rates. Compare probe states and topologies. Load real experiment results. |
-| **Circuit Builder** | Drag-and-drop circuit construction with 14 gate types. 22 preset circuits (Bell, GHZ, QFT, QPE, Teleportation, Grover, etc.). Step-by-step Bloch sphere playback with entanglement analysis at every gate. |
+| **Circuit Builder + Bloch Playback** | Build circuits with 14 gate types, then **watch the quantum state evolve on a 3D Bloch sphere** step by step. Pause at any gate. Scrub back and forth. See per-qubit Bloch vectors computed via partial traces. 22 preset circuits (Bell, GHZ, QFT, QPE, Teleportation, Grover, etc.) with step-by-step explanations. |
+| **Live Entanglement Analysis** | At every step of the circuit, see ΔCov correlation matrices, pairwise concurrence, and 3-tangle residual gauge. Watch entanglement appear and disappear as gates are applied. |
+| **State Recognition** | Auto-detects known quantum states (Bell Φ+, GHZ, W, Cluster, Dicke) and displays educational context — what the state is, why it matters, and how it was constructed. |
+| **Bloch Sphere Visualizer** | Interactive 3D noise channel visualization. Watch decoherence deform the Bloch ball. Sweep error rates. Compare probe states and topologies. Load real experiment results from the Python engine. |
 | **Quantum Glossary** | 135 terms across 16 categories. Formal definitions, intuitive explanations, LaTeX equations, cross-linked navigation. |
 | **Experiment Configurator** | Full GUI for building experiment configs: state type, noise model, simulation mode, hardware backend, metrics. Live circuit preview. |
 | **Results Browser** | Browse, sort, and inspect past experiment results. |
 | **Experiment Registry** | Discover and launch pre-built experiments with one tap. |
+
+**What makes this different from IBM Quantum Composer, Quirk, or Qiskit widgets:**
+- Step-by-step Bloch sphere animation with scrubber (not just final state)
+- Multi-qubit Bloch view with per-qubit partial trace dots
+- Entanglement metrics (ΔCov, concurrence, tangle) computed and displayed at every gate
+- Connected to a real experiment engine — take the circuit you built and run it on IBM hardware
+- 22 presets with educational narratives explaining *why* each gate is there, not just *what* it does
 
 ---
 
