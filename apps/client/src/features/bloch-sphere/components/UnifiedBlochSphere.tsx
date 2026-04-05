@@ -38,6 +38,8 @@ interface CircuitMode {
   zoom?: number;
   /** Indices of qubits currently being operated on — shown enlarged with glow */
   activeQubits?: number[];
+  /** Interpolation progress within current step (0=start, 1=end) — drives enlargement decay */
+  stepProgress?: number;
 }
 
 export type UnifiedBlochSphereProps = GlossaryMode | VisualizerMode | CircuitMode;
@@ -408,7 +410,7 @@ function VisualizerSphere({
 
 // ── Circuit mode ────────────────────────────────────────────────
 
-function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
+function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0 }: CircuitMode) {
   const mountRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const dotsRef = useRef(dots);
@@ -417,6 +419,8 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   const activeQubitsRef = useRef<number[]>(activeQubits ?? []);
   useEffect(() => { activeQubitsRef.current = activeQubits ?? []; }, [activeQubits]);
+  const stepProgressRef = useRef(stepProgress);
+  useEffect(() => { stepProgressRef.current = stepProgress; }, [stepProgress]);
 
   const dotMeshesRef = useRef<THREE.Mesh[]>([]);
   const glowMeshesRef = useRef<THREE.Mesh[]>([]);
@@ -429,17 +433,34 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
     if (!el) return;
     while (el.firstChild) el.removeChild(el.firstChild);
 
-    const renderSize = size ?? (Math.min(el.clientWidth, el.clientHeight) || 280);
+    const w = size ?? (el.clientWidth || 280);
+    const h = size ?? (el.clientHeight || 280);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
     camera.position.set(2.5, 1.8, 2.5);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(renderSize, renderSize);
+    renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x08090e, 1);
     el.appendChild(renderer.domElement);
+
+    // Track container aspect ratio for camera fit adjustment
+    const aspectRef = { current: w / h };
+
+    // Resize observer to keep renderer matched to container
+    const ro = new ResizeObserver(([entry]) => {
+      const nw = entry.contentRect.width;
+      const nh = entry.contentRect.height;
+      if (nw > 0 && nh > 0) {
+        camera.aspect = nw / nh;
+        camera.updateProjectionMatrix();
+        renderer.setSize(nw, nh);
+        aspectRef.current = nw / nh;
+      }
+    });
+    if (!size) ro.observe(el);
 
     buildScaffold(scene, { background: 0x08090e, detail: "full" });
 
@@ -465,7 +486,7 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
     dotMeshesRef.current = dotMeshes;
     glowMeshesRef.current = glowMeshes;
 
-    const baseDistance = 3.5;
+    const baseDistance = 4.0;
     const autoRotateRef = { current: true };
 
     // Drag-to-rotate
@@ -506,16 +527,21 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
       // Gentle auto-rotate (paused during drag)
       if (autoRotateRef.current) scene.rotation.y += 0.002;
 
-      // Apply zoom to camera distance
+      // Apply zoom to camera distance, adjusted for container aspect ratio
       const z = zoomRef.current;
-      const dist = baseDistance * z;
+      // Auto-fit: when container is taller than wide, push camera back to keep sphere visible
+      const aspect = aspectRef.current;
+      const fitFactor = aspect < 1 ? 1 / Math.sqrt(aspect) : 1;
+      const dist = baseDistance * z * fitFactor;
       camera.position.set(dist * 0.72, dist * 0.52, dist * 0.72);
       camera.lookAt(0, 0, 0);
 
       // Update dot positions and active qubit highlighting
       const curDots = dotsRef.current;
       const active = activeQubitsRef.current;
-      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.005); // 0..1 pulsing
+      // stepProgress: 0 = start of step (max enlarge), 1 = end of step (normal)
+      const sp = stepProgressRef.current;
+      const decay = 1 - sp; // 1 at start → 0 at end
 
       for (let i = 0; i < dotMeshes.length && i < curDots.length; i++) {
         const pos = blochToThree(curDots[i].rx, curDots[i].ry, curDots[i].rz);
@@ -523,13 +549,13 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
         glowMeshes[i].position.copy(pos);
 
         const isActive = active.includes(i);
-        // Scale: active dots are 1.6x-2.0x larger with pulsing
-        const baseScale = isActive ? 1.6 + pulse * 0.4 : 1.0;
-        dotMeshes[i].scale.setScalar(baseScale);
-        // Glow: active dots have larger, brighter glow
-        const glowScale = isActive ? 2.0 + pulse * 0.5 : 1.0;
+        // Scale: starts enlarged, shrinks to normal as step progresses
+        const dotScale = isActive ? 1.0 + 0.35 * decay : 1.0;
+        dotMeshes[i].scale.setScalar(dotScale);
+        // Glow: starts bright, fades as step progresses
+        const glowScale = isActive ? 1.0 + 0.5 * decay : 1.0;
         glowMeshes[i].scale.setScalar(glowScale);
-        (glowMeshes[i].material as THREE.MeshBasicMaterial).opacity = isActive ? 0.35 + pulse * 0.15 : 0.2;
+        (glowMeshes[i].material as THREE.MeshBasicMaterial).opacity = isActive ? 0.2 + 0.2 * decay : 0.2;
       }
 
       renderer.render(scene, camera);
@@ -541,6 +567,7 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointerleave", onUp);
+      ro.disconnect();
       cancelAnimationFrame(frameRef.current);
       renderer.dispose();
     };

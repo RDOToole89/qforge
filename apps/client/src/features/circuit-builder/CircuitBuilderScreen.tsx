@@ -143,6 +143,9 @@ export default function CircuitBuilderScreen() {
   const [activePreset, setActivePreset] = useState<CircuitPreset | null>(null);
   const [exportCopied, setExportCopied] = useState(false);
   const [blochFullscreen, setBlochFullscreen] = useState(false);
+  const [blochPanelWidth, setBlochPanelWidth] = useState(480);
+  const resizingRef = useRef(false);
+  const resizeStartRef = useRef({ x: 0, width: 0 });
 
   // Onboarding actions
   const onboardingActions = useMemo((): OnboardingActions => ({
@@ -1291,8 +1294,50 @@ export default function CircuitBuilderScreen() {
           )}
         </div>
 
-        {/* Right: Bloch sphere playback panel */}
-        <div data-onboarding="bloch-sphere" style={{ width: 320, flexShrink: 0 }}>
+        {/* Right: Bloch sphere playback panel with resize handle */}
+        <div data-onboarding="bloch-sphere" style={{ width: blochPanelWidth, flexShrink: 0, position: "relative" }}>
+          {/* Drag handle on left edge */}
+          <div
+            onPointerDown={(e) => {
+              e.preventDefault();
+              resizingRef.current = true;
+              resizeStartRef.current = { x: e.clientX, width: blochPanelWidth };
+              (e.target as HTMLElement).setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              if (!resizingRef.current) return;
+              const dx = resizeStartRef.current.x - e.clientX;
+              const newWidth = Math.max(280, Math.min(700, resizeStartRef.current.width + dx));
+              setBlochPanelWidth(newWidth);
+            }}
+            onPointerUp={() => { resizingRef.current = false; }}
+            onPointerCancel={() => { resizingRef.current = false; }}
+            style={{
+              position: "absolute",
+              left: -3,
+              top: 0,
+              bottom: 0,
+              width: 6,
+              cursor: "col-resize",
+              zIndex: 2,
+              background: "transparent",
+            }}
+            title="Drag to resize"
+          >
+            {/* Visual indicator */}
+            <div style={{
+              position: "absolute",
+              left: 2,
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 3,
+              height: 40,
+              borderRadius: 2,
+              background: colors.border,
+              opacity: 0.5,
+              transition: "opacity 0.15s",
+            }} />
+          </div>
           <BlochPlaybackPanel
             playback={playback}
             numQubits={activeNumQubits}
@@ -1301,10 +1346,17 @@ export default function CircuitBuilderScreen() {
             previewCaption={gatePreview?.caption ?? null}
             activeQubits={(() => {
               const { snapshotIndex, t, status } = playback.state;
-              if (status === "idle" && t === 0 && snapshotIndex === 0) return undefined;
+              // Only highlight during active playback or mid-step scrubbing
+              if (status === "idle") return undefined;
+              if (t === 0 && snapshotIndex === 0) return undefined;
+              // At the final step with no interpolation — playback finished
+              const totalSnaps = playback.totalSnapshots;
+              if (snapshotIndex >= totalSnaps - 1 && t === 0) return undefined;
+              // The moment being animated
               const momentIdx = t > 0 ? snapshotIndex : Math.max(0, snapshotIndex - 1);
-              const src = isPreviewActive ? gatePreview : null;
-              const moments = src ? GATE_PREVIEW_CIRCUITS[activeGateType!]?.circuit?.moments : circuit.moments;
+              const moments = isPreviewActive && activeGateType
+                ? GATE_PREVIEW_CIRCUITS[activeGateType]?.circuit?.moments
+                : circuit.moments;
               const moment = moments?.[momentIdx];
               if (!moment) return undefined;
               return [...new Set(moment.gates.flatMap((g: { qubits: number[] }) => g.qubits))] as number[];

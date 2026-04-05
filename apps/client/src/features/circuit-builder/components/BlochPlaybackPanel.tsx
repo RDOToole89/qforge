@@ -29,7 +29,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
   const fullscreen = internalFs;
   const setFullscreen = (v: boolean) => { setInternalFs(v); onFullscreenChange?.(v); };
   const [corrMode, setCorrMode] = useState<"correlation" | "concurrence" | "tangle">("correlation");
-  const [blochZoom, setBlochZoom] = useState(1.0);
+  const [blochZoom, setBlochZoom] = useState(1.25);
   const { state, play, pause, stepBack, stepForward, setSpeed, reset, seek, scrubTo, snapToStep, totalSnapshots } = playback;
   const { status, snapshotIndex, speed, dots, correlations, progress } = state;
 
@@ -98,17 +98,20 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           </div>
         )}
 
-        {/* Sphere */}
-        <div style={{
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 8,
-        }}>
+        {/* Sphere — fills all available space, double-click to open modal */}
+        <div
+          onDoubleClick={() => setFullscreen(true)}
+          style={{
+            flex: 1,
+            minHeight: 0,
+            width: "100%",
+            cursor: "pointer",
+            overflow: "hidden",
+          }}
+          title="Double-click to expand"
+        >
           {(hasCircuit || previewCaption) ? (
-            <UnifiedBlochSphere mode="circuit" dots={dots} size={260} zoom={blochZoom} activeQubits={activeQubits} />
+            <UnifiedBlochSphere mode="circuit" dots={dots} zoom={blochZoom} activeQubits={activeQubits} stepProgress={state.t} />
           ) : (
             <div style={{
               color: colors.textTertiary,
@@ -279,7 +282,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
               minHeight: 400,
             }}>
               {hasCircuit ? (
-                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} zoom={blochZoom} activeQubits={activeQubits} />
+                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} zoom={blochZoom} activeQubits={activeQubits} stepProgress={state.t} />
               ) : (
                 <div style={{
                   color: colors.textTertiary,
