@@ -311,6 +311,31 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             <div style={{ padding: "0 20px" }}>
               <QubitLegend dots={dots} hasCircuit={hasCircuit} />
             </div>
+
+            {/* Live state readout in modal */}
+            {hasCircuit && dots.length > 0 && (
+              <div style={{ padding: "4px 34px 6px", display: "flex", flexWrap: "wrap", gap: "2px 16px", justifyContent: "center" }}>
+                {dots.map((d, i) => {
+                  const len = Math.sqrt(d.rx * d.rx + d.ry * d.ry + d.rz * d.rz);
+                  const purity = len > 0.95 ? "pure" : len < 0.15 ? "mixed" : `${(len * 100).toFixed(0)}%`;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontFamily: fonts.mono }}>
+                      <div style={{ width: 6, height: 6, borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                      <span style={{ color: colors.textTertiary }}>q{i}</span>
+                      <span style={{ color: colors.textSecondary }}>
+                        ({d.rx >= 0 ? "+" : ""}{d.rx.toFixed(2)},
+                        {d.ry >= 0 ? " +" : " "}{d.ry.toFixed(2)},
+                        {d.rz >= 0 ? " +" : " "}{d.rz.toFixed(2)})
+                      </span>
+                      <span style={{ color: len > 0.95 ? colors.success : len < 0.15 ? colors.warning : colors.textTertiary, fontSize: 9 }}>
+                        {purity}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {hasCircuit && correlations && numQubits >= 2 && (
               <div data-onboarding="modal-correlation" style={{ padding: "0 20px", display: "flex", justifyContent: "center" }}>
                 <CorrelationPanel correlations={correlations} numQubits={numQubits} corrMode={corrMode} setCorrMode={setCorrMode} />

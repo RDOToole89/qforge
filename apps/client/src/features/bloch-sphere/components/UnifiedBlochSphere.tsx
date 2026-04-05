@@ -461,17 +461,50 @@ function CircuitSphere({ dots, size, zoom = 1 }: CircuitMode) {
     dotMeshesRef.current = dotMeshes;
     glowMeshesRef.current = glowMeshes;
 
-    const baseDistance = 3.5; // default camera distance from origin
+    const baseDistance = 3.5;
+    const autoRotateRef = { current: true };
+
+    // Drag-to-rotate
+    let dragging = false;
+    let prevX = 0;
+    let prevY = 0;
+    const canvas = renderer.domElement;
+
+    const onDown = (e: PointerEvent) => {
+      dragging = true;
+      prevX = e.clientX;
+      prevY = e.clientY;
+      autoRotateRef.current = false;
+      canvas.style.cursor = "grabbing";
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      scene.rotation.y += (e.clientX - prevX) * 0.01;
+      scene.rotation.x += (e.clientY - prevY) * 0.01;
+      // Clamp vertical rotation
+      scene.rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, scene.rotation.x));
+      prevX = e.clientX;
+      prevY = e.clientY;
+    };
+    const onUp = () => {
+      dragging = false;
+      canvas.style.cursor = "grab";
+    };
+
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    canvas.addEventListener("pointerup", onUp);
+    canvas.addEventListener("pointerleave", onUp);
+    canvas.style.cursor = "grab";
 
     const animate = () => {
       frameRef.current = requestAnimationFrame(animate);
-      // Gentle auto-rotate
-      scene.rotation.y += 0.002;
+      // Gentle auto-rotate (paused during drag)
+      if (autoRotateRef.current) scene.rotation.y += 0.002;
 
       // Apply zoom to camera distance
       const z = zoomRef.current;
       const dist = baseDistance * z;
-      const angle = performance.now() * 0.0001; // slow orbit for variety
       camera.position.set(dist * 0.72, dist * 0.52, dist * 0.72);
       camera.lookAt(0, 0, 0);
 
@@ -488,6 +521,10 @@ function CircuitSphere({ dots, size, zoom = 1 }: CircuitMode) {
     animate();
 
     return () => {
+      canvas.removeEventListener("pointerdown", onDown);
+      canvas.removeEventListener("pointermove", onMove);
+      canvas.removeEventListener("pointerup", onUp);
+      canvas.removeEventListener("pointerleave", onUp);
       cancelAnimationFrame(frameRef.current);
       renderer.dispose();
     };
