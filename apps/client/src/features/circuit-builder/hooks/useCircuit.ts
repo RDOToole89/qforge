@@ -107,12 +107,34 @@ function circuitReducer(state: Circuit, action: CircuitAction): Circuit {
     }
 
     case "MOVE_GATE": {
-      // Find and remove the gate
+      // Find and remove the gate from its current position
       let movedGate: PlacedGate | null = null;
       let moments = state.moments.map((m) => {
         const found = m.gates.find((g) => g.id === action.gateId);
         if (found) {
-          movedGate = { ...found, qubits: [action.qubit] };
+          // Recompute qubits: shift the target to the new qubit,
+          // adjust control qubits relative to the new target
+          const def = getGateDef(found.gateType);
+          let newQubits: number[];
+          if (def.numQubits === 1) {
+            newQubits = [action.qubit];
+          } else {
+            // Preserve the offset pattern between control and target
+            const oldTarget = found.qubits[found.qubits.length - 1];
+            const shift = action.qubit - oldTarget;
+            newQubits = found.qubits.map((q) => {
+              const nq = q + shift;
+              return Math.max(0, Math.min(nq, state.numQubits - 1));
+            });
+            // Ensure uniqueness
+            const unique = [...new Set(newQubits)];
+            if (unique.length < newQubits.length) {
+              // Fallback: use createGate logic
+              const fresh = createGate(found.gateType, action.qubit, state.numQubits, found.params);
+              newQubits = fresh.qubits;
+            }
+          }
+          movedGate = { ...found, qubits: newQubits };
           return { gates: m.gates.filter((g) => g.id !== action.gateId) };
         }
         return m;
@@ -256,6 +278,10 @@ export function useCircuit() {
     dispatch({ type: "CLEAR" });
   }, []);
 
+  const moveGate = useCallback((gateId: string, qubit: number, momentIndex: number) => {
+    dispatch({ type: "MOVE_GATE", gateId, qubit, momentIndex });
+  }, []);
+
   const loadPreset = useCallback((c: Circuit) => {
     dispatch({ type: "LOAD_PRESET", circuit: c });
   }, []);
@@ -264,6 +290,7 @@ export function useCircuit() {
     circuit,
     addGate,
     removeGate,
+    moveGate,
     setParams,
     setControl,
     setNumQubits,

@@ -70,6 +70,7 @@ export default function GateBlock({ gate, momentIndex, selected, onClick, onDoub
     onContextMenu?.(gate.id, e);
   };
 
+
   // Compute bounding box for the full gate (including multi-qubit connections)
   const isMultiQubit = def.numQubits >= 2 && gate.qubits.length >= 2;
   const minQ = isMultiQubit ? Math.min(...gate.qubits) : targetQubit;
@@ -98,7 +99,7 @@ export default function GateBlock({ gate, momentIndex, selected, onClick, onDoub
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onContextMenu={handleContextMenu}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer", userSelect: "none" }}
         transform={selTransform}
       >
         {/* Invisible hit area covering the full gate */}

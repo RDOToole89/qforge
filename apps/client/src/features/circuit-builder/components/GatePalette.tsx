@@ -22,7 +22,7 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
         onDragStart={(e) => {
           if (disabled) { e.preventDefault(); return; }
           e.dataTransfer.setData("gate-type", gt);
-          e.dataTransfer.effectAllowed = "copy";
+          e.dataTransfer.effectAllowed = "copyMove";
           onGateSelect(gt);
         }}
         title={disabled ? `Needs ${def.numQubits}+ qubits` : `${def.name} — click or drag to place`}

@@ -25,6 +25,7 @@ export default function CircuitBuilderScreen() {
     circuit,
     addGate,
     removeGate,
+    moveGate,
     setParams,
     setControl,
     setNumQubits,
@@ -400,10 +401,14 @@ export default function CircuitBuilderScreen() {
               onGateClick={handleGateClick}
               onGateDoubleClick={undefined}
               onGateContextMenu={handleGateContextMenu}
+              onGateMove={(gateId, qubit, mi) => {
+                moveGate(gateId, qubit, mi);
+                setSelectedGateId(null);
+              }}
               onCanvasClick={handleCanvasClick}
-              onDrop={(gateType, qubit, event) => {
+              onDrop={(gateType, qubit, momentIndex, event) => {
                 setActiveGateType(gateType as GateType);
-                const result = addGate(gateType as GateType, qubit);
+                const result = addGate(gateType as GateType, qubit, momentIndex);
                 handleGatePlacementResult(result, event);
                 setActiveGateType(null);
               }}

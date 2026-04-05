@@ -1,6 +1,7 @@
 import { useRef, useCallback, useState, useEffect } from "react";
 import { colors, layout, fonts, momentX, wireY, canvasWidth, canvasHeight } from "../styles";
 import GateBlock from "./GateBlock";
+import { getGateDef } from "../data/gateLibrary";
 import type { Circuit } from "../types";
 
 interface CircuitCanvasProps {
@@ -11,7 +12,9 @@ interface CircuitCanvasProps {
   onGateContextMenu?: (gateId: string, event: React.MouseEvent) => void;
   onCanvasClick: (qubit: number, event?: React.MouseEvent) => void;
   /** Called when a gate is dropped from the palette onto a qubit wire */
-  onDrop?: (gateType: string, qubit: number, event?: React.DragEvent) => void;
+  onDrop?: (gateType: string, qubit: number, momentIndex: number, event?: React.DragEvent) => void;
+  /** Called when a placed gate is repositioned via drag */
+  onGateMove?: (gateId: string, qubit: number, momentIndex: number) => void;
   /** Show moment column grid lines */
   showGrid?: boolean;
   /** Highlight column/wire during drag */
@@ -25,6 +28,7 @@ export default function CircuitCanvas({
   onCanvasClick,
   onGateDoubleClick,
   onGateContextMenu,
+  onGateMove,
   onDrop,
   showGrid = false,
   dropTarget,
@@ -34,6 +38,7 @@ export default function CircuitCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragQubit, setDragQubit] = useState<number | null>(null);
   const [containerWidth, setContainerWidth] = useState(800);
+
 
   // Track actual container width so wires extend to the edge
   useEffect(() => {
@@ -95,7 +100,7 @@ export default function CircuitCanvas({
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
+      // Don't set dropEffect — let the browser match it to effectAllowed automatically
       setDragQubit(closestQubit(e));
     },
     [closestQubit],
@@ -103,16 +108,63 @@ export default function CircuitCanvas({
 
   const handleDragLeave = useCallback(() => setDragQubit(null), []);
 
+  // Find closest moment column from a drag event
+  const closestMoment = useCallback(
+    (e: React.DragEvent) => {
+      const svg = svgRef.current;
+      if (!svg) return 0;
+      const rect = svg.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      let best = 0, bestDist = Infinity;
+      const maxM = Math.max(moments.length + 2, 4);
+      for (let mi = 0; mi < maxM; mi++) {
+        const d = Math.abs(mx - momentX(mi));
+        if (d < bestDist) { bestDist = d; best = mi; }
+      }
+      return best;
+    },
+    [moments.length],
+  );
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragQubit(null);
+      const moveId = e.dataTransfer.getData("gate-move-id");
       const gateType = e.dataTransfer.getData("gate-type");
-      if (gateType && onDrop) {
-        onDrop(gateType, closestQubit(e), e);
+
+      if (moveId && onGateMove) {
+        // Moving an existing gate
+        const qubit = closestQubit(e);
+        const mi = closestMoment(e);
+        onGateMove(moveId, qubit, mi);
+      } else if (gateType && onDrop) {
+        // Placing a new gate from the palette — snap to drop position
+        onDrop(gateType, closestQubit(e), closestMoment(e), e);
       }
     },
-    [closestQubit, onDrop],
+    [closestQubit, closestMoment, onDrop, onGateMove, onGateClick],
+  );
+
+  // Compute gate positions for draggable overlays (in viewBox coords —
+  // positioned inside a wrapper that matches SVG dimensions exactly)
+  const gateDragOverlays = moments.flatMap((moment, mi) =>
+    moment.gates.map((gate) => {
+      const gx = momentX(mi);
+      const minQ = Math.min(...gate.qubits);
+      const maxQ = Math.max(...gate.qubits);
+      const gyTop = wireY(minQ);
+      const gyBot = wireY(maxQ);
+      const pad = 8;
+      return {
+        left: gx - layout.gateSize / 2 - pad,
+        top: gyTop - layout.gateSize / 2 - pad,
+        width: layout.gateSize + pad * 2,
+        height: (gyBot - gyTop) + layout.gateSize + pad * 2,
+        gateType: gate.gateType,
+        gateId: gate.id,
+      };
+    }),
   );
 
   return (
@@ -129,6 +181,7 @@ export default function CircuitCanvas({
         border: `1px solid ${dragQubit !== null ? colors.accent : colors.border}`,
         background: colors.surface,
         transition: "border-color 0.15s ease",
+        position: "relative",
       }}
     >
       <svg
@@ -138,7 +191,12 @@ export default function CircuitCanvas({
         viewBox={`0 0 ${viewBoxWidth} ${height}`}
         preserveAspectRatio="xMinYMid meet"
         onClick={handleSvgClick}
-        style={{ display: "block", minWidth: contentWidth > containerWidth ? contentWidth : undefined }}
+        style={{
+          display: "block",
+          minWidth: contentWidth > containerWidth ? contentWidth : undefined,
+          userSelect: "none",
+          WebkitUserSelect: "none",
+        } as React.CSSProperties}
       >
         {/* Qubit labels */}
         {Array.from({ length: numQubits }, (_, i) => {
@@ -288,6 +346,48 @@ export default function CircuitCanvas({
           </text>
         )}
       </svg>
+
+      {/* Overlay layer: same dimensions as SVG, positioned on top, for draggable gate handles */}
+      <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: viewBoxWidth,
+          height,
+          pointerEvents: "none",
+        }}
+      >
+        {gateDragOverlays.map(({ left, top, width: w, height: h, gateType, gateId }) => (
+          <div
+            key={`drag-${gateId}`}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("gate-type", gateType);
+              e.dataTransfer.setData("gate-move-id", gateId);
+              e.dataTransfer.effectAllowed = "copyMove";
+              onGateClick(gateId);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onGateClick(gateId);
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGateContextMenu?.(gateId, e as unknown as React.MouseEvent);
+            }}
+            style={{
+              position: "absolute",
+              left,
+              top,
+              width: w,
+              height: h,
+              cursor: "grab",
+              pointerEvents: "auto",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
