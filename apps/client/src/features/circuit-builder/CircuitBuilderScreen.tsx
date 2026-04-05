@@ -1299,6 +1299,16 @@ export default function CircuitBuilderScreen() {
             fullscreenOpen={blochFullscreen}
             onFullscreenChange={setBlochFullscreen}
             previewCaption={gatePreview?.caption ?? null}
+            activeQubits={(() => {
+              const { snapshotIndex, t, status } = playback.state;
+              if (status === "idle" && t === 0 && snapshotIndex === 0) return undefined;
+              const momentIdx = t > 0 ? snapshotIndex : Math.max(0, snapshotIndex - 1);
+              const src = isPreviewActive ? gatePreview : null;
+              const moments = src ? GATE_PREVIEW_CIRCUITS[activeGateType!]?.circuit?.moments : circuit.moments;
+              const moment = moments?.[momentIdx];
+              if (!moment) return undefined;
+              return [...new Set(moment.gates.flatMap((g: { qubits: number[] }) => g.qubits))] as number[];
+            })()}
           />
         </div>
       </div>

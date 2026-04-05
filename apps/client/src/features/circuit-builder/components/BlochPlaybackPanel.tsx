@@ -14,11 +14,13 @@ interface BlochPlaybackPanelProps {
   onFullscreenChange?: (open: boolean) => void;
   /** When set, shows a preview caption above the sphere */
   previewCaption?: string | null;
+  /** Qubits currently being operated on — highlighted on Bloch sphere */
+  activeQubits?: number[];
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4];
 
-export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption }: BlochPlaybackPanelProps) {
+export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen, onFullscreenChange, previewCaption, activeQubits }: BlochPlaybackPanelProps) {
   const [internalFs, setInternalFs] = useState(false);
   // Sync external fullscreen control
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
           padding: 8,
         }}>
           {(hasCircuit || previewCaption) ? (
-            <UnifiedBlochSphere mode="circuit" dots={dots} size={260} zoom={blochZoom} />
+            <UnifiedBlochSphere mode="circuit" dots={dots} size={260} zoom={blochZoom} activeQubits={activeQubits} />
           ) : (
             <div style={{
               color: colors.textTertiary,
@@ -277,7 +279,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
               minHeight: 400,
             }}>
               {hasCircuit ? (
-                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} zoom={blochZoom} />
+                <UnifiedBlochSphere mode="circuit" dots={dots} size={520} zoom={blochZoom} activeQubits={activeQubits} />
               ) : (
                 <div style={{
                   color: colors.textTertiary,

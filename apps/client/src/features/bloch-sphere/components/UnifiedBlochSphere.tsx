@@ -36,6 +36,8 @@ interface CircuitMode {
   size?: number;
   /** Camera zoom: 1.0 = default, < 1 = zoomed in, > 1 = zoomed out */
   zoom?: number;
+  /** Indices of qubits currently being operated on — shown enlarged with glow */
+  activeQubits?: number[];
 }
 
 export type UnifiedBlochSphereProps = GlossaryMode | VisualizerMode | CircuitMode;
@@ -406,13 +408,15 @@ function VisualizerSphere({
 
 // ── Circuit mode ────────────────────────────────────────────────
 
-function CircuitSphere({ dots, size, zoom = 1 }: CircuitMode) {
+function CircuitSphere({ dots, size, zoom = 1, activeQubits }: CircuitMode) {
   const mountRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const dotsRef = useRef(dots);
   useEffect(() => { dotsRef.current = dots; }, [dots]);
   const zoomRef = useRef(zoom);
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  const activeQubitsRef = useRef<number[]>(activeQubits ?? []);
+  useEffect(() => { activeQubitsRef.current = activeQubits ?? []; }, [activeQubits]);
 
   const dotMeshesRef = useRef<THREE.Mesh[]>([]);
   const glowMeshesRef = useRef<THREE.Mesh[]>([]);
@@ -508,12 +512,24 @@ function CircuitSphere({ dots, size, zoom = 1 }: CircuitMode) {
       camera.position.set(dist * 0.72, dist * 0.52, dist * 0.72);
       camera.lookAt(0, 0, 0);
 
-      // Update dot positions from ref (no scene rebuild needed)
+      // Update dot positions and active qubit highlighting
       const curDots = dotsRef.current;
+      const active = activeQubitsRef.current;
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.005); // 0..1 pulsing
+
       for (let i = 0; i < dotMeshes.length && i < curDots.length; i++) {
         const pos = blochToThree(curDots[i].rx, curDots[i].ry, curDots[i].rz);
         dotMeshes[i].position.copy(pos);
         glowMeshes[i].position.copy(pos);
+
+        const isActive = active.includes(i);
+        // Scale: active dots are 1.6x-2.0x larger with pulsing
+        const baseScale = isActive ? 1.6 + pulse * 0.4 : 1.0;
+        dotMeshes[i].scale.setScalar(baseScale);
+        // Glow: active dots have larger, brighter glow
+        const glowScale = isActive ? 2.0 + pulse * 0.5 : 1.0;
+        glowMeshes[i].scale.setScalar(glowScale);
+        (glowMeshes[i].material as THREE.MeshBasicMaterial).opacity = isActive ? 0.35 + pulse * 0.15 : 0.2;
       }
 
       renderer.render(scene, camera);
