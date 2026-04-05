@@ -290,6 +290,23 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
               )}
             </div>
 
+            {/* Zoom slider in modal */}
+            {hasCircuit && (
+              <div style={{ padding: "2px 40px", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono }}>-</span>
+                <input
+                  type="range"
+                  min={0.5}
+                  max={2.0}
+                  step={0.05}
+                  value={blochZoom}
+                  onChange={(e) => setBlochZoom(parseFloat(e.target.value))}
+                  style={{ flex: 1, accentColor: colors.textTertiary, height: 3, cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono }}>+</span>
+              </div>
+            )}
+
             {/* Controls */}
             <div style={{ padding: "0 20px" }}>
               <QubitLegend dots={dots} hasCircuit={hasCircuit} />
