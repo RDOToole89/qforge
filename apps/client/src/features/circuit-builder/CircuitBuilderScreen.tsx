@@ -11,6 +11,7 @@ import CircuitToolbar from "./components/CircuitToolbar";
 import GatePalette from "./components/GatePalette";
 import CircuitCanvas from "./components/CircuitCanvas";
 import ProbabilityDisplay from "./components/ProbabilityDisplay";
+import AmplitudeDisplay from "./components/AmplitudeDisplay";
 import BlochPlaybackPanel from "./components/BlochPlaybackPanel";
 import OnboardingOverlay, { OnboardingResetButton } from "./components/OnboardingOverlay";
 import LearnMode from "./components/LearnMode";
@@ -147,7 +148,13 @@ export default function CircuitBuilderScreen() {
   const [exportCopied, setExportCopied] = useState(false);
   const [blochFullscreen, setBlochFullscreen] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
+  const [infoTab, setInfoTab] = useState<"evolution" | "probabilities" | "amplitudes" | "about">("evolution");
   const [blochPanelWidth, setBlochPanelWidth] = useState(480);
+  // Split ratio: percentage of left panel given to the tab content area (0.2 to 0.8)
+  const [tabSplit, setTabSplit] = useState(0.5);
+  const vertResizingRef = useRef(false);
+  const vertResizeStartRef = useRef({ y: 0, split: 0 });
+  const leftPanelRef = useRef<HTMLDivElement>(null);
   const resizingRef = useRef(false);
   const resizeStartRef = useRef({ x: 0, width: 0 });
 
@@ -308,10 +315,11 @@ export default function CircuitBuilderScreen() {
       <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
         {/* Left: circuit content */}
         <div
+          ref={leftPanelRef}
           style={{
             flex: 1,
             minWidth: 0,
-            overflowY: "auto",
+            overflow: "hidden",
             padding: 12,
             display: "flex",
             flexDirection: "column",
@@ -425,6 +433,11 @@ export default function CircuitBuilderScreen() {
           )}
 
           {/* Circuit Canvas */}
+          <div style={{
+            flex: `${Math.round((1 - tabSplit) * 100)}`,
+            minHeight: 80,
+            overflowY: "auto",
+          }}>
           <div data-onboarding="canvas" style={{ position: "relative" }}>
             <CircuitCanvas
               circuit={circuit}
@@ -842,8 +855,87 @@ export default function CircuitBuilderScreen() {
             </div>
           )}
 
-          {/* State Evolution Narrative */}
-          {circuitSnapshots.length > 1 && (
+          </div>{/* end circuit area wrapper */}
+
+          {/* Vertical resize handle between circuit area and tabs */}
+          <div
+            onPointerDown={(e) => {
+              e.preventDefault();
+              vertResizingRef.current = true;
+              vertResizeStartRef.current = { y: e.clientY, split: tabSplit };
+              (e.target as HTMLElement).setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              if (!vertResizingRef.current || !leftPanelRef.current) return;
+              const panelH = leftPanelRef.current.clientHeight;
+              if (panelH < 100) return;
+              const dy = e.clientY - vertResizeStartRef.current.y;
+              // Dragging down = circuit area bigger = tab split smaller
+              const deltaSplit = dy / panelH;
+              const newSplit = Math.max(0.15, Math.min(0.8, vertResizeStartRef.current.split - deltaSplit));
+              setTabSplit(newSplit);
+            }}
+            onPointerUp={() => { vertResizingRef.current = false; }}
+            onPointerCancel={() => { vertResizingRef.current = false; }}
+            style={{
+              height: 8,
+              cursor: "row-resize",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <div style={{
+              width: 40,
+              height: 3,
+              borderRadius: 2,
+              background: colors.border,
+              opacity: 0.5,
+            }} />
+          </div>
+
+          {/* ── Tabbed info panel ── */}
+          <div style={{
+            display: "flex",
+            gap: 0,
+            borderBottom: `1px solid ${colors.border}`,
+            marginBottom: -1,
+            flexShrink: 0,
+          }}>
+            {([
+              ["evolution", "State Evolution"],
+              ["probabilities", "Probabilities"],
+              ["amplitudes", "Amplitudes"],
+              ...(displayPreset ? [["about", displayPreset.name] as const] : []),
+            ] as const).map(([tab, label]) => (
+              <button
+                key={tab}
+                onClick={() => setInfoTab(tab as typeof infoTab)}
+                style={{
+                  background: infoTab === tab ? colors.surface : "transparent",
+                  color: infoTab === tab ? colors.text : colors.textTertiary,
+                  border: `1px solid ${infoTab === tab ? colors.border : "transparent"}`,
+                  borderBottom: infoTab === tab ? `1px solid ${colors.surface}` : `1px solid ${colors.border}`,
+                  borderRadius: "6px 6px 0 0",
+                  padding: "6px 14px",
+                  fontSize: 11,
+                  fontWeight: infoTab === tab ? 600 : 400,
+                  fontFamily: fonts.sans,
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content — fills remaining space */}
+          <div style={{ flex: `${Math.round(tabSplit * 100)}`, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+          {/* State Evolution tab — scrollable */}
+          {infoTab === "evolution" && circuitSnapshots.length > 1 && (
+            <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
             <div
               data-onboarding="state-evolution"
               style={{
@@ -976,13 +1068,37 @@ export default function CircuitBuilderScreen() {
                 })}
               </div>
             </div>
+            </div>
           )}
 
-          {/* Probability Display */}
-          <ProbabilityDisplay snapshot={circuitFinalSnapshot} />
+          {/* Probabilities tab — scrollable */}
+          {infoTab === "probabilities" && (
+            <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+              <ProbabilityDisplay snapshot={circuitFinalSnapshot} />
+            </div>
+          )}
 
-          {/* Preset Info Panel — shown for manual presets or auto-detected states */}
-          {displayPreset && (
+          {/* Amplitudes tab — fills space */}
+          {infoTab === "amplitudes" && (
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <AmplitudeDisplay
+                snapshot={circuitFinalSnapshot}
+                allSnapshots={circuitSnapshots}
+                currentStep={playback.state.snapshotIndex}
+                playbackProgress={playback.state.progress}
+                gateLabels={circuit.moments.map((m) =>
+                  m.gates.map((g) => {
+                    const def = getGateDef(g.gateType);
+                    return def.label;
+                  }).join(",")
+                )}
+              />
+            </div>
+          )}
+
+          {/* About/Preset tab — scrollable */}
+          {infoTab === "about" && displayPreset && (
+            <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
             <div
               style={{
                 padding: 16,
@@ -1123,7 +1239,10 @@ export default function CircuitBuilderScreen() {
                 </div>
               )}
             </div>
+            </div>
           )}
+
+          </div>{/* end tab content wrapper */}
             </>
           )}
 
