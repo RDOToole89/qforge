@@ -66,10 +66,15 @@ class TestQasmMode:
     """Test that QASM mode continues to work as before."""
 
     def test_qasm_basic(self):
-        result = run(ExperimentConfig(
-            num_qubits=2, state_type="GHZ", sim_mode="qasm",
-            shots=500, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="GHZ",
+                sim_mode="qasm",
+                shots=500,
+                rng_seed=42,
+            )
+        )
         meas = result.analysis.measurement_results
         assert meas.total_shots == 500
         assert meas.statevector is None
@@ -77,11 +82,18 @@ class TestQasmMode:
         assert meas.fidelity is None
 
     def test_qasm_with_noise(self):
-        result = run(ExperimentConfig(
-            num_qubits=3, state_type="GHZ", sim_mode="qasm",
-            noise_enabled=True, noise_type="depolarizing", error_rate=0.05,
-            shots=500, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=3,
+                state_type="GHZ",
+                sim_mode="qasm",
+                noise_enabled=True,
+                noise_type="depolarizing",
+                error_rate=0.05,
+                shots=500,
+                rng_seed=42,
+            )
+        )
         meas = result.analysis.measurement_results
         assert meas.total_shots == 500
         # Noisy GHZ should have more than just 000/111
@@ -97,10 +109,15 @@ class TestStatevectorMode:
     """Test exact statevector simulation."""
 
     def test_statevector_ghz(self):
-        result = run(ExperimentConfig(
-            num_qubits=3, state_type="GHZ", sim_mode="statevector",
-            shots=1000, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=3,
+                state_type="GHZ",
+                sim_mode="statevector",
+                shots=1000,
+                rng_seed=42,
+            )
+        )
         meas = result.analysis.measurement_results
 
         # Should have statevector
@@ -128,10 +145,15 @@ class TestStatevectorMode:
         assert set(meas.raw_counts.keys()) <= {"000", "111"}
 
     def test_statevector_bell(self):
-        result = run(ExperimentConfig(
-            num_qubits=2, state_type="BELL", sim_mode="statevector",
-            shots=500, rng_seed=123,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="BELL",
+                sim_mode="statevector",
+                shots=500,
+                rng_seed=123,
+            )
+        )
         meas = result.analysis.measurement_results
         assert meas.statevector is not None
         assert len(meas.statevector) == 4  # 2^2
@@ -139,10 +161,15 @@ class TestStatevectorMode:
         assert meas.fidelity > 0.999
 
     def test_statevector_superposition(self):
-        result = run(ExperimentConfig(
-            num_qubits=2, state_type="SUPERPOSITION", sim_mode="statevector",
-            shots=500, rng_seed=99,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="SUPERPOSITION",
+                sim_mode="statevector",
+                shots=500,
+                rng_seed=99,
+            )
+        )
         meas = result.analysis.measurement_results
         assert meas.statevector is not None
         assert meas.fidelity is not None
@@ -153,10 +180,15 @@ class TestStatevectorMode:
         """Same seed should give identical counts."""
         results = []
         for _ in range(2):
-            r = run(ExperimentConfig(
-                num_qubits=3, state_type="GHZ", sim_mode="statevector",
-                shots=1000, rng_seed=42,
-            ))
+            r = run(
+                ExperimentConfig(
+                    num_qubits=3,
+                    state_type="GHZ",
+                    sim_mode="statevector",
+                    shots=1000,
+                    rng_seed=42,
+                )
+            )
             results.append(r.analysis.measurement_results.raw_counts)
         assert results[0] == results[1]
 
@@ -170,15 +202,20 @@ class TestDensityMatrixMode:
     """Test full density matrix simulation."""
 
     def test_density_matrix_noiseless(self):
-        result = run(ExperimentConfig(
-            num_qubits=2, state_type="GHZ", sim_mode="density_matrix",
-            shots=500, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="GHZ",
+                sim_mode="density_matrix",
+                shots=500,
+                rng_seed=42,
+            )
+        )
         meas = result.analysis.measurement_results
 
         # Should have density matrix
         assert meas.density_matrix is not None
-        dim = 2 ** 2  # 2 qubits
+        dim = 2**2  # 2 qubits
         assert len(meas.density_matrix) == dim
         assert len(meas.density_matrix[0]) == dim
         # Each element is [real, imag]
@@ -192,11 +229,18 @@ class TestDensityMatrixMode:
         assert meas.statevector is None
 
     def test_density_matrix_with_noise(self):
-        result = run(ExperimentConfig(
-            num_qubits=3, state_type="GHZ", sim_mode="density_matrix",
-            noise_enabled=True, noise_type="depolarizing", error_rate=0.1,
-            shots=500, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=3,
+                state_type="GHZ",
+                sim_mode="density_matrix",
+                noise_enabled=True,
+                noise_type="depolarizing",
+                error_rate=0.1,
+                shots=500,
+                rng_seed=42,
+            )
+        )
         meas = result.analysis.measurement_results
 
         assert meas.density_matrix is not None
@@ -211,10 +255,15 @@ class TestDensityMatrixMode:
 
     def test_density_matrix_trace_one(self):
         """Trace of density matrix should be ~1."""
-        result = run(ExperimentConfig(
-            num_qubits=2, state_type="BELL", sim_mode="density_matrix",
-            shots=100, rng_seed=42,
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="BELL",
+                sim_mode="density_matrix",
+                shots=100,
+                rng_seed=42,
+            )
+        )
         dm = result.analysis.measurement_results.density_matrix
         assert dm is not None
 
@@ -232,15 +281,22 @@ class TestDensityMatrixMode:
 class TestMetricsCompatibility:
     """Test that all simulation modes produce data compatible with the metrics pipeline."""
 
-    @pytest.mark.parametrize("sim_mode,noise", [
-        ("qasm", True),
-        ("statevector", False),
-        ("density_matrix", True),
-    ])
+    @pytest.mark.parametrize(
+        "sim_mode,noise",
+        [
+            ("qasm", True),
+            ("statevector", False),
+            ("density_matrix", True),
+        ],
+    )
     def test_metrics_work_with_mode(self, sim_mode, noise):
         cfg = dict(
-            num_qubits=3, state_type="GHZ", sim_mode=sim_mode,
-            shots=500, metrics="quick", rng_seed=42,
+            num_qubits=3,
+            state_type="GHZ",
+            sim_mode=sim_mode,
+            shots=500,
+            metrics="quick",
+            rng_seed=42,
         )
         if noise:
             cfg.update(noise_enabled=True, noise_type="depolarizing", error_rate=0.05)

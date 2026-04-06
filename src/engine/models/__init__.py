@@ -1,5 +1,4 @@
-"""
-Engine Models Package
+"""Engine Models Package.
 
 Purpose:
     Pydantic models that define the complete API contract for the quantum
@@ -11,9 +10,14 @@ Purpose:
 
 Architecture:
     - config.py      : Experiment configuration models
-    - results.py     : Experiment result models (raw data, analysis, provenance)
-    - research.py    : Structured decoherence research models (metrics & analysis)
-    - sweep.py       : Parameter sweep configuration and result models
+    - metadata.py    : Experiment identification and context
+    - circuit.py     : Quantum circuit statistics
+    - measurement.py : Measurement data and statistics
+    - provenance.py  : Reproducibility provenance tracking
+    - quality.py     : Quality assessment metrics
+    - results.py     : Top-level result composition (imports above)
+    - research.py    : Structured decoherence research models
+    - sweep.py       : Parameter sweep configuration and results
     - storage.py     : Storage, artifacts, and manifest models
 
 Dependencies:
@@ -25,11 +29,18 @@ Used by:
 
 from __future__ import annotations
 
+# ===== Focused Model Submodules =====
+from .circuit import CircuitStatistics
+
 # ===== Configuration =====
 from .config import (
     AdvancedNoiseConfig,
     ExperimentConfig,
 )
+from .measurement import MeasurementResults
+from .metadata import ExperimentMetadata
+from .provenance import Provenance
+from .quality import QualityMetrics, compute_quality_metrics
 
 # ===== Research Metrics =====
 from .research import (
@@ -39,16 +50,11 @@ from .research import (
     ResearchMetadata,
 )
 
-# ===== Results =====
+# ===== Results (composes above) =====
 from .results import (
-    CircuitStatistics,
     ExperimentAnalysis,
-    ExperimentMetadata,
     ExperimentResult,
-    ExperimentStatus,  # Literal type
-    MeasurementResults,
-    Provenance,
-    QualityMetrics,
+    ExperimentStatus,
 )
 
 # ===== Storage & Artifacts =====
@@ -86,6 +92,7 @@ __all__ = [
     "QualityMetrics",
     "Provenance",
     "ExperimentStatus",
+    "compute_quality_metrics",
     # Research Metrics
     "MetricEntry",
     "MetricsBundle",

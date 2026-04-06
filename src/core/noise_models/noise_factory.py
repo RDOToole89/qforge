@@ -1,5 +1,4 @@
-"""
-Quantum Noise Model Factory for Research-Grade Decoherence Experiments
+"""Quantum Noise Model Factory for Research-Grade Decoherence Experiments.
 
 # Noise Model Factory
 Centralized factory for creating quantum decoherence channels used in structured
@@ -12,8 +11,9 @@ showing how to manage different environmental coupling mechanisms systematically
 while keeping the interface simple and extensible for research use.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 from qiskit_aer.noise import NoiseModel
 
@@ -26,7 +26,7 @@ from .phase_damping import PhaseDampingNoise
 from .phase_flip import PhaseFlipNoise
 from .thermal_relaxation import ThermalRelaxationNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 # Noise registry for available noise models
 NOISE_CLASSES = {
@@ -43,12 +43,12 @@ NOISE_CLASSES = {
 def create_noise_model(
     noise_type: str,
     num_qubits: int,
-    error_rate: Optional[float] = None,
-    custom_params: Optional[dict] = None,
+    error_rate: float | None = None,
+    custom_params: dict | None = None,
     experiment_id: str = "N/A",
+    readout_error_rate: float | None = None,
 ) -> NoiseModel:
-    """
-    Factory function to create noise models for decoherence pathway research.
+    """Factory function to create noise models for decoherence pathway research.
 
     # Quantum Noise Factory Pattern
     Creates specific decoherence channels (depolarizing, amplitude damping, etc.) using
@@ -67,6 +67,7 @@ def create_noise_model(
         error_rate: Phenomenological error probability [0, 1]
         custom_params: Noise-specific parameters (T1, T2, temperature, etc.)
         experiment_id: Unique identifier for experiment tracking
+        readout_error_rate: Optional measurement readout error probability.
 
     Returns:
         NoiseModel: Configured quantum decoherence channel ready for pathway studies
@@ -116,6 +117,10 @@ def create_noise_model(
         gate_list = _get_appropriate_gates(noise_type, num_qubits)
         noise.apply(noise_model, gate_list)
 
+        # Apply readout errors if requested
+        if readout_error_rate is not None and readout_error_rate > 0:
+            _apply_readout_errors(noise_model, num_qubits, readout_error_rate)
+
         # Log successful creation with research context
         logger.info(
             f"Created {noise_type} noise model: {num_qubits} qubits, "
@@ -136,12 +141,11 @@ def create_noise_model(
 def create_noise_instance(
     noise_type: str,
     num_qubits: int,
-    error_rate: Optional[float] = None,
-    custom_params: Optional[dict] = None,
+    error_rate: float | None = None,
+    custom_params: dict | None = None,
     experiment_id: str = "N/A",
 ) -> BaseNoise:
-    """
-    Create a noise instance without generating the full noise model.
+    """Create a noise instance without generating the full noise model.
 
     # Noise Instance Factory
     Useful for analysis modules that need access to noise properties
@@ -185,8 +189,7 @@ def create_noise_instance(
 
 
 def get_available_noise_types() -> list[str]:
-    """
-    Get list of all available quantum noise types.
+    """Get list of all available quantum noise types.
 
     Returns:
         List[str]: Available noise types for factory creation
@@ -198,12 +201,11 @@ def create_noise_model_for_hardware(
     noise_type: str,
     num_qubits: int,
     backend=None,
-    error_rate: Optional[float] = None,
-    custom_params: Optional[dict] = None,
+    error_rate: float | None = None,
+    custom_params: dict | None = None,
     experiment_id: str = "N/A",
 ) -> NoiseModel:
-    """
-    Create noise model with hardware validation for real quantum devices.
+    """Create noise model with hardware validation for real quantum devices.
 
     # Hardware-Aware Noise Creation
     This enhanced factory function validates noise compatibility with real quantum
@@ -306,11 +308,10 @@ def create_noise_model_for_hardware(
 def validate_noise_request(
     noise_type: str,
     num_qubits: int,
-    error_rate: Optional[float] = None,
-    custom_params: Optional[dict] = None,
+    error_rate: float | None = None,
+    custom_params: dict | None = None,
 ) -> list[str]:
-    """
-    Validate noise creation request before attempting model creation.
+    """Validate noise creation request before attempting model creation.
 
     # Pre-flight Validation
     Catches common errors before expensive quantum noise model creation,
@@ -383,9 +384,32 @@ def validate_noise_request(
     return warnings
 
 
-def _get_appropriate_gates(noise_type: str, num_qubits: int) -> list[str]:
+def _apply_readout_errors(
+    noise_model: NoiseModel, num_qubits: int, readout_error_rate: float
+) -> None:
+    """Apply per-qubit readout (measurement) errors to the noise model.
+
+    Models imperfect measurement: each qubit has probability `readout_error_rate`
+    of reporting the wrong computational basis outcome. This is independent of
+    gate errors and represents measurement apparatus imperfections.
+
+    The confusion matrix per qubit is:
+        P(measured | true) = [[1-p,  p ],
+                              [ p,  1-p]]
+    where p = readout_error_rate.
     """
-    Get appropriate gate list for specific noise type.
+    from qiskit_aer.noise import ReadoutError
+
+    p = float(readout_error_rate)
+    probs = [[1 - p, p], [p, 1 - p]]
+    for qubit in range(num_qubits):
+        noise_model.add_readout_error(ReadoutError(probs), [qubit])
+
+    logger.info(f"Applied readout error (rate={p:.4f}) to {num_qubits} qubits")
+
+
+def _get_appropriate_gates(noise_type: str, num_qubits: int) -> list[str]:
+    """Get appropriate gate list for specific noise type.
 
     # Gate Selection Strategy
     Different noise types affect different classes of quantum gates:
@@ -422,8 +446,7 @@ def _get_appropriate_gates(noise_type: str, num_qubits: int) -> list[str]:
 
 
 def get_noise_info() -> dict[str, dict[str, str]]:
-    """
-    Get comprehensive information about all available noise types.
+    """Get comprehensive information about all available noise types.
 
     # Educational Noise Catalog
     Provides detailed descriptions of each noise mechanism for educational

@@ -1,5 +1,4 @@
-"""
-Structured Decoherence Analysis Pipelines
+"""Structured Decoherence Analysis Pipelines.
 
 High-level orchestration functions for quantum decoherence pathway analysis.
 """

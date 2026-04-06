@@ -1,5 +1,4 @@
-"""
-Schema Bridge - Conversion between MetricResult and v1.0 Schema Format
+"""Schema Bridge - Conversion between MetricResult and v1.0 Schema Format.
 
 This module provides the canonical interface for converting MetricResult objects
 from the registry system into the exact JSON schema format required by the
@@ -41,8 +40,7 @@ __all__ = [
 
 
 def metrics_to_schema(results: Mapping[str, MetricResult]) -> dict[str, Any]:
-    """
-    Convert MetricResult dictionary to v1.0 schema format.
+    """Convert MetricResult dictionary to v1.0 schema format.
 
     This function provides the canonical bridge between the registry system's
     MetricResult format and the exact JSON schema required by downstream
@@ -125,8 +123,7 @@ def metrics_to_schema(results: Mapping[str, MetricResult]) -> dict[str, Any]:
 def _normalize_result_keys(
     results: Mapping[str, MetricResult],
 ) -> dict[str, MetricResult]:
-    """
-    Normalize a results mapping that may contain alias keys into canonical keys.
+    """Normalize a results mapping that may contain alias keys into canonical keys.
 
     Canonical names take precedence when both canonical and alias are present.
     """
@@ -160,8 +157,7 @@ def _normalize_result_keys(
 
 
 def _convert_metric_result(result: MetricResult, metric_name: str) -> dict[str, Any]:
-    """
-    Convert single MetricResult to schema format with validation.
+    """Convert single MetricResult to schema format with validation.
 
     Args:
         result: MetricResult from registry
@@ -200,7 +196,8 @@ def _convert_metric_result(result: MetricResult, metric_name: str) -> dict[str, 
     status = result["status"]
     if status not in valid_statuses:
         raise ValueError(
-            f"Invalid status '{status}' for '{metric_name}', must be one of {sorted(valid_statuses)}"
+            f"Invalid status '{status}' for '{metric_name}', "
+            f"must be one of {sorted(valid_statuses)}"
         )
 
     # Build schema result
@@ -237,8 +234,7 @@ def _convert_metric_result(result: MetricResult, metric_name: str) -> dict[str, 
 
 
 def validate_schema_output(schema_data: dict[str, Any]) -> bool:
-    """
-    Validate that schema output conforms to v1.0 requirements.
+    """Validate that schema output conforms to v1.0 requirements.
 
     Args:
         schema_data: Output from metrics_to_schema()
@@ -289,8 +285,7 @@ def validate_schema_output(schema_data: dict[str, Any]) -> bool:
 
 
 def get_schema_field_mapping() -> dict[str, str]:
-    """
-    Get mapping from registry metric names to schema field names.
+    """Get mapping from registry metric names to schema field names.
 
     Returns:
         Dict mapping registry names to canonical schema names

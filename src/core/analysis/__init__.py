@@ -1,7 +1,6 @@
 # src/analysis/__init__.py
 
-"""
-Structured Decoherence Analysis Module
+"""Structured Decoherence Analysis Module.
 
 Research-grade analysis framework for quantum structured decoherence studies.
 Focuses on pathway detection, correlation analysis, and statistical validation.

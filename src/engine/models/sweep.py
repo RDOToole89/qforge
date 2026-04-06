@@ -1,5 +1,4 @@
-"""
-Parameter Sweep Models
+"""Parameter Sweep Models.
 
 Purpose: Define models for parameter sweep configurations and results.
 Sweeps enable systematic exploration of quantum experiment parameter spaces
@@ -29,8 +28,7 @@ from .results import ExperimentResult
 
 
 class SweepManifest(BaseModel):
-    """
-    Complete specification for a parameter sweep.
+    """Complete specification for a parameter sweep.
 
     Defines the base configuration and parameter ranges for systematic
     exploration of quantum experiment parameter space.
@@ -112,9 +110,10 @@ class SweepManifest(BaseModel):
     def validate_base_config_or_preset(
         cls, v: ExperimentConfig | None, info
     ) -> ExperimentConfig | None:
-        """
-        Ensure either base_config or base_preset is provided.
-        NOTE: Grid expansion helpers use base_config; base_preset is kept for legacy but not expanded.
+        """Ensure either base_config or base_preset is provided.
+
+        NOTE: Grid expansion helpers use base_config; base_preset
+        is kept for legacy but not expanded.
         """
         base_preset = info.data.get("base_preset")
         if v is None and base_preset is None:
@@ -124,12 +123,14 @@ class SweepManifest(BaseModel):
     @field_validator("rng_seed")
     @classmethod
     def validate_seed(cls, v: int | None) -> int | None:
+        """Validate that rng_seed is non-negative when provided."""
         if v is not None and v < 0:
             raise ValueError("rng_seed must be non-negative if provided")
         return v
 
     @model_validator(mode="after")
     def validate_parallelism(self) -> SweepManifest:
+        """Set a conservative default for max_concurrent when parallel execution is enabled."""
         # If parallel_execution is requested and max_concurrent not set, pick a conservative default
         if self.parallel_execution and self.max_concurrent is None:
             # Default to min(total combinations, 4) — simple, portable, safe
@@ -156,15 +157,18 @@ class SweepManifest(BaseModel):
 
     @property
     def estimated_duration_minutes(self) -> float | None:
-        """Estimate total sweep duration based on typical experiment time (heuristic: 30s/experiment)."""
+        """Estimate total sweep duration.
+
+        Based on typical experiment time (heuristic: 30s/experiment).
+        """
         if self.total_experiments > 0:
             return (self.total_experiments * 30.0) / 60.0
         return None
 
     # ===== Helpers (engine-facing) =====
     def parameter_grid(self) -> list[dict[str, Any]]:
-        """
-        Build a cartesian grid of all parameter combinations.
+        """Build a cartesian grid of all parameter combinations.
+
         Returns a list of {param: value} dicts (order is deterministic).
         """
         if not self.parameter_ranges:
@@ -187,14 +191,15 @@ class SweepManifest(BaseModel):
     def iter_experiment_configs(
         self,
     ) -> Iterator[tuple[ExperimentConfig, int, dict[str, Any]]]:
-        """
-        Yield concrete ExperimentConfig instances for each combination and run.
+        """Yield concrete ExperimentConfig instances for each combination and run.
+
         Yields (config, run_index, param_combo_dict).
         Requires base_config (base_preset is not expanded here).
         """
         if self.base_config is None:
             raise ValueError(
-                "iter_experiment_configs requires base_config (base_preset expansion is not supported)"
+                "iter_experiment_configs requires base_config "
+                "(base_preset expansion is not supported)"
             )
 
         base = self.base_config
@@ -268,8 +273,7 @@ class SweepResearchMetadata(BaseModel):
 
 
 class SweepResult(BaseModel):
-    """
-    Complete results from a parameter sweep.
+    """Complete results from a parameter sweep.
 
     Contains all individual experiment results plus aggregated analysis
     across the parameter space.

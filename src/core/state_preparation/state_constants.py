@@ -1,5 +1,4 @@
-"""
-State Registry for Quantum Decoherence Research Framework
+"""State Registry for Quantum Decoherence Research Framework.
 
 # State Class Registry Pattern
 Centralized registry of all available quantum state preparation classes
@@ -47,8 +46,7 @@ STATE_CLASSES: dict[str, type[BaseState]] = {
 
 
 def get_state_class(state_type: str) -> type[BaseState]:
-    """
-    Get state class for given state type with validation.
+    """Get state class for given state type with validation.
 
     # Registry Lookup Pattern
     Provides type-safe access to state classes with clear error messages
@@ -76,8 +74,7 @@ def get_state_class(state_type: str) -> type[BaseState]:
 
 
 def get_available_states() -> list[str]:
-    """
-    Get list of all available state types.
+    """Get list of all available state types.
 
     # State Discovery Pattern
     Enables programmatic discovery of available quantum state types
@@ -95,8 +92,7 @@ def get_available_states() -> list[str]:
 
 
 def get_state_info() -> dict[str, dict[str, str]]:
-    """
-    Get comprehensive information about all registered state types.
+    """Get comprehensive information about all registered state types.
 
     # State Documentation Pattern
     Provides structured information about each state type for documentation,
@@ -157,8 +153,7 @@ def get_state_info() -> dict[str, dict[str, str]]:
 
 
 def validate_state_registry() -> bool:
-    """
-    Validate the integrity of the state registry.
+    """Validate the integrity of the state registry.
 
     # Registry Validation Pattern
     Ensures all registered state classes properly implement the BaseState

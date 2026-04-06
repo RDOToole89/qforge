@@ -1,7 +1,6 @@
 # src/state_preparation/__init__.py
 
-"""
-State preparation package for quantum experiments.
+"""State preparation package for quantum experiments.
 
 This package provides:
 - BaseState: A template for state creation.

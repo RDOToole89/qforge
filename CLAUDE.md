@@ -8,7 +8,7 @@ This is a **research-grade quantum experiment framework** built on Qiskit for co
 
 ## Research Focus: Structured Decoherence Pathways
 
-**Central Hypothesis**: Quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns. The framework implements the **Spring Network Model** where entanglement bonds act as springs and decoherence flows along tension patterns.
+**Central Hypothesis**: Quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns. The framework uses a **Spring Network Model** where entanglement bonds act as springs and decoherence flows along tension patterns.
 
 **Complete Research Metrics Suite (v1.0 Schema Compliant):**
 
@@ -153,7 +153,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ## File Organization
 
-### Analysis Framework (Research-Grade, December 2024)
+### Analysis Framework (Research-Grade, Hardened Dec 2024)
 
 - `src/core/analysis/metrics/` - **Individual metric implementations**
   - `asymmetry_index.py` - Fast closed-form TVD with educational documentation
@@ -161,15 +161,21 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - `entanglement_error_correlation.py` - Multi-topology support with statistical testing
   - `temporal_pathway_stability.py` - Advanced time series analysis with transition matrices
   - `pathway_concentration_ratio.py` - Adaptive quartile-based concentration
+  - `concentration_index.py` - Gini-like pathway concentration measure
+  - `pathway_persistence.py` - Pathway persistence measurement
+  - `total_correlation.py` - Multi-information (total correlation) across all qubits
+  - `noise_topology_correlation.py` - Noise-topology correlation analysis
   - `structure_score.py` - Clean delegation wrapper for all metrics
   - `schema_bridge.py` - v1.0 schema compliance with robust validation
-  - `registry.py` - Centralized metric computation with bootstrap CI
+  - `registry.py` - Declarative MetricSpec pattern with bootstrap CI and status logic
+  - `profiles.py` - Metric selection profiles (structured_decoherence, minimal, full)
 
 - `src/core/analysis/core/` - **Mathematical foundations**
   - `information_theory.py` - Full-support Jeffreys smoothing, deterministic ordering
   - `null_models.py` - SciPy-free factorized models with reproducible sampling
   - `correlations.py` - Topology analysis with adjacency matrix construction
   - `bootstrap.py` - Reproducible confidence intervals with RNG plumbing
+  - `topology.py` - Topology builders for noise model and metric computation
 
 - `src/core/analysis/pipelines/` - **High-level orchestration**
   - `pathway_analysis.py` - Complete research pipeline with schema output
@@ -179,15 +185,27 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ### Engine (Primary Interface)
 
-- `src/engine/api.py` - Main entry points: `run()`, `sweep()`
-- `src/engine/models/` - Pydantic models (config, results, research metrics)
-- `src/engine/storage.py` - Deterministic result storage
+- `src/engine/api.py` - Main entry points: `run()`, `sweep()`, `iter_experiment_configs()`
+- `src/engine/bloch_math.py` - Bloch sphere coordinate math for visualization
+- `src/engine/provenance.py` - Provenance building (software versions, git SHA, host info)
+- `src/engine/fidelity.py` - Simulation data extraction (statevector, density matrix, fidelity)
+- `src/engine/viz_pipeline.py` - Visualization rendering orchestration
+- `src/engine/models/` - Pydantic models, split into focused submodules:
+  - `config.py` - Experiment configuration
+  - `metadata.py` - Experiment identification and context
+  - `circuit.py` - Quantum circuit statistics with auto-healing validators
+  - `measurement.py` - Measurement results with auto-healing validators
+  - `provenance.py` - Reproducibility provenance tracking
+  - `quality.py` - Quality assessment metrics
+  - `results.py` - Top-level result composition (imports above)
+  - `research.py` - Structured decoherence research models
+  - `sweep.py` - Parameter sweep configuration and results
+  - `storage.py` - Storage, artifacts, and manifest models
 
 ### Core Quantum Mechanics
 
-- `src/core/experiment_runner.py` - Quantum circuit execution
-- `src/core/noise_factory.py` - Physics-compliant noise models
-- `src/core/state_factory.py` - Quantum state preparation
+- `src/core/noise_models/` - Physics-compliant noise model implementations
+- `src/core/state_preparation/` - Quantum state preparation (6 state types)
 
 ### State Preparation (Educational Excellence)
 
@@ -196,7 +214,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
   - Hardware compatibility and validation
   - Clean factory pattern and registry system
 
-## Current Development Status (Updated December 2024)
+## Current Development Status (Updated April 2026)
 
 ### ✅ **MAJOR ACHIEVEMENT: Research-Grade Analysis Framework Complete**
 
@@ -240,11 +258,27 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Hardware Integration**: Real quantum device compatibility
 - **6 State Types**: GHZ, Bell, W, Cluster, Superposition, Custom
 
-**Engine Integration** - ✅ **STABLE**
+**Engine Integration** - ✅ **STABLE & MODULAR**
 
-- Clean API through `run()` and `sweep()` functions
-- Type-safe Pydantic models for all data structures
+- Clean API through `run()`, `sweep()`, and `iter_experiment_configs()`
+- Type-safe Pydantic models split into focused submodules (metadata, circuit, measurement, provenance, quality)
 - Automated structured decoherence metrics computation
+- Extracted provenance, fidelity, and visualization into dedicated modules
+
+**Code Quality** - ✅ **ENFORCED**
+
+- **Linting**: ruff with pydocstyle (D), complexity (C901 max 15), Google convention
+- **Pre-commit hooks**: ruff check + format, trailing whitespace, YAML/JSON/TOML validation
+- **Type checking**: mypy strict mode
+- **Testing**: pytest with 90% coverage on core analysis, 296+ passing tests
+
+**Frontend (React Native / Expo)** - ✅ **REFACTORED**
+
+- BlochSphereScreen split from 1064 lines into hooks + sub-components (~232 lines main screen)
+- Custom hooks: useBuiltInMode, useExperimentMode, useSweepMode, useDragRotation
+- Component hierarchy: Header, BuiltinSidebar, ExperimentSidebar, DataPanel
+- Quantum Glossary: searchable reference of 100+ quantum computing terms across 16 categories
+- Expo Router file-based navigation with 6 tabs (configure, results, visualizer, circuit, registry, glossary)
 
 ### 🚀 **Ready for Next Phase**
 
@@ -278,11 +312,11 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 
 ## Framework Generalizability
 
-**Key insight**: Although the current flagship is **SST and structured decoherence**, the architecture is **deliberately general**:
+**Key insight**: Although the current flagship is **structured decoherence research**, the architecture is **deliberately general**:
 
-- `src/core/` is not tied to SST — it's pure physics + metrics
+- `src/core/` is not tied to any specific hypothesis — it's pure physics + metrics
 - `src/engine/` doesn't know what "structured decoherence" means — it just orchestrates
-- Only `src/experiments/` carries SST-specific semantics
+- Only `src/experiments/` carries research-specific semantics
 
 ### ExperimentProgram Abstraction
 
@@ -311,9 +345,11 @@ class ExperimentProgram(Protocol):
 ```python
 # src/experiments/__init__.py
 EXPERIMENT_REGISTRY = {
-    "sst_q1": SSTHypothesisQ1(),
-    "bell_chsh": BellCHSH(),  # future: non-SST proof of generality
-    # "vqe_benchmark": VQEBenchmark(),
+    "bell_state": BellExperiment(),
+    "topology_comparison": TopologyComparison(),
+    "scaling_ladder": ScalingLadder(),
+    "shor": ShorExperiment(),
+    # ... 13 experiments across basics/, advanced/, decoherence/, hardware/
 }
 ```
 
@@ -335,12 +371,13 @@ def run_experiment(name: str, override: list[str] = []):
 
 ### Metrics Stay General, Interpretation Specializes
 
-- `src/core/analysis/metrics/` — **strictly general** (no SST language)
-- `StructuredDecoherenceMetrics` — one *view* over the metric bundle
+- `src/core/analysis/metrics/` — **strictly general** (no research-specific language)
+- `StructuredDecoherenceMetrics` — one _view_ over the metric bundle
 - Future: `BenchmarkMetrics`, `EntanglementMetrics`, etc.
 
 The engine routes via `research_type`:
-- `research_type="structured_decoherence"` → SST metrics
+
+- `research_type="structured_decoherence"` → decoherence pathway metrics
 - `research_type="benchmark"` → hardware benchmark metrics
 - etc.
 
@@ -353,12 +390,11 @@ The engine routes via `research_type`:
 - Respect the layered architecture (`experiments → engine → core`)
 - Keep everything deterministic and reproducible
 - Keep metrics mathematically and physically faithful
-- Treat SST as **one experiment program**, not the framework's identity
+- Treat structured decoherence as **one experiment program**, not the framework's identity
 - Keep CLI/UI layers thin — they call into the framework, not the reverse
 
 ### DO NOT (without being asked)
 
-- Strip out SST language from docs — it's important research context
 - "Simplify" metrics just to make code shorter — they are research-grade on purpose
 - Fold `core` and `engine` together — the layered architecture is a feature
 - Turn this into a product-like framework with web UI, auth, etc.
@@ -377,6 +413,7 @@ The engine routes via `research_type`:
 **Rule:** Remove old code, don't wrap it. Clean breaks > cruft.
 
 When refactoring:
+
 - Delete procedural code, replace with class-based implementations
 - Don't keep old function signatures "for compatibility"
 - Don't add `# deprecated` comments — just remove the code

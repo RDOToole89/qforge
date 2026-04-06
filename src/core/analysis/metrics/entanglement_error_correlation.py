@@ -1,5 +1,4 @@
-"""
-Entanglement-Error Correlation (EEC) - Topology-Error Pattern Analysis
+"""Entanglement-Error Correlation (EEC) - Topology-Error Pattern Analysis.
 
 # Mathematical Foundation
 The Entanglement-Error Correlation quantifies how well decoherence patterns
@@ -44,11 +43,13 @@ References:
 - Wasserman & Faust (1994), "Social Network Analysis"
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -68,8 +69,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class TopologyAnalysis:
-    """
-    Complete entanglement topology analysis with correlation results.
+    """Complete entanglement topology analysis with correlation results.
 
     This structure provides comprehensive information about the relationship
     between quantum state topology and observed error patterns.
@@ -103,12 +103,11 @@ class TopologyAnalysis:
 def compute_entanglement_error_correlation(
     counts: Mapping[str, int],
     state_type: str = "GHZ",
-    topology_params: Optional[dict[str, Any]] = None,
+    topology_params: dict[str, Any] | None = None,
     alpha: float = ALPHA,
     return_analysis: bool = False,
-) -> Union[float, "TopologyAnalysis"]:
-    """
-    Compute Entanglement-Error Correlation - topology vs error pattern correlation.
+) -> float | TopologyAnalysis:
+    """Compute Entanglement-Error Correlation - topology vs error pattern correlation.
 
     Mathematical Process:
         1. Construct entanglement topology matrix W(i,j) based on state type
@@ -138,6 +137,7 @@ def compute_entanglement_error_correlation(
         counts: Measurement counts {bitstring: count}
         state_type: Quantum state topology ("GHZ", "W", "Bell", "Cluster", "Custom")
         topology_params: Additional parameters for topology construction
+        alpha: Significance level for statistical testing.
         return_analysis: If True, return comprehensive TopologyAnalysis
 
     Returns:
@@ -234,8 +234,7 @@ def compute_entanglement_error_correlation(
 def compute_multiway_entanglement_correlation(
     counts: Mapping[str, int], state_type: str = "GHZ", max_order: int = 3
 ) -> dict[int, float]:
-    """
-    Compute higher-order entanglement correlations beyond pairwise.
+    """Compute higher-order entanglement correlations beyond pairwise.
 
     This function extends EEC to multiway correlations, analyzing how
     3-way, 4-way, and higher-order entanglement structures correlate
@@ -309,12 +308,17 @@ def compute_multiway_entanglement_correlation(
 def _construct_entanglement_topology(
     n_qubits: int, state_type: str, params: dict[str, Any]
 ) -> np.ndarray:
-    """
-    Construct entanglement topology matrix for given quantum state.
+    """Construct entanglement topology matrix for given quantum state.
 
     This function builds the theoretical entanglement connectivity matrix
     that represents how strongly different qubit pairs are entangled in
     the ideal quantum state before decoherence.
+
+    Hardware caveat: this matrix assumes *logical* qubit ordering.
+    After transpilation for real hardware, logical-to-physical qubit
+    mapping may change due to SWAP insertion. For hardware results,
+    interpret EEC values as measuring correlation with the *intended*
+    topology, not the physical layout.
     """
     # Initialize symmetric matrix
     W = np.zeros((n_qubits, n_qubits))
@@ -402,8 +406,7 @@ def _construct_entanglement_topology(
 def _compute_error_correlation_matrix(
     counts: Mapping[str, int], n_qubits: int, alpha: float
 ) -> np.ndarray:
-    """
-    Compute error correlation matrix from measurement data.
+    """Compute error correlation matrix from measurement data.
 
     This function analyzes the measurement outcomes to determine how
     frequently different qubit pairs exhibit correlated errors.
@@ -434,8 +437,7 @@ def _compute_error_correlation_matrix(
 def _compute_topology_error_correlation(
     entanglement_matrix: np.ndarray, error_matrix: np.ndarray
 ) -> tuple[float, float]:
-    """
-    Compute correlation between entanglement topology and error patterns.
+    """Compute correlation between entanglement topology and error patterns.
 
     This function calculates the Pearson correlation coefficient between
     the theoretical entanglement matrix and observed error correlation matrix.
@@ -522,7 +524,6 @@ def _generate_topology_analysis(
     n_qubits: int,
 ) -> TopologyAnalysis:
     """Generate comprehensive topology analysis results."""
-
     # Determine correlation strength
     abs_eec = abs(eec)
     if abs_eec >= CORRELATION_STRONG_THRESHOLD:
@@ -585,8 +586,7 @@ def _create_empty_topology_analysis(state_type: str) -> TopologyAnalysis:
 def validate_eec_properties(
     eec: float, counts: Mapping[str, int], state_type: str, tolerance: float = 1e-10
 ) -> bool:
-    """
-    Validate mathematical properties of computed EEC.
+    """Validate mathematical properties of computed EEC.
 
     Validated Properties:
         1. Range: EEC ∈ [-1, 1] (Pearson correlation bounds)
@@ -613,8 +613,7 @@ def validate_eec_properties(
 
 
 def entanglement_error_correlation_educational_demo() -> dict:
-    """
-    Educational demonstration of EEC behavior across quantum state types.
+    """Educational demonstration of EEC behavior across quantum state types.
 
     Returns:
         dict: Demonstration results with quantum physics interpretations

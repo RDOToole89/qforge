@@ -50,13 +50,11 @@ so you can attach logging, telemetry, or progress UIs without changing logic.
 from __future__ import annotations
 
 import logging
-import os
 from collections import Counter
 from collections.abc import Iterator
 from datetime import datetime
 from typing import Any
 
-import numpy as np
 from qiskit import QuantumCircuit
 
 # Research integration (counts canonicalization + metrics bundle)
@@ -64,6 +62,8 @@ from src.engine.analysis import compute_metrics_bundle, extract_counts_from_resu
 
 # App plumbing
 from src.engine.execution.context import AppContext
+from src.engine.execution.runner import run_raw
+from src.engine.fidelity import extract_simulation_data
 
 # Event bus (optional, cheap)
 from src.engine.infrastructure.events import (
@@ -76,34 +76,24 @@ from src.engine.infrastructure.events import (
     make_event,
 )
 from src.engine.infrastructure.logging import event_log_handler
-from src.engine.persistence.hashing import sha1_of
 
-# Typed models (top-level exports) …
+# Typed models
 from src.engine.models import (
     ArtifactRef,
-    ExperimentConfig,
-    ExperimentResult,
-    Provenance,
-    SweepManifest,
-)
-
-# … and result sub-types (declared in results.py)
-from src.engine.models.results import (
     CircuitStatistics,
     ExperimentAnalysis,
+    ExperimentConfig,
     ExperimentMetadata,
+    ExperimentResult,
     MeasurementResults,
+    SweepManifest,
 )
-from src.engine.execution.runner import run_raw
+from src.engine.persistence.hashing import sha1_of
 
 # Storage adapter
 from src.engine.persistence.storage import LocalStorage
-
-# Optional visualization (gracefully skipped if not installed)
-try:
-    from src.engine.visualization import create_default_service
-except Exception:
-    create_default_service = None  # type: ignore
+from src.engine.provenance import build_provenance
+from src.engine.viz_pipeline import render_visualizations
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +106,7 @@ logger = logging.getLogger(__name__)
 def run(
     config: ExperimentConfig | dict[str, Any],
     ctx: AppContext | None = None,
+    _hardware_session: Any = None,
 ) -> ExperimentResult:
     """Run a single experiment and return a validated `ExperimentResult`.
 
@@ -136,13 +127,13 @@ def run(
     ctx : Optional[AppContext]
         Execution context (base results directory, env). A default is created if omitted.
 
-    Returns
+    Returns:
     -------
     ExperimentResult
         Complete, validated result object with typed `analysis`, optional
         `structured_decoherence_metrics`, `provenance`, and `artifacts`.
 
-    Notes
+    Notes:
     -----
     - Rendering is optional and non-fatal. If visualization deps are missing,
       or the viz layer cannot handle the payload, we warn and continue.
@@ -158,13 +149,20 @@ def run(
     bus.publish(make_event(RUN_START, {"config": cfg_model.model_dump(exclude_none=True)}))
 
     # 1) Execute experiment via runner
-    circuit, raw = run_raw(cfg_model.model_dump())
+    import time as _time
+
+    _t0 = _time.monotonic()
+    raw_config = cfg_model.model_dump()
+    if _hardware_session is not None:
+        raw_config["_hardware_session"] = _hardware_session
+    circuit, raw = run_raw(raw_config)
+    _exec_seconds = _time.monotonic() - _t0
 
     # 2) Canonicalize counts (MSB-left, fixed bit-width)
     counts = extract_counts_from_result(raw, num_qubits=cfg_model.num_qubits)
 
     # 2b) Extract simulation-specific data (statevector, density matrix, fidelity)
-    sim_density_matrix, sim_statevector, sim_fidelity = _extract_simulation_data(
+    sim_density_matrix, sim_statevector, sim_fidelity = extract_simulation_data(
         raw, cfg_model.sim_mode, cfg_model.state_type, cfg_model.num_qubits
     )
 
@@ -183,8 +181,18 @@ def run(
     if cfg_model.metrics is not None and counts:
         metrics_bundle = compute_metrics_bundle(counts, cfg_model)
 
-    # 5) Build provenance
-    prov = _build_provenance(cfg_model)
+    # 5) Build provenance (enrich with hardware metadata if applicable)
+    hardware_metadata = None
+    if cfg_model.sim_mode == "hardware" and isinstance(raw, dict):
+        hw_result = raw.get("hardware_result")
+        if hw_result is not None:
+            hardware_metadata = {"hardware_result": hw_result}
+
+    prov = build_provenance(
+        cfg_model,
+        execution_time_seconds=round(_exec_seconds, 4),
+        hardware_metadata=hardware_metadata,
+    )
 
     # 6) Persist analysis to disk (deterministic path via config hash)
     cfg_hash = sha1_of(cfg_model.model_dump(exclude_none=True))[:8]
@@ -194,31 +202,7 @@ def run(
     artifacts: list[ArtifactRef] = [ArtifactRef(kind="analysis", path=saved_path, metadata={})]
 
     # 7) Visualization (multi-type, multi-format)
-    if cfg_model.visualization_type != "none" and create_default_service is not None:
-        try:
-            service = create_default_service()
-            viz_types = _resolve_viz_types(cfg_model.visualization_type, analysis, metrics_bundle)
-            for vt in viz_types:
-                try:
-                    viz_payload: dict[str, Any] = {
-                        "analysis": analysis.model_dump(),
-                        "metrics_bundle": (
-                            metrics_bundle.model_dump() if metrics_bundle else None
-                        ),
-                        "export_formats": cfg_model.export_formats,
-                    }
-                    if vt == "circuit":
-                        viz_payload["circuit"] = circuit  # live QuantumCircuit object
-                    out_path = os.path.join(
-                        os.path.dirname(saved_path), vt
-                    )
-                    artifact = service.render_or_none(vt, viz_payload, out_path)
-                    if artifact:
-                        artifacts.append(artifact)
-                except Exception as e:
-                    logger.warning("Visualization '%s' skipped: %s", vt, e)
-        except Exception as e:
-            logger.warning("Visualization service init failed: %s", e)
+    artifacts.extend(render_visualizations(cfg_model, analysis, metrics_bundle, saved_path))
 
     # 8) Package final typed result
     result = ExperimentResult(
@@ -265,12 +249,12 @@ def sweep(
     ctx : Optional[AppContext]
         Execution context. A default is created if omitted.
 
-    Returns
+    Returns:
     -------
     List[ExperimentResult]
         A flat list of results, one per realized configuration (× runs).
 
-    See also
+    See Also:
     --------
     iter_experiment_configs : yields the concrete `ExperimentConfig`s used.
     """
@@ -286,6 +270,11 @@ def sweep(
     total = _product_len(man.parameter_ranges)
     bus.publish(make_event(SWEEP_START, {"keys": keys, "total": total}))
 
+    # Determine if this is a hardware sweep that should use Sessions
+    _use_hw_session = base.get("sim_mode") == "hardware" and base.get("hardware_session", False)
+
+    hw_session = None
+
     # Cartesian expansion (depth-first), honoring stable key order
     def _expand(idx: int, acc: dict[str, Any]) -> None:
         if idx == len(keys):
@@ -293,7 +282,7 @@ def sweep(
             i = len(results)
             bus.publish_progress(fraction=i / total, message=f"Running {i + 1}/{total}")
             cfg = {**base, **(man.override or {}), **acc}
-            results.append(run(cfg, ctx))
+            results.append(run(cfg, ctx, _hardware_session=hw_session))
             return
         key = keys[idx]
         for value in man.parameter_ranges[key]:
@@ -301,7 +290,19 @@ def sweep(
             _expand(idx + 1, acc)
         acc.pop(key, None)
 
-    _expand(0, {})
+    if _use_hw_session:
+        from src.engine.execution.hardware import create_session, resolve_backend
+
+        backend = resolve_backend(
+            backend_name=base.get("backend_name"),
+            min_qubits=int(base.get("num_qubits", 1)),
+        )
+        hw_session = create_session(backend)
+        with hw_session:
+            _expand(0, {})
+    else:
+        _expand(0, {})
+
     bus.publish(make_event(SWEEP_END, {"count": len(results)}))
     return results
 
@@ -322,7 +323,7 @@ def iter_experiment_configs(
       * Distribute runs across machines.
       * Add custom pre/post hooks around each config.
 
-    Example
+    Example:
     -------
     >>> for cfg in iter_experiment_configs(manifest):
     ...     submit_to_pool(lambda: run(cfg))
@@ -332,7 +333,7 @@ def iter_experiment_configs(
     manifest : SweepManifest | Dict[str, Any]
         Sweep specification (typed or dict).
 
-    Yields
+    Yields:
     ------
     ExperimentConfig
         Fully-typed configuration for each parameter combination (× runs).
@@ -457,146 +458,4 @@ def _build_experiment_analysis(
         information_theory_metrics=None,
         correlation_analysis=None,
         statistical_validation=None,
-    )
-
-
-def _extract_simulation_data(
-    raw: Any,
-    sim_mode: str,
-    state_type: str,
-    num_qubits: int,
-) -> tuple[
-    list[list[list[float]]] | None,  # density_matrix
-    list[list[float]] | None,  # statevector
-    float | None,  # fidelity
-]:
-    """Extract simulation-specific data from runner output.
-
-    Returns (density_matrix, statevector, fidelity) — all JSON-safe.
-    Complex numbers are serialized as [real, imag] pairs.
-    """
-    if sim_mode == "qasm":
-        return None, None, None
-
-    try:
-        if sim_mode == "statevector" and isinstance(raw, dict):
-            sv_obj = raw.get("statevector")
-            if sv_obj is None:
-                return None, None, None
-
-            sv_data = np.asarray(sv_obj.data, dtype=complex)
-            sv_serialized = [[float(c.real), float(c.imag)] for c in sv_data]
-            fidelity = _compute_fidelity_statevector(sv_data, state_type, num_qubits)
-            return None, sv_serialized, fidelity
-
-        if sim_mode == "density_matrix" and isinstance(raw, dict):
-            dm_obj = raw.get("density_matrix")
-            if dm_obj is None:
-                return None, None, None
-
-            dm_data = np.asarray(dm_obj.data, dtype=complex)
-            dm_serialized = [
-                [[float(c.real), float(c.imag)] for c in row]
-                for row in dm_data
-            ]
-            fidelity = _compute_fidelity_density_matrix(dm_data, state_type, num_qubits)
-            return dm_serialized, None, fidelity
-
-    except Exception as e:
-        logger.warning(f"Failed to extract simulation data for {sim_mode}: {e}")
-
-    return None, None, None
-
-
-def _compute_fidelity_statevector(
-    sv: np.ndarray, state_type: str, num_qubits: int
-) -> float | None:
-    """Compute |<psi_ideal|psi_sim>|^2 fidelity for a pure statevector."""
-    try:
-        from src.core.state_preparation import create_state_instance
-
-        ideal = create_state_instance(state_type, num_qubits).get_theoretical_state_vector()
-        overlap = np.abs(np.vdot(ideal, sv)) ** 2
-        return float(np.clip(overlap, 0.0, 1.0))
-    except Exception as e:
-        logger.warning(f"Fidelity computation failed (statevector): {e}")
-        return None
-
-
-def _compute_fidelity_density_matrix(
-    dm: np.ndarray, state_type: str, num_qubits: int
-) -> float | None:
-    """Compute <psi_ideal|rho|psi_ideal> fidelity for a density matrix."""
-    try:
-        from src.core.state_preparation import create_state_instance
-
-        ideal = create_state_instance(state_type, num_qubits).get_theoretical_state_vector()
-        # F = <psi|rho|psi>
-        fidelity = float(np.real(ideal.conj() @ dm @ ideal))
-        return float(np.clip(fidelity, 0.0, 1.0))
-    except Exception as e:
-        logger.warning(f"Fidelity computation failed (density_matrix): {e}")
-        return None
-
-
-def _resolve_viz_types(
-    viz_type: str,
-    analysis: ExperimentAnalysis,
-    metrics_bundle: Any,
-) -> list[str]:
-    """Map ``visualization_type`` config value to a list of renderable types.
-
-    ``"all"`` expands to every type whose data prerequisites are met.
-    ``"none"`` returns an empty list.
-    A single named type returns ``[type]``.
-    """
-    if viz_type == "none":
-        return []
-
-    all_types = ["histogram", "density_matrix", "correlation", "circuit"]
-
-    if viz_type != "all":
-        return [viz_type]
-
-    # For "all", filter to types that have data available
-    available: list[str] = []
-    meas = analysis.measurement_results
-    if meas.raw_counts:
-        available.append("histogram")
-    if meas.density_matrix:
-        available.append("density_matrix")
-    # Correlation needs EEC extras with matrices
-    if metrics_bundle is not None:
-        try:
-            eec = metrics_bundle.metrics.get("entanglement_error_correlation")
-            if eec and eec.extras and "error_correlation_matrix" in eec.extras:
-                available.append("correlation")
-        except Exception:
-            pass
-    # Circuit is always available (we pass the live object)
-    available.append("circuit")
-    return available
-
-
-def _build_provenance(cfg: ExperimentConfig) -> Provenance:
-    """Fill a minimal, valid `Provenance` block (extend as you capture more).
-
-    Recommended future enrichments:
-      - software_versions: qiskit, numpy, your engine version, OS/CPU
-      - simulator_info: AerSimulator options, target backend name
-      - transpilation_summary: pass manager, optimization level, coupling map
-      - execution_time_seconds / memory_usage_mb: measured via timers/profilers
-      - git_sha: inject from CI to lock exact code version
-    """
-    return Provenance(
-        schema_version="1.0.0",
-        timestamp=_now_iso(),
-        software_versions={},
-        host_info={},
-        git_sha=None,
-        rng_seed=cfg.rng_seed,
-        simulator_info={},
-        transpilation_summary={},
-        execution_time_seconds=None,
-        memory_usage_mb=None,
     )

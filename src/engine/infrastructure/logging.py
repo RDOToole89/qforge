@@ -12,7 +12,8 @@ Two formatters are available:
 
 - **JsonFormatter** — one JSON object per line for machine consumption::
 
-      {"ts": "2026-02-20T16:15:03", "level": "INFO", "logger": "src.engine.api", "msg": "Starting experiment"}
+      {"ts": "2026-02-20T16:15:03", "level": "INFO",
+       "logger": "src.engine.api", "msg": "Starting experiment"}
 
 The ``event_log_handler`` bridges the engine's ``SimpleEventBus`` events into
 stdlib logging so lifecycle events (RUN_START, RUN_END, PROGRESS, …) appear
@@ -44,12 +45,15 @@ class JsonFormatter(logging.Formatter):
     """Structured JSON-line format for machine consumption."""
 
     def format(self, record: logging.LogRecord) -> str:
-        return _json.dumps({
-            "ts": datetime.fromtimestamp(record.created).isoformat(),
-            "level": record.levelname,
-            "logger": record.name,
-            "msg": record.getMessage(),
-        })
+        """Format a log record as a JSON line."""
+        return _json.dumps(
+            {
+                "ts": datetime.fromtimestamp(record.created).isoformat(),
+                "level": record.levelname,
+                "logger": record.name,
+                "msg": record.getMessage(),
+            }
+        )
 
 
 def setup_logging(
@@ -71,7 +75,7 @@ def setup_logging(
     log_file : optional path
         If provided, also write logs to this file.
 
-    Returns
+    Returns:
     -------
     logging.Logger
         The configured ``"src"`` root logger.

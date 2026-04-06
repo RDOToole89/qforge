@@ -1,5 +1,4 @@
-"""
-Complexity Emergence Score (CES) - Critical Threshold Detection for Structured Decoherence
+"""Complexity Emergence Score (CES) - Critical Threshold Detection for Structured Decoherence.
 
 # Mathematical Foundation
 The Complexity Emergence Score quantifies at what system complexity level
@@ -45,11 +44,13 @@ References:
 - Cardy (1996), "Scaling and Renormalization in Statistical Physics"
 """
 
+from __future__ import annotations
+
 import logging
 import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -63,8 +64,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class EmergenceAnalysis:
-    """
-    Complete complexity emergence analysis with critical point detection.
+    """Complete complexity emergence analysis with critical point detection.
 
     This structure provides comprehensive information about how structured
     decoherence emerges as quantum system complexity increases.
@@ -104,9 +104,8 @@ def compute_complexity_emergence_score(
     structure_metric: str = "asymmetry_index",
     emergence_model: str = "logistic",
     return_analysis: bool = False,
-) -> Union[float, EmergenceAnalysis]:
-    """
-    Compute Complexity Emergence Score - critical threshold for structure emergence.
+) -> float | EmergenceAnalysis:
+    """Compute Complexity Emergence Score - critical threshold for structure emergence.
 
     Mathematical Process:
         1. Compute structure metric for each qubit count in multi_qubit_data
@@ -236,10 +235,9 @@ def compute_complexity_emergence_score(
 
 
 def compute_emergence_across_metrics(
-    multi_qubit_data: dict[int, Mapping[str, int]], metrics: Optional[list[str]] = None
+    multi_qubit_data: dict[int, Mapping[str, int]], metrics: list[str] | None = None
 ) -> dict[str, float]:
-    """
-    Compute CES across multiple structure metrics for comprehensive analysis.
+    """Compute CES across multiple structure metrics for comprehensive analysis.
 
     This function analyzes emergence patterns across different structural
     measures, providing a multi-dimensional view of complexity scaling.
@@ -290,7 +288,7 @@ def _fit_emergence_model(x_data: np.ndarray, y_data: np.ndarray, model: str) -> 
 
 
 def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
-    """Fit logistic emergence model: S(n) = A/(1 + exp(-k(n-n₀))) + S₀"""
+    """Fit logistic emergence model: S(n) = A/(1 + exp(-k(n-n₀))) + S₀."""
 
     def logistic_func(x, A, k, n0, S0):
         with warnings.catch_warnings():
@@ -349,7 +347,7 @@ def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str,
 
 
 def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
-    """Fit linear model: S(n) = m×n + b"""
+    """Fit linear model: S(n) = m×n + b."""
     try:
         slope, intercept, r_value, p_value, std_err = linregress(x_data, y_data)
         return {
@@ -373,7 +371,7 @@ def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, A
 
 
 def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
-    """Fit power law model: S(n) = A×n^α + S₀"""
+    """Fit power law model: S(n) = A×n^α + S₀."""
 
     def power_law_func(x, A, alpha, S0):
         return A * np.power(x, alpha) + S0
@@ -438,7 +436,8 @@ def _fit_best_emergence_model(x_data: np.ndarray, y_data: np.ndarray) -> dict[st
             )
             y_pred = fit_result["fitted_function"](x_data)
             rss = float(np.sum((y_data - y_pred) ** 2))
-            # AIC = 2k + n*ln(RSS/n); handle perfect fit (rss=0) as -inf to favor simplest perfect-fit model
+            # AIC = 2k + n*ln(RSS/n); handle perfect fit (rss=0)
+            # as -inf to favor simplest perfect-fit model
             aic = 2.0 * n_params + n_data * np.log(rss / n_data) if rss > 0 else -np.inf
             fit_result["aic"] = aic
             results.append(fit_result)
@@ -533,7 +532,11 @@ def _generate_emergence_analysis(
         scaling_behavior = "flat"
 
     emergence_confidence = r_squared * (1.0 if emergence_quality in ("excellent", "good") else 0.5)
-    summary = f"CES = {ces:.3f} ({emergence_quality} {scaling_behavior} emergence): threshold ≈ {critical_threshold:.1f} qubits, R² = {r_squared:.3f}"
+    summary = (
+        f"CES = {ces:.3f} ({emergence_quality} {scaling_behavior} "
+        f"emergence): threshold ≈ {critical_threshold:.1f} qubits, "
+        f"R² = {r_squared:.3f}"
+    )
 
     return EmergenceAnalysis(
         complexity_emergence_score=float(ces),
@@ -570,8 +573,7 @@ def _create_insufficient_emergence_analysis() -> EmergenceAnalysis:
 def validate_ces_properties(
     ces: float, multi_qubit_data: dict[int, Mapping[str, int]], tolerance: float = 1e-10
 ) -> bool:
-    """
-    Validate mathematical properties of computed CES.
+    """Validate mathematical properties of computed CES.
 
     Validated Properties:
         1. Non-negativity: CES ≥ 0 (emergence score cannot be negative)
@@ -587,8 +589,7 @@ def validate_ces_properties(
 
 
 def complexity_emergence_educational_demo() -> dict:
-    """
-    Educational demonstration of CES behavior across emergence scenarios.
+    """Educational demonstration of CES behavior across emergence scenarios.
 
     Returns:
         dict: Demonstration results with critical phenomena interpretations

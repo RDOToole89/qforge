@@ -1,5 +1,4 @@
-"""
-Null Models for Structured Decoherence Hypothesis Testing
+"""Null Models for Structured Decoherence Hypothesis Testing.
 
 # Statistical Null Model Framework
 This module provides baseline null models for testing the structured decoherence
@@ -30,9 +29,10 @@ References:
 - Nielsen & Chuang (2010), "Quantum Computation and Quantum Information"
 """
 
+from __future__ import annotations
+
 import logging
 from collections.abc import Mapping
-from typing import Optional
 
 import numpy as np
 import numpy.linalg as npl
@@ -61,8 +61,7 @@ Probs = dict[str, float]
 
 
 def factorized_null_model(counts: Counts, alpha: float = ALPHA) -> Probs:
-    """
-    Create factorized (independent) null model from marginal distributions.
+    """Create factorized (independent) null model from marginal distributions.
 
     Mathematical Definition:
         For n qubits, construct null model as:
@@ -142,7 +141,7 @@ def sample_multinomial_counts(
     probs: Mapping[str, float],
     N: int,
     rng: np.random.Generator,
-    order: Optional[list[str]] = None,
+    order: list[str] | None = None,
     drop_zeros: bool = True,
 ) -> dict[str, int]:
     """Sample one counts dict from Mult(N, probs) with a deterministic key order.
@@ -186,10 +185,9 @@ def generate_null_samples(
 def parametric_bootstrap_null(
     observed_counts: Mapping[str, int],
     n_bootstrap: int = DEFAULT_BOOTSTRAP_B,
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator | None = None,
 ) -> list[dict[str, int]]:
-    """
-    Perform parametric bootstrap under factorized null model.
+    """Perform parametric bootstrap under factorized null model.
 
     Mathematical Process:
         1. Estimate marginal distributions from observed data
@@ -204,9 +202,10 @@ def parametric_bootstrap_null(
         - Confidence intervals under null hypothesis
 
     Note:
-        Re-fitting the null model per bootstrap replicate (Q^(b)) for Structure Score should be done in the
-        **metric implementation**, not here. This generator draws synthetic datasets from a fixed Q estimated
-        on the observed data.
+        Re-fitting the null model per bootstrap replicate (Q^(b)) for
+        Structure Score should be done in the **metric implementation**,
+        not here. This generator draws synthetic datasets from a fixed Q
+        estimated on the observed data.
 
     Args:
         observed_counts: Original measurement counts
@@ -247,8 +246,7 @@ def readout_confusion_model(
     confusion_matrices: list[NDArray[np.float64]],
     regularization: float = TIKHONOV_LAMBDA,
 ) -> dict[str, float]:
-    """
-    Apply readout confusion correction to measurement counts.
+    """Apply readout confusion correction to measurement counts.
 
     Mathematical Framework:
         Readout confusion model:
@@ -373,10 +371,9 @@ def readout_confusion_model(
 
 
 def ghz_aware_null_model(
-    counts: Mapping[str, int], n_qubits: Optional[int] = None, alpha: float = ALPHA
+    counts: Mapping[str, int], n_qubits: int | None = None, alpha: float = ALPHA
 ) -> dict[str, float]:
-    """
-    Create GHZ-state-aware null model for specialized hypothesis testing.
+    """Create GHZ-state-aware null model for specialized hypothesis testing.
 
     Mathematical Motivation:
         For GHZ states, we expect enhanced probability on |00...0⟩ and |11...1⟩

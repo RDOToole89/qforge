@@ -1,5 +1,4 @@
-"""
-Information Theory Utilities for Quantum Decoherence Analysis
+"""Information Theory Utilities for Quantum Decoherence Analysis.
 
 # Information-Theoretic Foundations
 This module provides numerically stable, research-grade implementations of
@@ -66,8 +65,7 @@ def counts_to_vector(counts: Mapping[str, int], order: list[str]) -> NDArray[np.
 
 
 def entropy(p: NDArray[np.float64], base: float = LOG_BASE) -> float:
-    """
-    Compute Shannon entropy with numerical stability.
+    """Compute Shannon entropy with numerical stability.
 
     Mathematical Definition:
         H(X) = -∑ p(x) log_base p(x)
@@ -116,8 +114,8 @@ def entropy(p: NDArray[np.float64], base: float = LOG_BASE) -> float:
 
 
 def counts_to_probabilities(counts: Mapping[str, int], alpha: float = ALPHA) -> dict[str, float]:
-    """
-    Convert counts to a smoothed probability distribution over the *full* 2^n support.
+    """Convert counts to a smoothed probability distribution over the *full* 2^n support.
+
     Uses Jeffreys smoothing with K = 2^n, adding alpha to *every* outcome, including
     unobserved bitstrings. Deterministic lexicographic ordering is enforced.
     """
@@ -128,7 +126,8 @@ def counts_to_probabilities(counts: Mapping[str, int], alpha: float = ALPHA) -> 
     outcomes = 1 << n
     if outcomes > MAX_OUTCOMES_EXACT:
         logging.warning(
-            f"[counts_to_probabilities] 2**n={outcomes} exceeds MAX_OUTCOMES_EXACT={MAX_OUTCOMES_EXACT}; "
+            f"[counts_to_probabilities] 2**n={outcomes} exceeds "
+            f"MAX_OUTCOMES_EXACT={MAX_OUTCOMES_EXACT}; "
             "this operation may be slow or memory heavy."
         )
 
@@ -155,8 +154,7 @@ def counts_to_probabilities(counts: Mapping[str, int], alpha: float = ALPHA) -> 
 def marginal_distribution(
     counts: Mapping[str, int], qubit_index: int, alpha: float = ALPHA
 ) -> NDArray[np.float64]:
-    """
-    Compute marginal distribution for a single qubit.
+    """Compute marginal distribution for a single qubit.
 
     Mathematical Definition:
         For qubit i, marginalize joint distribution:
@@ -218,8 +216,7 @@ def marginal_distribution(
 def pairwise_joint_distribution(
     counts: Mapping[str, int], qubit_i: int, qubit_j: int, alpha: float = ALPHA
 ) -> NDArray[np.float64]:
-    """
-    Compute joint distribution for a pair of qubits.
+    """Compute joint distribution for a pair of qubits.
 
     Mathematical Definition:
         For qubits i,j: compute 2×2 joint distribution
@@ -273,8 +270,7 @@ def pairwise_joint_distribution(
 def mutual_information(
     counts: Mapping[str, int], qubit_i: int, qubit_j: int, alpha: float = ALPHA
 ) -> float:
-    """
-    Compute mutual information between two qubits.
+    """Compute mutual information between two qubits.
 
     full-support Jeffreys smoothing (K = 2^n)" for clarity.
 
@@ -336,9 +332,9 @@ def mutual_information(
 
 
 def total_correlation(counts: Mapping[str, int], alpha: float = ALPHA) -> float:
-    """
-    Compute total correlation (multi-information) across all qubits using
-    Jeffreys smoothing on the full 2^n outcome space and deterministic ordering.
+    """Compute total correlation (multi-information) across all qubits.
+
+    Uses Jeffreys smoothing on the full 2^n outcome space and deterministic ordering.
     """
     counts_clean = validate_counts_dict(counts)
     if not counts_clean:
@@ -378,8 +374,7 @@ def total_correlation(counts: Mapping[str, int], alpha: float = ALPHA) -> float:
 
 # ---- Canonical KL and JSD implementations
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> float:
-    """
-    Compute Kullback-Leibler divergence KL(p||q) in nats.
+    """Compute Kullback-Leibler divergence KL(p||q) in nats.
 
     Mathematical Definition:
         KL(P||Q) = ∑ p(x) log(p(x)/q(x))
@@ -408,8 +403,7 @@ def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> float:
 
 
 def jensen_shannon_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> float:
-    """
-    Compute Jensen-Shannon divergence between two probability distributions.
+    """Compute Jensen-Shannon divergence between two probability distributions.
 
     Mathematical Definition:
         Let M = (P + Q) / 2

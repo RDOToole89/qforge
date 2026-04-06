@@ -6,7 +6,8 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from src.engine.api import run as engine_run, sweep as engine_sweep
+from src.engine.api import run as engine_run
+from src.engine.api import sweep as engine_sweep
 from src.engine.models import ExperimentConfig, ExperimentResult, SweepManifest
 from src.experiments import get_experiment, list_experiments
 
@@ -36,6 +37,100 @@ def default_config(name: str) -> dict[str, Any]:
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return exp.default_config().model_dump(exclude_none=True)
+
+
+# ── Circuit Preview ─────────────────────────────────────────────────────
+
+
+@router.post("/preview")
+def preview_circuit(config: ExperimentConfig) -> dict[str, Any]:
+    """Generate a circuit preview without executing it.
+
+    Returns structured gate data for visual rendering, ASCII diagram
+    as fallback, and circuit statistics.
+    """
+    from src.core.state_preparation.state_factory import prepare_state
+
+    try:
+        circuit = prepare_state(config.state_type, config.num_qubits)
+        circuit.measure_all()
+
+        diagram = circuit.draw(output="text").single_string()
+        structured = _qiskit_to_circuit(circuit)
+        stats = {
+            "depth": circuit.depth(),
+            "num_gates": len(circuit.data),
+            "num_qubits": circuit.num_qubits,
+        }
+        return {"circuit": structured, "diagram": diagram, "stats": stats}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# Qiskit gate name -> circuit builder GateType mapping
+_GATE_MAP: dict[str, str] = {
+    "h": "H", "x": "X", "y": "Y", "z": "Z", "s": "S", "t": "T",
+    "rx": "Rx", "ry": "Ry", "rz": "Rz", "sx": "SX",
+    "cx": "CNOT", "cz": "CZ", "swap": "SWAP", "ccx": "Toffoli",
+}
+_SKIP_GATES = {"barrier", "measure", "delay", "reset", "id"}
+
+
+def _qiskit_to_circuit(qc: Any) -> dict[str, Any]:
+    """Convert a Qiskit QuantumCircuit to the frontend Circuit JSON format.
+
+    Gates are assigned to moments greedily: each gate is placed in the
+    earliest moment where all its target qubits are free.
+    """
+    num_qubits = qc.num_qubits
+    moments: list[dict[str, Any]] = []
+    # Track which moment each qubit is free from
+    qubit_free_at: list[int] = [0] * num_qubits
+    gate_counter = 0
+
+    for inst in qc.data:
+        name = inst.operation.name.lower()
+        if name in _SKIP_GATES:
+            continue
+
+        gate_type = _GATE_MAP.get(name)
+        if gate_type is None:
+            continue  # Skip unsupported gates
+
+        try:
+            qubits = [q._index for q in inst.qubits]
+        except AttributeError:
+            continue
+
+        params = (
+            [float(p) for p in inst.operation.params]
+            if inst.operation.params
+            else None
+        )
+
+        # Find earliest moment where all qubits are free
+        earliest = max(qubit_free_at[q] for q in qubits)
+
+        # Extend moments list if needed
+        while len(moments) <= earliest:
+            moments.append({"gates": []})
+
+        gate: dict[str, Any] = {
+            "id": f"g{gate_counter}",
+            "gateType": gate_type,
+            "qubits": qubits,
+        }
+        if params:
+            gate["params"] = params
+
+        moments[earliest]["gates"].append(gate)
+        gate_counter += 1
+
+        # Mark qubits as occupied through this moment
+        for q in qubits:
+            qubit_free_at[q] = earliest + 1
+
+    return {"numQubits": num_qubits, "moments": moments}
 
 
 # ── Execution ───────────────────────────────────────────────────────────

@@ -1,5 +1,4 @@
-"""
-Experiment Configuration Models
+"""Experiment Configuration Models.
 
 Purpose: Define the complete specification for quantum experiment configurations.
 Supports both basic experiments and advanced research configurations with
@@ -24,8 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class ExperimentConfig(BaseModel):
-    """
-    Complete quantum experiment configuration.
+    """Complete quantum experiment configuration.
 
     This model defines all parameters needed to run a quantum experiment,
     from basic circuit parameters to advanced research configurations.
@@ -41,13 +39,14 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Simulation Parameters =====
-    sim_mode: Literal["qasm", "statevector", "density_matrix"] = Field(
+    sim_mode: Literal["qasm", "statevector", "density_matrix", "hardware"] = Field(
         default="qasm",
         description=(
-            "Simulation mode: "
-            "'qasm' = shot-based measurement sampling (supports noise), "
-            "'statevector' = exact noiseless state (counts synthesized via multinomial sampling), "
-            "'density_matrix' = full mixed-state simulation (supports noise, provides density matrix)"
+            "Execution mode: "
+            "'qasm' = shot-based simulation (supports noise), "
+            "'statevector' = exact noiseless state, "
+            "'density_matrix' = full mixed-state simulation, "
+            "'hardware' = execute on IBM Quantum hardware via qiskit-ibm-runtime"
         ),
     )
 
@@ -89,10 +88,24 @@ class ExperimentConfig(BaseModel):
     t1: float | None = Field(default=None, gt=0.0)
     t2: float | None = Field(default=None, gt=0.0)
 
+    # Readout (measurement) error
+    readout_error_rate: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=0.5,
+        description=(
+            "Per-qubit readout error probability (bit-flip on "
+            "measurement). Independent of gate noise."
+        ),
+    )
+
     # Circuit balancing
     balance_circuit: str | None = Field(
         default=None,
-        description="Circuit balancing strategy. 'gate_count' pads circuits with identity gates to equalize depth across state types.",
+        description=(
+            "Circuit balancing strategy. 'gate_count' pads circuits "
+            "with identity gates to equalize depth across state types."
+        ),
     )
 
     # ===== Research Parameters =====
@@ -127,11 +140,14 @@ class ExperimentConfig(BaseModel):
     )
 
     # ===== Output Parameters =====
-    visualization_type: Literal[
-        "histogram", "density_matrix", "correlation", "circuit", "all", "none"
-    ] = Field(
+    visualization_type: list[str] | str = Field(
         default="histogram",
-        description="Type of visualization to generate (research-focused)",
+        description=(
+            "Visualization type(s) to generate. "
+            "String for single type, list for multiple. "
+            "Valid: 'histogram', 'density_matrix', 'correlation', 'circuit', "
+            "'metrics_summary', 'bloch_sphere', 'all', 'none'"
+        ),
     )
 
     export_formats: list[Literal["png", "pdf", "svg"]] = Field(
@@ -145,12 +161,53 @@ class ExperimentConfig(BaseModel):
         description="Random number generator seed for reproducible results",
     )
 
+    # ===== Hardware Execution Parameters =====
+    backend_name: str | None = Field(
+        default=None,
+        description=(
+            "IBM Quantum backend name (e.g. 'ibm_brisbane'). "
+            "If None and sim_mode='hardware', the least busy backend is auto-selected."
+        ),
+    )
+
+    optimization_level: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        description="Transpiler optimization level (0-3). Only used for sim_mode='hardware'.",
+    )
+
+    hardware_session: bool = Field(
+        default=False,
+        description="Keep backend reserved across sweep jobs. Only used for sim_mode='hardware'.",
+    )
+
     custom_params: dict[str, Any] | None = Field(
         default=None,
         description="Custom parameters for advanced state preparation or noise models",
     )
 
     # ===== Field normalizers / validators =====
+    @field_validator("visualization_type", mode="before")
+    @classmethod
+    def _validate_visualization_type(cls, v: list[str] | str) -> list[str] | str:
+        """Validate visualization_type values against allowed set."""
+        valid = {
+            "histogram", "density_matrix", "correlation", "circuit",
+            "metrics_summary", "bloch_sphere", "sweep_line", "comparison",
+            "all", "none",
+        }
+        if isinstance(v, str):
+            if v not in valid:
+                raise ValueError(f"Invalid visualization_type '{v}'. Valid: {valid}")
+            return v
+        if isinstance(v, list):
+            for item in v:
+                if item not in valid:
+                    raise ValueError(f"Invalid visualization_type '{item}'. Valid: {valid}")
+            return v
+        return v
+
     @field_validator("state_type", mode="before")
     @classmethod
     def _normalize_state_type(cls, v: str) -> str:
@@ -187,9 +244,7 @@ class ExperimentConfig(BaseModel):
 
     @model_validator(mode="after")
     def _cross_field_checks(self) -> ExperimentConfig:
-        """
-        Model-level cross-field validations that are safer after all fields are parsed.
-        """
+        """Model-level cross-field validations that are safer after all fields are parsed."""
         if self.t1 is not None and self.t2 is not None:
             if self.t2 > 2 * self.t1:
                 raise ValueError(f"T2 ({self.t2}) must be ≤ 2*T1 ({2 * self.t1})")
@@ -202,12 +257,34 @@ class ExperimentConfig(BaseModel):
                 "Use sim_mode='density_matrix' for noisy simulations with full state access."
             )
 
+        # Hardware mode rejects simulated noise (physical noise is the point)
+        if self.sim_mode == "hardware" and self.noise_enabled:
+            raise ValueError(
+                "sim_mode='hardware' is incompatible with noise_enabled=True. "
+                "Real quantum hardware has physical noise; simulated noise models "
+                "cannot be applied."
+            )
+
+        # Hardware is inherently non-deterministic
+        if self.sim_mode == "hardware" and self.rng_seed is not None:
+            raise ValueError(
+                "sim_mode='hardware' does not support rng_seed. "
+                "Quantum hardware measurements are inherently probabilistic."
+            )
+
+        # backend_name only meaningful for hardware mode
+        if self.backend_name is not None and self.sim_mode != "hardware":
+            raise ValueError("backend_name is only valid when sim_mode='hardware'.")
+
+        # IBM hardware shot limit
+        if self.sim_mode == "hardware" and self.shots > 100_000:
+            raise ValueError(f"shots={self.shots} exceeds IBM Quantum hardware limit (100,000).")
+
         return self
 
 
 class AdvancedNoiseConfig(BaseModel):
-    """
-    Advanced noise configuration for complex noise models.
+    """Advanced noise configuration for complex noise models.
 
     Purpose: Separate complex noise configurations from basic ExperimentConfig
     to keep the main config model clean and focused.

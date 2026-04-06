@@ -1,5 +1,4 @@
-"""
-Product Superposition States for Quantum Control and Baseline Research
+"""Product Superposition States for Quantum Control and Baseline Research.
 
 # Product Superposition States (Non-Entangled)
 Product superposition states consist of multiple qubits each in superposition
@@ -17,7 +16,9 @@ where each |ψᵢ⟩ = cos(θᵢ/2)|0⟩ + e^(iφᵢ)sin(θᵢ/2)|1⟩
 - Phase noise isolation: Study decoherence without entanglement complications
 """
 
-from typing import Any, Optional, Union
+from __future__ import annotations
+
+from typing import Any
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -26,8 +27,7 @@ from .base_state import BaseState
 
 
 class SuperpositionState(BaseState):
-    """
-    Product superposition state preparation for control experiments.
+    """Product superposition state preparation for control experiments.
 
     # Quantum State Definition
     Creates separable (non-entangled) multi-qubit states where each qubit
@@ -52,8 +52,7 @@ class SuperpositionState(BaseState):
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit that prepares product superposition state.
+        """Create quantum circuit that prepares product superposition state.
 
         # Product State Construction Strategy
         Each qubit is prepared independently using single-qubit rotations:
@@ -139,8 +138,7 @@ class SuperpositionState(BaseState):
         return circuit
 
     def _parse_qubits(self, num_qubits: int, custom_params: dict) -> list[int]:
-        """
-        Parse which qubits to address for superposition preparation.
+        """Parse which qubits to address for superposition preparation.
 
         Args:
             num_qubits: Total number of qubits in the system
@@ -152,7 +150,7 @@ class SuperpositionState(BaseState):
         Raises:
             ValueError: If qubit specifications are invalid
         """
-        qubits_param: Union[str, list[int]] = custom_params.get("qubits", "all")
+        qubits_param: str | list[int] = custom_params.get("qubits", "all")
 
         if qubits_param == "all":
             return list(range(num_qubits))
@@ -167,9 +165,8 @@ class SuperpositionState(BaseState):
 
     def _parse_angles(
         self, num_qubits: int, custom_params: dict, target_qubits: list[int]
-    ) -> Optional[list[Optional[dict[str, float]]]]:
-        """
-        Parse angle specifications for parametric superposition states.
+    ) -> list[dict[str, float] | None] | None:
+        """Parse angle specifications for parametric superposition states.
 
         Args:
             num_qubits: Total number of qubits
@@ -204,7 +201,7 @@ class SuperpositionState(BaseState):
         # Handle single dict → broadcast to all target qubits
         if isinstance(angles, dict):
             angle_dict = _normalize_angle_dict(angles)
-            per_qubit: list[Optional[dict[str, float]]] = [None] * num_qubits
+            per_qubit: list[dict[str, float] | None] = [None] * num_qubits
             for qubit in target_qubits:
                 per_qubit[qubit] = angle_dict
             return per_qubit
@@ -235,8 +232,7 @@ class SuperpositionState(BaseState):
         raise ValueError("custom_params['angles'] must be a dict or a list of dicts")
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate theoretical state vector for product superposition state.
+        """Calculate theoretical state vector for product superposition state.
 
         # Mathematical Construction
         For product states, the full state vector is the tensor product
@@ -285,8 +281,7 @@ class SuperpositionState(BaseState):
         return full_state
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for product superposition preparation.
+        """Estimate circuit depth for product superposition preparation.
 
         # Depth Analysis
         Product states require only single-qubit gates:
@@ -308,8 +303,7 @@ class SuperpositionState(BaseState):
             return 2  # Ry + Rz layers
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for product superposition preparation.
+        """Get quantum gates required for product superposition preparation.
 
         Returns:
             List[str]: Required gate names
@@ -326,8 +320,7 @@ class SuperpositionState(BaseState):
             return ["ry", "rz"]  # Rotation gates
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties of product superposition states.
+        """Get theoretical quantum properties of product superposition states.
 
         Returns:
             Dict with product superposition specific properties
@@ -353,8 +346,7 @@ class SuperpositionState(BaseState):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for product superposition studies.
+        """Get research context for product superposition studies.
 
         Returns:
             Dict with research context and experimental predictions

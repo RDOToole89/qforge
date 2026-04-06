@@ -10,6 +10,7 @@ interface Props {
   step: number;
   onValueChange: (v: number) => void;
   formatValue?: (v: number) => string;
+  disabled?: boolean;
 }
 
 export default function ConfigSlider({
@@ -20,11 +21,12 @@ export default function ConfigSlider({
   step,
   onValueChange,
   formatValue,
+  disabled = false,
 }: Props) {
   const display = formatValue ? formatValue(value) : String(value);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, disabled && styles.disabled]}>
       <View style={styles.header}>
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{display}</Text>
@@ -39,6 +41,7 @@ export default function ConfigSlider({
         minimumTrackTintColor="#6366f1"
         maximumTrackTintColor="#334155"
         thumbTintColor="#6366f1"
+        disabled={disabled}
       />
     </View>
   );
@@ -46,6 +49,7 @@ export default function ConfigSlider({
 
 const styles = StyleSheet.create({
   container: { marginBottom: 16 },
+  disabled: { opacity: 0.4 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

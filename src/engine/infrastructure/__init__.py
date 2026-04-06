@@ -1,5 +1,4 @@
-"""
-Infrastructure Module
+"""Infrastructure Module.
 
 Cross-cutting infrastructure components:
 - events: Event bus for progress tracking and notifications

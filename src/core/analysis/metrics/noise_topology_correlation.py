@@ -1,5 +1,4 @@
-"""
-Noise Topology Correlation (NTC) Metric
+"""Noise Topology Correlation (NTC) Metric.
 
 Measures whether EXCESS pairwise bit covariance (relative to a baseline with
 independent noise) concentrates on topology-adjacent qubit pairs.

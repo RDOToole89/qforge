@@ -1,5 +1,4 @@
-"""
-Quantum State Factory for Research-Grade Decoherence Experiments
+"""Quantum State Factory for Research-Grade Decoherence Experiments.
 
 # State Preparation Factory
 Centralized factory for creating quantum states used in structured decoherence
@@ -12,27 +11,27 @@ showing how to manage different quantum state types systematically while
 keeping the interface simple and extensible.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 from qiskit import QuantumCircuit
 
 from .base_state import BaseState
 from .state_constants import STATE_CLASSES
 
-logger = logging.getLogger("QuantumExperiment.StatePreparation")
+logger = logging.getLogger(__name__)
 
 
 def prepare_state(
     state_type: str,
     num_qubits: int,
-    custom_params: Optional[dict] = None,
+    custom_params: dict | None = None,
     add_barrier: bool = False,
     experiment_id: str = "N/A",
-    balance: Optional[str] = None,
+    balance: str | None = None,
 ) -> QuantumCircuit:
-    """
-    Factory function to prepare quantum states for decoherence research.
+    """Factory function to prepare quantum states for decoherence research.
 
     # Quantum State Factory Pattern
     Creates specific quantum states (GHZ, W, Bell, Cluster, etc.) using a unified
@@ -51,6 +50,7 @@ def prepare_state(
         custom_params: State-specific parameters (angles, topology, etc.)
         add_barrier: Add quantum barrier for circuit visualization
         experiment_id: Unique identifier for experiment tracking
+        balance: Optional circuit balancing strategy name.
 
     Returns:
         QuantumCircuit: Prepared quantum circuit ready for noise application
@@ -73,7 +73,9 @@ def prepare_state(
         # Create state instance
         state_class = STATE_CLASSES[state_type]
         state = state_class(
-            num_qubits=num_qubits, custom_params=custom_params, experiment_id=experiment_id,
+            num_qubits=num_qubits,
+            custom_params=custom_params,
+            experiment_id=experiment_id,
             balance=balance,
         )
 
@@ -99,11 +101,10 @@ def prepare_state(
 def create_state_instance(
     state_type: str,
     num_qubits: int,
-    custom_params: Optional[dict] = None,
+    custom_params: dict | None = None,
     experiment_id: str = "N/A",
 ) -> BaseState:
-    """
-    Create a state instance without generating the circuit.
+    """Create a state instance without generating the circuit.
 
     # State Instance Factory
     Useful for analysis modules that need access to state properties
@@ -136,8 +137,7 @@ def create_state_instance(
 
 
 def get_available_states() -> list[str]:
-    """
-    Get list of all available quantum state types.
+    """Get list of all available quantum state types.
 
     Returns:
         List[str]: Available state types for factory creation
@@ -149,12 +149,11 @@ def prepare_state_for_hardware(
     state_type: str,
     num_qubits: int,
     backend=None,
-    custom_params: Optional[dict] = None,
+    custom_params: dict | None = None,
     add_barrier: bool = False,
     experiment_id: str = "N/A",
 ) -> QuantumCircuit:
-    """
-    Prepare quantum state with hardware validation for real quantum devices.
+    """Prepare quantum state with hardware validation for real quantum devices.
 
     # Hardware-Aware State Preparation
     This enhanced factory function validates state compatibility with real quantum
@@ -231,7 +230,8 @@ def prepare_state_for_hardware(
                     for keyword in critical_keywords
                 ):
                     raise ValueError(
-                        f"State {state_type} is incompatible with backend {backend_constraints['backend_name']}. "
+                        f"State {state_type} is incompatible with "
+                        f"backend {backend_constraints['backend_name']}. "
                         f"Issues: {hardware_warnings}"
                     )
 
@@ -250,10 +250,9 @@ def prepare_state_for_hardware(
 
 
 def validate_state_request(
-    state_type: str, num_qubits: int, custom_params: Optional[dict] = None
+    state_type: str, num_qubits: int, custom_params: dict | None = None
 ) -> list[str]:
-    """
-    Validate state creation request before attempting preparation.
+    """Validate state creation request before attempting preparation.
 
     # Pre-flight Validation
     Catches common errors before expensive quantum circuit creation,

@@ -1,5 +1,4 @@
-"""
-Total Correlation - Multi-Information Analysis
+"""Total Correlation - Multi-Information Analysis.
 
 This module provides the canonical implementation of Total Correlation (TC)
 for the v1.0 schema compliance, wrapping the core information theory
@@ -31,8 +30,7 @@ def compute_total_correlation(
     rng: Any | None = None,
     **kwargs: Any,
 ) -> MetricResult:
-    """
-    Compute Total Correlation with bootstrap confidence intervals.
+    """Compute Total Correlation with bootstrap confidence intervals.
 
     Total Correlation measures the total amount of correlation among all variables:
     TC = Σᵢ H(Xᵢ) - H(X₁, X₂, ..., Xₙ)

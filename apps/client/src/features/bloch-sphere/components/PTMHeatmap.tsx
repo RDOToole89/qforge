@@ -6,16 +6,18 @@ interface PTMHeatmapProps {
   runtimeCh: Record<string, RuntimeChannel>;
   channel: string;
   strength: number;
+  /** When provided, render this matrix directly instead of computing from channel */
+  rawMatrix?: number[][];
 }
 
 const LABELS = ["I", "X", "Y", "Z"];
 const LABEL_COLORS = ["#8899aa", "#ff4466", "#44ff88", "#4488ff"];
 
-export default function PTMHeatmap({ runtimeCh, channel, strength }: PTMHeatmapProps) {
+export default function PTMHeatmap({ runtimeCh, channel, strength, rawMatrix }: PTMHeatmapProps) {
   const ch = runtimeCh[channel];
-  if (!ch) return null;
+  if (!ch && !rawMatrix) return null;
 
-  const ptm = ch.ptm(strength);
+  const ptm = rawMatrix ?? ch!.ptm(strength);
   const mx = Math.max(...ptm.flat().map(Math.abs), 0.01);
 
   const bg = (v: number): string => {

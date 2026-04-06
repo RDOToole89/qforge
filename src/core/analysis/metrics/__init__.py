@@ -1,5 +1,4 @@
-"""
-Structured Decoherence Metrics - Canonical Registry API
+"""Structured Decoherence Metrics - Canonical Registry API.
 
 Research-grade metrics for detecting and quantifying structured decoherence
 patterns in quantum measurements. All metrics follow rigorous mathematical

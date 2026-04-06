@@ -1,5 +1,4 @@
-"""
-Engine Analysis Module
+"""Engine Analysis Module.
 
 Bridge between the engine and core analysis metrics.
 

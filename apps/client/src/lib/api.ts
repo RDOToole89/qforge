@@ -1,10 +1,13 @@
 /**
- * Typed API client for the Quantum Experiment Framework backend.
+ * Typed API client for the QForge backend.
  *
  * All functions throw on non-2xx responses.
  */
 
 import type {
+  BlochSweepRequest,
+  BlochSweepResponse,
+  BlochVisualizerData,
   ExperimentConfig,
   ExperimentResult,
   RegistryEntry,
@@ -57,6 +60,15 @@ export function runExperiment(
   });
 }
 
+export function previewCircuit(
+  config: ExperimentConfig,
+): Promise<{ circuit: unknown; diagram: string; stats: { depth: number; num_gates: number; num_qubits: number } }> {
+  return request("/experiments/preview", {
+    method: "POST",
+    body: JSON.stringify(config),
+  });
+}
+
 // ── Stored results ────────────────────────────────────────────────────
 
 export function listResults(
@@ -68,4 +80,17 @@ export function listResults(
 
 export function getResult(filename: string): Promise<Record<string, unknown>> {
   return request(`/results/${encodeURIComponent(filename)}`);
+}
+
+export function getBlochData(filename: string): Promise<BlochVisualizerData> {
+  // filename contains path separators (e.g. "2026-03-07/GHZ_.../analysis.json")
+  // which must be passed as literal slashes for FastAPI's {filename:path} parameter
+  return request(`/bloch/${filename}`);
+}
+
+export function runBlochSweep(req: BlochSweepRequest): Promise<BlochSweepResponse> {
+  return request("/bloch/sweep", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
 }

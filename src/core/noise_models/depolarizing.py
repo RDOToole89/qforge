@@ -1,5 +1,4 @@
-"""
-Depolarizing Noise for Quantum Decoherence Pathway Research
+"""Depolarizing Noise for Quantum Decoherence Pathway Research.
 
 # The Depolarizing Channel - Fundamental Quantum Decoherence
 Depolarizing noise represents the most fundamental quantum decoherence mechanism:
@@ -45,12 +44,11 @@ from qiskit_aer.noise import NoiseModel, depolarizing_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 
 class DepolarizingNoise(BaseNoise):
-    """
-    Depolarizing noise model for fundamental quantum decoherence research.
+    """Depolarizing noise model for fundamental quantum decoherence research.
 
     # Quantum Decoherence Definition
     The depolarizing channel creates isotropic decoherence by applying random
@@ -82,8 +80,7 @@ class DepolarizingNoise(BaseNoise):
     """
 
     def __init__(self, error_rate: float = 0.05, num_qubits: int = 1, experiment_id: str = "N/A"):
-        """
-        Initialize depolarizing noise with physics-compliant validation.
+        """Initialize depolarizing noise with physics-compliant validation.
 
         # Physics Constraint Validation
         Depolarizing channels have fundamental physical bounds:
@@ -132,8 +129,7 @@ class DepolarizingNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply depolarizing noise to quantum gates in the noise model.
+        """Apply depolarizing noise to quantum gates in the noise model.
 
         # Depolarizing Channel Implementation
         Creates Qiskit depolarizing error channels that apply random Pauli errors
@@ -238,8 +234,7 @@ class DepolarizingNoise(BaseNoise):
         )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the depolarizing channel.
+        """Return Kraus operators for the depolarizing channel.
 
         # Mathematical Construction
         For single-qubit depolarizing channel with error rate p:
@@ -293,8 +288,7 @@ class DepolarizingNoise(BaseNoise):
             return kraus_ops
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of depolarizing decoherence.
+        """Return comprehensive physics description of depolarizing decoherence.
 
         Returns:
             Dict with educational physics content about depolarizing channels
@@ -311,8 +305,7 @@ class DepolarizingNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to depolarizing channels.
+        """Get theoretical quantum properties specific to depolarizing channels.
 
         Returns:
             Dict with depolarizing channel specific properties
@@ -333,8 +326,7 @@ class DepolarizingNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for depolarizing noise in pathway studies.
+        """Get research context for depolarizing noise in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -372,8 +364,7 @@ class DepolarizingNoise(BaseNoise):
         }
 
     def _validate_depolarizing_bounds(self, error_rate: float, num_qubits: int) -> None:
-        """
-        Validate error rate against depolarizing channel physical bounds.
+        """Validate error rate against depolarizing channel physical bounds.
 
         # Physical Constraint Derivation
         Depolarizing channels must satisfy complete positivity, which constrains
@@ -394,8 +385,7 @@ class DepolarizingNoise(BaseNoise):
             raise ValueError(f"Error rate must be non-negative, got {error_rate:.4f}")
 
     def _calculate_pauli_probabilities(self) -> dict[str, float]:
-        """
-        Calculate individual Pauli error probabilities for educational display.
+        """Calculate individual Pauli error probabilities for educational display.
 
         Returns:
             Dict mapping Pauli operators to their error probabilities
@@ -408,8 +398,7 @@ class DepolarizingNoise(BaseNoise):
         }
 
     def _calculate_entropy_increase(self) -> float:
-        """
-        Calculate von Neumann entropy increase for depolarizing channel.
+        """Calculate von Neumann entropy increase for depolarizing channel.
 
         # Information Theory
         Depolarizing channels increase entropy by mixing pure states with
@@ -428,8 +417,7 @@ class DepolarizingNoise(BaseNoise):
             return self.error_rate * self.num_qubits
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for depolarizing noise.
+        """Get specific pathway prediction for depolarizing noise.
 
         Returns:
             Depolarizing-specific pathway hypothesis prediction
@@ -441,9 +429,7 @@ class DepolarizingNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess depolarizing noise sensitivity to quantum state topology.
-        """
+        """Assess depolarizing noise sensitivity to quantum state topology."""
         return (
             "Minimal topology sensitivity expected due to isotropic Pauli errors. "
             "Depolarizing noise treats all entanglement structures equivalently, "
@@ -451,9 +437,7 @@ class DepolarizingNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze depolarizing noise pathway preferences.
-        """
+        """Analyze depolarizing noise pathway preferences."""
         return (
             "No intrinsic pathway preferences - depolarizing channels are designed "
             "to be maximally symmetric. Any observed preferences indicate either "

@@ -1,5 +1,4 @@
-"""
-Clean, extensible visualization service for research.
+"""Clean, extensible visualization service for research.
 
 Plugin architecture allows adding new visualization types without
 modifying core engine code.
@@ -22,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizationRenderer(ABC):
-    """
-    Abstract base class for visualization renderers.
+    """Abstract base class for visualization renderers.
 
     Renderers should be stateless (or at least reentrant) because the
     VisualizationService may call them from parallel sweep contexts.
@@ -49,9 +47,9 @@ class VisualizationRenderer(ABC):
         raise NotImplementedError
 
     def supported_types(self) -> Iterable[str]:
-        """
-        Optional: return an iterable of visualization type strings this renderer
-        is designed to handle (e.g., {"histogram"}). Used for discovery.
+        """Return an iterable of visualization type strings this renderer handles.
+
+        For example, {"histogram"}. Used for discovery. Optional override.
         """
         return ()
 
@@ -64,8 +62,7 @@ class RendererRegistryError(RuntimeError):
 
 
 class VisualizationService:
-    """
-    Research-focused visualization service with plugin architecture.
+    """Research-focused visualization service with plugin architecture.
 
     - Thread-safe renderer registry
     - Priority-based renderer selection
@@ -79,8 +76,7 @@ class VisualizationService:
     # ----- Registry management -----
 
     def register_renderer(self, renderer: VisualizationRenderer) -> None:
-        """
-        Register a visualization renderer plugin.
+        """Register a visualization renderer plugin.
 
         Guards against duplicate registration of the exact same instance.
         """
@@ -108,8 +104,8 @@ class VisualizationService:
             return [r.name for r in self._renderers]
 
     def list_supported_types(self) -> list[str]:
-        """
-        Union of supported types reported by all renderers.
+        """Union of supported types reported by all renderers.
+
         Renderers that do not override `supported_types()` will contribute nothing here,
         but can still be selected via `can_render()`.
         """
@@ -124,8 +120,8 @@ class VisualizationService:
         return sorted(types)
 
     def get_renderer(self, viz_type: str, data: dict[str, Any]) -> VisualizationRenderer | None:
-        """
-        Return the best renderer for (viz_type, data), or None if no match.
+        """Return the best renderer for (viz_type, data), or None if no match.
+
         Selection is priority-first, then registration order.
         """
         with self._lock:
@@ -144,8 +140,7 @@ class VisualizationService:
     # ----- Rendering -----
 
     def render(self, viz_type: str, data: dict[str, Any], output_path: str) -> ArtifactRef:
-        """
-        Render visualization using the highest-priority compatible renderer.
+        """Render visualization using the highest-priority compatible renderer.
 
         Args:
             viz_type: Type of visualization (e.g., "histogram", "pathway_analysis")
@@ -173,8 +168,8 @@ class VisualizationService:
     def render_or_none(
         self, viz_type: str, data: dict[str, Any], output_path: str
     ) -> ArtifactRef | None:
-        """
-        Render visualization using the best renderer, returning None if no renderer matches.
+        """Render visualization using the best renderer, returning None if no renderer matches.
+
         Useful for optional visualizations in pipelines.
         """
         try:
@@ -194,15 +189,17 @@ class VisualizationService:
 
 
 def create_default_service() -> VisualizationService:
-    """
-    Create a visualization service with default research renderers.
+    """Create a visualization service with default research renderers.
+
     Add new renderers here or register them at runtime in your pipeline.
     """
     from .renderers import (  # local import to avoid import cycles
+        BlochSphereRenderer,
         CircuitDiagramRenderer,
         CorrelationRenderer,
         DensityMatrixRenderer,
         HistogramRenderer,
+        MetricsSummaryRenderer,
     )
 
     service = VisualizationService()
@@ -210,4 +207,6 @@ def create_default_service() -> VisualizationService:
     service.register_renderer(DensityMatrixRenderer())
     service.register_renderer(CorrelationRenderer())
     service.register_renderer(CircuitDiagramRenderer())
+    service.register_renderer(MetricsSummaryRenderer())
+    service.register_renderer(BlochSphereRenderer())
     return service

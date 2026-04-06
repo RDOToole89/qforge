@@ -1,5 +1,4 @@
-"""
-Metric Profiles
+"""Metric Profiles.
 
 Named collections of metrics for common use cases.
 Profiles are resolved by name to a list of metric keys from the registry.

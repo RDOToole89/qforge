@@ -1,7 +1,0 @@
-{
-  "$schema": "../../../v1/core/provenance.schema.json",
-  "schema_version": "1.0",
-  "engine_config_hash": "sha256:abc123def456",
-  "execution_backend": "qasm_simulator",
-  "timestamp": "2025-08-16T12:00:00Z"
-}

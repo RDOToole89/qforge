@@ -1,5 +1,4 @@
-"""
-Research Models — Generic Metrics Bundle
+"""Research Models — Generic Metrics Bundle.
 
 Purpose: Define metric-agnostic models for the engine's analysis layer.
 A MetricsBundle holds an arbitrary set of MetricEntry values keyed by name,
@@ -82,8 +81,7 @@ class AnalysisMetadata(BaseModel):
 
 
 class ResearchMetadata(BaseModel):
-    """
-    Metadata for research experiments and campaigns.
+    """Metadata for research experiments and campaigns.
 
     Purpose: Track research context, hypotheses, and experimental conditions.
     """

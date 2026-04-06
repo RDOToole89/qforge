@@ -1,5 +1,4 @@
-"""
-Thermal Relaxation Noise for Realistic Hardware Modeling
+"""Thermal Relaxation Noise for Realistic Hardware Modeling.
 
 # The Thermal Relaxation Channel - Combined T1/T2 Processes
 Thermal relaxation noise represents the most realistic decoherence model by combining
@@ -48,7 +47,7 @@ from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 # Physical constants for thermal calculations
 BOLTZMANN_EV = 8.617e-5  # Boltzmann constant in eV/K
@@ -57,8 +56,7 @@ TYPICAL_QUBIT_FREQ = 5.5e9  # 5.5 GHz typical superconducting qubit
 
 
 class ThermalRelaxationNoise(BaseNoise):
-    """
-    Thermal relaxation noise model for realistic hardware decoherence research.
+    """Thermal relaxation noise model for realistic hardware decoherence research.
 
     # Combined T1/T2 Decoherence Definition
     The thermal relaxation channel models the combined effects of energy relaxation
@@ -97,8 +95,7 @@ class ThermalRelaxationNoise(BaseNoise):
         temperature: float = 0.015,
         qubit_frequency: float = TYPICAL_QUBIT_FREQ,
     ):
-        """
-        Initialize thermal relaxation noise with comprehensive physics validation.
+        """Initialize thermal relaxation noise with comprehensive physics validation.
 
         # Physics Parameter Integration
         Supports both phenomenological error rates and physics-based T1/T2 calculations:
@@ -188,8 +185,7 @@ class ThermalRelaxationNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply thermal relaxation noise to quantum gates with realistic physics.
+        """Apply thermal relaxation noise to quantum gates with realistic physics.
 
         # Comprehensive Decoherence Implementation
         Creates Qiskit thermal relaxation error channels that model combined T1/T2
@@ -264,8 +260,7 @@ class ThermalRelaxationNoise(BaseNoise):
             )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the thermal relaxation channel.
+        """Return Kraus operators for the thermal relaxation channel.
 
         # Mathematical Construction
         Thermal relaxation combines amplitude damping and dephasing channels.
@@ -293,8 +288,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of thermal relaxation.
+        """Return comprehensive physics description of thermal relaxation.
 
         Returns:
             Dict with educational physics content about combined T1/T2 processes
@@ -313,8 +307,7 @@ class ThermalRelaxationNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to thermal relaxation.
+        """Get theoretical quantum properties specific to thermal relaxation.
 
         Returns:
             Dict with thermal relaxation channel specific properties
@@ -340,8 +333,7 @@ class ThermalRelaxationNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for thermal relaxation in pathway studies.
+        """Get research context for thermal relaxation in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -387,8 +379,7 @@ class ThermalRelaxationNoise(BaseNoise):
         temperature: float,
         qubit_frequency: float,
     ) -> None:
-        """
-        Validate thermal relaxation parameters against physics constraints.
+        """Validate thermal relaxation parameters against physics constraints.
 
         # Comprehensive Physics Validation
         Ensures all parameters represent realistic thermal relaxation scenarios
@@ -438,8 +429,7 @@ class ThermalRelaxationNoise(BaseNoise):
             )
 
     def _calculate_thermal_population(self) -> float:
-        """
-        Calculate thermal population using Boltzmann distribution.
+        """Calculate thermal population using Boltzmann distribution.
 
         # Thermal Physics
         At finite temperature, the excited state has non-zero population
@@ -463,8 +453,7 @@ class ThermalRelaxationNoise(BaseNoise):
             return 0.0
 
     def _calculate_t1_error_rate(self) -> float:
-        """
-        Calculate T1 error rate for the gate time.
+        """Calculate T1 error rate for the gate time.
 
         Returns:
             T1 error probability for single gate operation
@@ -472,8 +461,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return 1 - np.exp(-self.gate_time / self.t1)
 
     def _calculate_t2_error_rate(self) -> float:
-        """
-        Calculate T2 error rate for the gate time.
+        """Calculate T2 error rate for the gate time.
 
         Returns:
             T2 error probability for single gate operation
@@ -481,8 +469,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return 1 - np.exp(-self.gate_time / self.t2)
 
     def _calculate_combined_error_rate(self) -> float:
-        """
-        Calculate combined T1/T2 error rate.
+        """Calculate combined T1/T2 error rate.
 
         # Combined Error Physics
         The combined error rate accounts for both energy relaxation and
@@ -499,8 +486,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return min(1.0, t1_rate + t2_rate - t1_rate * t2_rate)
 
     def _calculate_effective_t2(self) -> float:
-        """
-        Calculate effective T2 including T1 contributions.
+        """Calculate effective T2 including T1 contributions.
 
         # Effective T2 Physics
         The observed dephasing time includes contributions from both
@@ -512,8 +498,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return 1.0 / (1.0 / self.t2 + 1.0 / (2 * self.t1))
 
     def _get_gate_times(self) -> dict[str, float]:
-        """
-        Get gate-specific operation times.
+        """Get gate-specific operation times.
 
         # Gate Timing Physics
         Different gates have different physical implementation times:
@@ -555,8 +540,7 @@ class ThermalRelaxationNoise(BaseNoise):
         }
 
     def _calculate_channel_capacity(self) -> float:
-        """
-        Calculate quantum channel capacity for thermal relaxation.
+        """Calculate quantum channel capacity for thermal relaxation.
 
         # Information Theory
         Channel capacity for thermal relaxation is complex due to the
@@ -567,8 +551,7 @@ class ThermalRelaxationNoise(BaseNoise):
         return max(0, 1 - combined_rate)
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for thermal relaxation noise.
+        """Get specific pathway prediction for thermal relaxation noise.
 
         Returns:
             Thermal relaxation specific pathway hypothesis prediction
@@ -580,9 +563,7 @@ class ThermalRelaxationNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess thermal relaxation sensitivity to quantum state topology.
-        """
+        """Assess thermal relaxation sensitivity to quantum state topology."""
         return (
             "High topology sensitivity expected due to combined T1/T2 mechanisms. "
             "States with different energy and coherence characteristics should show "
@@ -590,9 +571,7 @@ class ThermalRelaxationNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze thermal relaxation pathway preferences.
-        """
+        """Analyze thermal relaxation pathway preferences."""
         return (
             f"Complex pathway preferences combining energy flow (T1) and dephasing (T2). "
             f"Thermal effects at {self.temperature}K create equilibrium bias with "

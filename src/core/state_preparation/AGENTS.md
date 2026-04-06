@@ -1,7 +1,7 @@
 # AGENTS.md — Quantum State Preparation
 
 Owner: Research Engineering (Roibín O'Toole)
-Last updated: 2025-12-02
+Last updated: 2026-04-05
 Token budget: 350
 
 ## Purpose
@@ -133,7 +133,33 @@ state_preparation/
 ├── bell_state.py        # |Φ+⟩ = (|00⟩ + |11⟩)/√2
 ├── cluster_state.py     # Graph state with CZ gates
 ├── superposition_state.py  # Equal superposition
-└── custom_state.py      # User-defined circuits
+└── custom_state.py      # User-defined circuits (4 source modes)
+```
+
+## CustomState Source Modes
+
+CustomState supports four ways to define a circuit:
+
+| Source | Description | Use Case |
+|--------|-------------|----------|
+| `"circuit"` | Pass a pre-built `QuantumCircuit` object directly | Algorithms (Shor, Grover, VQE, QAOA) |
+| `"gates"` | Define circuit as a list of gate dicts | Simple programmatic definitions |
+| `"builder"` | Call a Python function that returns a circuit | Complex parameterized circuits |
+| `"openqasm"` | Load from an OpenQASM file | External circuit import |
+
+The `"circuit"` source is the most flexible — experiments build their own `QuantumCircuit` in Python and pass it through `custom_params`:
+
+```python
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(4, 4)
+qc.h(range(4))
+qc.measure(range(4), range(4))
+
+config = ExperimentConfig(
+    num_qubits=4,
+    state_type="CUSTOM",
+    custom_params={"source": "circuit", "circuit": qc},
+)
 ```
 
 ## Adding a New State

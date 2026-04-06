@@ -1,5 +1,4 @@
-"""
-Experiment Program Base Classes
+"""Experiment Program Base Classes.
 
 This module defines the ExperimentProgram protocol and BaseExperiment helper class
 for creating pluggable, discoverable experiment programs.
@@ -18,8 +17,7 @@ from src.engine.models import ExperimentConfig, ExperimentResult
 
 @runtime_checkable
 class ExperimentProgram(Protocol):
-    """
-    Protocol for pluggable experiment programs.
+    """Protocol for pluggable experiment programs.
 
     This defines the contract that all experiment programs must follow.
     Experiments can implement this protocol directly or inherit from BaseExperiment.
@@ -41,8 +39,7 @@ class ExperimentProgram(Protocol):
         ...
 
     def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
-        """
-        Run the experiment with optional config overrides.
+        """Run the experiment with optional config overrides.
 
         Args:
             overrides: Optional dict of config fields to override
@@ -54,8 +51,7 @@ class ExperimentProgram(Protocol):
 
 
 class BaseExperiment:
-    """
-    Base class providing common experiment functionality.
+    """Base class providing common experiment functionality.
 
     Subclasses must:
     - Set `name` and `description` class attributes
@@ -89,8 +85,7 @@ class BaseExperiment:
         raise NotImplementedError("Subclasses must implement default_config()")
 
     def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
-        """
-        Run experiment using the engine API.
+        """Run experiment using the engine API.
 
         Args:
             overrides: Optional dict of config fields to override
@@ -115,8 +110,7 @@ class BaseExperiment:
         parameter_ranges: dict[str, list[Any]],
         **base_overrides: Any,
     ) -> list[ExperimentResult]:
-        """
-        Run parameter sweep using the engine API.
+        """Run parameter sweep using the engine API.
 
         Args:
             parameter_ranges: Dict mapping parameter names to lists of values

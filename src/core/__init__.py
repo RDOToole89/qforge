@@ -1,12 +1,11 @@
-"""
-Core quantum logic — public API
+"""Core quantum logic — public API.
 
 This package contains the reusable building blocks for the engine:
 - State preparation primitives (GHZ, W, Bell, Cluster, Superposition, Custom)
 - Noise model factory (depolarizing, amplitude/phase damping, bit/phase flip, thermal)
 - Lightweight analysis utilities used across the stack
 
-Notes
+Notes:
 -----
 * The **experiment runner/orchestration** lives in `src.engine.*` now.
   We intentionally do NOT export any runner here to avoid coupling and to

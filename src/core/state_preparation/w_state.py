@@ -1,5 +1,4 @@
-"""
-W State Preparation for Symmetric Entanglement Research
+"""W State Preparation for Symmetric Entanglement Research.
 
 # The W State - Symmetric Multipartite Entanglement
 The W state represents symmetric multipartite entanglement where exactly one
@@ -21,15 +20,15 @@ particle loss but less useful for certain quantum protocols.
 from typing import Any
 
 import numpy as np
-from qiskit import QuantumCircuit, transpile as _qk_transpile
+from qiskit import QuantumCircuit
+from qiskit import transpile as _qk_transpile
 from qiskit.circuit.library import UnitaryGate
 
 from .base_state import BaseState
 
 
 class WState(BaseState):
-    """
-    W state preparation for symmetric entanglement research.
+    """W state preparation for symmetric entanglement research.
 
     # Quantum State Definition
     |W_n⟩ = (|100...0⟩ + |010...0⟩ + ... + |000...1⟩)/√n
@@ -51,8 +50,7 @@ class WState(BaseState):
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit that prepares the W state.
+        """Create quantum circuit that prepares the W state.
 
         # W State Construction Strategy
         For n qubits, we create the superposition:
@@ -101,9 +99,7 @@ class WState(BaseState):
 
         # Decompose UnitaryGate instructions to standard basis gates
         # so that noise models can attach errors to each gate.
-        circuit = _qk_transpile(
-            circuit, basis_gates=["cx", "rz", "sx", "x"], optimization_level=1
-        )
+        circuit = _qk_transpile(circuit, basis_gates=["cx", "rz", "sx", "x"], optimization_level=1)
 
         # Gate-count balancing (equalize noise exposure across qubits)
         if self.balance == "gate_count":
@@ -146,8 +142,7 @@ class WState(BaseState):
         return UnitaryGate(U, label="Givens")
 
     def _get_w_state_vector(self) -> np.ndarray:
-        """
-        Generate the W state vector for initialization.
+        """Generate the W state vector for initialization.
 
         # W State Vector Construction
         For n qubits, create vector where only computational basis states
@@ -171,8 +166,7 @@ class WState(BaseState):
         return w_state
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate the theoretical W state vector for validation.
+        """Calculate the theoretical W state vector for validation.
 
         # Mathematical Definition
         |W_n⟩ = (1/√n) * Σᵢ |0...0 1ᵢ 0...0⟩
@@ -191,8 +185,7 @@ class WState(BaseState):
         return self._get_w_state_vector()
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for W state preparation.
+        """Estimate circuit depth for W state preparation.
 
         Uses n-1 Givens rotations, each decomposing to ~2 CX + single-qubit gates.
 
@@ -204,8 +197,7 @@ class WState(BaseState):
         return 2 * (self.num_qubits - 1)  # ~2 layers per Givens rotation
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for W state preparation.
+        """Get quantum gates required for W state preparation.
 
         Returns:
             List[str]: Required gate names
@@ -215,8 +207,7 @@ class WState(BaseState):
         return ["x", "cx", "rz", "sx"]  # Givens rotations decompose to these
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to W states.
+        """Get theoretical quantum properties specific to W states.
 
         Returns:
             Dict with W-specific theoretical properties
@@ -247,8 +238,7 @@ class WState(BaseState):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for W state decoherence studies.
+        """Get research context for W state decoherence studies.
 
         Returns:
             Dict with research context and experimental predictions

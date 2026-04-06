@@ -1,5 +1,4 @@
-"""
-Pathway Persistence - Canonical alias for Temporal Pathway Stability
+"""Pathway Persistence - Canonical alias for Temporal Pathway Stability.
 
 This module provides the canonical API name for temporal persistence analysis
 while maintaining backward compatibility with the original implementation.

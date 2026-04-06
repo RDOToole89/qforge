@@ -1,5 +1,4 @@
-"""
-Storage interfaces and local implementation (engine-native, schema-aware).
+"""Storage interfaces and local implementation (engine-native, schema-aware).
 
 Purpose
 -------
@@ -19,11 +18,11 @@ Integration
     {shots} {noise_desc} {config_hash}
 - If config is not supplied, a descriptive fallback filename is used.
 
-Notes
+Notes:
 -----
-- `ArtifactRef` is imported from engine.models to keep a single source of truth.
+- `ArtifactRef` is imported from src.engine.models to keep a single source of truth.
 - This module intentionally stays small; richer policies (archival/retention)
-  can be layered on top later using your models in engine/models/storage.py.
+  can be layered on top later using your models in src/engine/models/storage.py.
 """
 
 from __future__ import annotations
@@ -73,8 +72,7 @@ class Storage(ABC):
 
 
 class LocalStorage(Storage):
-    """
-    Filesystem-backed storage with schema-aware layout.
+    """Filesystem-backed storage with schema-aware layout.
 
     Directory Layout
     ----------------
@@ -112,8 +110,8 @@ class LocalStorage(Storage):
     def save_json(
         self, rel_path: str, data: dict[str, Any], *, compress: bool | None = None
     ) -> str:
-        """
-        Save JSON atomically at base_dir/rel_path. Returns absolute path.
+        """Save JSON atomically at base_dir/rel_path. Returns absolute path.
+
         If compress is True (or rel_path ends with .gz), writes JSON GZIP.
         """
         target = self.base_dir / rel_path
@@ -141,8 +139,8 @@ class LocalStorage(Storage):
         return str(target.resolve())
 
     def register_artifact(self, artifact: ArtifactRef) -> None:
-        """
-        Append artifact metadata to a per-directory JSONL ledger for lightweight indexing.
+        """Append artifact metadata to a per-directory JSONL ledger for lightweight indexing.
+
         Safe to call even if the path's directory doesn't exist yet.
         """
         p = Path(artifact.path)
@@ -156,12 +154,12 @@ class LocalStorage(Storage):
             f.write(json.dumps(record, default=str) + "\n")
 
     def save_analysis(self, analysis: dict[str, Any]) -> str:
-        """
-        Persist analysis with structure-aware directory and filename policy.
+        """Persist analysis with structure-aware directory and filename policy.
 
         Consumed keys (best-effort):
         - experiment_metadata: {experiment_id, timestamp, research_type}
-        - experiment_parameters: {state_type, num_qubits, shots, noise_enabled, noise_type, error_rate, t1, t2}
+        - experiment_parameters: {state_type, num_qubits, shots,
+          noise_enabled, noise_type, error_rate, t1, t2}
         - provenance: {config_hash}
         """
         dt = _extract_datetime(analysis)
@@ -272,11 +270,11 @@ def _slug(text: str) -> str:
 
 
 def _sanitize_filename(name: str) -> str:
-    """
-    Sanitize a filename template result:
+    """Sanitize a filename template result.
+
     - Replace path separators
     - Collapse whitespace/punct to underscores
-    - Keep dots (for extensions) but remove extra dots in the stem
+    - Keep dots (for extensions) but remove extra dots in the stem.
     """
     # Split stem + ext to preserve extension dots
     stem, *ext = name.split(".")
@@ -288,8 +286,8 @@ def _sanitize_filename(name: str) -> str:
 
 
 def _noise_segment(params: dict[str, Any]) -> str:
-    """
-    Build a short, readable noise description.
+    """Build a short, readable noise description.
+
     Examples:
       - no noise        -> "clean"
       - depolarizing    -> "depolarizing_0.02"

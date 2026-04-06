@@ -48,10 +48,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="circuit"
+        options={{
+          title: "Circuit",
+          tabBarIcon: ({ color }) => <TabBarIcon name="sitemap" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="registry"
         options={{
           title: "Registry",
           tabBarIcon: ({ color }) => <TabBarIcon name="flask" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="glossary"
+        options={{
+          title: "Glossary",
+          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
       />
     </Tabs>

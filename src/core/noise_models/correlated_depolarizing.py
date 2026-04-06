@@ -1,5 +1,4 @@
-"""
-Correlated Depolarizing Noise for Topology-Dependent Error Studies
+"""Correlated Depolarizing Noise for Topology-Dependent Error Studies.
 
 Depolarizing noise with pair correlations along entanglement topology edges.
 This enables in-simulation tests of the structured decoherence hypothesis:
@@ -21,7 +20,7 @@ from src.core.analysis.core.topology import TOPOLOGY_BUILDERS
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 
 class CorrelatedDepolarizingNoise(BaseNoise):
@@ -36,25 +35,22 @@ class CorrelatedDepolarizingNoise(BaseNoise):
         custom_topology: np.ndarray | None = None,
         experiment_id: str = "N/A",
     ):
-        """
+        """Initialize correlated depolarizing noise model.
+
         Args:
-            error_rate: Base per-gate depolarizing probability.
-            num_qubits: Number of qubits.
-            correlation_strength: Bias factor for correlated Pauli errors
-                on topology-connected pairs. Range [-1, 1].
-                Positive = correlated, negative = anti-correlated, 0 = standard.
-            topology: Topology name ("GHZ", "W", "CLUSTER", "CHAIN", "STAR", "ALL_TO_ALL").
-            custom_topology: Explicit adjacency matrix (overrides topology name).
-            experiment_id: Experiment tracking ID.
+        error_rate: Base per-gate depolarizing probability.
+        num_qubits: Number of qubits.
+        correlation_strength: Bias factor for correlated Pauli errors
+            on topology-connected pairs. Range [-1, 1].
+            Positive = correlated, negative = anti-correlated, 0 = standard.
+        topology: Topology name ("GHZ", "W", "CLUSTER", "CHAIN", "STAR", "ALL_TO_ALL").
+        custom_topology: Explicit adjacency matrix (overrides topology name).
+        experiment_id: Experiment tracking ID.
         """
-        super().__init__(
-            error_rate=error_rate, num_qubits=num_qubits, experiment_id=experiment_id
-        )
+        super().__init__(error_rate=error_rate, num_qubits=num_qubits, experiment_id=experiment_id)
 
         if not -1.0 <= correlation_strength <= 1.0:
-            raise ValueError(
-                f"correlation_strength must be in [-1, 1], got {correlation_strength}"
-            )
+            raise ValueError(f"correlation_strength must be in [-1, 1], got {correlation_strength}")
 
         self.correlation_strength = correlation_strength
         self.topology_name = topology.upper()
@@ -101,7 +97,20 @@ class CorrelatedDepolarizingNoise(BaseNoise):
         from qiskit_aer.noise import depolarizing_error
 
         one_qubit_gates = {
-            "id", "u1", "u2", "u3", "h", "x", "y", "z", "s", "t", "sx", "rz", "ry", "rx",
+            "id",
+            "u1",
+            "u2",
+            "u3",
+            "h",
+            "x",
+            "y",
+            "z",
+            "s",
+            "t",
+            "sx",
+            "rz",
+            "ry",
+            "rx",
         }
         two_qubit_gates = {"cx", "cy", "cz", "ch", "swap", "iswap", "ecr"}
 
@@ -203,6 +212,7 @@ class CorrelatedDepolarizingNoise(BaseNoise):
         return []
 
     def get_physics_description(self) -> dict[str, str]:
+        """Return a description of the correlated depolarizing noise mechanism."""
         return {
             "mechanism": (
                 "Depolarizing noise with topology-dependent pair correlations. "

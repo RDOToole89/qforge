@@ -1,5 +1,4 @@
-"""
-Cluster State Preparation for Graph-State Network Research
+"""Cluster State Preparation for Graph-State Network Research.
 
 # Cluster States - Graph-Based Quantum Networks
 Cluster states are a class of highly entangled quantum states that form the basis
@@ -26,8 +25,7 @@ from .base_state import BaseState
 
 
 class ClusterState(BaseState):
-    """
-    Cluster state preparation for graph-based network research.
+    """Cluster state preparation for graph-based network research.
 
     # Quantum Graph State Definition
     Cluster states are graph states where qubits correspond to vertices and
@@ -53,8 +51,7 @@ class ClusterState(BaseState):
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit that prepares cluster state on specified graph.
+        """Create quantum circuit that prepares cluster state on specified graph.
 
         # Cluster State Construction Strategy
         1. **Superposition preparation**: Apply H to all qubits
@@ -136,8 +133,7 @@ class ClusterState(BaseState):
     def _create_1d_cluster(
         self, circuit: QuantumCircuit, ring: bool
     ) -> tuple[list[tuple[int, int]], dict]:
-        """
-        Create 1D cluster state (chain or ring topology).
+        """Create 1D cluster state (chain or ring topology).
 
         Args:
             circuit: Quantum circuit to modify
@@ -170,8 +166,7 @@ class ClusterState(BaseState):
     def _create_2d_cluster(
         self, circuit: QuantumCircuit, ring: bool, params: dict
     ) -> tuple[list[tuple[int, int]], dict]:
-        """
-        Create 2D cluster state (grid or torus topology).
+        """Create 2D cluster state (grid or torus topology).
 
         Args:
             circuit: Quantum circuit to modify
@@ -246,8 +241,7 @@ class ClusterState(BaseState):
         return edges, topology_info
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate theoretical cluster state vector (warning: exponentially hard).
+        """Calculate theoretical cluster state vector (warning: exponentially hard).
 
         # Computational Warning
         Cluster states for n>4 qubits become computationally expensive to simulate
@@ -274,8 +268,7 @@ class ClusterState(BaseState):
         return self._simulate_circuit_state_vector(circuit)
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for cluster state preparation.
+        """Estimate circuit depth for cluster state preparation.
 
         # Depth Analysis by Topology
         - 1D chain: depth = 2 (H layer + CZ layer)
@@ -287,8 +280,7 @@ class ClusterState(BaseState):
         return 2  # H gates + CZ gates (parallelizable)
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for cluster state preparation.
+        """Get quantum gates required for cluster state preparation.
 
         Returns:
             List[str]: Required gate names
@@ -296,8 +288,7 @@ class ClusterState(BaseState):
         return ["h", "cz"]  # Hadamard and controlled-Z gates
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to cluster states.
+        """Get theoretical quantum properties specific to cluster states.
 
         Returns:
             Dict with cluster state specific properties
@@ -333,8 +324,7 @@ class ClusterState(BaseState):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for cluster state decoherence studies.
+        """Get research context for cluster state decoherence studies.
 
         Returns:
             Dict with research context and experimental predictions

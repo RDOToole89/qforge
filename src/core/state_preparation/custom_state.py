@@ -1,5 +1,4 @@
-"""
-Custom State Preparation for Advanced Quantum Research
+"""Custom State Preparation for Advanced Quantum Research.
 
 # Custom States - Flexible Circuit Definition
 Custom states provide maximum flexibility for advanced quantum experiments,
@@ -33,8 +32,7 @@ from .base_state import BaseState
 
 
 class CustomState(BaseState):
-    """
-    Advanced custom state preparation for cutting-edge quantum research.
+    """Advanced custom state preparation for cutting-edge quantum research.
 
     # Quantum Circuit Flexibility
     Custom states enable researchers to define arbitrary quantum circuits through
@@ -55,7 +53,7 @@ class CustomState(BaseState):
 
     # Custom Parameters Schema
     Required:
-    - source: 'gates' | 'builder' | 'openqasm'
+    - source: 'gates' | 'builder' | 'openqasm' | 'circuit'
 
     For 'gates' source:
     - num_qubits: int (positive)
@@ -80,8 +78,7 @@ class CustomState(BaseState):
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
-        """
-        Create quantum circuit from custom specification.
+        """Create quantum circuit from custom specification.
 
         # Custom Circuit Construction Strategy
         Supports three distinct input methods for maximum research flexibility:
@@ -134,12 +131,28 @@ class CustomState(BaseState):
         validate = bool(params.get("validate", True))
         metadata = params.get("metadata", {})
 
-        if source not in {"gates", "builder", "openqasm"}:
+        if source not in {"gates", "builder", "openqasm", "circuit"}:
             raise ValueError(
-                "CustomState requires 'source' to be one of 'gates'|'builder'|'openqasm'"
+                "CustomState requires 'source' to be one of "
+                "'gates'|'builder'|'openqasm'|'circuit'"
             )
 
-        if source == "gates":
+        if source == "circuit":
+            # Direct QuantumCircuit passthrough — the most flexible option.
+            # Experiments build their own circuit and pass it directly.
+            qc = params.get("circuit")
+            if not isinstance(qc, QuantumCircuit):
+                raise ValueError(
+                    "'circuit' source requires a QuantumCircuit object "
+                    "in custom_params['circuit']"
+                )
+            if validate and qc.num_qubits != self.num_qubits:
+                raise ValueError(
+                    f"Circuit has {qc.num_qubits} qubits but "
+                    f"num_qubits={self.num_qubits} was specified"
+                )
+
+        elif source == "gates":
             num_qubits = params.get("num_qubits")
             if not isinstance(num_qubits, int) or num_qubits <= 0:
                 raise ValueError("'num_qubits' must be a positive integer for gates source")
@@ -221,8 +234,9 @@ class CustomState(BaseState):
         return qc
 
     def get_theoretical_state_vector(self) -> np.ndarray:
-        """
-        Calculate theoretical state vector for custom circuit (warning: may be computationally intensive).
+        """Calculate theoretical state vector for custom circuit.
+
+        Warning: may be computationally intensive.
 
         # Computational Warning
         Custom circuits can be arbitrarily complex, making state vector calculation
@@ -251,8 +265,7 @@ class CustomState(BaseState):
         return self._simulate_circuit_state_vector(circuit)
 
     def _estimate_circuit_depth(self) -> int:
-        """
-        Estimate circuit depth for custom state preparation.
+        """Estimate circuit depth for custom state preparation.
 
         # Depth Analysis
         Custom circuits have user-defined depth that depends entirely
@@ -269,8 +282,7 @@ class CustomState(BaseState):
             return self.num_qubits  # Conservative estimate
 
     def _get_required_gates(self) -> list[str]:
-        """
-        Get quantum gates required for custom state preparation.
+        """Get quantum gates required for custom state preparation.
 
         Returns:
             List[str]: Required gate names (depends on custom specification)
@@ -283,8 +295,7 @@ class CustomState(BaseState):
             return ["h", "cx", "u3"]  # Common gate set
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties of custom states.
+        """Get theoretical quantum properties of custom states.
 
         Returns:
             Dict with custom state properties (limited analysis due to arbitrary nature)
@@ -306,8 +317,7 @@ class CustomState(BaseState):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for custom state studies.
+        """Get research context for custom state studies.
 
         Returns:
             Dict with research context and experimental considerations
@@ -363,7 +373,10 @@ class CustomState(BaseState):
         elif source == "builder":
             builder = params.get("builder", "unknown")
             func_name = builder.split(":")[-1] if ":" in builder else builder
-            return f"Custom state: {self.num_qubits}-qubit circuit (builder: {func_name}) [user-defined]"
+            return (
+                f"Custom state: {self.num_qubits}-qubit circuit "
+                f"(builder: {func_name}) [user-defined]"
+            )
         elif source == "openqasm":
             qasm_path = params.get("openqasm", "unknown")
             filename = Path(qasm_path).name if isinstance(qasm_path, str) else "unknown"

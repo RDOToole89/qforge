@@ -18,7 +18,11 @@ build/
 
 # Logs and results (optional, if you don't want to track generated logs/results)
 # logs/
-# results/
+results/
+
+# Environment variables / secrets
+.env
+.env.*
 
 # Temporary and system files
 *.log
@@ -37,6 +41,10 @@ apps/client/android/
 apps/client/.expo/
 *.tsbuildinfo
 pnpm-lock.yaml
+
+# Linter / type-checker caches
+.ruff_cache/
+.mypy_cache/
 
 # Private context (session notes, not for repo)
 .context/

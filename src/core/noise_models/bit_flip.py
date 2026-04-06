@@ -1,5 +1,4 @@
-"""
-Bit Flip Noise for Classical Digital Error Research
+"""Bit Flip Noise for Classical Digital Error Research.
 
 # The Bit Flip Channel - Classical Computational Basis Errors
 Bit flip noise represents classical digital errors where computational basis states
@@ -46,12 +45,11 @@ from qiskit_aer.noise import NoiseModel, pauli_error
 
 from .base_noise import BaseNoise
 
-logger = logging.getLogger("QuantumExperiment.NoiseModels")
+logger = logging.getLogger(__name__)
 
 
 class BitFlipNoise(BaseNoise):
-    """
-    Bit flip noise model for classical digital error research.
+    """Bit flip noise model for classical digital error research.
 
     # Quantum Bit Flip Definition
     The bit flip channel models classical computational errors by applying
@@ -90,8 +88,7 @@ class BitFlipNoise(BaseNoise):
         coherent_error: bool = False,
         pulse_amplitude_error: float = None,
     ):
-        """
-        Initialize bit flip noise with physics-based validation.
+        """Initialize bit flip noise with physics-based validation.
 
         # Physics Parameter Integration
         Supports both phenomenological bit flip rates and physics-based
@@ -165,8 +162,7 @@ class BitFlipNoise(BaseNoise):
     def apply(
         self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
     ) -> None:
-        """
-        Apply bit flip noise to single-qubit quantum gates.
+        """Apply bit flip noise to single-qubit quantum gates.
 
         # Classical Digital Error Implementation
         Creates Qiskit Pauli error channels that model bit flip transitions:
@@ -241,8 +237,7 @@ class BitFlipNoise(BaseNoise):
             )
 
     def get_kraus_operators(self) -> list[np.ndarray]:
-        """
-        Return Kraus operators for the bit flip channel.
+        """Return Kraus operators for the bit flip channel.
 
         # Mathematical Construction
         For bit flip channel with flip probability p:
@@ -269,8 +264,7 @@ class BitFlipNoise(BaseNoise):
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
-        """
-        Return comprehensive physics description of bit flip decoherence.
+        """Return comprehensive physics description of bit flip decoherence.
 
         Returns:
             Dict with educational physics content about classical bit errors
@@ -290,8 +284,7 @@ class BitFlipNoise(BaseNoise):
         }
 
     def get_theoretical_properties(self) -> dict[str, Any]:
-        """
-        Get theoretical quantum properties specific to bit flip channels.
+        """Get theoretical quantum properties specific to bit flip channels.
 
         Returns:
             Dict with bit flip channel specific properties
@@ -313,8 +306,7 @@ class BitFlipNoise(BaseNoise):
         }
 
     def get_research_context(self) -> dict[str, Any]:
-        """
-        Get research context for bit flip noise in pathway studies.
+        """Get research context for bit flip noise in pathway studies.
 
         Returns:
             Dict with research context and experimental predictions
@@ -352,8 +344,7 @@ class BitFlipNoise(BaseNoise):
         }
 
     def _validate_bit_flip_params(self, error_rate: float, pulse_amplitude_error: float) -> None:
-        """
-        Validate bit flip parameters against physics constraints.
+        """Validate bit flip parameters against physics constraints.
 
         # Physics Constraint Validation
         Ensures all parameters represent realistic bit flip scenarios
@@ -376,8 +367,7 @@ class BitFlipNoise(BaseNoise):
                 )
 
     def _calculate_flip_probabilities(self) -> dict[str, float]:
-        """
-        Calculate individual flip probabilities for educational display.
+        """Calculate individual flip probabilities for educational display.
 
         Returns:
             Dict mapping operators to their probabilities
@@ -385,8 +375,7 @@ class BitFlipNoise(BaseNoise):
         return {"identity": 1 - self.error_rate, "bit_flip_x": self.error_rate}
 
     def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """
-        Get gate-specific bit flip sensitivity factors.
+        """Get gate-specific bit flip sensitivity factors.
 
         # Gate Sensitivity Physics
         Different gates have different sensitivities to bit flip errors:
@@ -424,8 +413,7 @@ class BitFlipNoise(BaseNoise):
         }
 
     def _calculate_channel_capacity(self) -> float:
-        """
-        Calculate quantum channel capacity for bit flip channel.
+        """Calculate quantum channel capacity for bit flip channel.
 
         # Information Theory
         Channel capacity for bit flip depends on the flip probability
@@ -444,8 +432,7 @@ class BitFlipNoise(BaseNoise):
             return max(0, 1 - h_p)
 
     def _get_pathway_prediction(self) -> str:
-        """
-        Get specific pathway prediction for bit flip noise.
+        """Get specific pathway prediction for bit flip noise.
 
         Returns:
             Bit flip specific pathway hypothesis prediction
@@ -457,9 +444,7 @@ class BitFlipNoise(BaseNoise):
         )
 
     def _assess_topology_sensitivity(self) -> str:
-        """
-        Assess bit flip noise sensitivity to quantum state topology.
-        """
+        """Assess bit flip noise sensitivity to quantum state topology."""
         return (
             "Moderate topology sensitivity expected due to computational basis preservation. "
             "States with more computational basis components should show different "
@@ -467,9 +452,7 @@ class BitFlipNoise(BaseNoise):
         )
 
     def _analyze_pathway_preferences(self) -> str:
-        """
-        Analyze bit flip noise pathway preferences.
-        """
+        """Analyze bit flip noise pathway preferences."""
         return (
             f"Computational basis pathway preferences. Bit flip errors preferentially "
             f"affect stored information while preserving |0⟩, |1⟩ structure with "

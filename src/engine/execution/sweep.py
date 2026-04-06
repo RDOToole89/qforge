@@ -1,6 +1,5 @@
 # src/engine/execution/sweep.py
-"""
-Parameter Sweep Driver (engine-native).
+"""Parameter Sweep Driver (engine-native).
 
 What this is
 ------------
@@ -24,7 +23,7 @@ Key entry point
 ---------------
 - run_sweep(manifest, enable_histograms=False, storage_dir=None, output_dir=None, save_summary=True)
 
-Notes
+Notes:
 -----
 - This module has no hard dependency on the visualization package; histograms
   are generated with a local matplotlib import if `enable_histograms=True` and
@@ -34,11 +33,14 @@ Notes
   each run’s typed analysis is saved using the engine `LocalStorage` rules.
 - All results are returned as *typed* Pydantic models.
 
-Example
+Example:
 -------
 >>> from src.engine.models.config import ExperimentConfig
 >>> from src.engine.models.sweep import SweepManifest
->>> base = ExperimentConfig(num_qubits=3, state_type="GHZ", shots=1024, visualization_type="histogram")
+>>> base = ExperimentConfig(
+...     num_qubits=3, state_type="GHZ",
+...     shots=1024, visualization_type="histogram"
+... )
 >>> mf = SweepManifest(
 ...     base_config=base,
 ...     parameter_ranges={"error_rate": [0.0, 0.02, 0.05], "noise_enabled": [False, True]},
@@ -64,16 +66,16 @@ from src.engine.analysis import compute_metrics_bundle, extract_counts_from_resu
 
 # Engine-native runner (no legacy deps)
 from src.engine.execution.runner import EngineExperimentRunner
-from src.engine.models.config import ExperimentConfig
-from src.engine.models.results import (
+from src.engine.models import (
+    ArtifactRef,
     CircuitStatistics,
     ExperimentAnalysis,
+    ExperimentConfig,
     ExperimentMetadata,
     ExperimentResult,
     MeasurementResults,
     Provenance,
 )
-from src.engine.models.storage import ArtifactRef
 from src.engine.models.sweep import (
     OutcomeStatistics,
     ParameterAnalysis,
@@ -104,12 +106,12 @@ def _probs_from_counts(counts: dict[str, int]) -> dict[str, float]:
 
 
 def _iter_experiment_configs(manifest: SweepManifest) -> Iterable[ExperimentConfig]:
-    """
-    Cartesian expansion of a SweepManifest into concrete ExperimentConfigs.
+    """Cartesian expansion of a SweepManifest into concrete ExperimentConfigs.
+
     - Honors `base_config`
     - Applies `override`
     - Applies each combination in `parameter_ranges` in a stable order
-    - Duplicates per `runs_per_config`, varying rng_seed if manifest.rng_seed is set
+    - Duplicates per `runs_per_config`, varying rng_seed if manifest.rng_seed is set.
     """
     base = manifest.base_config
     assert base is not None, "SweepManifest.base_config is required."
@@ -191,12 +193,12 @@ def _maybe_save_histogram(
 
 
 def _primary_metric_value(exp_result: ExperimentResult) -> float:
-    """
-    Extract a single scalar per experiment for sweep summaries.
+    """Extract a single scalar per experiment for sweep summaries.
+
     Preference order:
       - structure_score (if present in metrics_bundle)
       - first metric value (fallback)
-      - 0.0 (no metrics)
+      - 0.0 (no metrics).
     """
     bundle = exp_result.metrics_bundle
     if not bundle or not bundle.metrics:
@@ -219,8 +221,7 @@ def run_sweep(
     storage_dir: str | None = None,
     save_summary: bool = True,
 ) -> SweepResult:
-    """
-    Execute a parameter sweep and return a typed `SweepResult`.
+    """Execute a parameter sweep and return a typed `SweepResult`.
 
     Parameters
     ----------
@@ -239,13 +240,13 @@ def run_sweep(
         If True and `storage_dir` is provided, a sweep-level summary JSON is written
         to `<storage_dir>/sweeps/<YYYYMMDD>/<HHMMSS>_sweep_summary.json`.
 
-    Returns
+    Returns:
     -------
     SweepResult
         Typed sweep result containing all `ExperimentResult`s plus a minimal
         aggregated analysis and execution metadata.
 
-    Notes
+    Notes:
     -----
     - This function runs sequentially. If you need concurrency, pair
       `_iter_experiment_configs()` with your pool/executor and call the engine's

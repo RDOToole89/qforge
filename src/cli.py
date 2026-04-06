@@ -1,5 +1,4 @@
-"""
-Thin CLI wrapper for the quantum experiment framework.
+"""Thin CLI wrapper for the quantum experiment framework.
 
 This CLI follows the principle: parser + caller + printer.
 All domain logic lives in the engine and experiments modules.
@@ -9,17 +8,16 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 app = typer.Typer(
-    name="qxf",
-    help="Quantum Experiment Framework CLI",
+    name="qforge",
+    help="QForge — quantum experiment engine",
     add_completion=False,
 )
 
@@ -40,11 +38,11 @@ def main_callback(
         typer.Option("--quiet", "-q", help="Suppress non-error log output"),
     ] = False,
     results_dir: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--results-dir", help="Override results directory"),
     ] = os.getenv("QEF_RESULTS_DIR"),
 ) -> None:
-    """Quantum Experiment Framework."""
+    """QForge."""
     from src.engine.infrastructure.logging import setup_logging
 
     effective_level = "ERROR" if quiet else log_level.upper()
@@ -76,11 +74,12 @@ def list_experiments() -> None:
 def run_experiment(
     name: Annotated[str, typer.Argument(help="Experiment name from registry")],
     override: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             "--set",
             "-s",
-            help="Override config values as key=value pairs (e.g., -s num_qubits=3 -s error_rate=0.1)",
+            help="Override config values as key=value pairs "
+            "(e.g., -s num_qubits=3 -s error_rate=0.1)",
         ),
     ] = None,
     json_output: Annotated[
@@ -187,7 +186,7 @@ def _parse_overrides(overrides: list[str]) -> dict:
     return result
 
 
-def _print_result(result: "ExperimentResult", json_output: bool) -> None:  # noqa: F821
+def _print_result(result: ExperimentResult, json_output: bool) -> None:  # noqa: F821
     """Print experiment result in the requested format."""
     if json_output:
         console.print(result.model_dump_json(indent=2))

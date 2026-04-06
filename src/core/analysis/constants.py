@@ -1,5 +1,4 @@
-"""
-Analysis Constants for Structured Decoherence Research
+"""Analysis Constants for Structured Decoherence Research.
 
 # Central Configuration & Defaults
 This module defines all numerical constants, tolerances, and default parameters

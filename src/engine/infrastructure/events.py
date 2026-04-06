@@ -42,10 +42,11 @@ Typical usage
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from threading import RLock
-from typing import Any, Callable, Literal, Union
+from typing import Any, Literal
 
 # ---- Canonical event names ---------------------------------------------------
 
@@ -59,7 +60,7 @@ PROGRESS: Literal["progress"] = "progress"
 ALL: Literal["*"] = "*"
 
 EventName = Literal["run_start", "run_end", "sweep_start", "sweep_end", "progress"]
-EventKey = Union[EventName, Literal["*"]]
+EventKey = EventName | Literal["*"]
 
 # ---- Event structure ---------------------------------------------------------
 
@@ -68,7 +69,7 @@ EventKey = Union[EventName, Literal["*"]]
 class Event:
     """Immutable event payload delivered to subscribers.
 
-    Attributes
+    Attributes:
     ----------
     name : EventName
         Canonical event name (see constants above).
@@ -101,6 +102,7 @@ class Subscription:
         self._active = True
 
     def unsubscribe(self) -> None:
+        """Remove this subscription from the event bus."""
         if self._active:
             self._bus.unsubscribe(self._name, self._handler)
             self._active = False
@@ -122,7 +124,7 @@ class SimpleEventBus:
     - Handlers are isolated; exceptions are suppressed.
     - Thread-safe via RLock.
 
-    Notes
+    Notes:
     -----
     Publishing is synchronous. If you need async, wrap handlers yourself or
     extend this class.
