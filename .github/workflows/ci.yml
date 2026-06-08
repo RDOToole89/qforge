@@ -107,6 +107,14 @@ jobs:
         safety check --json --output safety-report.json || true
         safety check
 
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image (smoke test)
+      run: docker build -t qforge-api .
+
   package:
     runs-on: ubuntu-latest
     needs: [test, docs]

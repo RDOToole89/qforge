@@ -7,6 +7,8 @@ Run from repo root:
     venv/bin/python -m uvicorn apps.api.main:app --reload --port 8000
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,9 +20,11 @@ app = FastAPI(
     description="REST API for the QForge.",
 )
 
+_cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:8081").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,4 +37,5 @@ app.include_router(bloch.router, prefix="/api/bloch", tags=["bloch"])
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
+    """Return a simple health check response."""
     return {"status": "ok"}

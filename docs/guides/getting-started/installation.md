@@ -15,8 +15,8 @@ For development and testing:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/qforge.git
-cd qforge
+git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
+cd qiskit-experiment-framework
 
 # Create virtual environment
 python -m venv venv
@@ -69,7 +69,8 @@ mkdocs serve
 Additional tools for development:
 
 ```bash
-pip install black isort flake8 mypy pre-commit
+pip install -e ".[dev]"
+pre-commit install
 ```
 
 ## Environment Setup
@@ -98,8 +99,13 @@ The framework includes type hints and docstrings for optimal IDE support:
 Optional environment variables:
 
 ```bash
-export QISKIT_EXPERIMENTS_LOG_LEVEL=INFO
-export QISKIT_EXPERIMENTS_CACHE_DIR=/path/to/cache
+# Copy the template and fill in your values
+cp .env.example .env
+
+# Or set directly
+export QEF_LOG_LEVEL=INFO
+export QEF_RESULTS_DIR=./results
+export IBM_QUANTUM_TOKEN=your_token_here  # For hardware experiments
 ```
 
 ### Project Structure
@@ -107,15 +113,18 @@ export QISKIT_EXPERIMENTS_CACHE_DIR=/path/to/cache
 After installation, your project structure should look like:
 
 ```
-qforge/
+qiskit-experiment-framework/
 ├── src/
-│   ├── engine/              # Engine API
-│   └── core/
-│       └── analysis/        # Analysis framework
-├── tests/                   # Test suite
+│   ├── engine/              # Engine API: run(), sweep()
+│   ├── core/                # Pure physics: circuits, noise, metrics
+│   └── experiments/         # Experiment programs
+├── apps/
+│   ├── api/                 # FastAPI server
+│   └── client/              # Expo/React Native web UI
+├── tests/                   # Test suite (335+ tests)
 ├── docs/                    # Documentation
 ├── requirements.txt         # Production dependencies
-└── requirements-dev.txt     # Development dependencies
+└── pyproject.toml           # Package config + tool settings
 ```
 
 ## Troubleshooting
@@ -169,6 +178,6 @@ sudo apt-get install python3-dev
 
 After successful installation:
 
-1. Continue to [Quick Start](quickstart.md) for immediate usage
-2. Read the [Basic Usage](basic-usage.md) guide for detailed examples
-3. Explore the [API Reference](../api/constants.md) for complete documentation
+1. Continue to the [Quick Start](quickstart.md) for immediate usage
+2. Explore the [Metrics Reference](../api/metrics.md) for the analysis API
+3. Set up [Hardware Access](../hardware-setup.md) for IBM Quantum experiments

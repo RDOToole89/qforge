@@ -1,0 +1,83 @@
+site_name: QForge
+site_description: A general-purpose quantum experiment engine built on Qiskit
+site_url: https://RDOToole89.github.io/qiskit-experiment-framework/
+repo_url: https://github.com/RDOToole89/qiskit-experiment-framework
+repo_name: RDOToole89/qiskit-experiment-framework
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - search.suggest
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: guides/getting-started/installation.md
+    - Quick Start: guides/getting-started/quickstart.md
+  - Guides:
+    - Hardware Setup: guides/hardware-setup.md
+  - API Reference:
+    - Metrics: guides/api/metrics.md
+    - Constants: guides/api/constants.md
+  - Reference:
+    - CLI: reference/cli.md
+    - Design Document: reference/design-document.md
+  - Architecture:
+    - Overview: architecture/architecture.md
+    - Capabilities: architecture/architecture-and-capabilities.md
+    - Framework Integration: architecture/framework-integration.md
+    - Engine Refactor: architecture/engine-first-refactor-plan.md
+  - Research:
+    - Research Direction: research/research-direction.md
+    - Hardware Results: research/2026-04-hardware-decoherence/hardware-scaling-results.md
+    - Structured Decoherence: research/2026-04-hardware-decoherence/structured-decoherence-paper.md
+    - State Probe Study:
+      - Findings: research/2026-02-state-probe-study/state-probe-findings.md
+      - Correlation & Noise: research/2026-02-state-probe-study/correlation-noise-findings.md
+      - Pilot Evidence Audit: research/2026-02-state-probe-study/pilot-evidence-audit.md
+    - Delta-Cov Fingerprints: research/delta-cov-fingerprints.md
+    - Reconfiguration Space: research/reconfiguration-space-hypothesis.md
+    - Spectral Bridge: research/spectral-bridge-prediction.md
+  - Planning:
+    - Roadmap: planning/roadmap.md
+    - Phase 1 - Scientific Rigor: planning/phase1-scientific-rigor.md

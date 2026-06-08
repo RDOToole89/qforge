@@ -42,6 +42,9 @@ apps/client/.expo/
 *.tsbuildinfo
 pnpm-lock.yaml
 
+# MkDocs build output
+site/
+
 # Linter / type-checker caches
 .ruff_cache/
 .mypy_cache/

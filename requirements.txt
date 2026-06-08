@@ -45,6 +45,13 @@ shellingham==1.5.4
 pydantic==2.11.7
 
 # ==========================
+# ✅ API Server
+# ==========================
+
+fastapi==0.115.12
+uvicorn[standard]==0.34.3
+
+# ==========================
 # ✅ Test & Validation Dependencies
 # ==========================
 

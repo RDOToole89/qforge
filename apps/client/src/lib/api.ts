@@ -19,7 +19,8 @@ const DEV_URL = "http://localhost:8000/api";
 // For physical devices on the same LAN, change to your machine's IP:
 // const DEV_URL = "http://192.168.x.x:8000/api";
 
-const BASE_URL = __DEV__ ? DEV_URL : DEV_URL; // TODO: set prod URL when deployed
+const PROD_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const BASE_URL = __DEV__ ? DEV_URL : PROD_URL;
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {

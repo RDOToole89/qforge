@@ -6,8 +6,8 @@ Thank you for your interest in contributing to the QForge. This guide covers the
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/qforge.git
-cd qforge
+git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
+cd qiskit-experiment-framework
 
 # Create and activate a virtual environment
 python -m venv .venv
@@ -21,6 +21,25 @@ pre-commit install
 ```
 
 The pre-commit hooks run `ruff` for linting and formatting on every commit. Make sure they are installed before you start writing code.
+
+### Full-Stack Setup (API + Web Client)
+
+If you want to run both the Python API and the web frontend:
+
+```bash
+# Terminal 1: Start the API server
+pip install -e ".[api]"
+uvicorn apps.api.main:app --reload --port 8000
+
+# Terminal 2: Start the web client
+cd apps/client
+pnpm install
+pnpm web
+```
+
+The client runs on `http://localhost:8081` and expects the API at `http://localhost:8000`.
+
+Copy `.env.example` to `.env` and fill in your IBM Quantum token if you want to use hardware features.
 
 ## Code Quality
 

@@ -62,6 +62,7 @@ from pathlib import Path
 
 import numpy as np
 
+from src.engine._version_util import get_version
 from src.engine.analysis import compute_metrics_bundle, extract_counts_from_result
 
 # Engine-native runner (no legacy deps)
@@ -324,7 +325,7 @@ def run_sweep(
             meta = ExperimentMetadata(
                 experiment_id=exp_id,
                 timestamp=datetime.now().isoformat(),
-                framework_version="engine-1.0",
+                framework_version=get_version(),
                 research_type=cfg.research_type,
             )
 
@@ -337,7 +338,7 @@ def run_sweep(
 
             prov = Provenance(
                 timestamp=datetime.now().isoformat(),
-                software_versions={"engine": "1.0"},
+                software_versions={"engine": get_version()},
                 host_info={},
                 simulator_info={"backend": "AerSimulator", "shots": cfg.shots},
                 transpilation_summary={},

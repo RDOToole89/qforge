@@ -1,6 +1,23 @@
 # QForge
 
+[![CI](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
 **A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware.**
+
+## Table of Contents
+
+- [What Makes This Different](#what-makes-this-different)
+- [Architecture](#architecture)
+- [Features at a Glance](#features-at-a-glance)
+- [Quick Start](#quick-start)
+- [Learning Path](#learning-path)
+- [Research](#research-structured-decoherence-on-real-hardware)
+- [Experiments](#experiments)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [License](#license)
 
 I'm a software engineer, not a physicist. I fell in love with quantum mechanics as a kid watching BBC science programs — Schrodinger's cat completely blew my mind. When I asked my teacher about it, she said: *"We're not discussing that in this class."* I never ended up in physics.
 
@@ -135,8 +152,8 @@ The frontend isn't just a dashboard — it's an **interactive quantum laboratory
 ### Run an Experiment (Python)
 
 ```bash
-git clone https://github.com/rootoole/qforge.git
-cd qforge
+git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
+cd qiskit-experiment-framework
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 

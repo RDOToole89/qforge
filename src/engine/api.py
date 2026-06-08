@@ -57,6 +57,9 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 
+# Version helper
+from src.engine._version_util import get_version
+
 # Research integration (counts canonicalization + metrics bundle)
 from src.engine.analysis import compute_metrics_bundle, extract_counts_from_result
 
@@ -402,7 +405,7 @@ def _build_experiment_analysis(
     meta = ExperimentMetadata(
         experiment_id=f"{cfg.state_type}_{cfg.num_qubits}",
         timestamp=_now_iso(),
-        framework_version="engine-1.0",  # TODO: inject your real engine version
+        framework_version=get_version(),
         research_type=cfg.research_type,
         experiment_description=None,
     )
