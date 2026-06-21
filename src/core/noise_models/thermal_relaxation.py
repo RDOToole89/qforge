@@ -183,7 +183,7 @@ class ThermalRelaxationNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply thermal relaxation noise to quantum gates with realistic physics.
 
@@ -448,7 +448,7 @@ class ThermalRelaxationNoise(BaseNoise):
         # Boltzmann factor
         if thermal_energy > 0:
             boltzmann_factor = np.exp(photon_energy / thermal_energy)
-            return 1.0 / (1.0 + boltzmann_factor)
+            return float(1.0 / (1.0 + boltzmann_factor))
         else:
             return 0.0
 
@@ -458,7 +458,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T1 error probability for single gate operation
         """
-        return 1 - np.exp(-self.gate_time / self.t1)
+        return float(1 - np.exp(-self.gate_time / self.t1))
 
     def _calculate_t2_error_rate(self) -> float:
         """Calculate T2 error rate for the gate time.
@@ -466,7 +466,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T2 error probability for single gate operation
         """
-        return 1 - np.exp(-self.gate_time / self.t2)
+        return float(1 - np.exp(-self.gate_time / self.t2))
 
     def _calculate_combined_error_rate(self) -> float:
         """Calculate combined T1/T2 error rate.

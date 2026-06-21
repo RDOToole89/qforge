@@ -14,6 +14,7 @@ keeping the interface simple and extensible.
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from qiskit import QuantumCircuit
 
@@ -148,7 +149,7 @@ def get_available_states() -> list[str]:
 def prepare_state_for_hardware(
     state_type: str,
     num_qubits: int,
-    backend=None,
+    backend: Any = None,
     custom_params: dict | None = None,
     add_barrier: bool = False,
     experiment_id: str = "N/A",

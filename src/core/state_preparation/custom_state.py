@@ -133,8 +133,7 @@ class CustomState(BaseState):
 
         if source not in {"gates", "builder", "openqasm", "circuit"}:
             raise ValueError(
-                "CustomState requires 'source' to be one of "
-                "'gates'|'builder'|'openqasm'|'circuit'"
+                "CustomState requires 'source' to be one of 'gates'|'builder'|'openqasm'|'circuit'"
             )
 
         if source == "circuit":
@@ -143,8 +142,7 @@ class CustomState(BaseState):
             qc = params.get("circuit")
             if not isinstance(qc, QuantumCircuit):
                 raise ValueError(
-                    "'circuit' source requires a QuantumCircuit object "
-                    "in custom_params['circuit']"
+                    "'circuit' source requires a QuantumCircuit object in custom_params['circuit']"
                 )
             if validate and qc.num_qubits != self.num_qubits:
                 raise ValueError(
@@ -276,7 +274,7 @@ class CustomState(BaseState):
         """
         try:
             circuit = self.create()
-            return circuit.depth()
+            return int(circuit.depth())
         except Exception:
             # If circuit creation fails, return conservative estimate
             return self.num_qubits  # Conservative estimate

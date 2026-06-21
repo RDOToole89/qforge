@@ -59,6 +59,7 @@ class TranspilationExperiment(BaseExperiment):
     description = "Step 3: Transpilation — see your logical circuit become physical gates"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",

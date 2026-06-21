@@ -85,8 +85,8 @@ class PhaseFlipNoise(BaseNoise):
         error_rate: float = 0.05,
         num_qubits: int = 1,
         experiment_id: str = "N/A",
-        magnetic_field_noise: float = None,
-        charge_noise: float = None,
+        magnetic_field_noise: float | None = None,
+        charge_noise: float | None = None,
     ):
         """Initialize phase flip noise with physics-based validation.
 
@@ -160,7 +160,7 @@ class PhaseFlipNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply phase flip noise to quantum gates.
 
@@ -346,7 +346,7 @@ class PhaseFlipNoise(BaseNoise):
         }
 
     def _validate_phase_flip_params(
-        self, error_rate: float, magnetic_field_noise: float, charge_noise: float
+        self, error_rate: float, magnetic_field_noise: float | None, charge_noise: float | None
     ) -> None:
         """Validate phase flip parameters against physics constraints.
 

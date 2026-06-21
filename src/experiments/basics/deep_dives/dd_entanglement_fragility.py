@@ -63,6 +63,7 @@ class EntanglementFragilityExperiment(BaseExperiment):
     description = "Deep dive: GHZ is fragile, W is robust — what survives qubit loss?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -70,7 +71,9 @@ class EntanglementFragilityExperiment(BaseExperiment):
             noise_enabled=False,
         )
 
-    def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult, ExperimentResult, ExperimentResult]:
+    def run_comparison(
+        self,
+    ) -> tuple[ExperimentResult, ExperimentResult, ExperimentResult, ExperimentResult]:
         """Run GHZ-4 and W-4 at full size and 3 qubits for comparison.
 
         Returns (ghz_4q, ghz_3q, w_4q, w_3q).

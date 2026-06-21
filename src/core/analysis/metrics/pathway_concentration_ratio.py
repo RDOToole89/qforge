@@ -39,7 +39,7 @@ References:
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Literal, Union, overload
 
 import numpy as np
 
@@ -79,6 +79,23 @@ class ConcentrationAnalysis:
             "rare_pathways": self.rare_pathways,
             "inequality_summary": self.inequality_summary,
         }
+
+
+@overload
+def compute_pathway_concentration_ratio(
+    counts: Mapping[str, int],
+    adaptive_quartiles: bool = ...,
+    return_analysis: Literal[False] = ...,
+) -> float: ...
+
+
+@overload
+def compute_pathway_concentration_ratio(
+    counts: Mapping[str, int],
+    adaptive_quartiles: bool = ...,
+    *,
+    return_analysis: Literal[True],
+) -> "ConcentrationAnalysis": ...
 
 
 def compute_pathway_concentration_ratio(
@@ -410,7 +427,7 @@ def pathway_concentration_educational_demo() -> dict:
         - Provides intuition for interpreting PCR in research contexts
         - Illustrates relationship between PCR and pathway structure
     """
-    demo_results = {}
+    demo_results: dict[str, Any] = {}
 
     # Example 1: Perfect uniform (no concentration)
     uniform_counts = {"00": 250, "01": 250, "10": 250, "11": 250}
@@ -479,7 +496,8 @@ def _compute_lorenz_curve_data(counts: dict) -> dict:
     frequency_percentiles = cumulative_freq / total_freq
 
     # Gini coefficient from Lorenz curve
-    gini = 1 - 2 * np.trapz(frequency_percentiles, population_percentiles)
+    # np.trapz exists at runtime but is absent from current numpy stubs.
+    gini = 1 - 2 * np.trapz(frequency_percentiles, population_percentiles)  # type: ignore[attr-defined]
 
     return {
         "population_percentiles": population_percentiles.tolist(),

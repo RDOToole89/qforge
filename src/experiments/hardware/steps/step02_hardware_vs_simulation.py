@@ -51,6 +51,7 @@ class HardwareVsSimulationExperiment(BaseExperiment):
     description = "Step 2: Same circuit on hardware vs simulation — where do models break down?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=3,
             state_type="GHZ",
@@ -64,13 +65,15 @@ class HardwareVsSimulationExperiment(BaseExperiment):
         """Run on hardware and simulation, return both for comparison."""
         hw = self.run()
 
-        sim = self.run({
-            "sim_mode": "qasm",
-            "noise_enabled": True,
-            "noise_type": "depolarizing",
-            "error_rate": 0.02,
-            "rng_seed": 42,
-        })
+        sim = self.run(
+            {
+                "sim_mode": "qasm",
+                "noise_enabled": True,
+                "noise_type": "depolarizing",
+                "error_rate": 0.02,
+                "rng_seed": 42,
+            }
+        )
 
         return hw, sim
 

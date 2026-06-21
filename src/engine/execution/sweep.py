@@ -53,6 +53,7 @@ Example:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 from collections.abc import Iterable
 from copy import deepcopy
@@ -97,7 +98,8 @@ logger = logging.getLogger(__name__)
 
 def _hash_config(cfg: ExperimentConfig) -> str:
     """Short, deterministic hash of an ExperimentConfig (12 hex chars)."""
-    blob = cfg.model_dump_json(by_alias=True, exclude_none=True, sort_keys=True)
+    data = cfg.model_dump(by_alias=True, exclude_none=True, mode="json")
+    blob = json.dumps(data, sort_keys=True)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
@@ -122,7 +124,7 @@ def _iter_experiment_configs(manifest: SweepManifest) -> Iterable[ExperimentConf
 
     run_idx = 0
     for combo in product(*vals):
-        combo_overrides = dict(zip(keys, combo))
+        combo_overrides = dict(zip(keys, combo, strict=True))
 
         cfg_dict = base.model_dump(exclude_none=False)
         if manifest.override:

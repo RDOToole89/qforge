@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 **A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware.**
 
@@ -154,18 +154,23 @@ The frontend isn't just a dashboard — it's an **interactive quantum laboratory
 ```bash
 git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
 cd qiskit-experiment-framework
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+
+# Install uv once (https://docs.astral.sh/uv/), then:
+uv sync   # creates .venv and installs everything from uv.lock
 
 # List available experiments
-python -m src.cli list
+uv run python -m src.cli list
 
 # Run your first experiment
-python -m src.cli run bell_state
+uv run python -m src.cli run bell_state
 
 # Run with overrides
-python -m src.cli run ghz_exploration -s num_qubits=5 -s error_rate=0.1
+uv run python -m src.cli run ghz_exploration -s num_qubits=5 -s error_rate=0.1
 ```
+
+> **Why `uv`?** It manages the Python interpreter (pinned to 3.12 via `.python-version`)
+> and installs an exact, reproducible environment from the committed `uv.lock` — no manual
+> venv or version juggling. `uv run <cmd>` runs `<cmd>` inside that environment.
 
 ### Use the Engine API
 
@@ -211,7 +216,7 @@ See [Hardware Setup Guide](docs/guides/hardware-setup.md) for IBM Quantum creden
 
 ```bash
 # Start the API server
-uvicorn apps.api.main:app --reload --port 8000
+uv run uvicorn apps.api.main:app --reload --port 8000
 
 # In another terminal
 cd apps/client && pnpm install && pnpm run web

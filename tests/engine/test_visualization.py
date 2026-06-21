@@ -16,6 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from pydantic import ValidationError
 from qiskit import QuantumCircuit
 
 from src.engine.api import run
@@ -56,7 +57,7 @@ class TestConfigValidation:
         assert cfg.visualization_type == vt
 
     def test_invalid_visualization_type_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             ExperimentConfig(num_qubits=2, state_type="GHZ", visualization_type="invalid")
 
     def test_export_formats_default(self):
@@ -68,7 +69,7 @@ class TestConfigValidation:
         assert cfg.export_formats == ["png", "pdf", "svg"]
 
     def test_invalid_export_format_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             ExperimentConfig(num_qubits=2, state_type="GHZ", export_formats=["png", "bmp"])
 
 
@@ -145,17 +146,7 @@ class TestDensityMatrixRenderer:
 
     def test_can_render_with_density_matrix(self):
         renderer = DensityMatrixRenderer()
-        data = {
-            "analysis": {
-                "measurement_results": {
-                    "density_matrix": [
-                        [[[0.5, 0.0], [0.0, 0.0]], [[0.0, 0.0], [0.5, 0.0]]],
-                        [[[0.0, 0.0], [0.5, 0.0]], [[0.5, 0.0], [0.0, 0.0]]],
-                    ]
-                }
-            }
-        }
-        # Fix: density_matrix is list of rows, each row is list of [real, imag]
+        # density_matrix is list of rows, each row is list of [real, imag]
         # For a 2x2 matrix: [[row0_col0, row0_col1], [row1_col0, row1_col1]]
         dm_2x2 = [
             [[0.5, 0.0], [0.5, 0.0]],

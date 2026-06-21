@@ -16,10 +16,13 @@ from src.engine.models import ArtifactRef, ExperimentAnalysis, ExperimentConfig
 logger = logging.getLogger(__name__)
 
 # Optional visualization (gracefully skipped if not installed)
+create_default_service: Any = None
 try:
-    from src.engine.visualization import create_default_service
+    from src.engine.visualization import create_default_service as _create_default_service
+
+    create_default_service = _create_default_service
 except Exception:
-    create_default_service = None  # type: ignore
+    pass
 
 
 def render_visualizations(

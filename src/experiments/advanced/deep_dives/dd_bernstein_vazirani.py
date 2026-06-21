@@ -66,6 +66,7 @@ class BernsteinVaziraniExperiment(BaseExperiment):
     description = "Deep dive: Bernstein-Vazirani — find a hidden string in one query"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _bv_circuit("1011")
         return ExperimentConfig(
             num_qubits=5,
@@ -73,17 +74,22 @@ class BernsteinVaziraniExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_hidden_strings(self) -> list[ExperimentResult]:
         """Find several different hidden strings."""
         results = []
         for secret in ["101", "1011", "11001", "101010"]:
             circuit = _bv_circuit(secret)
-            results.append(self.run({
-                "num_qubits": len(secret) + 1,
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "num_qubits": len(secret) + 1,
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

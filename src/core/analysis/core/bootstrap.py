@@ -28,9 +28,9 @@ from __future__ import annotations
 
 import logging
 import warnings
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
@@ -172,29 +172,31 @@ def bootstrap_confidence_interval(
         logger.error("All bootstrap samples failed")
         return (original_metric, original_metric)
 
-    bootstrap_metrics = np.array(bootstrap_metrics)
+    bootstrap_array = np.array(bootstrap_metrics)
 
     # Calculate confidence interval
+    ci_lower: float
+    ci_upper: float
     if method == "percentile":
         # Percentile method
         alpha = 1 - confidence_level
         lower_percentile = (alpha / 2) * 100
         upper_percentile = (1 - alpha / 2) * 100
 
-        ci_lower = np.percentile(bootstrap_metrics, lower_percentile)
-        ci_upper = np.percentile(bootstrap_metrics, upper_percentile)
+        ci_lower = float(np.percentile(bootstrap_array, lower_percentile))
+        ci_upper = float(np.percentile(bootstrap_array, upper_percentile))
 
     elif method == "bca":
         try:
             ci_lower, ci_upper = _compute_bca_interval(
-                bootstrap_metrics, original_metric, confidence_level
+                bootstrap_array, original_metric, confidence_level
             )
         except Exception:
             alpha = 1 - confidence_level
             lower_percentile = (alpha / 2) * 100
             upper_percentile = (1 - alpha / 2) * 100
-            ci_lower = float(np.percentile(bootstrap_metrics, lower_percentile))
-            ci_upper = float(np.percentile(bootstrap_metrics, upper_percentile))
+            ci_lower = float(np.percentile(bootstrap_array, lower_percentile))
+            ci_upper = float(np.percentile(bootstrap_array, upper_percentile))
     else:
         raise ValueError(f"Unknown CI method: {method}")
 
@@ -263,7 +265,7 @@ def _compute_bias_correction(bootstrap_metrics: np.ndarray, original_metric: flo
 def _normal_quantile(p: float) -> float:
     """Compute normal distribution quantile (inverse CDF)."""
     try:
-        from scipy.stats import norm  # type: ignore
+        from scipy.stats import norm
 
         return float(norm.ppf(p))
     except Exception:
@@ -274,7 +276,7 @@ def _normal_quantile(p: float) -> float:
 def _normal_cdf(z: float) -> float:
     """Compute normal distribution CDF."""
     try:
-        from scipy.stats import norm  # type: ignore
+        from scipy.stats import norm
 
         return float(norm.cdf(z))
     except Exception:
@@ -345,7 +347,7 @@ def compute_metric_with_confidence(
     metric_name: str = "metric",
     n_bootstrap: int = DEFAULT_BOOTSTRAP_B,
     rng: np.random.Generator | None = None,
-    **metric_kwargs,
+    **metric_kwargs: Any,
 ) -> MetricWithConfidence:
     """Compute a metric with confidence interval and validation status.
 
@@ -384,10 +386,13 @@ def compute_metric_with_confidence(
     logger.info(f"Computing {metric_name} with confidence interval")
 
     # Bind kwargs (including rng) for metric if needed
+    metric_func: Callable[[Mapping[str, int]], float]
     if metric_kwargs:
 
-        def metric_func(c):
+        def _bound_metric(c: Mapping[str, int]) -> float:
             return metric_function(c, **metric_kwargs)
+
+        metric_func = _bound_metric
     else:
         metric_func = metric_function
 

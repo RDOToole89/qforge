@@ -63,7 +63,7 @@ except Exception:  # pragma: no cover
     from .asymmetry_index import compute_asymmetry_index  # required
 
     compute_asymmetry_index_with_null_comparison = None  # type: ignore[assignment]
-    AsymmetryAnalysis = None  # type: ignore[assignment]
+    AsymmetryAnalysis = None  # type: ignore[assignment, misc]
 
 # PCR original module (also expose original dataclass alias for clarity)
 # CES
@@ -99,7 +99,7 @@ from .total_correlation import compute_total_correlation
 
 # ---- Public API surface -----------------------------------------------------
 
-__all__ = (
+__all__: tuple[str, ...] = (
     # Canonical Registry API (PRIMARY)
     "MetricResult",
     "Status",

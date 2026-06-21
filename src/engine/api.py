@@ -345,7 +345,7 @@ def iter_experiment_configs(
     base = man.base_config.model_dump(exclude_none=True) if man.base_config else {}
     keys = sorted((man.parameter_ranges or {}).keys())
 
-    def _expand(idx: int, acc: dict[str, Any]) -> None:
+    def _expand(idx: int, acc: dict[str, Any]) -> Iterator[ExperimentConfig]:
         if idx == len(keys):
             merged = {**base, **(man.override or {}), **acc}
             # Yield N copies if runs_per_config > 1 (vary rng_seed if set)

@@ -58,6 +58,7 @@ class MeasurementBasisExperiment(BaseExperiment):
     description = "Deep dive: See hidden quantum information by changing the measurement basis"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
         qc.h(0)  # prepare |+⟩
         qc.h(0)  # X-basis measurement
@@ -75,8 +76,8 @@ class MeasurementBasisExperiment(BaseExperiment):
         results = []
 
         states = [
-            ("|0⟩", lambda qc: None),             # do nothing
-            ("|+⟩", lambda qc: qc.h(0)),          # Hadamard
+            ("|0⟩", lambda qc: None),  # do nothing
+            ("|+⟩", lambda qc: qc.h(0)),  # Hadamard
         ]
 
         for _name, prep_fn in states:
@@ -84,18 +85,26 @@ class MeasurementBasisExperiment(BaseExperiment):
             qc = QuantumCircuit(1, 1)
             prep_fn(qc)
             qc.measure(0, 0)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": qc},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": qc},
+                    }
+                )
+            )
 
             # X-basis (add H before measurement)
             qc = QuantumCircuit(1, 1)
             prep_fn(qc)
             qc.h(0)  # rotate Z→X basis
             qc.measure(0, 0)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": qc},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": qc},
+                    }
+                )
+            )
 
         # Bell state in Z and X basis
         for add_h in [False, True]:
@@ -106,11 +115,15 @@ class MeasurementBasisExperiment(BaseExperiment):
                 qc.h(0)
                 qc.h(1)
             qc.measure([0, 1], [0, 1])
-            results.append(self.run({
-                "num_qubits": 2,
-                "state_type": "CUSTOM",
-                "custom_params": {"source": "circuit", "circuit": qc},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "num_qubits": 2,
+                        "state_type": "CUSTOM",
+                        "custom_params": {"source": "circuit", "circuit": qc},
+                    }
+                )
+            )
 
         return results
 

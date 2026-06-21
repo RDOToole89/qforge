@@ -54,6 +54,7 @@ class SuperpositionExperiment(BaseExperiment):
     description = "Step 1: What is superposition? Measure a qubit in |0⟩, |1⟩, and |+⟩"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=1,
             state_type="SUPERPOSITION",
@@ -70,28 +71,40 @@ class SuperpositionExperiment(BaseExperiment):
         # |0⟩ — do nothing
         qc0 = QuantumCircuit(1, 1)
         qc0.measure(0, 0)
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc0},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc0},
+                }
+            )
+        )
 
         # |1⟩ — apply X gate
         qc1 = QuantumCircuit(1, 1)
         qc1.x(0)
         qc1.measure(0, 0)
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc1},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc1},
+                }
+            )
+        )
 
         # |+⟩ — apply H gate (superposition)
         qcH = QuantumCircuit(1, 1)
         qcH.h(0)
         qcH.measure(0, 0)
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qcH},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qcH},
+                }
+            )
+        )
 
         return results
 

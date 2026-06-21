@@ -1,7 +1,5 @@
 """Tests for counts-based fidelity estimation (hardware mode)."""
 
-import pytest
-
 from src.engine.fidelity import _compute_fidelity_from_counts
 
 

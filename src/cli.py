@@ -9,11 +9,14 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 from rich.console import Console
 from rich.table import Table
+
+if TYPE_CHECKING:
+    from src.engine.models import ExperimentResult
 
 app = typer.Typer(
     name="qforge",
@@ -186,7 +189,7 @@ def _parse_overrides(overrides: list[str]) -> dict:
     return result
 
 
-def _print_result(result: ExperimentResult, json_output: bool) -> None:  # noqa: F821
+def _print_result(result: ExperimentResult, json_output: bool) -> None:
     """Print experiment result in the requested format."""
     if json_output:
         console.print(result.model_dump_json(indent=2))

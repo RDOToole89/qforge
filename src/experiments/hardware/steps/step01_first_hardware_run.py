@@ -47,7 +47,7 @@ TRY IT:
 
 from __future__ import annotations
 
-from src.engine.models import ExperimentConfig, ExperimentResult
+from src.engine.models import ExperimentConfig
 from src.experiments.base import BaseExperiment
 
 
@@ -58,6 +58,7 @@ class FirstHardwareRunExperiment(BaseExperiment):
     description = "Step 1: Your first real quantum computer — Bell state on IBM hardware"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=2,
             state_type="GHZ",

@@ -1,42 +1,45 @@
-.PHONY: install validate validate-schemas validate-examples clean lint format typecheck test check pre-commit
+.PHONY: install sync validate validate-schemas validate-examples clean lint format typecheck test check pre-commit
+
+# ── Environment ──────────────────────────────────────────
+
+# One-command setup for collaborators: creates .venv from uv.lock
+install sync:
+	uv sync
 
 # ── Schema Validation ────────────────────────────────────
 
-install:
-	pip install jsonschema referencing
-
 validate:
-	python scripts/validate.py --path .
+	uv run python scripts/validate.py --path .
 
 validate-schemas:
-	python scripts/validate.py --schemas-only --path .
+	uv run python scripts/validate.py --schemas-only --path .
 
 validate-examples:
-	python scripts/validate.py --examples-only --path .
+	uv run python scripts/validate.py --examples-only --path .
 
 validate-json:
-	python scripts/validate.py --output json --path .
+	uv run python scripts/validate.py --output json --path .
 
 # ── Development ──────────────────────────────────────────
 
 lint:
-	ruff check src tests
+	uv run ruff check src tests
 
 format:
-	ruff format src tests
-	ruff check --fix src tests
+	uv run ruff format src tests
+	uv run ruff check --fix src tests
 
 typecheck:
-	mypy src --ignore-missing-imports
+	uv run mypy src --ignore-missing-imports
 
 test:
-	pytest
+	uv run pytest
 
 check: lint typecheck test
 
 pre-commit:
-	pre-commit install
-	pre-commit run --all-files
+	uv run pre-commit install
+	uv run pre-commit run --all-files
 
 clean:
 	find . -name "*.pyc" -delete

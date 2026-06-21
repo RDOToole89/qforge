@@ -65,6 +65,7 @@ TRY IT:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -169,8 +170,8 @@ def _extract_factors(N: int, a: int, measurement: int, n_count: int) -> tuple[in
     Returns:
         (p, q) if factors found, None otherwise
     """
-    from math import gcd
     from fractions import Fraction
+    from math import gcd
 
     if measurement == 0:
         return None
@@ -213,6 +214,7 @@ class ShorExperiment(BaseExperiment):
     description = "Shor's algorithm — factor integers using quantum period-finding"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         N, a, n_count = 15, 7, 4
         n_target = int(np.ceil(np.log2(N + 1)))
         circuit = _build_shor_circuit(N, a, n_count)
@@ -228,9 +230,10 @@ class ShorExperiment(BaseExperiment):
                 "a": a,
                 "n_count": n_count,
             },
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
-    def run(self, overrides: dict[str, Any] | None = None) -> ExperimentResult:
+    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
         """Run Shor's algorithm and report factoring results.
 
         The result includes standard framework output plus extras
@@ -264,6 +267,7 @@ class ShorExperiment(BaseExperiment):
 
         # Log results
         import logging
+
         logger = logging.getLogger(__name__)
         success_rate = successes / total if total > 0 else 0
         logger.info(
@@ -275,7 +279,10 @@ class ShorExperiment(BaseExperiment):
         return result
 
     def run_noise_sweep(
-        self, steps: int = 5, max_error: float = 0.1, **overrides: Any,
+        self,
+        steps: int = 5,
+        max_error: float = 0.1,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """See how noise affects Shor's algorithm success rate."""
         rates = np.linspace(0.001, max_error, steps).tolist()

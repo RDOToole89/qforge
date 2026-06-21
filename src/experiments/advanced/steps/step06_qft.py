@@ -86,6 +86,7 @@ class QFTExperiment(BaseExperiment):
     description = "Step 6: QFT — the engine inside Shor's and phase estimation"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _qft_circuit(4, "0000")
         return ExperimentConfig(
             num_qubits=4,
@@ -93,16 +94,21 @@ class QFTExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_input_comparison(self) -> list[ExperimentResult]:
         """Run QFT on different input states to see different output patterns."""
         results = []
         for input_state in ["0000", "0001", "0010", "0100", "1000"]:
             circuit = _qft_circuit(4, input_state)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

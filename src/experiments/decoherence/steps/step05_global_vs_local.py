@@ -60,6 +60,7 @@ class GlobalVsLocalExperiment(BaseExperiment):
     description = "Step 5: Global vs local — where does the structure live?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -69,7 +70,8 @@ class GlobalVsLocalExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_both(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run GHZ-6 and W-6 for marginal comparison."""

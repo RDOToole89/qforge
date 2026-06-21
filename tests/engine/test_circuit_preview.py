@@ -14,15 +14,25 @@ from api.routes.experiments import _qiskit_to_circuit
 
 from src.core.state_preparation.state_factory import prepare_state
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 VALID_GATE_TYPES = {
-    "H", "X", "Y", "Z", "S", "T", "SX",
-    "Rx", "Ry", "Rz",
-    "CNOT", "CZ", "SWAP", "Toffoli",
+    "H",
+    "X",
+    "Y",
+    "Z",
+    "S",
+    "T",
+    "SX",
+    "Rx",
+    "Ry",
+    "Rz",
+    "CNOT",
+    "CZ",
+    "SWAP",
+    "Toffoli",
 }
 
 
@@ -46,9 +56,16 @@ def _all_gates(result: dict) -> list[dict]:
 class TestCircuitStructure:
     """Verify the output structure matches the frontend Circuit type."""
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_top_level_keys(self, state_type, num_qubits):
         """Result must have numQubits and moments keys."""
         result = _preview(state_type, num_qubits)
@@ -56,17 +73,31 @@ class TestCircuitStructure:
         assert "moments" in result
         assert isinstance(result["moments"], list)
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_num_qubits_matches(self, state_type, num_qubits):
         """numQubits in output must match requested qubit count."""
         result = _preview(state_type, num_qubits)
         assert result["numQubits"] == num_qubits
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_gate_fields(self, state_type, num_qubits):
         """Every gate must have id, gateType, and qubits fields."""
         result = _preview(state_type, num_qubits)
@@ -77,9 +108,16 @@ class TestCircuitStructure:
             assert isinstance(gate["qubits"], list)
             assert len(gate["qubits"]) >= 1
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_gate_types_valid(self, state_type, num_qubits):
         """Every gateType must be in the known set."""
         result = _preview(state_type, num_qubits)
@@ -88,31 +126,51 @@ class TestCircuitStructure:
                 f"Unknown gateType '{gate['gateType']}' in {state_type} {num_qubits}q"
             )
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_qubit_indices_in_range(self, state_type, num_qubits):
         """All qubit indices must be within [0, numQubits)."""
         result = _preview(state_type, num_qubits)
         for gate in _all_gates(result):
             for q in gate["qubits"]:
                 assert 0 <= q < num_qubits, (
-                    f"Qubit index {q} out of range for {num_qubits}-qubit "
-                    f"circuit in gate {gate}"
+                    f"Qubit index {q} out of range for {num_qubits}-qubit circuit in gate {gate}"
                 )
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_unique_gate_ids(self, state_type, num_qubits):
         """All gate IDs must be unique."""
         result = _preview(state_type, num_qubits)
         ids = [g["id"] for g in _all_gates(result)]
         assert len(ids) == len(set(ids)), f"Duplicate gate IDs in {state_type} {num_qubits}q"
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_no_empty_moments(self, state_type, num_qubits):
         """No moment should be completely empty."""
         result = _preview(state_type, num_qubits)
@@ -121,9 +179,16 @@ class TestCircuitStructure:
                 f"Empty moment at index {i} in {state_type} {num_qubits}q"
             )
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 3), ("W", 3), ("CLUSTER", 4), ("BELL", 2), ("SUPERPOSITION", 2),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 3),
+            ("W", 3),
+            ("CLUSTER", 4),
+            ("BELL", 2),
+            ("SUPERPOSITION", 2),
+        ],
+    )
     def test_parametric_gates_have_params(self, state_type, num_qubits):
         """Parametric gates (Rx, Ry, Rz) must have a params array."""
         result = _preview(state_type, num_qubits)
@@ -295,9 +360,16 @@ class TestScaling:
 class TestMomentAssignment:
     """Verify that no two gates in the same moment share a qubit."""
 
-    @pytest.mark.parametrize("state_type,num_qubits", [
-        ("GHZ", 6), ("W", 4), ("CLUSTER", 6), ("BELL", 2), ("SUPERPOSITION", 4),
-    ])
+    @pytest.mark.parametrize(
+        "state_type,num_qubits",
+        [
+            ("GHZ", 6),
+            ("W", 4),
+            ("CLUSTER", 6),
+            ("BELL", 2),
+            ("SUPERPOSITION", 4),
+        ],
+    )
     def test_no_qubit_collisions(self, state_type, num_qubits):
         """Within each moment, no qubit should be used by more than one gate."""
         result = _preview(state_type, num_qubits)
@@ -306,7 +378,6 @@ class TestMomentAssignment:
             for gate in moment["gates"]:
                 for q in gate["qubits"]:
                     assert q not in used_qubits, (
-                        f"Qubit {q} used twice in moment {i} of "
-                        f"{state_type} {num_qubits}q"
+                        f"Qubit {q} used twice in moment {i} of {state_type} {num_qubits}q"
                     )
                     used_qubits.add(q)

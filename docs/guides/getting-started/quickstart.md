@@ -110,9 +110,8 @@ for r in results:
 To explore experiments visually with the Bloch sphere, circuit builder, and glossary:
 
 ```bash
-# Terminal 1: Start the API server
-pip install -e ".[api]"
-uvicorn apps.api.main:app --reload --port 8000
+# Terminal 1: Start the API server (fastapi/uvicorn are installed by `uv sync`)
+uv run uvicorn apps.api.main:app --reload --port 8000
 
 # Terminal 2: Start the web client
 cd apps/client

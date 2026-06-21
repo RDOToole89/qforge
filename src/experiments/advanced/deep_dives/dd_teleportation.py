@@ -122,6 +122,7 @@ class TeleportationExperiment(BaseExperiment):
     description = "Quantum teleportation — transfer a state using entanglement"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         state = "+"
         circuit = _build_teleportation_circuit(state)
         return ExperimentConfig(
@@ -136,10 +137,14 @@ class TeleportationExperiment(BaseExperiment):
                 "circuit": circuit,
                 "state": state,
             },
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_noise_sweep(
-        self, steps: int = 8, max_error: float = 0.2, **overrides: Any,
+        self,
+        steps: int = 8,
+        max_error: float = 0.2,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """See how noisy entanglement degrades teleportation fidelity."""
         rates = np.linspace(0.0, max_error, steps).tolist()

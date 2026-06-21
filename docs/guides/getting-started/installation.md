@@ -2,10 +2,11 @@
 
 ## Requirements
 
-- Python 3.9 or later
-- Qiskit 0.45.0 or later
-- NumPy 1.21.0 or later
-- SciPy 1.7.0 or later
+- [uv](https://docs.astral.sh/uv/) (manages the Python interpreter and dependencies)
+- Python 3.11 or later (uv installs the pinned 3.12 automatically)
+
+All other dependencies (Qiskit, NumPy, SciPy, etc.) are declared in `pyproject.toml`
+and pinned in `uv.lock` — you do not install them by hand.
 
 ## Installation Methods
 
@@ -18,16 +19,19 @@ For development and testing:
 git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
 cd qiskit-experiment-framework
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create the .venv and install runtime + dev + test deps from uv.lock.
+# uv reads .python-version and installs Python 3.12 if needed.
+uv sync
+```
 
-# Install development dependencies
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+That's it — `uv sync` creates `.venv/`, resolves the pinned interpreter, and installs
+everything. Run commands inside the environment with `uv run <command>`.
 
-# Install in editable mode
-pip install -e .
+To include the documentation or security tool groups as well:
+
+```bash
+uv sync --all-groups        # everything
+uv sync --group docs        # add the docs group
 ```
 
 ### Production Installation
@@ -44,13 +48,13 @@ Verify the installation by running the test suite:
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
-pytest --cov=src/core/analysis --cov-report=html
+uv run pytest --cov=src/core/analysis --cov-report=html
 
 # Run specific test modules
-pytest tests/test_metrics.py -v
+uv run pytest tests/core/test_metrics.py -v
 ```
 
 ## Optional Dependencies
@@ -60,28 +64,26 @@ pytest tests/test_metrics.py -v
 To build documentation locally:
 
 ```bash
-pip install mkdocs mkdocs-material mkdocstrings[python]
-mkdocs serve
+uv run --group docs mkdocs serve
 ```
 
 ### Development Tools
 
-Additional tools for development:
+The `dev` group (ruff, mypy, pre-commit, ipython, jupyter) is installed by default
+with `uv sync`. Just install the pre-commit hooks:
 
 ```bash
-pip install -e ".[dev]"
-pre-commit install
+uv run pre-commit install
 ```
 
 ## Environment Setup
 
 ### Jupyter Notebooks
 
-For interactive analysis:
+For interactive analysis (jupyter and ipython ship in the `dev` group):
 
 ```bash
-pip install jupyter ipython
-jupyter notebook
+uv run jupyter notebook
 ```
 
 ### IDE Integration
@@ -121,34 +123,29 @@ qiskit-experiment-framework/
 ├── apps/
 │   ├── api/                 # FastAPI server
 │   └── client/              # Expo/React Native web UI
-├── tests/                   # Test suite (335+ tests)
+├── tests/                   # Test suite (395+ tests)
 ├── docs/                    # Documentation
-├── requirements.txt         # Production dependencies
-└── pyproject.toml           # Package config + tool settings
+├── pyproject.toml           # Dependencies, tool config (single source of truth)
+├── uv.lock                  # Pinned, reproducible dependency lockfile
+└── .python-version          # Pinned Python interpreter (3.12)
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-**ImportError: No module named 'qiskit'**
+**ImportError: No module named 'qiskit'** / **No module named 'src'**
 
 ```bash
-pip install qiskit>=0.45.0
+# Re-sync the environment from the lockfile, then prefix commands with `uv run`
+uv sync
+uv run python -c "import qiskit; from src.engine.api import run"
 ```
 
-**ModuleNotFoundError: No module named 'src'**
+**Lockfile out of date after editing pyproject.toml**
 
 ```bash
-# Ensure you're in the project root and installed in editable mode
-pip install -e .
-```
-
-**Test failures related to coverage**
-
-```bash
-# Install coverage dependencies
-pip install pytest-cov coverage
+uv lock   # regenerate uv.lock, then `uv sync`
 ```
 
 ### Platform-Specific Notes

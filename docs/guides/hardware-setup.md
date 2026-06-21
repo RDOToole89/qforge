@@ -51,7 +51,7 @@ print(f"Available backends: {[b.name for b in backends]}")
 ### 5. Install Dependencies
 
 ```bash
-pip install -r requirements.txt  # qiskit-ibm-runtime is already listed
+uv sync  # qiskit-ibm-runtime is already declared in pyproject.toml
 ```
 
 ---

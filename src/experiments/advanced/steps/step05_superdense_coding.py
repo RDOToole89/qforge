@@ -85,6 +85,7 @@ class SuperdenseCodingExperiment(BaseExperiment):
     description = "Step 5: Superdense coding — send 2 bits using 1 qubit + entanglement"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _superdense_circuit("00")
         return ExperimentConfig(
             num_qubits=2,
@@ -92,16 +93,21 @@ class SuperdenseCodingExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_all_messages(self) -> list[ExperimentResult]:
         """Encode and decode all four 2-bit messages."""
         results = []
         for msg in ["00", "01", "10", "11"]:
             circuit = _superdense_circuit(msg)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

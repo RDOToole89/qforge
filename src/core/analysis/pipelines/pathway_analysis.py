@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from typing import Any
+from datetime import UTC
+from typing import Any, cast
 
 import numpy as np
 
@@ -89,7 +90,7 @@ def compute_all_pathway_metrics(
         f"Computing structured decoherence metrics for {num_qubits}-qubit {state_type} state"
     )
 
-    # Compute core metrics
+    # Compute core metrics (return_analysis defaults to False -> plain floats)
     ai = compute_asymmetry_index(counts)
     pcr = compute_pathway_concentration_ratio(counts)
     eec = compute_entanglement_error_correlation(counts, state_type)
@@ -110,7 +111,9 @@ def compute_all_pathway_metrics(
 
     # Compute complexity emergence if multi-qubit data available
     if multi_qubit_data:
-        metrics["complexity_emergence_score"] = compute_complexity_emergence_score(multi_qubit_data)
+        metrics["complexity_emergence_score"] = compute_complexity_emergence_score(
+            cast("dict[int, Mapping[str, int]]", multi_qubit_data)
+        )
     else:
         metrics["complexity_emergence_score"] = None
         logger.debug("No multi-qubit data provided - CES not computed")
@@ -320,9 +323,9 @@ def _generate_interpretation(
 
 def _get_timestamp() -> str:
     """Get current timestamp (timezone-aware) for analysis metadata."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 __all__ = (

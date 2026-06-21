@@ -84,6 +84,7 @@ class TeleportationExperiment(BaseExperiment):
     description = "Step 4: Quantum teleportation — entanglement as a communication resource"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _teleport_circuit("+")
         return ExperimentConfig(
             num_qubits=3,
@@ -91,16 +92,21 @@ class TeleportationExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_three_states(self) -> list[ExperimentResult]:
         """Teleport |0⟩, |1⟩, and |+⟩."""
         results = []
         for state in ["0", "1", "+"]:
             circuit = _teleport_circuit(state)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

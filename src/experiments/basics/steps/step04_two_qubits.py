@@ -61,6 +61,7 @@ class TwoQubitsExperiment(BaseExperiment):
     description = "Step 4: Independent vs entangled — see how CNOT creates correlations"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         # Default: Bell state (entangled)
         return ExperimentConfig(
             num_qubits=2,
@@ -76,10 +77,12 @@ class TwoQubitsExperiment(BaseExperiment):
         qc_indep.h(0)
         qc_indep.h(1)
         qc_indep.measure([0, 1], [0, 1])
-        independent = self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc_indep},
-        })
+        independent = self.run(
+            {
+                "state_type": "CUSTOM",
+                "custom_params": {"source": "circuit", "circuit": qc_indep},
+            }
+        )
 
         # Entangled: H + CNOT (Bell state)
         entangled = self.run()  # default is GHZ-2 = Bell

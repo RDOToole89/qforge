@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 import matplotlib
+
 try:
     matplotlib.use("Agg")
 except Exception:
@@ -121,11 +122,14 @@ def render_sweep_summary(
         "error_rate": "Error Rate",
         "num_qubits": "Number of Qubits",
     }
-    ax.set_xlabel(short_names.get(parameter_name, parameter_name), fontsize=12)
-    ax.set_ylabel(short_names.get(metric_name, metric_name), fontsize=12)
+    metric_label = short_names.get(metric_name, metric_name)
+    param_label = short_names.get(parameter_name, parameter_name)
+    ax.set_xlabel(param_label, fontsize=12)
+    ax.set_ylabel(metric_label, fontsize=12)
     ax.set_title(
-        f"{short_names.get(metric_name, metric_name)} vs {short_names.get(parameter_name, parameter_name)}",
-        fontsize=14, fontweight="bold",
+        f"{metric_label} vs {param_label}",
+        fontsize=14,
+        fontweight="bold",
     )
     ax.grid(alpha=0.3)
     fig.tight_layout()
@@ -193,8 +197,14 @@ def render_comparison_histograms(
 
     for i, label in enumerate(labels):
         offset = (i - n_series / 2 + 0.5) * width
-        ax.bar(x + offset, data[i], width, label=label,
-               color=colors[i % len(colors)], edgecolor="white")
+        ax.bar(
+            x + offset,
+            data[i],
+            width,
+            label=label,
+            color=colors[i % len(colors)],
+            edgecolor="white",
+        )
 
     ax.set_xlabel("Measurement Outcome", fontsize=11)
     ax.set_ylabel("Probability (%)", fontsize=11)

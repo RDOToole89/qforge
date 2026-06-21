@@ -85,6 +85,7 @@ class TeleportationIntroExperiment(BaseExperiment):
     description = "Deep dive: Quantum teleportation — see state transfer in action"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _teleportation_circuit("+")
         return ExperimentConfig(
             num_qubits=3,
@@ -99,9 +100,13 @@ class TeleportationIntroExperiment(BaseExperiment):
         results = []
         for state in ["0", "1", "+"]:
             circuit = _teleportation_circuit(state)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

@@ -48,6 +48,7 @@ class MeasurementExperiment(BaseExperiment):
     description = "Step 2: How measurement probability depends on quantum state angle"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
         qc.ry(np.pi / 2, 0)  # |+⟩ state
         qc.measure(0, 0)
@@ -67,9 +68,11 @@ class MeasurementExperiment(BaseExperiment):
             qc = QuantumCircuit(1, 1)
             qc.ry(theta, 0)
             qc.measure(0, 0)
-            r = self.run({
-                "custom_params": {"source": "circuit", "circuit": qc},
-            })
+            r = self.run(
+                {
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
             results.append(r)
         return results
 

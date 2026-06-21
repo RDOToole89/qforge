@@ -40,6 +40,7 @@ TRY IT:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -145,7 +146,7 @@ class BellCorrelation(BaseExperiment):
         """Default configuration for Bell correlation experiment."""
         return ExperimentConfig(
             num_qubits=2,  # Bell states are strictly 2-qubit
-            state_type="Bell",
+            state_type="BELL",
             custom_params={"variant": "phi_plus"},
             noise_enabled=True,
             noise_type="depolarizing",
@@ -154,7 +155,7 @@ class BellCorrelation(BaseExperiment):
             # metrics=None is the default — this experiment computes its own
         )
 
-    def run(self, overrides: dict[str, Any] | None = None) -> ExperimentResult:
+    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
         """Run Bell correlation experiment and compute Bell-specific metrics.
 
         Returns standard ExperimentResult. Access Bell metrics via:

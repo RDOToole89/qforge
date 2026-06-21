@@ -107,6 +107,12 @@ print(f"Entanglement Correlation: {schema_result['entanglement_error_correlation
 
 ## Development Commands
 
+> **Environment**: This project uses [uv](https://docs.astral.sh/uv/) for Python
+> dependency management. `pyproject.toml` is the single source of truth for
+> dependencies; `uv.lock` pins them; `.python-version` pins Python to 3.12.
+> Set up with `uv sync`, and prefix Python commands with `uv run` (e.g.
+> `uv run pytest`, `uv run python -c "..."`). There is no `requirements.txt`.
+
 ### Core Analysis Testing
 
 ```bash

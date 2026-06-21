@@ -64,9 +64,12 @@ class NoiseTypesExperiment(BaseExperiment):
     """Step 10: Compare five noise models on the same quantum state."""
 
     name = "10_noise_types"
-    description = "Step 10: Compare depolarizing, amplitude damping, phase damping, bit flip, phase flip"
+    description = (
+        "Step 10: Compare depolarizing, amplitude damping, phase damping, bit flip, phase flip"
+    )
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -74,7 +77,8 @@ class NoiseTypesExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_all_types(self) -> list[ExperimentResult]:
         """Run GHZ-4 under five different noise models."""

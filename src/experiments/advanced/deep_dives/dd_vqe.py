@@ -95,6 +95,7 @@ class VQEExperiment(BaseExperiment):
     description = "VQE — find molecular ground state energy with a hybrid quantum-classical loop"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _build_vqe_ansatz(n_qubits=2, depth=1, theta=0.5)
         return ExperimentConfig(
             num_qubits=2,
@@ -107,7 +108,8 @@ class VQEExperiment(BaseExperiment):
                 "bond_distance": 0.735,
                 "ansatz_depth": 1,
             },
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_bond_sweep(self, **overrides: Any) -> list[ExperimentResult]:
         """Sweep H-H bond distance to trace the potential energy surface."""
@@ -119,7 +121,10 @@ class VQEExperiment(BaseExperiment):
         return results
 
     def run_noise_sweep(
-        self, steps: int = 5, max_error: float = 0.1, **overrides: Any,
+        self,
+        steps: int = 5,
+        max_error: float = 0.1,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """See how noise affects the ground state energy estimate."""
         rates = np.linspace(0.001, max_error, steps).tolist()

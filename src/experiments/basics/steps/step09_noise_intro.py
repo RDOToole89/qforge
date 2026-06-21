@@ -58,6 +58,7 @@ class NoiseIntroExperiment(BaseExperiment):
     description = "Step 9: Watch noise gradually destroy a quantum state"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=1,
             state_type="SUPERPOSITION",
@@ -65,7 +66,8 @@ class NoiseIntroExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_noise_sweep(self, steps: int = 8, **overrides: Any) -> list[ExperimentResult]:
         """Sweep noise from 0% to 30% and watch the state degrade."""

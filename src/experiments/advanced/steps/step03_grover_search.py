@@ -44,8 +44,6 @@ TRY IT:
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 from qiskit import QuantumCircuit
 
@@ -93,6 +91,7 @@ class GroverSearchExperiment(BaseExperiment):
     description = "Step 3: Grover's search — quadratic speedup via amplitude amplification"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _grover_circuit(4, "1010")
         return ExperimentConfig(
             num_qubits=4,
@@ -100,16 +99,21 @@ class GroverSearchExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_iteration_sweep(self) -> list[ExperimentResult]:
         """See how success probability changes with iteration count."""
         results = []
         for n_iters in [1, 2, 3, 4, 5]:
             circuit = _grover_circuit(4, "1010", n_iters)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

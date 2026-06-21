@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Literal, cast, overload
 
 import numpy as np
 from scipy.stats import kendalltau, pearsonr, spearmanr
@@ -90,6 +91,25 @@ class TemporalAnalysis:
             "critical_transitions": self.critical_transitions,
             "temporal_summary": self.temporal_summary,
         }
+
+
+@overload
+def compute_temporal_pathway_stability(
+    pathway_rankings: list[list[str]],
+    correlation_method: str = ...,
+    adaptive_top_k: bool = ...,
+    return_analysis: Literal[False] = ...,
+) -> float: ...
+
+
+@overload
+def compute_temporal_pathway_stability(
+    pathway_rankings: list[list[str]],
+    correlation_method: str = ...,
+    adaptive_top_k: bool = ...,
+    *,
+    return_analysis: Literal[True],
+) -> TemporalAnalysis: ...
 
 
 def compute_temporal_pathway_stability(
@@ -412,7 +432,7 @@ def compute_temporal_transition_matrix(
         T[r, r] = 1.0
 
     logger.debug("Computed %dx%d transition matrix", top_k + 1, top_k + 1)
-    return T
+    return cast(np.ndarray, T)
 
 
 def _apply_adaptive_top_k_selection(
@@ -647,8 +667,8 @@ def temporal_pathway_stability_educational_demo() -> dict:
     persistence_scores = compute_pathway_persistence_scores(degrading_rankings)
     demo_results["persistence_analysis"] = {
         "persistence_scores": persistence_scores,
-        "most_persistent": max(persistence_scores, key=persistence_scores.get),
-        "most_volatile": min(persistence_scores, key=persistence_scores.get),
+        "most_persistent": max(persistence_scores, key=lambda k: persistence_scores[k]),
+        "most_volatile": min(persistence_scores, key=lambda k: persistence_scores[k]),
         "interpretation": "Individual pathway stability varies",
     }
 

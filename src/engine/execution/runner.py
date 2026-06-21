@@ -7,13 +7,16 @@ Supports three simulation backends: qasm, statevector, density_matrix.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
 from src.core.noise_models import create_noise_model
+
+if TYPE_CHECKING:
+    from qiskit_aer.noise import NoiseModel
 
 # Import core modules for sophisticated state preparation and noise
 from src.core.state_preparation import prepare_state
@@ -36,7 +39,7 @@ class EngineExperimentRunner:
         """
         self.experiment_id = experiment_id
         self.logger = logging.getLogger(f"{__name__}.{experiment_id}")
-        self.noise_model = None  # Will be set if noise is enabled
+        self.noise_model: NoiseModel | None = None  # Will be set if noise is enabled
 
     def run_experiment(
         self,
@@ -133,7 +136,7 @@ class EngineExperimentRunner:
         """Create quantum circuit using sophisticated core state preparation."""
         try:
             # Use core state preparation with custom parameters
-            state_params = {
+            state_params: dict[str, Any] = {
                 "num_qubits": num_qubits,
                 "state_type": state_type,
             }
@@ -248,8 +251,14 @@ class EngineExperimentRunner:
 
             # Pass noise-relevant custom_params only (allowlist of noise keys)
             if custom_params:
-                noise_keys = {"correlation_strength", "topology", "temperature",
-                              "gate_time", "dt", "qubit_frequency"}
+                noise_keys = {
+                    "correlation_strength",
+                    "topology",
+                    "temperature",
+                    "gate_time",
+                    "dt",
+                    "qubit_frequency",
+                }
                 filtered = {k: v for k, v in custom_params.items() if k in noise_keys}
                 if filtered:
                     noise_params["custom_params"] = filtered
@@ -436,10 +445,10 @@ class EngineExperimentRunner:
         - Keeps MSB-left ordering (compatible with metrics package)
         """
         try:
-            raw_counts = result.get_counts()  # type: ignore[attr-defined]
+            raw_counts = result.get_counts()
         except Exception:
             # handle multi-experiment result (rare here)
-            raw_counts = result.get_counts(0)  # type: ignore[attr-defined]
+            raw_counts = result.get_counts(0)
 
         counts: dict[str, int] = {}
         for k, v in raw_counts.items():

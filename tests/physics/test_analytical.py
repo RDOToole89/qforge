@@ -21,7 +21,8 @@ Analytical Baselines (Phase 1 Scientific Rigor):
 
 import numpy as np
 
-from src.core.analysis.core.information_theory import entropy
+# Use core total_correlation directly (avoids MetricResult wrapper)
+from src.core.analysis.core.information_theory import entropy, total_correlation
 from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
 from src.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
@@ -29,9 +30,6 @@ from src.core.analysis.metrics.entanglement_error_correlation import (
 from src.core.analysis.metrics.pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
 )
-
-# Use core total_correlation directly (avoids MetricResult wrapper)
-from src.core.analysis.core.information_theory import total_correlation
 
 # Tolerance for floating point comparisons
 # We expect high precision for analytical cases

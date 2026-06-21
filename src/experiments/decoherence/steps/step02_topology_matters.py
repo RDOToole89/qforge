@@ -49,6 +49,7 @@ class TopologyMattersExperiment(BaseExperiment):
     description = "Step 2: Four topologies, four behaviors — entanglement type determines structure"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -58,7 +59,8 @@ class TopologyMattersExperiment(BaseExperiment):
             error_rate=0.1,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_all_topologies(self) -> list[ExperimentResult]:
         """Run GHZ, W, Cluster, and Product at 6 qubits."""

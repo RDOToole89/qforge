@@ -41,6 +41,7 @@ class TopologyComparison(BaseExperiment):
     description = "Compare decoherence structure across GHZ, W, Cluster, and Product states"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -49,7 +50,8 @@ class TopologyComparison(BaseExperiment):
             error_rate=0.1,
             shots=8192,
             metrics="structured_decoherence",
-            visualization_type="all",)
+            visualization_type="all",
+        )
 
     def run_all_states(self) -> list[ExperimentResult]:
         """Run all four topologies for comparison."""

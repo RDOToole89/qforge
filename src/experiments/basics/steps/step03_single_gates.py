@@ -64,6 +64,7 @@ class SingleGatesExperiment(BaseExperiment):
     description = "Step 3: See what X, H, Z, Y, S, T gates do to a qubit"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
         qc.h(0)
         qc.measure(0, 0)
@@ -83,9 +84,11 @@ class SingleGatesExperiment(BaseExperiment):
             qc = QuantumCircuit(1, 1)
             getattr(qc, gate_name)(0)
             qc.measure(0, 0)
-            r = self.run({
-                "custom_params": {"source": "circuit", "circuit": qc},
-            })
+            r = self.run(
+                {
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
             results.append(r)
         return results
 

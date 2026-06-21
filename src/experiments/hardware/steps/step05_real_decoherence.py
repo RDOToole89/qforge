@@ -55,6 +55,7 @@ class RealDecoherenceExperiment(BaseExperiment):
     description = "Step 5: River vs Fog on real hardware — the culmination of your journey"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",

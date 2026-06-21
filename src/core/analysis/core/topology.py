@@ -4,6 +4,8 @@ Shared by noise models (correlated depolarizing) and analysis metrics (NTC).
 Each builder returns an n x n symmetric binary adjacency matrix.
 """
 
+from collections.abc import Callable
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -29,7 +31,7 @@ def all_to_all_adjacency(n: int) -> NDArray[np.float64]:
     return np.ones((n, n), dtype=np.float64) - np.eye(n, dtype=np.float64)
 
 
-TOPOLOGY_BUILDERS: dict[str, type(chain_adjacency)] = {
+TOPOLOGY_BUILDERS: dict[str, Callable[[int], NDArray[np.float64]]] = {
     # Noise topology names
     "CHAIN": chain_adjacency,
     "STAR": star_adjacency,

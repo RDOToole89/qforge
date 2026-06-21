@@ -22,17 +22,17 @@ import numpy as np
 import pytest
 
 from src.core.analysis.core.information_theory import (
-    entropy,
     counts_to_probabilities,
-    total_correlation,
+    entropy,
     mutual_information,
+    total_correlation,
 )
 from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.pathway_concentration_ratio import (
-    compute_pathway_concentration_ratio,
-)
 from src.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
+)
+from src.core.analysis.metrics.pathway_concentration_ratio import (
+    compute_pathway_concentration_ratio,
 )
 
 
@@ -46,8 +46,8 @@ class TestExtremeValues:
         probs = np.array(list(counts_to_probabilities(counts).values()))
         h = entropy(probs)
 
-        assert not math.isnan(h), f"Entropy is NaN"
-        assert not math.isinf(h), f"Entropy is Inf"
+        assert not math.isnan(h), "Entropy is NaN"
+        assert not math.isinf(h), "Entropy is Inf"
         assert h >= 0, f"Entropy negative: {h}"
 
     def test_highly_skewed_distribution(self):
@@ -56,7 +56,7 @@ class TestExtremeValues:
         # Note: zeros will be removed by counts dict
 
         ai = compute_asymmetry_index(counts)
-        assert not math.isnan(ai), f"AI is NaN"
+        assert not math.isnan(ai), "AI is NaN"
         assert 0 <= ai <= 1, f"AI out of bounds: {ai}"
 
     def test_single_count_per_outcome(self):
@@ -65,7 +65,7 @@ class TestExtremeValues:
         probs = np.array(list(counts_to_probabilities(counts).values()))
         h = entropy(probs)
 
-        assert not math.isnan(h), f"Entropy is NaN for single counts"
+        assert not math.isnan(h), "Entropy is NaN for single counts"
         assert h >= 0, f"Entropy negative: {h}"
 
     def test_single_outcome_only(self):
@@ -79,7 +79,7 @@ class TestExtremeValues:
         probs = np.array(list(counts_to_probabilities(counts).values()))
         h = entropy(probs)
 
-        assert not math.isnan(h), f"Entropy is NaN"
+        assert not math.isnan(h), "Entropy is NaN"
         # With full-support smoothing, entropy will be high (near max)
         # because pseudo-counts dominate the single real count
         assert h >= 0, f"Entropy negative: {h}"
@@ -91,8 +91,8 @@ class TestExtremeValues:
         probs = np.array(list(counts_to_probabilities(counts).values()))
         h = entropy(probs)
 
-        assert not math.isnan(h), f"Entropy is NaN for large counts"
-        assert not math.isinf(h), f"Entropy is Inf for large counts"
+        assert not math.isnan(h), "Entropy is NaN for large counts"
+        assert not math.isinf(h), "Entropy is Inf for large counts"
         # Should be ~1 bit (Bell-like)
         assert abs(h - 1.0) < 0.01, f"Expected H≈1, got {h}"
 
@@ -130,7 +130,7 @@ class TestNumericalPrecision:
         counts = {f"{i:04b}": 1000 + i for i in range(16)}
 
         ai = compute_asymmetry_index(counts)
-        assert not math.isnan(ai), f"AI is NaN"
+        assert not math.isnan(ai), "AI is NaN"
         # Should be very close to 0 (uniform-like)
         assert ai < 0.1, f"AI too high for nearly-uniform: {ai}"
 
@@ -139,7 +139,7 @@ class TestNumericalPrecision:
         counts = {"0000": 1_000_000, "0001": 1, "0010": 1, "0011": 1}
 
         ai = compute_asymmetry_index(counts)
-        assert not math.isnan(ai), f"AI is NaN"
+        assert not math.isnan(ai), "AI is NaN"
         # Should be close to 0.5 (deterministic-like)
         assert ai > 0.4, f"AI too low for nearly-deterministic: {ai}"
 
@@ -149,11 +149,11 @@ class TestNumericalPrecision:
         counts = {f"{i:03b}": 2 ** (7 - i) for i in range(8)}
 
         ai = compute_asymmetry_index(counts)
-        assert not math.isnan(ai), f"AI is NaN for power-law"
+        assert not math.isnan(ai), "AI is NaN for power-law"
         assert 0 <= ai <= 1, f"AI out of bounds: {ai}"
 
         pcr = compute_pathway_concentration_ratio(counts)
-        assert not math.isnan(pcr), f"PCR is NaN for power-law"
+        assert not math.isnan(pcr), "PCR is NaN for power-law"
         assert pcr > 0, f"PCR not positive: {pcr}"
 
 
@@ -165,7 +165,7 @@ class TestMutualInformationStability:
         counts = {"00": 500, "11": 500}
         mi = mutual_information(counts, 0, 1)
 
-        assert not math.isnan(mi), f"MI is NaN"
+        assert not math.isnan(mi), "MI is NaN"
         assert mi >= 0, f"MI negative: {mi}"
 
     def test_mi_with_independent_qubits(self):
@@ -174,7 +174,7 @@ class TestMutualInformationStability:
         counts = {"00": 250, "01": 250, "10": 250, "11": 250}
         mi = mutual_information(counts, 0, 1)
 
-        assert not math.isnan(mi), f"MI is NaN"
+        assert not math.isnan(mi), "MI is NaN"
         # Should be near 0 for independent qubits
         assert abs(mi) < 0.01, f"Expected MI≈0 for independent, got {mi}"
 
@@ -183,7 +183,7 @@ class TestMutualInformationStability:
         counts = {"00": 500, "11": 500}  # Perfect correlation
         mi = mutual_information(counts, 0, 1)
 
-        assert not math.isnan(mi), f"MI is NaN"
+        assert not math.isnan(mi), "MI is NaN"
         # Should be 1.0 for perfect correlation
         assert abs(mi - 1.0) < 0.05, f"Expected MI≈1 for correlated, got {mi}"
 
@@ -196,7 +196,7 @@ class TestEECStability:
         counts = {f"{i:03b}": 125 for i in range(8)}
         eec = compute_entanglement_error_correlation(counts, state_type="GHZ")
 
-        assert not math.isnan(eec), f"EEC is NaN"
+        assert not math.isnan(eec), "EEC is NaN"
         assert -1.0 <= eec <= 1.0, f"EEC out of bounds: {eec}"
 
     def test_eec_with_sparse(self):
@@ -204,7 +204,7 @@ class TestEECStability:
         counts = {"000": 990, "111": 10}
         eec = compute_entanglement_error_correlation(counts, state_type="GHZ")
 
-        assert not math.isnan(eec), f"EEC is NaN for sparse"
+        assert not math.isnan(eec), "EEC is NaN for sparse"
         assert -1.0 <= eec <= 1.0, f"EEC out of bounds: {eec}"
 
 
@@ -241,9 +241,9 @@ class TestEdgeCaseErrors:
 
         # Most functions should validate and reject
         try:
-            ai = compute_asymmetry_index(counts)
-            # If it doesn't raise, check the value is at least flagged as bad
-            # (might be NaN or out of bounds)
+            compute_asymmetry_index(counts)
+            # If it doesn't raise, the value may be NaN or out of bounds;
+            # the point of this test is that it does not crash silently.
         except (ValueError, AssertionError):
             pass  # Expected - validation caught the error
 
@@ -256,7 +256,7 @@ class TestTotalCorrelationStability:
         counts = {"00": 250, "01": 250, "10": 250, "11": 250}
         tc = total_correlation(counts)
 
-        assert not math.isnan(tc), f"TC is NaN"
+        assert not math.isnan(tc), "TC is NaN"
         assert abs(tc) < 0.01, f"Expected TC≈0 for product state, got {tc}"
 
     def test_tc_with_bell_state(self):
@@ -264,7 +264,7 @@ class TestTotalCorrelationStability:
         counts = {"00": 500, "11": 500}
         tc = total_correlation(counts)
 
-        assert not math.isnan(tc), f"TC is NaN"
+        assert not math.isnan(tc), "TC is NaN"
         assert abs(tc - 1.0) < 0.05, f"Expected TC≈1 for Bell state, got {tc}"
 
     def test_tc_with_single_outcome(self):
@@ -272,5 +272,5 @@ class TestTotalCorrelationStability:
         counts = {"00": 1000}
         tc = total_correlation(counts)
 
-        assert not math.isnan(tc), f"TC is NaN for single outcome"
+        assert not math.isnan(tc), "TC is NaN for single outcome"
         # TC for deterministic state depends on marginals

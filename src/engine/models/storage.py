@@ -267,7 +267,7 @@ class DirectoryStructure(BaseModel):
     by_research_type: bool = Field(default=True, description="Use research-type subdirectories")
     by_quantum_state: bool = Field(default=False, description="Use quantum-state subdirectories")
 
-    def get_path(self, base: Path, category: str, **kwargs) -> Path:
+    def get_path(self, base: Path, category: str, **kwargs: Any) -> Path:
         """Generate appropriate path for given category and metadata.
 
         Args:

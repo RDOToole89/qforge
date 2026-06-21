@@ -7,7 +7,7 @@ dependencies — used by the Bloch API routes and directly testable.
 from __future__ import annotations
 
 from itertools import combinations
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,7 +45,11 @@ def partial_trace_single_qubit(
             col_indices[i] = row_indices[i]
 
     out_indices = [row_indices[qubit_index], col_indices[qubit_index]]
-    return np.einsum(tensor, row_indices + col_indices, out_indices)
+    # numpy stubs lack the einsum "sublist" overload signature used here.
+    return cast(
+        "NDArray[np.complex128]",
+        np.einsum(tensor, row_indices + col_indices, out_indices),  # type: ignore[arg-type]
+    )
 
 
 def partial_trace_two_qubit(
@@ -73,7 +77,11 @@ def partial_trace_two_qubit(
         col_indices[qubit_j],
     ]
 
-    reduced = np.einsum(tensor, row_indices + col_indices, out_indices)
+    # numpy stubs lack the einsum "sublist" overload signature used here.
+    reduced = cast(
+        "NDArray[np.complex128]",
+        np.einsum(tensor, row_indices + col_indices, out_indices),  # type: ignore[arg-type]
+    )
     return reduced.reshape(4, 4)
 
 

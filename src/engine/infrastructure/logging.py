@@ -27,6 +27,10 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.engine.infrastructure.events import Event
 
 _CONFIGURED = False
 
@@ -113,7 +117,7 @@ def setup_logging(
     return root
 
 
-def event_log_handler(event) -> None:
+def event_log_handler(event: Event) -> None:
     """Event bus subscriber that logs engine events.
 
     Subscribe to ``ALL`` on a ``SimpleEventBus`` to bridge events into logging::

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any, cast
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -62,7 +63,9 @@ class CircuitStatistics(BaseModel):
 
         if self.connectivity_graph is not None:
             cleaned: list[list[int]] = []
-            for edge in self.connectivity_graph:
+            # Cast to Any: validators run defensively against unsanitized input,
+            # so the runtime checks below are intentional despite the declared type.
+            for edge in cast("list[Any]", self.connectivity_graph):
                 if not isinstance(edge, list) or len(edge) != 2:
                     continue
                 u, v = edge

@@ -4,10 +4,10 @@ Tests for multi-backend simulation support (qasm, statevector, density_matrix).
 
 import numpy as np
 import pytest
+from pydantic import ValidationError
 
 from src.engine.api import run
 from src.engine.models import ExperimentConfig
-
 
 # ---------------------------------------------------------------------------
 # Config validation
@@ -30,7 +30,7 @@ class TestConfigValidation:
         assert cfg.sim_mode == "density_matrix"
 
     def test_invalid_mode_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             ExperimentConfig(num_qubits=2, state_type="GHZ", sim_mode="invalid")
 
     def test_statevector_plus_noise_rejected(self):

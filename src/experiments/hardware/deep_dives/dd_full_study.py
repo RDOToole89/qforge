@@ -33,7 +33,7 @@ from qiskit import QuantumCircuit
 
 from src.core.analysis.metrics.registry import compute_all as _compute_all_metrics
 from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from src.engine.models import ExperimentConfig, ExperimentResult
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +52,21 @@ def _save_result(experiment_name: str, label: str, data: dict[str, Any]) -> Path
     return path
 
 
-def _extract_metrics(result) -> dict[str, float]:
+def _extract_metrics(result: ExperimentResult) -> dict[str, float]:
     """Extract metric values from an ExperimentResult."""
-    metrics = {}
+    metrics: dict[str, float] = {}
     mb = result.metrics_bundle
     if mb and mb.metrics:
         for name, m in mb.metrics.items():
+            # Cast to Any: metrics may be MetricEntry or raw dicts at runtime;
+            # keeping both branches reachable for type-checking purposes.
+            m_any: Any = m
             val = (
-                m.value if hasattr(m, "value") else m.get("value") if isinstance(m, dict) else None
+                m_any.value
+                if hasattr(m_any, "value")
+                else m_any.get("value")
+                if isinstance(m_any, dict)
+                else None
             )
             if val is not None:
                 metrics[name] = val
@@ -100,7 +107,7 @@ def _run_single(cfg_dict: dict[str, Any], label: str) -> dict[str, Any]:
     return summary
 
 
-def _base_config(mode: str, **overrides) -> dict[str, Any]:
+def _base_config(mode: str, **overrides: Any) -> dict[str, Any]:
     """Build config dict for hardware or simulation mode."""
     if mode == "hardware":
         cfg = {

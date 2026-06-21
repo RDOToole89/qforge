@@ -142,11 +142,20 @@ class HistogramRenderer(VisualizationRenderer):
         state_type = experiment_params.get("state_type", "").upper()
         num_qubits = int(experiment_params.get("num_qubits", 0))
         total_shots = sum(int(v) for v in normalized_counts.values()) if not is_prob else 1
-        ideal_values = self._get_ideal_distribution(state_type, num_qubits, reduced_labels, is_prob, total_shots)
+        ideal_values = self._get_ideal_distribution(
+            state_type, num_qubits, reduced_labels, is_prob, total_shots
+        )
 
         if ideal_values is not None:
-            ax.bar(indices, ideal_values, linewidth=1.5, edgecolor="#aaa",
-                   facecolor="none", linestyle="--", label="Ideal (noiseless)")
+            ax.bar(
+                indices,
+                ideal_values,
+                linewidth=1.5,
+                edgecolor="#aaa",
+                facecolor="none",
+                linestyle="--",
+                label="Ideal (noiseless)",
+            )
 
         bars = ax.bar(indices, reduced_values, linewidth=0.5, alpha=0.9, label="Measured")
 
@@ -226,7 +235,7 @@ class HistogramRenderer(VisualizationRenderer):
 
     # ----------------- helpers -----------------
 
-    def _annotate_metrics(self, ax, bundle_data: dict[str, Any] | None) -> None:
+    def _annotate_metrics(self, ax: Any, bundle_data: dict[str, Any] | None) -> None:
         if not bundle_data:
             return
 
@@ -273,8 +282,11 @@ class HistogramRenderer(VisualizationRenderer):
 
     @staticmethod
     def _get_ideal_distribution(
-        state_type: str, num_qubits: int, labels: list[str],
-        is_prob: bool, total_shots: int,
+        state_type: str,
+        num_qubits: int,
+        labels: list[str],
+        is_prob: bool,
+        total_shots: int,
     ) -> list[float] | None:
         """Compute ideal (noiseless) distribution for ghost overlay."""
         if num_qubits < 1 or num_qubits > 8:
@@ -290,7 +302,7 @@ class HistogramRenderer(VisualizationRenderer):
                 bs = "0" * i + "1" + "0" * (num_qubits - i - 1)
                 ideal[bs] = 1.0 / num_qubits
         elif state_type == "SUPERPOSITION":
-            n_outcomes = 2 ** num_qubits
+            n_outcomes = 2**num_qubits
             for i in range(n_outcomes):
                 ideal[f"{i:0{num_qubits}b}"] = 1.0 / n_outcomes
         elif state_type == "BELL":
@@ -310,7 +322,7 @@ class HistogramRenderer(VisualizationRenderer):
         if not vals:
             return False, {}
 
-        def _to_float(x):
+        def _to_float(x: Any) -> float:
             try:
                 return float(x)
             except Exception:
@@ -363,8 +375,8 @@ class HistogramRenderer(VisualizationRenderer):
             items.sort(key=lambda kv: kv[1], reverse=True)
 
         if len(items) <= top_k or top_k < 1:
-            labels, vals = zip(*items)
-            return list(labels), list(vals), False
+            zlabels, zvals = zip(*items, strict=True)
+            return list(zlabels), list(zvals), False
 
         head = items[:top_k]
         tail = items[top_k:]
@@ -445,8 +457,13 @@ class DensityMatrixRenderer(VisualizationRenderer):
                     val = mag[i, j]
                     color = "white" if val > mag.max() * 0.5 else "black"
                     ax_heatmap.text(
-                        j, i, f"{val:.2f}", ha="center", va="center",
-                        fontsize=7 if n <= 4 else 5, color=color,
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=7 if n <= 4 else 5,
+                        color=color,
                     )
 
         # Annotation box
@@ -564,8 +581,15 @@ class CorrelationRenderer(VisualizationRenderer):
                 for j in range(n):
                     val = mi_matrix[i, j]
                     color = "white" if val > mi_matrix.max() * 0.5 else "black"
-                    ax_mi.text(j, i, f"{val:.2f}", ha="center", va="center",
-                               fontsize=7 if n <= 4 else 5, color=color)
+                    ax_mi.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=7 if n <= 4 else 5,
+                        color=color,
+                    )
 
         # Right panel: entanglement topology heatmap
         im2 = ax_ent.imshow(ent_matrix, cmap="Blues", interpolation="nearest")
@@ -582,8 +606,15 @@ class CorrelationRenderer(VisualizationRenderer):
                 for j in range(n):
                     val = ent_matrix[i, j]
                     color = "white" if val > ent_matrix.max() * 0.5 else "black"
-                    ax_ent.text(j, i, f"{val:.2f}", ha="center", va="center",
-                                fontsize=7 if n <= 4 else 5, color=color)
+                    ax_ent.text(
+                        j,
+                        i,
+                        f"{val:.2f}",
+                        ha="center",
+                        va="center",
+                        fontsize=7 if n <= 4 else 5,
+                        color=color,
+                    )
 
         # Improvement 5: EEC annotation with context for small qubit counts
         num_pairs = n * (n - 1) // 2
@@ -615,7 +646,7 @@ class CorrelationRenderer(VisualizationRenderer):
             fontweight="bold",
             y=1.02,
         )
-        plt.tight_layout(rect=[0, 0.04, 1, 1])
+        plt.tight_layout(rect=(0, 0.04, 1, 1))
 
         # --- Save ---
         base = Path(output_path)
@@ -640,12 +671,13 @@ class CorrelationRenderer(VisualizationRenderer):
     @staticmethod
     def _get_eec_extras(data: dict[str, Any]) -> dict[str, Any] | None:
         try:
-            return (
+            extras: dict[str, Any] | None = (
                 data.get("metrics_bundle", {})
                 .get("metrics", {})
                 .get("entanglement_error_correlation", {})
                 .get("extras")
             )
+            return extras
         except Exception:
             return None
 
@@ -720,12 +752,14 @@ class MetricsSummaryRenderer(VisualizationRenderer):
     """Render a horizontal bar chart of structured decoherence metrics."""
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Return True if a metrics bundle is available for a metrics summary."""
         if viz_type != "metrics_summary":
             return False
         mb = data.get("metrics_bundle")
         return mb is not None and isinstance(mb, dict) and bool(mb.get("metrics"))
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render the metrics summary bar chart and return its artifact reference."""
         mb = data["metrics_bundle"]
         metrics = mb.get("metrics", {})
         params = data.get("analysis", {}).get("experiment_parameters", {})
@@ -781,7 +815,9 @@ class MetricsSummaryRenderer(VisualizationRenderer):
         n_rows = max(len(norm), 1)
         if has_big:
             fig, (ax_norm, ax_big) = plt.subplots(
-                1, 2, figsize=(11, max(2.5, n_rows * 0.55)),
+                1,
+                2,
+                figsize=(11, max(2.5, n_rows * 0.55)),
                 gridspec_kw={"width_ratios": [3, 1]},
             )
         else:
@@ -809,10 +845,15 @@ class MetricsSummaryRenderer(VisualizationRenderer):
             xerr_hi = [max(0, e[3] - e[1]) if e[3] is not None else 0 for e in norm]
             has_ci = any(x > 0 for x in xerr_lo + xerr_hi)
 
-            bars = ax_norm.barh(range(len(n_names)), n_vals, color=n_colors,
-                                edgecolor="white", height=0.55,
-                                xerr=[xerr_lo, xerr_hi] if has_ci else None,
-                                error_kw={"capsize": 3, "color": "#555", "linewidth": 1})
+            bars = ax_norm.barh(
+                range(len(n_names)),
+                n_vals,
+                color=n_colors,
+                edgecolor="white",
+                height=0.55,
+                xerr=[xerr_lo, xerr_hi] if has_ci else None,
+                error_kw={"capsize": 3, "color": "#555", "linewidth": 1},
+            )
 
             ax_norm.set_yticks(range(len(n_names)))
             ax_norm.set_yticklabels(n_names, fontsize=11, fontweight="bold")
@@ -831,12 +872,15 @@ class MetricsSummaryRenderer(VisualizationRenderer):
 
             ax_norm.grid(axis="x", alpha=0.2)
 
-            for bar, val in zip(bars, n_vals):
+            for bar, val in zip(bars, n_vals, strict=True):
                 label = f"{val:.4f}" if val < 10 else f"{val:.2f}"
                 ax_norm.text(
                     bar.get_width() + max_norm * 0.04,
                     bar.get_y() + bar.get_height() / 2,
-                    label, va="center", fontsize=9, color="#333",
+                    label,
+                    va="center",
+                    fontsize=9,
+                    color="#333",
                 )
 
         # --- Unbounded panel (CI, PCR) ---
@@ -845,8 +889,9 @@ class MetricsSummaryRenderer(VisualizationRenderer):
             b_vals = [e[1] for e in big]
             b_colors = ["#27ae60" for _ in big]
 
-            bars = ax_big.barh(range(len(b_names)), b_vals, color=b_colors,
-                               edgecolor="white", height=0.55)
+            bars = ax_big.barh(
+                range(len(b_names)), b_vals, color=b_colors, edgecolor="white", height=0.55
+            )
             ax_big.set_yticks(range(len(b_names)))
             ax_big.set_yticklabels(b_names, fontsize=11, fontweight="bold")
             ax_big.set_xlabel("Value", fontsize=10)
@@ -854,15 +899,18 @@ class MetricsSummaryRenderer(VisualizationRenderer):
             ax_big.invert_yaxis()
             ax_big.set_xlim(0, max(b_vals) * 1.3)
             ax_big.grid(axis="x", alpha=0.2)
-            for bar, val in zip(bars, b_vals):
+            for bar, val in zip(bars, b_vals, strict=True):
                 ax_big.text(
                     bar.get_width() + max(b_vals) * 0.03,
                     bar.get_y() + bar.get_height() / 2,
-                    f"{val:.1f}", va="center", fontsize=9, color="#333",
+                    f"{val:.1f}",
+                    va="center",
+                    fontsize=9,
+                    color="#333",
                 )
 
         fig.suptitle(_build_title(params) + " — Metrics", fontsize=12, fontweight="bold")
-        fig.tight_layout(rect=[0, 0, 1, 0.93])
+        fig.tight_layout(rect=(0, 0, 1, 0.93))
 
         saved_paths = save_figure(fig, output_path, export_formats)
         plt.close(fig)
@@ -888,6 +936,7 @@ class BlochSphereRenderer(VisualizationRenderer):
     """Render Bloch sphere visualization for 1-2 qubit states."""
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
+        """Return True for 1-2 qubit states with a statevector or density matrix."""
         if viz_type != "bloch_sphere":
             return False
         analysis = data.get("analysis", {})
@@ -895,9 +944,10 @@ class BlochSphereRenderer(VisualizationRenderer):
         params = analysis.get("experiment_parameters", {})
         n_qubits = params.get("num_qubits", 0)
         has_state = meas.get("statevector") or meas.get("density_matrix")
-        return has_state and 1 <= n_qubits <= 2
+        return bool(has_state) and 1 <= n_qubits <= 2
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
+        """Render the Bloch sphere visualization and return its artifact reference."""
         analysis = data["analysis"]
         meas = analysis.get("measurement_results", {})
         params = analysis.get("experiment_parameters", {})
@@ -928,15 +978,23 @@ class BlochSphereRenderer(VisualizationRenderer):
             fig = plot_bloch_multivector(state)
             fig.suptitle(
                 _build_title(params) + " — Bloch Sphere",
-                fontsize=12, fontweight="bold", y=1.02,
+                fontsize=12,
+                fontweight="bold",
+                y=1.02,
             )
 
         except ImportError:
             # Fallback: simple text-based Bloch info
             logger.warning("Qiskit visualization not available for Bloch sphere")
             fig, ax = plt.subplots(figsize=(6, 6))
-            ax.text(0.5, 0.5, "Bloch sphere requires\nqiskit.visualization",
-                    ha="center", va="center", fontsize=14)
+            ax.text(
+                0.5,
+                0.5,
+                "Bloch sphere requires\nqiskit.visualization",
+                ha="center",
+                va="center",
+                fontsize=14,
+            )
             ax.set_xlim(0, 1)
             ax.set_ylim(0, 1)
             ax.axis("off")

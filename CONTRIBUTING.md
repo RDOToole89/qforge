@@ -4,32 +4,35 @@ Thank you for your interest in contributing to the QForge. This guide covers the
 
 ## Development Setup
 
+This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+Install uv once, then everything else is a single command.
+
 ```bash
 # Clone the repository
 git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
 cd qiskit-experiment-framework
 
-# Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# Install in editable mode with dev dependencies
-pip install -e ".[dev]"
+# Create the .venv and install all runtime + dev + test dependencies from uv.lock.
+# uv also installs the pinned Python interpreter (3.12) automatically.
+uv sync
 
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install
 ```
 
 The pre-commit hooks run `ruff` for linting and formatting on every commit. Make sure they are installed before you start writing code.
+
+Run any command inside the environment with `uv run <command>` (no manual activation
+needed). The lockfile (`uv.lock`) is committed, so every contributor gets the exact
+same dependency set.
 
 ### Full-Stack Setup (API + Web Client)
 
 If you want to run both the Python API and the web frontend:
 
 ```bash
-# Terminal 1: Start the API server
-pip install -e ".[api]"
-uvicorn apps.api.main:app --reload --port 8000
+# Terminal 1: Start the API server (fastapi/uvicorn are part of the default sync)
+uv run uvicorn apps.api.main:app --reload --port 8000
 
 # Terminal 2: Start the web client
 cd apps/client
@@ -55,16 +58,16 @@ Run them individually:
 
 ```bash
 # Lint (check for issues)
-ruff check src/ tests/
+uv run ruff check src/ tests/
 
 # Format (auto-fix style)
-ruff format src/ tests/
+uv run ruff format src/ tests/
 
 # Type checking
-mypy src/
+uv run mypy src/
 
 # Tests
-pytest
+uv run pytest
 ```
 
 All three must pass before a PR can be merged.
@@ -73,16 +76,16 @@ All three must pass before a PR can be merged.
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage report
-pytest --cov=src/core/analysis --cov-report=term-missing
+uv run pytest --cov=src/core/analysis --cov-report=term-missing
 
 # Run a specific test file
-pytest tests/test_metrics.py
+uv run pytest tests/core/test_metrics.py
 
 # Run tests in parallel
-pytest -n auto
+uv run pytest -n auto
 ```
 
 Coverage is tracked for `src/core/analysis/`. When adding new metrics or analysis code, include tests that cover the core computation paths.

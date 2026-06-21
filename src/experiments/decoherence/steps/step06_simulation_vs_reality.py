@@ -51,6 +51,7 @@ class SimVsRealityExperiment(BaseExperiment):
     description = "Step 6: Simulation vs reality — where do noise models break down?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -60,7 +61,8 @@ class SimVsRealityExperiment(BaseExperiment):
             error_rate=0.02,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_noise_model_comparison(self) -> tuple[list[ExperimentResult], list[ExperimentResult]]:
         """Run GHZ and W under both depolarizing and amplitude damping."""

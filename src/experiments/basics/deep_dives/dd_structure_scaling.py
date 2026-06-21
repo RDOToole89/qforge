@@ -62,6 +62,7 @@ class StructureScalingExperiment(BaseExperiment):
     description = "Deep dive: Watch Structure Score grow with qubit count"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -71,9 +72,12 @@ class StructureScalingExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
-    def run_scaling(self, qubit_range: list[int] | None = None, **overrides: Any) -> list[ExperimentResult]:
+    def run_scaling(
+        self, qubit_range: list[int] | None = None, **overrides: Any
+    ) -> list[ExperimentResult]:
         """Run GHZ at 2-6 qubits and track structure metrics."""
         qubits = qubit_range or [2, 3, 4, 5, 6]
         return self.sweep(parameter_ranges={"num_qubits": qubits}, **overrides)

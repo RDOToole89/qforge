@@ -81,6 +81,7 @@ class BB84Experiment(BaseExperiment):
     description = "Deep dive: BB84 — quantum key distribution using basis choice"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _bb84_circuit(8)
         return ExperimentConfig(
             num_qubits=8,
@@ -88,16 +89,19 @@ class BB84Experiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_with_and_without_eve(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run with and without noise (noise simulates eavesdropping)."""
         clean = self.run({"noise_enabled": False})
-        noisy = self.run({
-            "noise_enabled": True,
-            "noise_type": "depolarizing",
-            "error_rate": 0.15,
-        })
+        noisy = self.run(
+            {
+                "noise_enabled": True,
+                "noise_type": "depolarizing",
+                "error_rate": 0.15,
+            }
+        )
         return clean, noisy
 
 

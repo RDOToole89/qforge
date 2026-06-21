@@ -42,8 +42,6 @@ TRY IT:
 
 from __future__ import annotations
 
-import numpy as np
-
 from src.engine.models import ExperimentConfig, ExperimentResult
 from src.experiments.base import BaseExperiment
 
@@ -55,6 +53,7 @@ class ClassicalNullExperiment(BaseExperiment):
     description = "Deep dive: Can classical noise fake quantum structured decoherence?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -64,7 +63,8 @@ class ClassicalNullExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type="all",)
+            visualization_type="all",
+        )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run quantum GHZ and a 'control' product state for comparison."""

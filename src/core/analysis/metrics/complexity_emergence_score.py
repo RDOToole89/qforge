@@ -50,7 +50,7 @@ import logging
 import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal, overload
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -99,8 +99,27 @@ class EmergenceAnalysis:
         }
 
 
+@overload
 def compute_complexity_emergence_score(
-    multi_qubit_data: dict[int, Mapping[str, int]],
+    multi_qubit_data: Mapping[int, Mapping[str, int]],
+    structure_metric: str = ...,
+    emergence_model: str = ...,
+    return_analysis: Literal[False] = ...,
+) -> float: ...
+
+
+@overload
+def compute_complexity_emergence_score(
+    multi_qubit_data: Mapping[int, Mapping[str, int]],
+    structure_metric: str = ...,
+    emergence_model: str = ...,
+    *,
+    return_analysis: Literal[True],
+) -> EmergenceAnalysis: ...
+
+
+def compute_complexity_emergence_score(
+    multi_qubit_data: Mapping[int, Mapping[str, int]],
     structure_metric: str = "asymmetry_index",
     emergence_model: str = "logistic",
     return_analysis: bool = False,
@@ -191,11 +210,11 @@ def compute_complexity_emergence_score(
         if structure_metric == "asymmetry_index":
             metric_value = float(compute_asymmetry_index(counts_clean))
         elif structure_metric == "structure_score":
-            from .schema_bridge import compute_structure_score
+            from .structure_score import compute_structure_score
 
-            metric_value = float(compute_structure_score(counts_clean))
+            metric_value = float(compute_structure_score(counts=counts_clean).get("value", 0.0))
         elif structure_metric == "concentration_index":
-            from .schema_bridge import compute_concentration_index
+            from .concentration_index import compute_concentration_index
 
             metric_value = float(compute_concentration_index(counts_clean))
         else:
@@ -235,7 +254,7 @@ def compute_complexity_emergence_score(
 
 
 def compute_emergence_across_metrics(
-    multi_qubit_data: dict[int, Mapping[str, int]], metrics: list[str] | None = None
+    multi_qubit_data: Mapping[int, Mapping[str, int]], metrics: list[str] | None = None
 ) -> dict[str, float]:
     """Compute CES across multiple structure metrics for comprehensive analysis.
 
@@ -258,7 +277,7 @@ def compute_emergence_across_metrics(
             ces = compute_complexity_emergence_score(
                 multi_qubit_data, structure_metric=metric, emergence_model="logistic"
             )
-            emergence_scores[metric] = float(ces)  # type: ignore[arg-type]
+            emergence_scores[metric] = float(ces)
             logger.debug("Emergence for %s: %.6f", metric, ces)
         except Exception as e:
             logger.warning("Failed to compute emergence for %s: %s", metric, e)
@@ -290,7 +309,7 @@ def _fit_emergence_model(x_data: np.ndarray, y_data: np.ndarray, model: str) -> 
 def _fit_logistic_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Fit logistic emergence model: S(n) = A/(1 + exp(-k(n-n₀))) + S₀."""
 
-    def logistic_func(x, A, k, n0, S0):
+    def logistic_func(x: Any, A: float, k: float, n0: float, S0: float) -> Any:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
             return A / (1 + np.exp(-k * (x - n0))) + S0
@@ -373,7 +392,7 @@ def _fit_linear_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, A
 def _fit_power_law_emergence(x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
     """Fit power law model: S(n) = A×n^α + S₀."""
 
-    def power_law_func(x, A, alpha, S0):
+    def power_law_func(x: Any, A: float, alpha: float, S0: float) -> Any:
         return A * np.power(x, alpha) + S0
 
     y_min = float(np.min(y_data))

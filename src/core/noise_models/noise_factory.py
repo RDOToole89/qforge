@@ -14,6 +14,7 @@ while keeping the interface simple and extensible for research use.
 from __future__ import annotations
 
 import logging
+from typing import Any, cast
 
 from qiskit_aer.noise import NoiseModel
 
@@ -185,7 +186,7 @@ def create_noise_instance(
     if custom_params:
         init_params.update(custom_params)
 
-    return noise_class(**init_params)
+    return cast(BaseNoise, noise_class(**init_params))
 
 
 def get_available_noise_types() -> list[str]:
@@ -200,7 +201,7 @@ def get_available_noise_types() -> list[str]:
 def create_noise_model_for_hardware(
     noise_type: str,
     num_qubits: int,
-    backend=None,
+    backend: Any = None,
     error_rate: float | None = None,
     custom_params: dict | None = None,
     experiment_id: str = "N/A",
