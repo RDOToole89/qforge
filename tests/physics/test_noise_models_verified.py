@@ -141,25 +141,20 @@ def test_depolarizing_2qubit_operator_count_and_completeness() -> None:
     assert np.allclose(completeness_sum(kraus), np.eye(4), atol=ATOL)
 
 
-def test_depolarizing_2qubit_is_tensor_product_channel() -> None:
-    """2-qubit get_kraus() is the tensor product of two 1-qubit channels.
+def test_depolarizing_2qubit_matches_qiskit_channel() -> None:
+    """2-qubit get_kraus() == genuine Qiskit depolarizing_error(p, 2), matching apply().
 
-    NOTE (physics discrepancy): this is NOT the same channel as Qiskit's true
-    n-qubit ``depolarizing_error(p, 2)`` that ``apply()`` simulates. The
-    tensor-product identity weight is (1-3p/4)^2 = 0.855625, whereas a genuine
-    2-qubit depolarizing channel has identity weight 1 - p + p/16 = 0.90625.
-    The Kraus operators are still a valid CPTP map (completeness holds), but
-    multi-qubit ``get_kraus_operators()`` does not match multi-qubit ``apply()``.
+    Fixed: get_kraus_operators() now returns the true n-qubit depolarizing channel
+    (identity weight 1 - p + p/16 = 0.90625), the same channel apply() simulates.
+    Previously it returned the tensor product of two 1-qubit channels (identity
+    weight (1-3p/4)^2 = 0.855625), which did not match apply().
     """
     p = 0.1
     kraus = DepolarizingNoise(error_rate=p, num_qubits=2).get_kraus_operators()
-    # K_00 = (1-3p/4) * (I ⊗ I): the all-identity tensor term.
-    identity_weight = (kraus[0][0, 0]) ** 2  # K0 is sqrt(prob)*I4 → prob = entry^2
-    assert identity_weight.real == pytest.approx((1 - 3 * p / 4) ** 2, abs=1e-12)
-    # Genuine 2-qubit depolarizing would instead have identity weight 0.90625.
-    genuine = depolarizing_error(p, 2)
-    assert max(genuine.probabilities) == pytest.approx(0.90625, abs=1e-12)
-    assert identity_weight.real != pytest.approx(0.90625, abs=1e-3)
+    # Channel represented by get_kraus() is the genuine 2-qubit depolarizing channel.
+    assert choi_equal(kraus, depolarizing_error(p, 2))
+    # Sanity: genuine 2-qubit identity weight is 0.90625 (not the tensor 0.855625).
+    assert max(depolarizing_error(p, 2).probabilities) == pytest.approx(0.90625, abs=1e-12)
 
 
 def test_depolarizing_action_uniform_mixing() -> None:
