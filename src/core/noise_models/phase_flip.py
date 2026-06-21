@@ -170,10 +170,10 @@ class PhaseFlipNoise(BaseNoise):
         destroying quantum interference patterns.
 
         # Gate Application Strategy
-        Phase flip noise affects all quantum operations:
-        - Z gates: Minimal additional error (already Z-axis)
-        - X/Y gates: Maximum sensitivity (orthogonal to error axis)
-        - General gates: Intermediate sensitivity based on Z component
+        A single, uniform single-qubit Pauli-Z error with probability p is applied
+        to every target gate, exactly matching the documented Kraus operators
+        K₀ = √(1-p)I, K₁ = √p Z. Two-qubit gates (which cannot accept a 1-qubit
+        error) are skipped and reported as failures.
 
         Args:
             noise_model: Qiskit noise model to modify with phase flip errors
@@ -182,7 +182,7 @@ class PhaseFlipNoise(BaseNoise):
 
         Example:
             >>> noise_model = NoiseModel()
-            >>> gates = ['h', 'x', 'cx']
+            >>> gates = ['h', 'x']
             >>> phase_flip_noise.apply(noise_model, gates)
         """
         # Phase flip is inherently single-qubit but can affect all operations
@@ -191,34 +191,18 @@ class PhaseFlipNoise(BaseNoise):
                 f"Phase flip is single-qubit, but applying to {qubits_for_error}-qubit gates"
             )
 
-        # Gate sensitivity mapping for phase flip errors
-        gate_sensitivity = self._get_gate_sensitivity_map()
+        # Uniform single-qubit phase-flip channel: K₀ = √(1-p)I, K₁ = √p Z
+        p = self.error_rate
+        phase_flip_channel = pauli_error([("I", 1.0 - p), ("Z", p)])
 
-        # Apply phase flip noise to all gates with sensitivity weighting
+        # Apply the same channel to every target gate
         successful_gates = []
         failed_gates = []
 
         for gate in gate_list:
             try:
-                # Get gate-specific sensitivity
-                sensitivity = gate_sensitivity.get(gate, 0.5)
-
-                if sensitivity > 0:
-                    # Calculate effective flip probability
-                    effective_flip_prob = self.error_rate * sensitivity
-                    identity_prob = 1.0 - effective_flip_prob
-
-                    # Create Pauli error with phase flip probability
-                    phase_flip_channel = pauli_error(
-                        [("I", identity_prob), ("Z", effective_flip_prob)]
-                    )
-
-                    noise_model.add_all_qubit_quantum_error(phase_flip_channel, gate)
-                    successful_gates.append(f"{gate}(s={sensitivity:.2f})")
-                else:
-                    # Gates with minimal phase flip sensitivity
-                    successful_gates.append(f"{gate}(minimal)")
-
+                noise_model.add_all_qubit_quantum_error(phase_flip_channel, gate)
+                successful_gates.append(gate)
             except Exception as e:
                 failed_gates.append((gate, str(e)))
 
@@ -407,44 +391,6 @@ class PhaseFlipNoise(BaseNoise):
             Dict mapping operators to their probabilities
         """
         return {"identity": 1 - self.error_rate, "phase_flip_z": self.error_rate}
-
-    def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """Get gate-specific phase flip sensitivity factors.
-
-        # Gate Sensitivity Physics
-        Different gates have different sensitivities to phase flip errors:
-        - Z gates: Minimal sensitivity (same error axis)
-        - X/Y gates: High sensitivity (orthogonal to error axis)
-        - General gates: Sensitivity based on non-Z component
-
-        Returns:
-            Dict mapping gate names to sensitivity factors [0, 1]
-        """
-        return {
-            # Z-axis gates (minimal sensitivity - same axis as error)
-            "z": 0.1,
-            "rz": 0.1,
-            "u1": 0.1,
-            "p": 0.1,
-            "s": 0.1,
-            "t": 0.1,
-            "sdg": 0.1,
-            "tdg": 0.1,
-            # X-axis gates (high sensitivity - orthogonal axis)
-            "x": 1.0,
-            "rx": 1.0,
-            # Y-axis gates (high sensitivity - orthogonal axis)
-            "y": 1.0,
-            "ry": 1.0,
-            # Hadamard (high sensitivity - creates superposition)
-            "h": 1.0,
-            # Identity (moderate sensitivity during idle)
-            "id": 0.3,
-            # General single-qubit gates (high sensitivity)
-            "u2": 0.8,
-            "u3": 0.9,
-            "u": 0.9,
-        }
 
     def _calculate_channel_capacity(self) -> float:
         """Calculate quantum channel capacity for phase flip channel.

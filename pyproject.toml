@@ -140,7 +140,7 @@ module = [
 ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["src/core/analysis"]
+source = ["src/core"]
 omit = [
     "*/tests/*",
     "*/venv/*",

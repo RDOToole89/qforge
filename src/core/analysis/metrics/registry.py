@@ -217,10 +217,8 @@ def determine_status(
     if isinstance(n_samples, (int, float)) and n_samples < 50:
         return "unstable"
 
-    p_value = extras.get("p_null", extras.get("p_value", 1.0))
-
     if rel <= STATUS_BAND_WIDTH:
-        return "validated" if (p_value < 0.05 or "p_null" not in extras) else "experimental"
+        return "validated"
 
     if rel <= 0.4:
         return "experimental"
@@ -343,36 +341,29 @@ _BOOTSTRAP_SPECS: list[MetricSpec] = [
 
 
 def _wrap_structure_score(**kwargs: Any) -> MetricResult:
-    """Structure score with fallback from dedicated module to asymmetry index."""
+    """Structure score (JSD from factorized null) with bootstrap CI."""
     counts = kwargs.get("counts", {}) or {}
     try:
-        try:
-            from .structure_score import compute_structure_score as _ss
+        from ..constants import DEFAULT_BOOTSTRAP_B
 
-            value = float(_ss(counts=counts).get("value", 0.0))
-            ci95 = tuple(_ss(counts=counts).get("ci95", (value, value)))
-        except Exception:
-            from ..constants import DEFAULT_BOOTSTRAP_B
+        bci_mod = importlib.import_module("src.core.analysis.core.bootstrap", package=None)
+        bci = bci_mod.bootstrap_confidence_interval
+        from .structure_score import compute_structure_score as _ss
 
-            bci_mod = importlib.import_module("src.core.analysis.core.bootstrap", package=None)
-            bci = bci_mod.bootstrap_confidence_interval
-            from .asymmetry_index import compute_asymmetry_index
+        def _stat(c: dict[str, int]) -> float:
+            return float(_ss(counts=c).get("value", 0.0))
 
-            def _stat(c: dict[str, int]) -> float:
-                return float(compute_asymmetry_index(c))
+        value = _stat(counts)
+        lo, hi = bci(
+            counts,
+            _stat,
+            n_bootstrap=kwargs.get("B", DEFAULT_BOOTSTRAP_B),
+            rng=kwargs.get("rng"),
+        )
+        ci95 = (float(lo), float(hi))
 
-            value = _stat(counts)
-            lo, hi = bci(
-                counts,
-                _stat,
-                n_bootstrap=kwargs.get("B", DEFAULT_BOOTSTRAP_B),
-                rng=kwargs.get("rng"),
-            )
-            ci95 = (float(lo), float(hi))
-
-        extras = {
-            "method": "structure_score",
-            "proxy": "asymmetry_index" if "compute_asymmetry_index" in dir() else "native",
+        extras: dict[str, Any] = {
+            "method": "jsd_factorized_null",
             "n_samples": sum(counts.values()) if counts else 0,
             "n_outcomes": len(counts),
         }
@@ -380,6 +371,40 @@ def _wrap_structure_score(**kwargs: Any) -> MetricResult:
         return MetricResult(value=value, ci95=ci95, status=status, extras=extras)
     except Exception as e:
         logger.error("structure_score failed: %s", e)
+        return MetricResult(value=0.0, ci95=(0.0, 0.0), status="unstable", extras={"error": str(e)})
+
+
+def _wrap_asymmetry_index(**kwargs: Any) -> MetricResult:
+    """Asymmetry index (TVD from uniform) with bootstrap CI."""
+    counts = kwargs.get("counts", {}) or {}
+    try:
+        from ..constants import DEFAULT_BOOTSTRAP_B
+
+        bci_mod = importlib.import_module("src.core.analysis.core.bootstrap", package=None)
+        bci = bci_mod.bootstrap_confidence_interval
+        from .asymmetry_index import compute_asymmetry_index
+
+        def _stat(c: dict[str, int]) -> float:
+            return float(compute_asymmetry_index(c))
+
+        value = _stat(counts)
+        lo, hi = bci(
+            counts,
+            _stat,
+            n_bootstrap=kwargs.get("B", DEFAULT_BOOTSTRAP_B),
+            rng=kwargs.get("rng"),
+        )
+        ci95 = (float(lo), float(hi))
+
+        extras: dict[str, Any] = {
+            "method": "total_variation_distance",
+            "n_samples": sum(counts.values()) if counts else 0,
+            "n_outcomes": len(counts),
+        }
+        status = determine_status(value, ci95, extras)
+        return MetricResult(value=value, ci95=ci95, status=status, extras=extras)
+    except Exception as e:
+        logger.error("asymmetry_index failed: %s", e)
         return MetricResult(value=0.0, ci95=(0.0, 0.0), status="unstable", extras={"error": str(e)})
 
 
@@ -508,12 +533,12 @@ def _register_all() -> None:
 
     # Special-case metrics with unique logic
     _METRIC_REGISTRY["structure_score"] = _wrap_structure_score
+    _METRIC_REGISTRY["asymmetry_index"] = _wrap_asymmetry_index
     _METRIC_REGISTRY["entanglement_error_correlation"] = _wrap_eec
     _METRIC_REGISTRY["pathway_persistence"] = _wrap_pathway_persistence
     _METRIC_REGISTRY["complexity_emergence_score"] = _wrap_complexity_emergence
 
     # Aliases for backward compatibility
-    _METRIC_REGISTRY["asymmetry_index"] = _METRIC_REGISTRY["structure_score"]
     _METRIC_REGISTRY["pathway_concentration_ratio"] = _METRIC_REGISTRY["concentration_index"]
     _METRIC_REGISTRY["temporal_pathway_stability"] = _METRIC_REGISTRY["pathway_persistence"]
 

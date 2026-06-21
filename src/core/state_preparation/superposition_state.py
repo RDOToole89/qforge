@@ -274,9 +274,11 @@ class SuperpositionState(BaseState):
 
             single_qubit_states.append(qubit_state)
 
-        # Compute tensor product of all single-qubit states
-        full_state = single_qubit_states[0]
-        for i in range(1, self.num_qubits):
+        # Compute tensor product of all single-qubit states.
+        # Qiskit uses little-endian ordering: qubit 0 is the least-significant
+        # bit, so the full state is |q_{n-1}⟩ ⊗ ... ⊗ |q_1⟩ ⊗ |q_0⟩.
+        full_state = single_qubit_states[self.num_qubits - 1]
+        for i in range(self.num_qubits - 2, -1, -1):
             full_state = np.kron(full_state, single_qubit_states[i])
 
         return full_state

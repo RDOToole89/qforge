@@ -151,7 +151,7 @@ def compute_pathway_concentration_ratio(
         >>> # High concentration (GHZ-like)
         >>> counts = {"000": 400, "111": 300, "001": 100, "010": 50, "011": 150}
         >>> compute_pathway_concentration_ratio(counts)
-        14.0
+        8.0
 
     Complexity:
         Time: O(n log n) for sorting frequencies

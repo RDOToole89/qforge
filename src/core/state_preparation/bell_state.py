@@ -129,10 +129,11 @@ class BellState(BaseState):
             circuit.x(1)  # X gate flips second qubit
 
         elif variant == "psi_minus":
-            # |Ψ-⟩ = (|01⟩ - |10⟩)/√2 - Apply both transformations
-            circuit.z(1)  # Phase flip on second qubit
+            # |Ψ-⟩ = (|01⟩ - |10⟩)/√2 - Apply both transformations.
+            # Order matters: X then Z yields the documented vector exactly
+            # (Z then X introduces a global phase of -1).
             circuit.x(1)  # Bit flip on second qubit
-            # Note: Combined Z-X creates the correct relative phase
+            circuit.z(1)  # Phase flip on second qubit
 
         # Optional: Add barrier for visualization
         if add_barrier:

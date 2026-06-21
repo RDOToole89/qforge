@@ -271,20 +271,19 @@ class ThermalRelaxationNoise(BaseNoise):
             List of conceptual Kraus operators for educational purposes
 
         Educational Note:
-            Full thermal relaxation involves multiple Kraus operators representing
-            energy exchange, pure dephasing, and thermal population effects.
+            APPROXIMATION: this returns only the T=0 amplitude-damping operators
+            (energy relaxation, K₀ = diag(1, √(1-γ₁)), K₁ = √γ₁|0⟩⟨1|) and
+            silently ignores the pure-dephasing (T2) and thermal-excitation
+            contributions. The full thermal-relaxation channel that ``apply()``
+            simulates via Qiskit ``thermal_relaxation_error`` requires additional
+            Kraus operators. Use ``apply()`` for a faithful simulation.
         """
-        # Simplified representation for educational purposes
-        # Full thermal relaxation Kraus operators are more complex
-        gamma_1 = self._t1_error_rate  # Energy relaxation rate
-        self._t2_error_rate - gamma_1 / 2  # Pure dephasing rate
+        # Approximate the channel by its T1 amplitude-damping component only.
+        gamma_1 = self._t1_error_rate  # Energy relaxation probability over the gate
 
-        # Simplified amplitude damping operators
         K0 = np.array([[1, 0], [0, np.sqrt(1 - gamma_1)]], dtype=complex)
         K1 = np.sqrt(gamma_1) * np.array([[0, 1], [0, 0]], dtype=complex)
 
-        # Note: This is a simplified representation
-        # Full thermal relaxation requires more operators
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:

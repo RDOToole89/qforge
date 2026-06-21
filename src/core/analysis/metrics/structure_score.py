@@ -37,6 +37,14 @@ from typing import Any
 import numpy as np
 from scipy.stats import spearmanr
 
+from ..core.information_theory import (
+    all_bitstrings,
+    counts_to_probabilities,
+    jensen_shannon_divergence,
+    n_qubits_from_counts,
+)
+from ..core.null_models import factorized_null_model
+
 # Delegate to rigorously implemented metric modules to avoid duplication and drift.
 from .asymmetry_index import compute_asymmetry_index as _ai_compute
 from .complexity_emergence_score import (
@@ -53,38 +61,54 @@ logger = logging.getLogger(__name__)
 
 
 def compute_structure_score(*, counts: dict[str, int], **kwargs: Any) -> dict[str, Any]:
-    """Compute Structure Score (Asymmetry Index).
+    """Compute Structure Score (JSD from factorized null model).
 
-    This is a thin wrapper around the canonical implementation of Asymmetry Index.
-    Confidence intervals and validation status are handled by higher-level
-    pipelines (e.g., bootstrap module) and not in this core wrapper.
+    The Structure Score quantifies how much the observed distribution deviates
+    from its factorized (independent-marginals) null model. A perfectly
+    independent (separable) distribution yields ~0; any inter-qubit structure
+    (correlations) raises the score.
+
+    Mathematical Definition:
+        SS = JSD(P_observed || Q_factorized)
+
+    where P_observed is the full-support smoothed distribution and
+    Q_factorized = ∏ᵢ q(xᵢ) is the product of per-qubit marginals. The JSD is
+    computed in bits and bounded to [0, 1].
 
     Args:
         counts: Measurement counts {bitstring: count}
-        **kwargs: Forwarded to the underlying implementation (if supported)
+        **kwargs: Forwarded for API compatibility (unused).
 
     Returns:
         dict: Minimal MetricResult-like payload:
               {
                 "value": <float>,
                 "status": "computed",
-                "extras": {"method": "total_variation_distance"}
+                "extras": {"method": "jsd_factorized_null"}
               }
               (CI and final status should be attached by the bootstrap pipeline.)
 
     Notes:
-        - Keeps this "core" file lightweight and in sync with schema specs.
-        - JSD (Jensen-Shannon Divergence) is an alternative metric that is more
-          sensitive to tail deviations than TVD. While TVD is the primary
-          "Structure Score" for its linear interpretability, JSD can be useful
-          for sensitivity analysis in "Fog vs River" detection.
+        - Observed and null probability vectors are aligned over the same
+          canonical lexicographic ordering of all 2^n bitstrings.
+        - Distinct from the Asymmetry Index (TVD vs uniform); both measure
+          different aspects of structure.
     """
     try:
-        value = compute_asymmetry_index(counts)
+        n = n_qubits_from_counts(counts)
+        order = all_bitstrings(n)
+
+        observed_probs = counts_to_probabilities(counts)
+        null_probs = factorized_null_model(counts)
+
+        p = np.asarray([observed_probs[bs] for bs in order], dtype=np.float64)
+        q = np.asarray([null_probs[bs] for bs in order], dtype=np.float64)
+
+        value = jensen_shannon_divergence(p, q)
         return {
             "value": float(value),
             "status": "computed",
-            "extras": {"method": "total_variation_distance"},
+            "extras": {"method": "jsd_factorized_null"},
         }
     except Exception as e:
         logger.error("Structure Score computation failed: %s", e)

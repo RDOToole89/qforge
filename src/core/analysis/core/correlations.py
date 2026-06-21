@@ -374,7 +374,6 @@ def cosine_similarity_matrix(
         sim[i,j] = dot(v_i, v_j) / (|v_i| * |v_j|).
         Zero vectors produce 0.0 similarity with everything.
     """
-    len(vectors)
     mat = np.stack(vectors, axis=0)  # k x d
     norms = np.linalg.norm(mat, axis=1)  # k
     # Avoid division by zero: replace zero norms with 1 (result will be 0 anyway)

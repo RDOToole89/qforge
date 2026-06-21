@@ -209,8 +209,10 @@ class AmplitudeDampingNoise(BaseNoise):
         }
         two_qubit_gates = {"cx", "cy", "cz", "ch", "swap", "iswap", "ecr"}
 
-        # Calculate effective damping rate including thermal effects
-        effective_rate = self._calculate_effective_damping_rate()
+        # Damping probability γ for the T=0 amplitude-damping channel. This is the
+        # same γ returned by get_kraus_operators(); finite-temperature excitation
+        # (the reverse |0⟩ → |1⟩ process) is modeled by thermal_relaxation.py, not here.
+        effective_rate = self.error_rate
 
         try:
             # Create single-qubit AD channel
@@ -262,6 +264,12 @@ class AmplitudeDampingNoise(BaseNoise):
         K₁ = √γ|0⟩⟨1|                  (decay operator)
 
         These satisfy K₀†K₀ + K₁†K₁ = I (completeness relation).
+
+        The damping probability γ = ``self.error_rate`` is the same value passed
+        to Qiskit ``amplitude_damping_error`` in ``apply()``: the physics-based
+        rate ``1 - exp(-gate_time / T1)`` when ``t1`` is supplied, otherwise the
+        phenomenological ``error_rate``. This is the T=0 amplitude-damping
+        channel; finite-temperature excitation lives in thermal_relaxation.py.
 
         Returns:
             List of Kraus operators as numpy arrays
@@ -416,24 +424,6 @@ class AmplitudeDampingNoise(BaseNoise):
 
         # Excited state population
         return float(1.0 / (1.0 + np.exp(beta_omega)))
-
-    def _calculate_effective_damping_rate(self) -> float:
-        """Calculate effective damping rate including thermal corrections.
-
-        # Thermal Corrections
-        At finite temperature, thermal excitation competes with relaxation:
-        γ_eff = γ₀(1 - n_th) where n_th is thermal population
-
-        Returns:
-            Effective damping rate including temperature effects
-        """
-        base_rate = self._physics_damping_rate
-
-        if self._thermal_population > 0:
-            # Thermal excitation reduces effective relaxation
-            return float(base_rate * (1 - self._thermal_population))
-        else:
-            return float(base_rate)
 
     def _calculate_channel_capacity(self) -> float:
         """Calculate quantum channel capacity for amplitude damping.

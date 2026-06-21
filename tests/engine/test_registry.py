@@ -167,13 +167,17 @@ class TestRegistryIntegration:
         from src.core.analysis.metrics.pathway_concentration_ratio import (
             compute_pathway_concentration_ratio,
         )
+        from src.core.analysis.metrics.structure_score import compute_structure_score
 
         direct_ai = compute_asymmetry_index(counts)
         direct_pcr = compute_pathway_concentration_ratio(counts)
+        direct_ss = compute_structure_score(counts=counts)["value"]
 
         # Should match (within numerical precision)
         if "structure_score" in registry_results:
-            assert abs(direct_ai - registry_results["structure_score"]["value"]) < 1e-10
+            assert abs(direct_ss - registry_results["structure_score"]["value"]) < 1e-10
+        if "asymmetry_index" in registry_results:
+            assert abs(direct_ai - registry_results["asymmetry_index"]["value"]) < 1e-10
         if "concentration_index" in registry_results:
             assert abs(direct_pcr - registry_results["concentration_index"]["value"]) < 1e-10
 
@@ -192,8 +196,13 @@ class TestRegistryIntegration:
             "insufficient_data",
         ]
 
-        # Deterministic case should give maximum AI
-        assert abs(result["value"] - 0.5) < 1e-10
+        # Deterministic case: structure_score (JSD from factorized null) is ~0
+        # because a single-outcome distribution is perfectly factorizable.
+        assert abs(result["value"]) < 1e-2
+
+        # Deterministic case gives maximum asymmetry index (TVD vs uniform).
+        ai_result = compute_metric("asymmetry_index", counts=counts)
+        assert abs(ai_result["value"] - 0.5) < 1e-10
 
     def test_confidence_intervals(self):
         """Test confidence interval generation."""
