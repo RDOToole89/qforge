@@ -34,9 +34,9 @@ CIRCUIT (same GHZ-3 in both modes):
 
   statevector mode: returns exact |ψ⟩, fidelity = 1.0
   density_matrix mode + noise: returns ρ (mixed state), fidelity < 1.0
-  
+
   The density matrix ρ shows coherences (off-diagonal elements)
-  that measurement destroys. Noise shrinks these coherences — 
+  that measurement destroys. Noise shrinks these coherences —
   that IS decoherence, literally "loss of coherence."
 
 TRY IT:
@@ -59,6 +59,7 @@ class DensityMatrixExperiment(BaseExperiment):
     description = "Deep dive: See the full quantum state with density matrix simulation"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=3,
             state_type="GHZ",
@@ -67,20 +68,25 @@ class DensityMatrixExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-            visualization_type=["histogram", "density_matrix"],)
+            visualization_type=["histogram", "density_matrix"],
+        )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run GHZ-3 clean (statevector) and noisy (density_matrix)."""
-        clean = self.run({
-            "sim_mode": "statevector",
-            "noise_enabled": False,
-            "rng_seed": 42,
-        })
-        noisy = self.run({
-            "sim_mode": "density_matrix",
-            "noise_enabled": True,
-            "error_rate": 0.1,
-        })
+        clean = self.run(
+            {
+                "sim_mode": "statevector",
+                "noise_enabled": False,
+                "rng_seed": 42,
+            }
+        )
+        noisy = self.run(
+            {
+                "sim_mode": "density_matrix",
+                "noise_enabled": True,
+                "error_rate": 0.1,
+            }
+        )
         return clean, noisy
 
 

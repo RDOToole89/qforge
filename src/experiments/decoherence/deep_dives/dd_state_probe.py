@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 import numpy as np
 
@@ -27,6 +27,8 @@ from src.engine.models import ExperimentConfig
 from src.experiments.base import BaseExperiment
 
 logger = logging.getLogger(__name__)
+
+StateTypeLiteral = Literal["GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM"]
 
 # --- Constants from research protocol ---
 
@@ -87,7 +89,7 @@ class StateProbeStudy(BaseExperiment):
         if abs(cs) < 1e-10:
             config = ExperimentConfig(
                 num_qubits=n,
-                state_type=state,
+                state_type=cast(StateTypeLiteral, state),
                 noise_enabled=True,
                 noise_type="depolarizing",
                 error_rate=p,
@@ -99,7 +101,7 @@ class StateProbeStudy(BaseExperiment):
         else:
             config = ExperimentConfig(
                 num_qubits=n,
-                state_type=state,
+                state_type=cast(StateTypeLiteral, state),
                 noise_enabled=True,
                 noise_type="correlated_depolarizing",
                 error_rate=p,
@@ -320,7 +322,7 @@ class StateProbeStudy(BaseExperiment):
         """Run one experiment with a custom noise adjacency matrix."""
         config = ExperimentConfig(
             num_qubits=n,
-            state_type=state,
+            state_type=cast(StateTypeLiteral, state),
             noise_enabled=True,
             noise_type="correlated_depolarizing",
             error_rate=p,

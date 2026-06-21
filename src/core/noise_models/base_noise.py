@@ -96,7 +96,7 @@ class BaseNoise(ABC):
         error_rate: float = DEFAULT_ERROR_RATE,
         num_qubits: int = 1,
         experiment_id: str = "N/A",
-        **physics_params,
+        **physics_params: Any,
     ):
         """Initialize base noise model with physics validation.
 
@@ -345,7 +345,7 @@ class BaseNoise(ABC):
                 f"noise operators with {4**num_qubits:,} elements"
             )
 
-    def _validate_physics_parameters(self, **params) -> None:
+    def _validate_physics_parameters(self, **params: Any) -> None:
         """Validate physics parameters against quantum mechanics constraints.
 
         # Quantum Physics Compliance

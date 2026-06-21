@@ -44,6 +44,7 @@ References:
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Literal, overload
 
 import numpy as np
 
@@ -106,7 +107,7 @@ class AsymmetryAnalysis:
 
 def _tvd_vs_uniform_from_counts_fast(
     counts: Mapping[str, int], alpha: float
-) -> tuple[float, int, int]:
+) -> tuple[float, int, float]:
     """Compute TVD(p̃ || uniform) in O(|observed|) using the full-support Jeffreys prior.
 
     Let K = 2^n be the full outcome count (from bitstring length), N = total shots,
@@ -182,6 +183,23 @@ def _entropy_full_support_fast(counts: Mapping[str, int], alpha: float) -> float
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
+
+@overload
+def compute_asymmetry_index(
+    counts: Mapping[str, int],
+    alpha: float = ...,
+    return_analysis: Literal[False] = ...,
+) -> float: ...
+
+
+@overload
+def compute_asymmetry_index(
+    counts: Mapping[str, int],
+    alpha: float = ...,
+    *,
+    return_analysis: Literal[True],
+) -> AsymmetryAnalysis: ...
 
 
 def compute_asymmetry_index(

@@ -30,7 +30,7 @@ Try it:
   q2: ─H── [X─────MCX─────X] ── [H─X─────MCX─────X─H] ── M
   q3: ─H── [  ─H──   ──H──  ] ── [H─X──H──   ──H──X─H] ── M
             └── oracle ──────┘    └── diffusion ────────┘
-  
+
   Repeat oracle + diffusion √N ≈ 3 times for 4 qubits.
   Target appears with >96% probability.
 
@@ -63,7 +63,9 @@ from src.engine.models import ExperimentConfig, ExperimentResult
 from src.experiments.base import BaseExperiment
 
 
-def _build_grover_circuit(n_qubits: int, target: str, n_iterations: int | None = None) -> QuantumCircuit:
+def _build_grover_circuit(
+    n_qubits: int, target: str, n_iterations: int | None = None
+) -> QuantumCircuit:
     """Build Grover's search circuit.
 
     Args:
@@ -115,11 +117,12 @@ class GroverExperiment(BaseExperiment):
     description = "Grover's search — find a marked item with quadratic speedup"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         target = "1010"
         circuit = _build_grover_circuit(len(target), target)
         return ExperimentConfig(
-            num_qubits=len(target,
-            visualization_type=["histogram", "circuit"],),
+            num_qubits=len(target),
+            visualization_type=["histogram", "circuit"],
             state_type="CUSTOM",
             shots=4096,
             noise_enabled=False,
@@ -130,7 +133,9 @@ class GroverExperiment(BaseExperiment):
             },
         )
 
-    def run_scaling(self, qubit_range: list[int] | None = None, **overrides: Any) -> list[ExperimentResult]:
+    def run_scaling(
+        self, qubit_range: list[int] | None = None, **overrides: Any
+    ) -> list[ExperimentResult]:
         """Run at multiple qubit counts to see success probability scale."""
         qubits = qubit_range or [2, 3, 4, 5]
         targets = {2: "10", 3: "101", 4: "1010", 5: "10101"}

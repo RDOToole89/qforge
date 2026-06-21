@@ -45,6 +45,7 @@ class ScalingLadder(BaseExperiment):
     description = "Test decoherence structure scaling from 2 to 6+ qubits"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -53,10 +54,13 @@ class ScalingLadder(BaseExperiment):
             error_rate=0.1,
             shots=8192,
             metrics="structured_decoherence",
-            visualization_type="all",)
+            visualization_type="all",
+        )
 
     def run_ghz_ladder(
-        self, qubit_range: list[int] | None = None, **overrides: Any,
+        self,
+        qubit_range: list[int] | None = None,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """Run GHZ scaling ladder."""
         qubits = qubit_range or [2, 3, 4, 5, 6]
@@ -67,7 +71,9 @@ class ScalingLadder(BaseExperiment):
         )
 
     def run_w_ladder(
-        self, qubit_range: list[int] | None = None, **overrides: Any,
+        self,
+        qubit_range: list[int] | None = None,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """Run W state scaling ladder."""
         qubits = qubit_range or [2, 3, 4, 5, 6]
@@ -78,7 +84,9 @@ class ScalingLadder(BaseExperiment):
         )
 
     def run_comparison(
-        self, qubit_range: list[int] | None = None, **overrides: Any,
+        self,
+        qubit_range: list[int] | None = None,
+        **overrides: Any,
     ) -> tuple[list[ExperimentResult], list[ExperimentResult]]:
         """Run both GHZ and W ladders for direct comparison."""
         ghz = self.run_ghz_ladder(qubit_range, **overrides)

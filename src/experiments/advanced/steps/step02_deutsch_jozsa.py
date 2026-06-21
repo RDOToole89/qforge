@@ -87,6 +87,7 @@ class DeutschJozsaExperiment(BaseExperiment):
     description = "Step 2: Deutsch-Jozsa — exponential speedup for function classification"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _dj_circuit(4, "balanced")
         return ExperimentConfig(
             num_qubits=5,
@@ -94,19 +95,24 @@ class DeutschJozsaExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_both_oracles(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run with constant and balanced oracles, compare outcomes."""
         const_circuit = _dj_circuit(4, "constant")
         bal_circuit = _dj_circuit(4, "balanced")
 
-        constant = self.run({
-            "custom_params": {"source": "circuit", "circuit": const_circuit},
-        })
-        balanced = self.run({
-            "custom_params": {"source": "circuit", "circuit": bal_circuit},
-        })
+        constant = self.run(
+            {
+                "custom_params": {"source": "circuit", "circuit": const_circuit},
+            }
+        )
+        balanced = self.run(
+            {
+                "custom_params": {"source": "circuit", "circuit": bal_circuit},
+            }
+        )
         return constant, balanced
 
 

@@ -110,7 +110,7 @@ class Subscription:
     def __enter__(self) -> Subscription:
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> None:
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
         self.unsubscribe()
 
 

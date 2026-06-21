@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 from src.core.analysis.core.bootstrap import bootstrap_confidence_interval
-from src.core.analysis.core.information_theory import entropy, counts_to_probabilities
+from src.core.analysis.core.information_theory import counts_to_probabilities, entropy
 
 
 class TestBootstrapCoverage:
@@ -52,7 +52,7 @@ class TestBootstrapCoverage:
             probs = np.array(list(counts_to_probabilities(counts).values()))
             return float(entropy(probs))
 
-        for trial in range(n_trials):
+        for _trial in range(n_trials):
             # Generate sample from biased coin
             outcomes = rng.choice(["0", "1"], size=n_samples, p=[p_bias, 1 - p_bias])
             counts = {

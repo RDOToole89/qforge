@@ -55,6 +55,7 @@ class ClusterStatesExperiment(BaseExperiment):
     description = "Step 8: Cluster states — entangled but 'invisible' in Z-basis measurement"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="CLUSTER",

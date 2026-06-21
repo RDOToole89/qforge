@@ -57,6 +57,7 @@ class NoiseComparison(BaseExperiment):
     description = "Compare depolarizing vs amplitude damping on the same state"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -65,7 +66,8 @@ class NoiseComparison(BaseExperiment):
             error_rate=0.05,
             shots=4096,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_comparison(self) -> list[ExperimentResult]:
         """Run GHZ-4 under both depolarizing and amplitude damping."""

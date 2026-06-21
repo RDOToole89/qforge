@@ -5,7 +5,8 @@ plugin architecture:
 
 - Thread-safe renderer registry
 - Priority-based renderer selection
-- 6 built-in renderers (histogram, density matrix, correlation, circuit, metrics summary, Bloch sphere)
+- 6 built-in renderers (histogram, density matrix, correlation, circuit,
+  metrics summary, Bloch sphere)
 - Sweep-level visualization utilities (line plots, comparison histograms)
 
 Typical usage:

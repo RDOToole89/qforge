@@ -86,7 +86,7 @@ class BitFlipNoise(BaseNoise):
         num_qubits: int = 1,
         experiment_id: str = "N/A",
         coherent_error: bool = False,
-        pulse_amplitude_error: float = None,
+        pulse_amplitude_error: float | None = None,
     ):
         """Initialize bit flip noise with physics-based validation.
 
@@ -160,7 +160,7 @@ class BitFlipNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply bit flip noise to single-qubit quantum gates.
 
@@ -343,7 +343,9 @@ class BitFlipNoise(BaseNoise):
             },
         }
 
-    def _validate_bit_flip_params(self, error_rate: float, pulse_amplitude_error: float) -> None:
+    def _validate_bit_flip_params(
+        self, error_rate: float, pulse_amplitude_error: float | None
+    ) -> None:
         """Validate bit flip parameters against physics constraints.
 
         # Physics Constraint Validation

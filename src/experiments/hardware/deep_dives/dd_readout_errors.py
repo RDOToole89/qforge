@@ -48,6 +48,7 @@ class ReadoutErrorsExperiment(BaseExperiment):
     description = "Deep dive: Readout errors — when measurement itself is noisy"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=2,
             state_type="GHZ",
@@ -65,22 +66,40 @@ class ReadoutErrorsExperiment(BaseExperiment):
         results = []
 
         # Gate noise only
-        results.append(self.run({
-            "noise_enabled": True, "noise_type": "depolarizing",
-            "error_rate": 0.02, "readout_error_rate": None,
-        }))
+        results.append(
+            self.run(
+                {
+                    "noise_enabled": True,
+                    "noise_type": "depolarizing",
+                    "error_rate": 0.02,
+                    "readout_error_rate": None,
+                }
+            )
+        )
 
         # Readout noise only
-        results.append(self.run({
-            "noise_enabled": False, "noise_type": None,
-            "error_rate": None, "readout_error_rate": 0.05,
-        }))
+        results.append(
+            self.run(
+                {
+                    "noise_enabled": False,
+                    "noise_type": None,
+                    "error_rate": None,
+                    "readout_error_rate": 0.05,
+                }
+            )
+        )
 
         # Both
-        results.append(self.run({
-            "noise_enabled": True, "noise_type": "depolarizing",
-            "error_rate": 0.02, "readout_error_rate": 0.05,
-        }))
+        results.append(
+            self.run(
+                {
+                    "noise_enabled": True,
+                    "noise_type": "depolarizing",
+                    "error_rate": 0.02,
+                    "readout_error_rate": 0.05,
+                }
+            )
+        )
 
         return results
 

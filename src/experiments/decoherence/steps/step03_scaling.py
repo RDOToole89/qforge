@@ -51,6 +51,7 @@ class ScalingExperiment(BaseExperiment):
     description = "Step 3: Does structure grow with qubits? Run the scaling ladder"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -60,9 +61,12 @@ class ScalingExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
-    def run_ghz_ladder(self, qubit_range: list[int] | None = None, **overrides: Any) -> list[ExperimentResult]:
+    def run_ghz_ladder(
+        self, qubit_range: list[int] | None = None, **overrides: Any
+    ) -> list[ExperimentResult]:
         """Run GHZ at 2-6 qubits."""
         qubits = qubit_range or [2, 3, 4, 5, 6]
         return self.sweep(parameter_ranges={"num_qubits": qubits}, **overrides)

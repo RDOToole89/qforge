@@ -54,6 +54,7 @@ class BackendExplorationExperiment(BaseExperiment):
     description = "Step 4: Compare quantum processors — is your result hardware-independent?"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -73,6 +74,7 @@ class BackendExplorationExperiment(BaseExperiment):
                 results.append(self.run({"backend_name": name}))
             except Exception as e:
                 import logging
+
                 logging.getLogger(__name__).warning(f"Backend {name} unavailable: {e}")
         return results
 

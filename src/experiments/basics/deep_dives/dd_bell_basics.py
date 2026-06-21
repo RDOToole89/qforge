@@ -64,6 +64,7 @@ class BellExperiment(BaseExperiment):
     description = "Two-qubit Bell state — see quantum correlations in action"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=2,
             state_type="GHZ",
@@ -75,7 +76,10 @@ class BellExperiment(BaseExperiment):
         )
 
     def run_noise_sweep(
-        self, steps: int = 10, max_error: float = 0.3, **overrides: Any,
+        self,
+        steps: int = 10,
+        max_error: float = 0.3,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """Watch correlations decay as noise increases."""
         import numpy as np

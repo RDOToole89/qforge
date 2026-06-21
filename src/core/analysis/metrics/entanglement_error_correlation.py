@@ -49,7 +49,7 @@ import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Any
+from typing import Any, Literal, overload
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -98,6 +98,27 @@ class TopologyAnalysis:
             "topology_summary": self.topology_summary,
             "statistical_significance": self.statistical_significance,
         }
+
+
+@overload
+def compute_entanglement_error_correlation(
+    counts: Mapping[str, int],
+    state_type: str = ...,
+    topology_params: dict[str, Any] | None = ...,
+    alpha: float = ...,
+    return_analysis: Literal[False] = ...,
+) -> float: ...
+
+
+@overload
+def compute_entanglement_error_correlation(
+    counts: Mapping[str, int],
+    state_type: str = ...,
+    topology_params: dict[str, Any] | None = ...,
+    alpha: float = ...,
+    *,
+    return_analysis: Literal[True],
+) -> TopologyAnalysis: ...
 
 
 def compute_entanglement_error_correlation(
@@ -477,14 +498,14 @@ def _compute_kway_entanglement_weight(
         if len(qubit_combo) == 2:
             i, j = qubit_combo
             distance = min(abs(i - j), n_qubits - abs(i - j))
-            return np.exp(-EEC_LAMBDA * distance)
+            return float(np.exp(-EEC_LAMBDA * distance))
         else:
             # Higher-order: product of pairwise weights
             weight = 1.0
             for i, j in combinations(qubit_combo, 2):
                 distance = min(abs(i - j), n_qubits - abs(i - j))
                 weight *= np.exp(-EEC_LAMBDA * distance)
-            return weight ** (1 / len(list(combinations(qubit_combo, 2))))
+            return float(weight ** (1 / len(list(combinations(qubit_combo, 2)))))
 
     elif state_type.upper() == "W":
         # W state: all k-way combinations equally weighted

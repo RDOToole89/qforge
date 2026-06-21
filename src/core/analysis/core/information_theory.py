@@ -33,6 +33,7 @@ References:
 
 import logging
 from collections.abc import Mapping
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -110,7 +111,7 @@ def entropy(p: NDArray[np.float64], base: float = LOG_BASE) -> float:
     h = max(0.0, h)
 
     logger.debug(f"Computed entropy = {h:.6f} bits (base={base})")
-    return h
+    return float(h)
 
 
 def counts_to_probabilities(counts: Mapping[str, int], alpha: float = ALPHA) -> dict[str, float]:
@@ -264,7 +265,7 @@ def pairwise_joint_distribution(
 
     logger.debug(f"Joint distribution for qubits ({qubit_i}, {qubit_j}):\n{joint_probs}")
 
-    return joint_probs
+    return cast(NDArray[np.float64], joint_probs)
 
 
 def mutual_information(

@@ -127,7 +127,7 @@ class DepolarizingNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply depolarizing noise to quantum gates in the noise model.
 
@@ -263,7 +263,7 @@ class DepolarizingNoise(BaseNoise):
 
         if self.num_qubits == 1:
             # Single-qubit Kraus operators
-            return [np.sqrt(prob) * op for prob, op in zip(pauli_probs, pauli_ops)]
+            return [np.sqrt(prob) * op for prob, op in zip(pauli_probs, pauli_ops, strict=True)]
         else:
             # Multi-qubit tensor products (exponentially many operators)
             kraus_ops = []

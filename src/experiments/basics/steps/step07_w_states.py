@@ -58,6 +58,7 @@ class WStatesExperiment(BaseExperiment):
     description = "Step 7: W states — shared excitation, a different entanglement topology"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=3,
             state_type="W",
@@ -65,7 +66,9 @@ class WStatesExperiment(BaseExperiment):
             noise_enabled=False,
         )
 
-    def run_scaling(self, qubit_range: list[int] | None = None, **overrides: Any) -> list[ExperimentResult]:
+    def run_scaling(
+        self, qubit_range: list[int] | None = None, **overrides: Any
+    ) -> list[ExperimentResult]:
         """Run W states at increasing qubit counts."""
         qubits = qubit_range or [3, 4, 5, 6]
         return self.sweep(parameter_ranges={"num_qubits": qubits}, **overrides)

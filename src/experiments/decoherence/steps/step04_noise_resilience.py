@@ -56,6 +56,7 @@ class NoiseResilienceExperiment(BaseExperiment):
     description = "Step 4: How robust is structure? Sweep noise from 0% to 20%"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -65,9 +66,12 @@ class NoiseResilienceExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
-    def run_sweep(self, steps: int = 8, max_error: float = 0.20, **overrides: Any) -> list[ExperimentResult]:
+    def run_sweep(
+        self, steps: int = 8, max_error: float = 0.20, **overrides: Any
+    ) -> list[ExperimentResult]:
         """Sweep noise rate and track structure."""
         rates = np.linspace(0.005, max_error, steps).tolist()
         return self.sweep(parameter_ranges={"error_rate": rates}, **overrides)

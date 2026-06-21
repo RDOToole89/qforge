@@ -37,7 +37,7 @@ import json
 import unicodedata
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 def canonical_dumps(
@@ -139,7 +139,7 @@ def _normalize(
     exclude_none: bool,
     unicode_normalize: str | None,
     float_precision: int | None,
-):
+) -> Any:
     """Recursively convert `obj` into JSON-serializable, canonical form."""
     # Pydantic models
     if hasattr(obj, "model_dump"):
@@ -150,7 +150,7 @@ def _normalize(
 
     # Dataclasses
     if dataclasses.is_dataclass(obj):
-        obj = dataclasses.asdict(obj)
+        obj = dataclasses.asdict(cast("Any", obj))
 
     # Path-like
     if isinstance(obj, Path):
@@ -197,7 +197,7 @@ def _normalize(
     # Numpy scalars (without importing numpy): duck-typed via .item()
     if hasattr(obj, "item") and callable(obj.item):
         try:
-            return obj.item()  # type: ignore[no-any-return]
+            return obj.item()
         except Exception:
             pass
 
@@ -207,7 +207,7 @@ def _normalize(
 
     # Strings with Unicode normalization
     if isinstance(obj, str) and unicode_normalize:
-        return unicodedata.normalize(unicode_normalize, obj)
+        return unicodedata.normalize(cast("Any", unicode_normalize), obj)
 
     # Bytes -> hex
     if isinstance(obj, (bytes, bytearray, memoryview)):

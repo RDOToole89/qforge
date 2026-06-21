@@ -19,7 +19,14 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 
 class ExperimentConfig(BaseModel):
@@ -190,12 +197,19 @@ class ExperimentConfig(BaseModel):
     # ===== Field normalizers / validators =====
     @field_validator("visualization_type", mode="before")
     @classmethod
-    def _validate_visualization_type(cls, v: list[str] | str) -> list[str] | str:
+    def _validate_visualization_type(cls, v: Any) -> Any:
         """Validate visualization_type values against allowed set."""
         valid = {
-            "histogram", "density_matrix", "correlation", "circuit",
-            "metrics_summary", "bloch_sphere", "sweep_line", "comparison",
-            "all", "none",
+            "histogram",
+            "density_matrix",
+            "correlation",
+            "circuit",
+            "metrics_summary",
+            "bloch_sphere",
+            "sweep_line",
+            "comparison",
+            "all",
+            "none",
         }
         if isinstance(v, str):
             if v not in valid:
@@ -210,7 +224,7 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("state_type", mode="before")
     @classmethod
-    def _normalize_state_type(cls, v: str) -> str:
+    def _normalize_state_type(cls, v: Any) -> Any:
         """Normalize state_type to UPPERCASE for engine compatibility."""
         if isinstance(v, str):
             return v.strip().upper()
@@ -226,7 +240,7 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("t2")
     @classmethod
-    def validate_t2_constraint(cls, v: float | None, info) -> float | None:
+    def validate_t2_constraint(cls, v: float | None, info: ValidationInfo) -> float | None:
         """Validate T2 ≤ 2*T1 constraint (field-level guard; model-level check also present)."""
         if v is not None and "t1" in info.data and info.data["t1"] is not None:
             t1 = info.data["t1"]
@@ -236,7 +250,7 @@ class ExperimentConfig(BaseModel):
 
     @field_validator("noise_type")
     @classmethod
-    def validate_noise_type_with_enabled(cls, v: str | None, info) -> str | None:
+    def validate_noise_type_with_enabled(cls, v: str | None, info: ValidationInfo) -> str | None:
         """Ensure noise_type is provided when noise_enabled=True."""
         if info.data.get("noise_enabled", False) and v is None:
             raise ValueError("noise_type must be specified when noise_enabled=True")

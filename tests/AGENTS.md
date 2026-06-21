@@ -5,7 +5,7 @@ Last updated: 2026-04-05
 
 ## Purpose
 
-296+ tests validating both **software correctness** and **scientific validity**. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
+395 tests validating both **software correctness** and **scientific validity**. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
 
 ## Structure
 
@@ -99,6 +99,6 @@ IBM_QUANTUM_TOKEN=1 pytest tests/integration/test_hardware_integration.py -v
 
 ## Coverage
 
-- `src/core/analysis/`: 90%+ (critical physics code, enforced in pytest.ini)
+- `src/core/analysis/`: ~57% now, 55% gate enforced in pytest.ini (target 90% — critical physics code)
 - `src/engine/`: 80%+ target
 - `src/experiments/`: tested via integration, not unit coverage

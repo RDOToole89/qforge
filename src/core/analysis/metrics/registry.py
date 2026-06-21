@@ -15,9 +15,10 @@ from __future__ import annotations
 
 import importlib
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import Any, Callable, Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 from ..constants import STATUS_BAND_WIDTH
 
@@ -460,9 +461,12 @@ def _wrap_complexity_emergence(**kwargs: Any) -> MetricResult:
             extras={"reason": "Missing 'multi_qubit_data' series"},
         )
     try:
-        from .complexity_emergence_score import compute_complexity_emergence_score
+        from .complexity_emergence_score import (
+            EmergenceAnalysis,
+            compute_complexity_emergence_score,
+        )
 
-        analysis_or_value = compute_complexity_emergence_score(
+        analysis_or_value: float | EmergenceAnalysis = compute_complexity_emergence_score(
             multi_qubit_data, return_analysis=True
         )
         if hasattr(analysis_or_value, "to_dict"):

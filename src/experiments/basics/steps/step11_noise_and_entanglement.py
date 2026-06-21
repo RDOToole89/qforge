@@ -61,6 +61,7 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
     description = "Step 11: River vs Fog — how entanglement shapes decoherence patterns"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -69,7 +70,8 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_all_topologies(self) -> list[ExperimentResult]:
         """Compare four entanglement topologies under the same noise."""

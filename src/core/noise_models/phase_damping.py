@@ -91,7 +91,7 @@ class PhaseDampingNoise(BaseNoise):
         error_rate: float = 0.05,
         num_qubits: int = 1,
         experiment_id: str = "N/A",
-        t2_star: float = None,
+        t2_star: float | None = None,
         gate_time: float = 20e-9,
         temperature: float = 0.015,
     ):
@@ -170,7 +170,7 @@ class PhaseDampingNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply phase damping noise to single-qubit quantum gates.
 
@@ -393,7 +393,7 @@ class PhaseDampingNoise(BaseNoise):
         }
 
     def _validate_phase_damping_params(
-        self, error_rate: float, t2_star: float, gate_time: float, temperature: float
+        self, error_rate: float, t2_star: float | None, gate_time: float, temperature: float
     ) -> None:
         """Validate phase damping parameters against physics constraints.
 
@@ -460,7 +460,7 @@ class PhaseDampingNoise(BaseNoise):
         thermal_contribution = self._thermal_dephasing
 
         # Add thermal contribution (typically small)
-        return min(1.0, base_rate + thermal_contribution)
+        return float(min(1.0, base_rate + thermal_contribution))
 
     def _get_gate_sensitivity_map(self) -> dict[str, float]:
         """Get gate-specific dephasing sensitivity factors.

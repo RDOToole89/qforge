@@ -50,7 +50,7 @@ class BellState(BaseState):
     def __init__(
         self,
         num_qubits: int,
-        custom_params: dict = None,
+        custom_params: dict | None = None,
         experiment_id: str = "N/A",
         **kwargs: Any,
     ):

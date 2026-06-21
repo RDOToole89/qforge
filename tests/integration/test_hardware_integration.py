@@ -26,13 +26,15 @@ class TestHardwareIntegration:
         from src.engine.api import run
         from src.engine.models import ExperimentConfig
 
-        result = run(ExperimentConfig(
-            num_qubits=3,
-            state_type="GHZ",
-            sim_mode="hardware",
-            shots=100,
-            visualization_type="none",
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=3,
+                state_type="GHZ",
+                sim_mode="hardware",
+                shots=100,
+                visualization_type="none",
+            )
+        )
 
         assert result.status == "completed"
         counts = result.analysis.measurement_results.raw_counts
@@ -44,13 +46,15 @@ class TestHardwareIntegration:
         from src.engine.api import run
         from src.engine.models import ExperimentConfig
 
-        result = run(ExperimentConfig(
-            num_qubits=2,
-            state_type="GHZ",
-            sim_mode="hardware",
-            shots=100,
-            visualization_type="none",
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="GHZ",
+                sim_mode="hardware",
+                shots=100,
+                visualization_type="none",
+            )
+        )
 
         sim_info = result.provenance.simulator_info
         assert sim_info["sim_mode"] == "hardware"
@@ -67,13 +71,15 @@ class TestHardwareIntegration:
         from src.engine.api import run
         from src.engine.models import ExperimentConfig
 
-        result = run(ExperimentConfig(
-            num_qubits=2,
-            state_type="GHZ",
-            sim_mode="hardware",
-            shots=1000,
-            visualization_type="none",
-        ))
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="GHZ",
+                sim_mode="hardware",
+                shots=1000,
+                visualization_type="none",
+            )
+        )
 
         fidelity = result.analysis.measurement_results.fidelity
         assert fidelity is not None

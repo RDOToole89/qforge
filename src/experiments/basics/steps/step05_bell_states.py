@@ -56,6 +56,7 @@ class BellStatesExperiment(BaseExperiment):
     description = "Step 5: The four Bell states — foundation of quantum entanglement"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=2,
             state_type="GHZ",
@@ -72,10 +73,14 @@ class BellStatesExperiment(BaseExperiment):
         qc.h(0)
         qc.cx(0, 1)
         qc.measure([0, 1], [0, 1])
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
+        )
 
         # Φ−: X, H, CNOT (or H, CNOT, Z)
         qc = QuantumCircuit(2, 2)
@@ -83,10 +88,14 @@ class BellStatesExperiment(BaseExperiment):
         qc.cx(0, 1)
         qc.z(0)
         qc.measure([0, 1], [0, 1])
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
+        )
 
         # Ψ+: H, CNOT, X on q1
         qc = QuantumCircuit(2, 2)
@@ -94,10 +103,14 @@ class BellStatesExperiment(BaseExperiment):
         qc.cx(0, 1)
         qc.x(1)
         qc.measure([0, 1], [0, 1])
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
+        )
 
         # Ψ−: H, CNOT, X and Z
         qc = QuantumCircuit(2, 2)
@@ -106,10 +119,14 @@ class BellStatesExperiment(BaseExperiment):
         qc.x(1)
         qc.z(0)
         qc.measure([0, 1], [0, 1])
-        results.append(self.run({
-            "state_type": "CUSTOM",
-            "custom_params": {"source": "circuit", "circuit": qc},
-        }))
+        results.append(
+            self.run(
+                {
+                    "state_type": "CUSTOM",
+                    "custom_params": {"source": "circuit", "circuit": qc},
+                }
+            )
+        )
 
         return results
 

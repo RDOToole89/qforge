@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -324,7 +324,7 @@ class BaseState(ABC):
             result = job.result()
             statevector = result.get_statevector()
 
-            return statevector.data
+            return cast(np.ndarray, statevector.data)
 
         except Exception as e:
             # Use helper for consistent fallback behavior
@@ -398,7 +398,7 @@ class BaseState(ABC):
         state = real_parts + 1j * imag_parts
 
         # Normalize to unit vector
-        return state / np.linalg.norm(state)
+        return cast(np.ndarray, state / np.linalg.norm(state))
 
     def _apply_gate_count_balancing(self, circuit: QuantumCircuit) -> QuantumCircuit:
         """Pad qubits with identity gates so all qubits have equal gate count.

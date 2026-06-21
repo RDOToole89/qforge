@@ -107,6 +107,12 @@ print(f"Entanglement Correlation: {schema_result['entanglement_error_correlation
 
 ## Development Commands
 
+> **Environment**: This project uses [uv](https://docs.astral.sh/uv/) for Python
+> dependency management. `pyproject.toml` is the single source of truth for
+> dependencies; `uv.lock` pins them; `.python-version` pins Python to 3.12.
+> Set up with `uv sync`, and prefix Python commands with `uv run` (e.g.
+> `uv run pytest`, `uv run python -c "..."`). There is no `requirements.txt`.
+
 ### Core Analysis Testing
 
 ```bash
@@ -270,7 +276,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Linting**: ruff with pydocstyle (D), complexity (C901 max 15), Google convention
 - **Pre-commit hooks**: ruff check + format, trailing whitespace, YAML/JSON/TOML validation
 - **Type checking**: mypy strict mode
-- **Testing**: pytest with 90% coverage on core analysis, 296+ passing tests
+- **Testing**: pytest with ~57% coverage on core analysis (55% gate enforced, target 90%), 395 passing tests
 
 **Frontend (React Native / Expo)** - ✅ **REFACTORED**
 

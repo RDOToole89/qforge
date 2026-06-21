@@ -18,7 +18,7 @@ where each |ψᵢ⟩ = cos(θᵢ/2)|0⟩ + e^(iφᵢ)sin(θᵢ/2)|1⟩
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -265,7 +265,8 @@ class SuperpositionState(BaseState):
                 qubit_state = np.array([1.0, 1.0], dtype=complex) / np.sqrt(2)
             else:
                 # Custom angles: cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩
-                angles = angles_by_qubit[qubit]
+                # Guarded above: this branch implies angles_by_qubit[qubit] is not None
+                angles = cast("dict[str, float]", angles_by_qubit[qubit])
                 theta, phi = angles["theta"], angles["phi"]
                 qubit_state = np.array(
                     [np.cos(theta / 2), np.exp(1j * phi) * np.sin(theta / 2)], dtype=complex

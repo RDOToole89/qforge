@@ -1,7 +1,6 @@
 """Tests for fingerprint utilities in correlations.py."""
 
 import numpy as np
-import pytest
 
 from src.core.analysis.core.correlations import (
     cosine_similarity_matrix,

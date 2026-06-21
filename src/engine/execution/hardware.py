@@ -300,7 +300,7 @@ def execute_on_hardware(
         # Fallback: grab the first attribute that has get_counts
         for attr in dir(data_bin):
             obj = getattr(data_bin, attr, None)
-            if hasattr(obj, "get_counts"):
+            if obj is not None and hasattr(obj, "get_counts"):
                 counts = obj.get_counts()
                 break
         else:

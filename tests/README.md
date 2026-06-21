@@ -1,6 +1,6 @@
 # Test Suite
 
-296+ tests with 90% minimum coverage on core analysis. Tests are organized by layer (core, engine, integration, physics, schemas) with custom pytest markers.
+395 tests organized by layer (core, engine, integration, physics, schemas) with custom pytest markers. Coverage of core analysis is currently ~57%, enforced at a 55% gate (target: 90%).
 
 ---
 
@@ -97,7 +97,7 @@ Custom markers from `pytest.ini`:
 
 ## Coverage
 
-- **Target**: 90% minimum on `src/core/analysis` (enforced by `--cov-fail-under=90`)
+- **Gate**: 55% on `src/core/analysis`, enforced by `--cov-fail-under=55` (currently ~57%; raise toward the 90% target as analysis tests are added)
 - **Report**: HTML report generated at `htmlcov/`
 - **Scope**: Coverage is measured on `src/core/analysis` only; other modules are tested but not coverage-gated
 - **CI**: `make test` runs the full suite with coverage enforcement

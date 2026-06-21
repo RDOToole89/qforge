@@ -78,7 +78,7 @@ class MeasurementResults(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _precompute_probs(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _precompute_probs(cls, data: Any) -> Any:
         """Compute outcome_probabilities from raw_counts if missing."""
         if not isinstance(data, dict):
             return data

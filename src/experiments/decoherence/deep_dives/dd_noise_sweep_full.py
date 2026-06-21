@@ -50,6 +50,7 @@ class NoiseSweep(BaseExperiment):
     description = "Sweep noise rate to test decoherence structure resilience"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=6,
             state_type="GHZ",
@@ -59,7 +60,8 @@ class NoiseSweep(BaseExperiment):
             shots=8192,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type="all",)
+            visualization_type="all",
+        )
 
     def run_sweep(
         self,

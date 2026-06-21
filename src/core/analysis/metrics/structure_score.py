@@ -52,7 +52,7 @@ from .pathway_concentration_ratio import (
 logger = logging.getLogger(__name__)
 
 
-def compute_structure_score(*, counts: dict[str, int], **kwargs) -> dict[str, Any]:
+def compute_structure_score(*, counts: dict[str, int], **kwargs: Any) -> dict[str, Any]:
     """Compute Structure Score (Asymmetry Index).
 
     This is a thin wrapper around the canonical implementation of Asymmetry Index.

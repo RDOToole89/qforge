@@ -21,7 +21,14 @@ from datetime import datetime
 from itertools import product
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from .config import ExperimentConfig
 from .results import ExperimentResult
@@ -108,7 +115,7 @@ class SweepManifest(BaseModel):
     @field_validator("base_config")
     @classmethod
     def validate_base_config_or_preset(
-        cls, v: ExperimentConfig | None, info
+        cls, v: ExperimentConfig | None, info: ValidationInfo
     ) -> ExperimentConfig | None:
         """Ensure either base_config or base_preset is provided.
 
@@ -177,7 +184,7 @@ class SweepManifest(BaseModel):
         value_lists = [self.parameter_ranges[k] for k in keys]
         combos = []
         for values in product(*value_lists):
-            combos.append({k: v for k, v in zip(keys, values)})
+            combos.append({k: v for k, v in zip(keys, values, strict=True)})
         return combos
 
     def _apply_overrides(self, params: dict[str, Any]) -> dict[str, Any]:

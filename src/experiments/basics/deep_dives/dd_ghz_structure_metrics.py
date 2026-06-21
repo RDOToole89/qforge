@@ -66,6 +66,7 @@ class GHZExploration(BaseExperiment):
     description = "Explore multi-qubit GHZ states and decoherence structure metrics"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         return ExperimentConfig(
             num_qubits=4,
             state_type="GHZ",
@@ -74,10 +75,13 @@ class GHZExploration(BaseExperiment):
             error_rate=0.05,
             shots=4096,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "metrics_summary"],)
+            visualization_type=["histogram", "metrics_summary"],
+        )
 
     def run_scaling(
-        self, qubit_range: list[int] | None = None, **overrides: Any,
+        self,
+        qubit_range: list[int] | None = None,
+        **overrides: Any,
     ) -> list[ExperimentResult]:
         """Run at multiple qubit counts to see how structure scales."""
         if qubit_range is None:

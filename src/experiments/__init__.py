@@ -24,7 +24,48 @@ Usage:
     results = exp.sweep({"error_rate": [0.01, 0.05, 0.1, 0.2]})
 """
 
+from src.experiments.advanced.deep_dives.dd_bb84 import bb84
+
+# Advanced — deep dives
+from src.experiments.advanced.deep_dives.dd_bernstein_vazirani import bernstein_vazirani
+from src.experiments.advanced.deep_dives.dd_grover import GroverExperiment, grover_experiment
+from src.experiments.advanced.deep_dives.dd_qaoa import QAOAExperiment, qaoa_experiment
+from src.experiments.advanced.deep_dives.dd_shor import ShorExperiment, shor_experiment
+from src.experiments.advanced.deep_dives.dd_vqe import VQEExperiment, vqe_experiment
+
+# Advanced — steps
+from src.experiments.advanced.steps.step01_quantum_randomness import quantum_randomness
+from src.experiments.advanced.steps.step02_deutsch_jozsa import deutsch_jozsa
+from src.experiments.advanced.steps.step03_grover_search import grover_search
+from src.experiments.advanced.steps.step04_teleportation import teleportation as adv_teleportation
+from src.experiments.advanced.steps.step05_superdense_coding import superdense
+from src.experiments.advanced.steps.step06_qft import qft
+from src.experiments.advanced.steps.step07_error_correction import error_correction
+from src.experiments.advanced.steps.step08_design_your_own import design_your_own
 from src.experiments.base import BaseExperiment, ExperimentProgram
+
+# Basics — deep dives
+from src.experiments.basics.deep_dives.dd_bell_basics import BellExperiment, bell_experiment
+from src.experiments.basics.deep_dives.dd_bell_correlations import (
+    BellCorrelation,
+    BellCorrelationMetrics,
+    bell_correlation,
+    compute_bell_metrics,
+)
+from src.experiments.basics.deep_dives.dd_bloch_geometry import bloch_geometry
+from src.experiments.basics.deep_dives.dd_density_matrix import density_matrix_mode
+from src.experiments.basics.deep_dives.dd_entanglement_fragility import entanglement_fragility
+from src.experiments.basics.deep_dives.dd_ghz_structure_metrics import (
+    GHZExploration,
+    ghz_exploration,
+)
+from src.experiments.basics.deep_dives.dd_measurement_basis import measurement_basis
+from src.experiments.basics.deep_dives.dd_noise_model_comparison import (
+    NoiseComparison,
+    noise_comparison,
+)
+from src.experiments.basics.deep_dives.dd_structure_scaling import structure_scaling
+from src.experiments.basics.deep_dives.dd_teleportation_intro import teleportation_intro
 
 # Basics — steps (core learning path)
 from src.experiments.basics.steps.step01_superposition import superposition
@@ -39,40 +80,12 @@ from src.experiments.basics.steps.step09_noise_intro import noise_intro
 from src.experiments.basics.steps.step10_noise_types import noise_types
 from src.experiments.basics.steps.step11_noise_and_entanglement import noise_and_entanglement
 
-# Basics — deep dives
-from src.experiments.basics.deep_dives.dd_bell_basics import BellExperiment, bell_experiment
-from src.experiments.basics.deep_dives.dd_bell_correlations import (
-    BellCorrelation,
-    BellCorrelationMetrics,
-    bell_correlation,
-    compute_bell_metrics,
+# Decoherence — deep dives
+from src.experiments.decoherence.deep_dives.dd_classical_null import classical_null
+from src.experiments.decoherence.deep_dives.dd_state_probe import (
+    StateProbeStudy,
+    state_probe_sensitivity,
 )
-from src.experiments.basics.deep_dives.dd_bloch_geometry import bloch_geometry
-from src.experiments.basics.deep_dives.dd_density_matrix import density_matrix_mode
-from src.experiments.basics.deep_dives.dd_entanglement_fragility import entanglement_fragility
-from src.experiments.basics.deep_dives.dd_ghz_structure_metrics import GHZExploration, ghz_exploration
-from src.experiments.basics.deep_dives.dd_measurement_basis import measurement_basis
-from src.experiments.basics.deep_dives.dd_noise_model_comparison import NoiseComparison, noise_comparison
-from src.experiments.basics.deep_dives.dd_structure_scaling import structure_scaling
-from src.experiments.basics.deep_dives.dd_teleportation_intro import teleportation_intro
-
-# Advanced — steps
-from src.experiments.advanced.steps.step01_quantum_randomness import quantum_randomness
-from src.experiments.advanced.steps.step02_deutsch_jozsa import deutsch_jozsa
-from src.experiments.advanced.steps.step03_grover_search import grover_search
-from src.experiments.advanced.steps.step04_teleportation import teleportation as adv_teleportation
-from src.experiments.advanced.steps.step05_superdense_coding import superdense
-from src.experiments.advanced.steps.step06_qft import qft
-from src.experiments.advanced.steps.step07_error_correction import error_correction
-from src.experiments.advanced.steps.step08_design_your_own import design_your_own
-
-# Advanced — deep dives
-from src.experiments.advanced.deep_dives.dd_bernstein_vazirani import bernstein_vazirani
-from src.experiments.advanced.deep_dives.dd_bb84 import bb84
-from src.experiments.advanced.deep_dives.dd_shor import ShorExperiment, shor_experiment
-from src.experiments.advanced.deep_dives.dd_grover import GroverExperiment, grover_experiment
-from src.experiments.advanced.deep_dives.dd_vqe import VQEExperiment, vqe_experiment
-from src.experiments.advanced.deep_dives.dd_qaoa import QAOAExperiment, qaoa_experiment
 
 # Decoherence — steps
 from src.experiments.decoherence.steps.step01_river_vs_fog import river_vs_fog
@@ -82,12 +95,8 @@ from src.experiments.decoherence.steps.step04_noise_resilience import noise_resi
 from src.experiments.decoherence.steps.step05_global_vs_local import global_vs_local
 from src.experiments.decoherence.steps.step06_simulation_vs_reality import sim_vs_reality
 
-# Decoherence — deep dives
-from src.experiments.decoherence.deep_dives.dd_classical_null import classical_null
-from src.experiments.decoherence.deep_dives.dd_state_probe import (
-    StateProbeStudy,
-    state_probe_sensitivity,
-)
+# Hardware — deep dives
+from src.experiments.hardware.deep_dives.dd_readout_errors import readout_errors
 
 # Hardware — steps
 from src.experiments.hardware.steps.step01_first_hardware_run import first_hardware
@@ -95,9 +104,6 @@ from src.experiments.hardware.steps.step02_hardware_vs_simulation import hardwar
 from src.experiments.hardware.steps.step03_transpilation import transpilation as hw_transpilation
 from src.experiments.hardware.steps.step04_backend_exploration import backend_exploration
 from src.experiments.hardware.steps.step05_real_decoherence import real_decoherence
-
-# Hardware — deep dives
-from src.experiments.hardware.deep_dives.dd_readout_errors import readout_errors
 
 # Alias for state probe
 state_probe = state_probe_sensitivity

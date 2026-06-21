@@ -89,7 +89,7 @@ class AmplitudeDampingNoise(BaseNoise):
         error_rate: float = 0.05,
         num_qubits: int = 1,
         experiment_id: str = "N/A",
-        t1: float = None,
+        t1: float | None = None,
         gate_time: float = 20e-9,
         temperature: float = 0.015,
     ):
@@ -168,7 +168,7 @@ class AmplitudeDampingNoise(BaseNoise):
         )
 
     def apply(
-        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int = None
+        self, noise_model: NoiseModel, gate_list: list[str], qubits_for_error: int | None = None
     ) -> None:
         """Apply amplitude damping noise to quantum gates.
 
@@ -363,7 +363,7 @@ class AmplitudeDampingNoise(BaseNoise):
         }
 
     def _validate_amplitude_damping_params(
-        self, error_rate: float, t1: float, gate_time: float, temperature: float
+        self, error_rate: float, t1: float | None, gate_time: float, temperature: float
     ) -> None:
         """Validate amplitude damping parameters against physics constraints.
 
@@ -415,7 +415,7 @@ class AmplitudeDampingNoise(BaseNoise):
         beta_omega = photon_energy / thermal_energy
 
         # Excited state population
-        return 1.0 / (1.0 + np.exp(beta_omega))
+        return float(1.0 / (1.0 + np.exp(beta_omega)))
 
     def _calculate_effective_damping_rate(self) -> float:
         """Calculate effective damping rate including thermal corrections.
@@ -431,9 +431,9 @@ class AmplitudeDampingNoise(BaseNoise):
 
         if self._thermal_population > 0:
             # Thermal excitation reduces effective relaxation
-            return base_rate * (1 - self._thermal_population)
+            return float(base_rate * (1 - self._thermal_population))
         else:
-            return base_rate
+            return float(base_rate)
 
     def _calculate_channel_capacity(self) -> float:
         """Calculate quantum channel capacity for amplitude damping.

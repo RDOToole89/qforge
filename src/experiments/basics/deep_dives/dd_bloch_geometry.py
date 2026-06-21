@@ -54,8 +54,6 @@ TRY IT:
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 from qiskit import QuantumCircuit
 
@@ -70,6 +68,7 @@ class BlochGeometryExperiment(BaseExperiment):
     description = "Deep dive: Gates as rotations — trace paths on the Bloch sphere"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
         qc.ry(np.pi / 4, 0)
         qc.measure(0, 0)
@@ -88,9 +87,13 @@ class BlochGeometryExperiment(BaseExperiment):
             qc = QuantumCircuit(1, 1)
             qc.ry(float(theta), 0)
             qc.measure(0, 0)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": qc},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": qc},
+                    }
+                )
+            )
         return results
 
     def run_all_axes(self) -> dict[str, list[ExperimentResult]]:
@@ -102,9 +105,13 @@ class BlochGeometryExperiment(BaseExperiment):
                 qc = QuantumCircuit(1, 1)
                 getattr(qc, axis)(float(theta), 0)
                 qc.measure(0, 0)
-                results.append(self.run({
-                    "custom_params": {"source": "circuit", "circuit": qc},
-                }))
+                results.append(
+                    self.run(
+                        {
+                            "custom_params": {"source": "circuit", "circuit": qc},
+                        }
+                    )
+                )
             axes[axis] = results
         return axes
 

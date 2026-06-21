@@ -104,15 +104,15 @@ def metrics_to_schema(results: Mapping[str, MetricResult]) -> dict[str, Any]:
 
     # Process optional metrics (nullable)
     for metric_name in optional_metrics:
-        result = normalized.get(metric_name)
-        if result is None:
+        opt_result = normalized.get(metric_name)
+        if opt_result is None:
             schema_output[metric_name] = None
         else:
-            status = result.get("status")
+            status = opt_result.get("status")
             if status in ("insufficient_runs", "insufficient_data"):
                 schema_output[metric_name] = None
             else:
-                schema_output[metric_name] = _convert_metric_result(result, metric_name)
+                schema_output[metric_name] = _convert_metric_result(opt_result, metric_name)
 
     logger.debug(
         "Converted %d results to schema format", len(schema_output) - 1

@@ -101,6 +101,7 @@ class ErrorCorrectionExperiment(BaseExperiment):
     description = "Step 7: Error correction — protect quantum information with the 3-qubit code"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         circuit = _bit_flip_code_circuit(error_qubit=1)
         return ExperimentConfig(
             num_qubits=5,
@@ -108,16 +109,21 @@ class ErrorCorrectionExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_error_positions(self) -> list[ExperimentResult]:
         """Run with error on qubit 0, 1, 2, and no error."""
         results = []
         for eq in [None, 0, 1, 2]:
             circuit = _bit_flip_code_circuit(error_qubit=eq)
-            results.append(self.run({
-                "custom_params": {"source": "circuit", "circuit": circuit},
-            }))
+            results.append(
+                self.run(
+                    {
+                        "custom_params": {"source": "circuit", "circuit": circuit},
+                    }
+                )
+            )
         return results
 
 

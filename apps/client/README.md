@@ -17,8 +17,8 @@ npm run android    # Android emulator
 To connect to the Python API server (required for experiment mode):
 
 ```bash
-# From the project root, in a separate terminal:
-venv/bin/python -m uvicorn apps.api.main:app --reload --port 8000
+# From the project root, in a separate terminal (requires uv: https://docs.astral.sh/uv/):
+uv run uvicorn apps.api.main:app --reload --port 8000
 ```
 
 ---

@@ -88,7 +88,8 @@ class DesignYourOwnExperiment(BaseExperiment):
             error_rate=0.05,
             rng_seed=42,
             metrics="structured_decoherence",
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_hypothesis_test(self) -> tuple[ExperimentResult, ExperimentResult]:
         """Run the structured state and the control state.
@@ -101,9 +102,11 @@ class DesignYourOwnExperiment(BaseExperiment):
         structured = self.run()
 
         # The control: product state shows no structure
-        control = self.run({
-            "state_type": "SUPERPOSITION",
-        })
+        control = self.run(
+            {
+                "state_type": "SUPERPOSITION",
+            }
+        )
 
         return structured, control
 
@@ -111,6 +114,7 @@ class DesignYourOwnExperiment(BaseExperiment):
         """Sweep a parameter to explore its effect.
 
         MODIFY THIS to sweep whatever parameter interests you.
+
         Examples:
           - error_rate: how does noise affect your metric?
           - num_qubits: how does system size affect your metric?

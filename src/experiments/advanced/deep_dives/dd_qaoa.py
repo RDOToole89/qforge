@@ -62,7 +62,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 from qiskit import QuantumCircuit
 
 from src.engine.models import ExperimentConfig, ExperimentResult
@@ -70,8 +69,11 @@ from src.experiments.base import BaseExperiment
 
 
 def _build_qaoa_circuit(
-    n_qubits: int, edges: list[list[int]], p: int = 1,
-    gamma: float = 0.5, beta: float = 0.5,
+    n_qubits: int,
+    edges: list[list[int]],
+    p: int = 1,
+    gamma: float = 0.5,
+    beta: float = 0.5,
 ) -> QuantumCircuit:
     """Build a QAOA circuit for MaxCut.
 
@@ -114,6 +116,7 @@ class QAOAExperiment(BaseExperiment):
     description = "QAOA — solve MaxCut combinatorial optimization with quantum circuits"
 
     def default_config(self) -> ExperimentConfig:
+        """Return the default configuration for this experiment."""
         edges = [[0, 1], [1, 2], [2, 3], [0, 3]]
         circuit = _build_qaoa_circuit(4, edges, p=1)
         return ExperimentConfig(
@@ -127,13 +130,16 @@ class QAOAExperiment(BaseExperiment):
                 "p": 1,
                 "edges": edges,
             },
-            visualization_type=["histogram", "circuit"],)
+            visualization_type=["histogram", "circuit"],
+        )
 
     def run_depth_sweep(self, **overrides: Any) -> list[ExperimentResult]:
         """Run QAOA at increasing depths to see solution quality improve."""
         results = []
         for p in [1, 2, 3, 4, 5]:
-            r = self.run({"custom_params": {"p": p, "edges": [[0, 1], [1, 2], [2, 3], [0, 3]]}, **overrides})
+            r = self.run(
+                {"custom_params": {"p": p, "edges": [[0, 1], [1, 2], [2, 3], [0, 3]]}, **overrides}
+            )
             results.append(r)
         return results
 
