@@ -319,7 +319,8 @@ def _noise_segment(params: dict[str, Any]) -> str:
 
 
 def _checksum(path: Path) -> str:
-    h = hashlib.sha1()
+    # Non-cryptographic: file integrity/content-addressing, not a security digest.
+    h = hashlib.sha1(usedforsecurity=False)
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)

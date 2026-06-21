@@ -86,7 +86,8 @@ def canonical_dumps(
 def sha1_of(data: Mapping[str, Any]) -> str:
     """SHA-1 hash (hex) of the canonical JSON for `data` (backward compatible)."""
     s = canonical_dumps(data)
-    return hashlib.sha1(s.encode("utf-8")).hexdigest()
+    # Non-cryptographic: used only for deterministic content-addressed artifact IDs.
+    return hashlib.sha1(s.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def short_hash(data: Mapping[str, Any], length: int = 8) -> str:

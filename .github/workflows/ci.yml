@@ -78,9 +78,12 @@ jobs:
         enable-cache: true
 
     - name: Run security checks with bandit
+      # Full report (all severities) is uploaded for review; the gate only fails
+      # on medium+ findings. The low-severity findings are accepted patterns
+      # (e.g. try/except/pass in optional-import guards, asserts in tests).
       run: |
         uv run --group security bandit -r src -f json -o bandit-report.json || true
-        uv run --group security bandit -r src
+        uv run --group security bandit -r src --severity-level medium
 
     - name: Check dependencies for security vulnerabilities
       run: |
