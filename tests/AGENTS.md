@@ -5,7 +5,7 @@ Last updated: 2026-04-05
 
 ## Purpose
 
-950+ tests validating both **software correctness** and **scientific validity**. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
+~1,100 tests (1104 passing) validating both **software correctness** and **scientific validity**, including ~700 verified-value tests that assert outputs against analytical/closed-form calculations. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
 
 ## Structure
 

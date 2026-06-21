@@ -131,6 +131,12 @@ src/
 │   └── analysis/             # → Research metrics integration
 │
 ├── core/                     # 🧠 Quantum Mechanics Implementation
+│   ├── math/                 # → Shared math primitives (single source of truth)
+│   │   ├── pauli.py          # → Pauli matrices
+│   │   ├── rates.py          # → relaxation_probability
+│   │   ├── distances.py      # → TVD, Gini coefficient
+│   │   └── indexing.py       # → Canonical qubit/bit indexing
+│   │
 │   ├── state_preparation/    # → Pure quantum state creation
 │   │   ├── README.md         # → Educational masterpiece docs
 │   │   ├── base_state.py     # → Abstract foundation class

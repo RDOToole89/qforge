@@ -19,7 +19,7 @@ Physics laws are non-negotiable. Code that violates quantum mechanics will be re
 ## Architecture Layers (strict separation)
 
 ```
-src/core/           Pure physics — metrics, noise models, state preparation
+src/core/           Pure physics — metrics, noise models, state preparation, shared math primitives (src/core/math)
 src/engine/          Orchestration — run(), sweep(), models, visualization, provenance
 src/experiments/     Research programs — pluggable experiment definitions
 apps/api/            FastAPI REST endpoints
@@ -76,4 +76,4 @@ These refine the rules above but may not contradict them.
 - Update the nearest `AGENTS.md` when adding structural concepts
 - Register new experiments in 4 places (folder init, root init, folder README, experiments AGENTS.md)
 - Run `pytest` and verify via CLI before submitting changes
-- Use `src/core` utilities instead of duplicating physics/math helpers
+- Use `src/core` utilities instead of duplicating physics/math helpers — `src/core/math/` is the single source of truth for Pauli matrices, relaxation probabilities, TVD/Gini, and the canonical qubit/bit indexing convention

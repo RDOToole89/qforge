@@ -81,7 +81,7 @@ analysis/
     pathway_persistence.py    Pathway persistence wrapper
     total_correlation.py      TC: multi-information
     noise_topology_correlation.py  NTC: permutation test for noise-topology
-    structure_score.py        SS: delegation to JSD or AI
+    structure_score.py        SS: JSD from factorized (independent-marginals) null model
     profiles.py               Metric selection profiles (structured_decoherence, minimal, full)
 
   core/                     Mathematical foundations
@@ -118,8 +118,10 @@ Public API:
 - `compute_all(metric_names, **kwargs)` -- Compute multiple metrics with shared parameters
 - `@register(name)` -- Decorator to register new metrics
 
+`structure_score` (JSD from the factorized null model) and `asymmetry_index`
+(TVD from uniform) are distinct, separately registered metrics.
+
 Aliases are provided for backward compatibility:
-- `asymmetry_index` -> `structure_score`
 - `pathway_concentration_ratio` -> `concentration_index`
 - `temporal_pathway_stability` -> `pathway_persistence`
 

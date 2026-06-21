@@ -221,6 +221,11 @@ The framework follows a strict **three-layer architecture** with unidirectional 
 qforge/
 ├── src/
 │   ├── core/                          # Pure physics (no IO)
+│   │   ├── math/                      # Shared math primitives (single source of truth)
+│   │   │   ├── pauli.py                     # Pauli matrices
+│   │   │   ├── rates.py                     # relaxation_probability
+│   │   │   ├── distances.py                 # TVD, Gini coefficient
+│   │   │   └── indexing.py                  # Canonical qubit/bit indexing
 │   │   ├── analysis/                  # Research metrics & pipelines
 │   │   │   ├── core/                  # Mathematical foundations
 │   │   │   │   ├── information_theory.py    # Entropy, MI, divergences

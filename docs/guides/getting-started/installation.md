@@ -123,7 +123,7 @@ qiskit-experiment-framework/
 ├── apps/
 │   ├── api/                 # FastAPI server
 │   └── client/              # Expo/React Native web UI
-├── tests/                   # Test suite (395+ tests)
+├── tests/                   # Test suite (~1,100 tests)
 ├── docs/                    # Documentation
 ├── pyproject.toml           # Dependencies, tool config (single source of truth)
 ├── uv.lock                  # Pinned, reproducible dependency lockfile
