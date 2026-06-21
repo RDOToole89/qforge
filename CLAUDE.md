@@ -276,7 +276,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Linting**: ruff with pydocstyle (D), complexity (C901 max 15), Google convention
 - **Pre-commit hooks**: ruff check + format, trailing whitespace, YAML/JSON/TOML validation
 - **Type checking**: mypy strict mode
-- **Testing**: pytest with 90% coverage on core analysis, 296+ passing tests
+- **Testing**: pytest with ~57% coverage on core analysis (55% gate enforced, target 90%), 395 passing tests
 
 **Frontend (React Native / Expo)** - ✅ **REFACTORED**
 

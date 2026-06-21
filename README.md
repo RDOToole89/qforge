@@ -121,7 +121,7 @@ graph LR
 | **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
 | **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
-| **Tests** | 296+ passing, 90% coverage on core analysis |
+| **Tests** | 395 passing, ~57% coverage on core analysis (55% gate, target 90%) |
 
 ### Visual Quantum Laboratory (React Native / Expo)
 
@@ -335,7 +335,7 @@ Requires IBM Quantum credentials. See [docs/guides/hardware-setup.md](docs/guide
 | Engine | Python 3.12+, Pydantic 2, NumPy |
 | API | FastAPI, Uvicorn |
 | Frontend | React Native 0.81, Expo SDK 54, TypeScript 5.9, Three.js |
-| Code quality | ruff, mypy (strict), pytest (296+ tests), pre-commit hooks |
+| Code quality | ruff, mypy (strict), pytest (395 tests), pre-commit hooks |
 
 ---
 
