@@ -66,9 +66,9 @@ graph TB
     end
 
     subgraph "Core Layer"
-        C1[State Preparation<br/>7 state types]
+        C1[State Preparation<br/>6 state types]
         C2[Noise Models<br/>8 noise channels]
-        C3[Analysis<br/>13 metrics + pipelines]
+        C3[Analysis<br/>8 metrics + pipelines]
     end
 
     subgraph "Execution Backends"
