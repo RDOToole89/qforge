@@ -54,6 +54,8 @@ from typing import Any, Literal, overload
 import numpy as np
 from scipy.stats import pearsonr
 
+from src.core.math import physical_qubit_of_index
+
 from ..constants import (
     ALPHA,
     CORRELATION_MODERATE_THRESHOLD,
@@ -365,16 +367,24 @@ def _construct_entanglement_topology(
                 W[i, j] = W[j, i] = uniform_weight
 
     elif state_type.upper() == "BELL":
-        # Bell state: Perfect 2-qubit correlation, extended to n qubits
+        # Bell state: Perfect 2-qubit correlation, extended to n qubits.
         if n_qubits == 2:
             W[0, 1] = W[1, 0] = 1.0
         else:
-            # Extended Bell: strongest correlation between first two qubits
-            W[0, 1] = W[1, 0] = 1.0
-            # Weaker correlations with other qubits
-            for i in range(2, n_qubits):
-                W[0, i] = W[i, 0] = 0.5
-                W[1, i] = W[i, 1] = 0.5
+            # Extended Bell: the entangled pair lives on physical qubits 0 and 1.
+            # Under the canonical convention these map to bitstring indices
+            # n-1 and n-2, so we place the strong bond there to keep the topology
+            # aligned with the MI (error-correlation) matrix, which is indexed by
+            # the same positional convention.
+            a = physical_qubit_of_index(0, n_qubits)  # n-1
+            b = physical_qubit_of_index(1, n_qubits)  # n-2
+            W[a, b] = W[b, a] = 1.0
+            # Weaker correlations with the remaining qubits
+            for i in range(n_qubits):
+                if i in (a, b):
+                    continue
+                W[a, i] = W[i, a] = 0.5
+                W[b, i] = W[i, b] = 0.5
 
     elif state_type.upper() == "CLUSTER":
         # Cluster state: Nearest-neighbor connectivity

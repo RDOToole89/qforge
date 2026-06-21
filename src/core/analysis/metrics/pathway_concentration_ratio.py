@@ -43,6 +43,8 @@ from typing import Any, Literal, Union, overload
 
 import numpy as np
 
+from src.core.math import gini_coefficient
+
 from ..constants import (
     validate_counts_dict,
 )
@@ -151,7 +153,7 @@ def compute_pathway_concentration_ratio(
         >>> # High concentration (GHZ-like)
         >>> counts = {"000": 400, "111": 300, "001": 100, "010": 50, "011": 150}
         >>> compute_pathway_concentration_ratio(counts)
-        14.0
+        8.0
 
     Complexity:
         Time: O(n log n) for sorting frequencies
@@ -280,19 +282,8 @@ def compute_concentration_with_gini(counts: Mapping[str, int]) -> tuple[float, f
     # Compute PCR using main function
     pcr = compute_pathway_concentration_ratio(counts_clean)
 
-    # Compute Gini coefficient
-    asc = np.asarray(sorted(counts_clean.values()), dtype=float)
-    n = asc.size
-
-    if n <= 1:
-        gini = 0.0
-    else:
-        # Standard Gini coefficient formula
-        cumsum = np.cumsum(asc)
-        gini = (2.0 * np.sum(np.arange(1, n + 1, dtype=float) * asc)) / (n * cumsum[-1]) - (
-            n + 1
-        ) / n
-    gini = max(0.0, gini)  # Ensure non-negative
+    # Compute Gini coefficient via shared primitive
+    gini = gini_coefficient(list(counts_clean.values()))
 
     logger.debug(f"Concentration measures: PCR={pcr:.3f}, Gini={gini:.3f}")
     return pcr, gini
@@ -317,16 +308,8 @@ def _generate_concentration_analysis(
     else:
         concentration_evidence = "uniform"
 
-    # Calculate Gini coefficient for additional insight
-    n = len(frequencies)
-    if n > 1:
-        cumsum = np.cumsum(sorted(frequencies))
-        gini = (2.0 * np.sum(np.arange(1, n + 1) * sorted(frequencies))) / (n * cumsum[-1]) - (
-            n + 1
-        ) / n
-        gini = max(0.0, gini)
-    else:
-        gini = 0.0
+    # Calculate Gini coefficient for additional insight via shared primitive
+    gini = gini_coefficient(frequencies)
 
     # Calculate quartile shares (as fractions of total)
     top_quartile_share = sum(frequencies[:top_k]) / total_counts

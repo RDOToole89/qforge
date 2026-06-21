@@ -189,6 +189,14 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - `src/core/analysis/constants.py` - **Centralized configuration**
   - All thresholds, parameters, and validation functions
 
+### Shared Math Primitives
+
+- `src/core/math/` - **Single source of truth for low-level math** (imported across noise models, analysis metrics, and the engine)
+  - `pauli.py` - Single-qubit Pauli matrices (`PAULI_I/X/Y/Z`, `PAULIS`, `pauli()`)
+  - `rates.py` - `relaxation_probability(t, tau)` = 1 - exp(-t/tau)
+  - `distances.py` - `total_variation_distance()` and `gini_coefficient()`
+  - `indexing.py` - Canonical qubit/bit indexing convention (`bit_for_qubit`, `physical_qubit_of_index`): logical bitstring index i = position i; physical qubit = n-1-i (Qiskit, rightmost is qubit 0)
+
 ### Engine (Primary Interface)
 
 - `src/engine/api.py` - Main entry points: `run()`, `sweep()`, `iter_experiment_configs()`
@@ -276,7 +284,7 @@ print(f'Evidence for structured pathways: {metrics.asymmetry_index > 0.2}')
 - **Linting**: ruff with pydocstyle (D), complexity (C901 max 15), Google convention
 - **Pre-commit hooks**: ruff check + format, trailing whitespace, YAML/JSON/TOML validation
 - **Type checking**: mypy strict mode
-- **Testing**: pytest with ~57% coverage on core analysis (55% gate enforced, target 90%), 395 passing tests
+- **Testing**: pytest with ~97% coverage on the physics/math core (all of `src/core` plus the engine math modules: `fidelity`, `bloch_math`, `analysis/research_integration`, `models/measurement`) behind a 95% gate, ~1,100 passing tests (1104) verified against analytical/closed-form values
 
 **Frontend (React Native / Expo)** - ✅ **REFACTORED**
 

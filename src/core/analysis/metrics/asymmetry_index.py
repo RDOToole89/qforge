@@ -48,6 +48,8 @@ from typing import Literal, overload
 
 import numpy as np
 
+from src.core.math import total_variation_distance
+
 from ..constants import (
     ALPHA,
     MAX_OUTCOMES_EXACT,
@@ -107,7 +109,7 @@ class AsymmetryAnalysis:
 
 def _tvd_vs_uniform_from_counts_fast(
     counts: Mapping[str, int], alpha: float
-) -> tuple[float, int, float]:
+) -> tuple[float, int, int]:
     """Compute TVD(p̃ || uniform) in O(|observed|) using the full-support Jeffreys prior.
 
     Let K = 2^n be the full outcome count (from bitstring length), N = total shots,
@@ -145,7 +147,7 @@ def _tvd_vs_uniform_from_counts_fast(
 
     # Numerical safety: clamp into [0, 0.5]
     tvd = 0.5 * (s_obs + (K - M) * delta0)
-    return float(tvd), K, u
+    return float(tvd), K, M
 
 
 def _entropy_full_support_fast(counts: Mapping[str, int], alpha: float) -> float:
@@ -241,7 +243,7 @@ def compute_asymmetry_index(
         >>> # Highly structured (GHZ-like)
         >>> counts = {"000": 400, "111": 400, "001": 100, "110": 100}
         >>> compute_asymmetry_index(counts)
-        0.4
+        0.547808764940239
     """
     counts_clean = validate_counts_dict(counts, "asymmetry index input")
 
@@ -402,7 +404,7 @@ def compute_asymmetry_index_with_null_comparison(
     obs_array = np.array([observed_probs[o] for o in outcomes], dtype=np.float64)
     null_array = np.array([null_model.get(o, 0.0) for o in outcomes], dtype=np.float64)
     null_array = null_array / null_array.sum()  # defensive renormalization
-    ai_factorized = 0.5 * float(np.sum(np.abs(obs_array - null_array)))
+    ai_factorized = total_variation_distance(obs_array, null_array)
 
     # Interpretation based on comparison
     if ai_uniform >= STRUCTURE_MODERATE_THRESHOLD and ai_factorized >= STRUCTURE_WEAK_THRESHOLD:

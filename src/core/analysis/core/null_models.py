@@ -332,11 +332,14 @@ def readout_confusion_model(
         measured_marginal = np.array(marginal_counts, dtype=float)
         measured_marginal = measured_marginal / measured_marginal.sum()
 
-        # Apply Tikhonov regularized inversion
+        # Apply Tikhonov regularized inversion.
+        # C is row-stochastic with C_ij = P(measure j | true i), so the forward
+        # model is p_measured = C^T p_true. Recovering p_true means solving
+        # C^T x = p_measured; the regularized normal equations are therefore
+        # (C C^T + λI) x = C p_measured.
         C = confusion_matrices[i]
-        # Solve (C^T C + λI) x = C^T y
-        A = C.T @ C + regularization * np.eye(2, dtype=float)
-        b = C.T @ measured_marginal
+        A = C @ C.T + regularization * np.eye(2, dtype=float)
+        b = C @ measured_marginal
         try:
             corrected_marginal = npl.solve(A, b)
         except npl.LinAlgError:

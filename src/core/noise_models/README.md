@@ -149,6 +149,26 @@ Each noise model implements specific environmental coupling mechanisms:
 
 ---
 
+## ⚙️ **Channel Conventions (Physics Consistency)**
+
+The noise channels follow standard textbook conventions, and each model's
+`get_kraus_operators()` returns the SAME channel that its `apply()` simulates:
+
+- **Uniform application**: `bit_flip`, `phase_flip`, and `phase_damping` apply a
+  single error channel uniformly to every gate in `gate_list`. (There is no
+  per-gate "gate sensitivity" heuristic — that earlier behavior was removed.)
+- **Phase damping**: standard 2-operator Kraus form with off-diagonal coherence
+  factor √(1 − λ).
+- **Amplitude damping**: standard zero-temperature (T = 0) amplitude-damping
+  channel.
+- **Depolarizing**: multi-qubit `get_kraus_operators()` returns the genuine
+  n-qubit Qiskit depolarizing channel.
+
+Pauli matrices and the `relaxation_probability(t, τ) = 1 − exp(−t/τ)` conversion
+come from the shared `src/core/math/` primitives (single source of truth).
+
+---
+
 ## 🔬 **Educational Framework Architecture**
 
 ### Physics Education Hierarchy
@@ -206,9 +226,8 @@ class NoiseModel(BaseNoise):
         # Log creation with context
 
     def apply(self, noise_model, gate_list, qubits_for_error=None):
-        # Gate sensitivity analysis
-        # Create Qiskit error channels
-        # Apply to noise model
+        # Build the Qiskit error channel for this mechanism
+        # Apply it UNIFORMLY to every gate in gate_list
         # Log application results
 
     def get_physics_description(self) -> Dict[str, str]:

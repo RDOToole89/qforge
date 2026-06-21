@@ -40,7 +40,10 @@ import logging
 from typing import Any
 
 import numpy as np
+from qiskit.quantum_info import Kraus
 from qiskit_aer.noise import NoiseModel, depolarizing_error
+
+from src.core.math import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z
 
 from .base_noise import BaseNoise
 
@@ -243,7 +246,11 @@ class DepolarizingNoise(BaseNoise):
         K₂ = √(p/4) Y     (Y error with probability p/4)
         K₃ = √(p/4) Z     (Z error with probability p/4)
 
-        For n qubits, tensor products create 4ⁿ Kraus operators.
+        For n > 1 qubits this returns the Kraus operators of the genuine
+        n-qubit depolarizing channel (Qiskit ``depolarizing_error(p, n)``) so
+        that ``get_kraus_operators()`` matches the channel ``apply()`` simulates.
+        Note this is NOT the tensor product of n single-qubit channels (which is
+        a different map with identity weight (1-3p/4)ⁿ).
 
         Returns:
             List of Kraus operators as numpy arrays
@@ -252,40 +259,15 @@ class DepolarizingNoise(BaseNoise):
             Kraus operators satisfy ∑ᵢ Kᵢ† Kᵢ = I (completeness relation)
             ensuring the channel is trace-preserving.
         """
-        # Pauli matrices for single-qubit construction
-        Id = np.array([[1, 0], [0, 1]], dtype=complex)
-        X = np.array([[0, 1], [1, 0]], dtype=complex)
-        Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
-        Z = np.array([[1, 0], [0, -1]], dtype=complex)
-
-        pauli_ops = [Id, X, Y, Z]
-        pauli_probs = [1 - 3 * self.error_rate / 4] + [self.error_rate / 4] * 3
-
         if self.num_qubits == 1:
-            # Single-qubit Kraus operators
+            # Single-qubit closed form (equivalent to depolarizing_error(p, 1)).
+            pauli_ops = [PAULI_I, PAULI_X, PAULI_Y, PAULI_Z]
+            pauli_probs = [1 - 3 * self.error_rate / 4] + [self.error_rate / 4] * 3
             return [np.sqrt(prob) * op for prob, op in zip(pauli_probs, pauli_ops, strict=True)]
-        else:
-            # Multi-qubit tensor products (exponentially many operators)
-            kraus_ops = []
-            for i in range(4**self.num_qubits):
-                # Convert index to base-4 representation for Pauli selection
-                pauli_indices = []
-                temp = i
-                for _ in range(self.num_qubits):
-                    pauli_indices.append(temp % 4)
-                    temp //= 4
 
-                # Construct tensor product and probability
-                operator = pauli_ops[pauli_indices[0]]
-                probability = pauli_probs[pauli_indices[0]]
-
-                for j in range(1, self.num_qubits):
-                    operator = np.kron(operator, pauli_ops[pauli_indices[j]])
-                    probability *= pauli_probs[pauli_indices[j]]
-
-                kraus_ops.append(np.sqrt(probability) * operator)
-
-            return kraus_ops
+        # Genuine n-qubit depolarizing channel, matching apply().
+        channel = Kraus(depolarizing_error(self.error_rate, self.num_qubits))
+        return [np.asarray(op, dtype=complex) for op in channel.data]
 
     def get_physics_description(self) -> dict[str, str]:
         """Return comprehensive physics description of depolarizing decoherence.

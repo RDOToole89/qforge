@@ -45,6 +45,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
 
+from src.core.math import relaxation_probability
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -271,20 +273,19 @@ class ThermalRelaxationNoise(BaseNoise):
             List of conceptual Kraus operators for educational purposes
 
         Educational Note:
-            Full thermal relaxation involves multiple Kraus operators representing
-            energy exchange, pure dephasing, and thermal population effects.
+            APPROXIMATION: this returns only the T=0 amplitude-damping operators
+            (energy relaxation, K₀ = diag(1, √(1-γ₁)), K₁ = √γ₁|0⟩⟨1|) and
+            silently ignores the pure-dephasing (T2) and thermal-excitation
+            contributions. The full thermal-relaxation channel that ``apply()``
+            simulates via Qiskit ``thermal_relaxation_error`` requires additional
+            Kraus operators. Use ``apply()`` for a faithful simulation.
         """
-        # Simplified representation for educational purposes
-        # Full thermal relaxation Kraus operators are more complex
-        gamma_1 = self._t1_error_rate  # Energy relaxation rate
-        self._t2_error_rate - gamma_1 / 2  # Pure dephasing rate
+        # Approximate the channel by its T1 amplitude-damping component only.
+        gamma_1 = self._t1_error_rate  # Energy relaxation probability over the gate
 
-        # Simplified amplitude damping operators
         K0 = np.array([[1, 0], [0, np.sqrt(1 - gamma_1)]], dtype=complex)
         K1 = np.sqrt(gamma_1) * np.array([[0, 1], [0, 0]], dtype=complex)
 
-        # Note: This is a simplified representation
-        # Full thermal relaxation requires more operators
         return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
@@ -458,7 +459,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T1 error probability for single gate operation
         """
-        return float(1 - np.exp(-self.gate_time / self.t1))
+        return relaxation_probability(self.gate_time, self.t1)
 
     def _calculate_t2_error_rate(self) -> float:
         """Calculate T2 error rate for the gate time.
@@ -466,7 +467,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T2 error probability for single gate operation
         """
-        return float(1 - np.exp(-self.gate_time / self.t2))
+        return relaxation_probability(self.gate_time, self.t2)
 
     def _calculate_combined_error_rate(self) -> float:
         """Calculate combined T1/T2 error rate.

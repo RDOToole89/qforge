@@ -13,9 +13,11 @@ phases without causing |0⟩ ↔ |1⟩ transitions. Common sources include:
 - Voltage fluctuations in gate-controlled systems
 
 # Mathematical Description
-The phase damping channel maps quantum states as:
-ρ → (1-λ)ρ + λ(|0⟩⟨0|ρ|0⟩⟨0| + |1⟩⟨1|ρ|1⟩⟨1|)
-Kraus operators: K₀ = √(1-λ/2)(I), K₁ = √(λ/2)|0⟩⟨0|, K₂ = √(λ/2)|1⟩⟨1|
+The phase damping channel maps quantum states by decaying off-diagonal
+coherences while preserving populations:
+ρ₀₀ → ρ₀₀, ρ₁₁ → ρ₁₁, ρ₀₁ → √(1-λ)·ρ₀₁
+Kraus operators (standard 2-operator form): K₀ = diag(1, √(1-λ)), K₁ = diag(0, √λ)
+This matches Qiskit's ``phase_damping_error(λ)`` (coherence factor √(1-λ)).
 
 # Hardware Origins
 - Magnetic field noise from environmental sources
@@ -43,6 +45,8 @@ from typing import Any
 
 import numpy as np
 from qiskit_aer.noise import NoiseModel, phase_damping_error
+
+from src.core.math import relaxation_probability
 
 from .base_noise import BaseNoise
 
@@ -134,7 +138,7 @@ class PhaseDampingNoise(BaseNoise):
         # Calculate effective dephasing rate
         if t2_star is not None:
             # Physics-based calculation: λ = 1 - exp(-t_gate/T2*)
-            self._physics_dephasing_rate = 1 - np.exp(-gate_time / t2_star)
+            self._physics_dephasing_rate = relaxation_probability(gate_time, t2_star)
             effective_error_rate = self._physics_dephasing_rate
         else:
             # Use phenomenological rate
@@ -232,32 +236,22 @@ class PhaseDampingNoise(BaseNoise):
             )
             return
 
-        # Calculate effective dephasing rate including thermal effects
-        effective_rate = self._calculate_effective_dephasing_rate()
+        # Use the same dephasing rate λ as get_kraus_operators() so the
+        # simulated channel matches the documented Kraus form exactly.
+        effective_rate = self.error_rate
 
-        # Gate-specific dephasing sensitivity
-        gate_sensitivity = self._get_gate_sensitivity_map()
-
-        # Create phase damping error channels with gate sensitivity
+        # Apply a single uniform phase damping channel to every single-qubit gate.
         successful_gates = []
         failed_gates = []
 
-        for gate in valid_gates:
-            try:
-                # Apply gate-specific sensitivity
-                sensitivity = gate_sensitivity.get(gate, 1.0)
-                gate_specific_rate = effective_rate * sensitivity
-
-                if gate_specific_rate > 0:
-                    phase_damping_channel = phase_damping_error(gate_specific_rate)
+        if effective_rate > 0:
+            phase_damping_channel = phase_damping_error(effective_rate)
+            for gate in valid_gates:
+                try:
                     noise_model.add_all_qubit_quantum_error(phase_damping_channel, gate)
-                    successful_gates.append(f"{gate}(s={sensitivity:.2f})")
-                else:
-                    # Virtual gates with zero sensitivity
-                    successful_gates.append(f"{gate}(virtual)")
-
-            except Exception as e:
-                failed_gates.append((gate, str(e)))
+                    successful_gates.append(gate)
+                except Exception as e:
+                    failed_gates.append((gate, str(e)))
 
         # Log application results with physics context
         if successful_gates:
@@ -280,36 +274,35 @@ class PhaseDampingNoise(BaseNoise):
         """Return Kraus operators for the phase damping channel.
 
         # Mathematical Construction
-        For phase damping with dephasing rate λ:
-        K₀ = √(1-λ/2) I  (identity with coherence preservation)
-        K₁ = √(λ/2) |0⟩⟨0|  (|0⟩ projection)
-        K₂ = √(λ/2) |1⟩⟨1|  (|1⟩ projection)
+        Standard 2-operator phase damping channel with dephasing rate λ:
+        K₀ = diag(1, √(1-λ))  (coherence survival)
+        K₁ = diag(0, √λ)       (phase-scattering operator)
 
-        These satisfy K₀†K₀ + K₁†K₁ + K₂†K₂ = I (completeness relation).
+        These satisfy K₀†K₀ + K₁†K₁ = I (completeness relation) and decay the
+        off-diagonal coherence by the factor √(1-λ), exactly matching the channel
+        simulated by ``apply()`` via Qiskit ``phase_damping_error(λ)``.
+
+        The dephasing rate λ = ``self.error_rate`` is derived identically to the
+        value passed to ``phase_damping_error`` in ``apply()``: it is the
+        physics-based rate ``1 - exp(-gate_time / T2*)`` when ``t2_star`` is
+        supplied, otherwise the phenomenological ``error_rate``.
 
         Returns:
             List of Kraus operators as numpy arrays
 
         Educational Note:
-            The projection operators K₁, K₂ destroy coherences |⟨0|ρ|1⟩|
-            while preserving populations |⟨0|ρ|0⟩| and |⟨1|ρ|1⟩|.
+            K₁ removes only the |1⟩-component phase, shrinking the off-diagonal
+            coherence ⟨0|ρ|1⟩ by √(1-λ) while preserving both populations.
         """
         λ = self.error_rate
 
-        # Computational basis states
-        zero_state = np.array([1, 0], dtype=complex)
-        one_state = np.array([0, 1], dtype=complex)
+        # Coherence-survival operator
+        K0 = np.array([[1, 0], [0, np.sqrt(1 - λ)]], dtype=complex)
 
-        # Identity operator (coherence preservation)
-        K0 = np.sqrt(1 - λ / 2) * np.eye(2, dtype=complex)
+        # Phase-scattering operator (acts on the |1⟩ amplitude only)
+        K1 = np.array([[0, 0], [0, np.sqrt(λ)]], dtype=complex)
 
-        # Projection onto |0⟩ (destroys coherence from |1⟩)
-        K1 = np.sqrt(λ / 2) * np.outer(zero_state, zero_state)
-
-        # Projection onto |1⟩ (destroys coherence from |0⟩)
-        K2 = np.sqrt(λ / 2) * np.outer(one_state, one_state)
-
-        return [K0, K1, K2]
+        return [K0, K1]
 
     def get_physics_description(self) -> dict[str, str]:
         """Return comprehensive physics description of phase damping.
@@ -320,7 +313,7 @@ class PhaseDampingNoise(BaseNoise):
         return {
             "mechanism": "Pure dephasing: environmental phase noise destroys coherence without energy exchange",
             "origin": "Magnetic field fluctuations, charge noise, voltage drifts causing random Z rotations",
-            "mathematical_form": f"K₀ = √(1-{self.error_rate:.3f}/2)I, K₁ = √({self.error_rate:.3f}/2)|0⟩⟨0|, K₂ = √({self.error_rate:.3f}/2)|1⟩⟨1|",
+            "mathematical_form": f"K₀ = diag(1, √(1-{self.error_rate:.3f})), K₁ = diag(0, √{self.error_rate:.3f})",
             "physical_timescale": f"T2* = {self.t2_star:.2e}s"
             if self.t2_star
             else "phenomenological rate",
@@ -341,7 +334,7 @@ class PhaseDampingNoise(BaseNoise):
             "decoherence_type": "pure_dephasing_elastic",
             "channel_classification": "unital",
             "dephasing_probability": self.error_rate,
-            "coherence_preservation": 1 - self.error_rate,
+            "coherence_preservation": float(np.sqrt(1 - self.error_rate)),
             "thermal_dephasing": self._thermal_dephasing,
             "t2_star_timescale": self.t2_star,
             "gate_timescale": self.gate_time,
@@ -445,59 +438,6 @@ class PhaseDampingNoise(BaseNoise):
 
         # Thermal dephasing is typically weak at dilution refrigerator temperatures
         return min(0.01, thermal_energy / typical_energy_scale)
-
-    def _calculate_effective_dephasing_rate(self) -> float:
-        """Calculate effective dephasing rate including thermal contributions.
-
-        # Effective Rate Calculation
-        Combines intrinsic dephasing with thermal contributions:
-        λ_eff = λ_intrinsic + λ_thermal
-
-        Returns:
-            Effective dephasing rate for gate application
-        """
-        base_rate = self._physics_dephasing_rate
-        thermal_contribution = self._thermal_dephasing
-
-        # Add thermal contribution (typically small)
-        return float(min(1.0, base_rate + thermal_contribution))
-
-    def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """Get gate-specific dephasing sensitivity factors.
-
-        # Gate Sensitivity Physics
-        Different gates have different sensitivities to dephasing:
-        - Virtual gates (pure Z rotations): Minimal dephasing
-        - Physical gates: Full dephasing during execution
-        - Idle operations: Time-dependent dephasing
-
-        Returns:
-            Dict mapping gate names to sensitivity factors [0, 1]
-        """
-        return {
-            # Virtual gates (minimal physical implementation)
-            "z": 0.0,
-            "rz": 0.0,
-            "u1": 0.0,
-            "p": 0.0,
-            # Identity and idle (time-dependent dephasing)
-            "id": 0.1,
-            # Physical single-qubit gates (full sensitivity)
-            "x": 1.0,
-            "y": 1.0,
-            "h": 1.0,
-            "rx": 1.0,
-            "ry": 1.0,
-            # Phase gates (moderate sensitivity)
-            "s": 0.5,
-            "t": 0.5,
-            "sdg": 0.5,
-            "tdg": 0.5,
-            # Composite gates (full sensitivity)
-            "u2": 1.0,
-            "u3": 1.0,
-            "u": 1.0,
-        }
 
     def _calculate_channel_capacity(self) -> float:
         """Calculate quantum channel capacity for phase damping.

@@ -66,9 +66,9 @@ graph TB
     end
 
     subgraph "Core Layer"
-        C1[State Preparation<br/>7 state types]
+        C1[State Preparation<br/>6 state types]
         C2[Noise Models<br/>8 noise channels]
-        C3[Analysis<br/>13 metrics + pipelines]
+        C3[Analysis<br/>8 metrics + pipelines]
     end
 
     subgraph "Execution Backends"
@@ -121,7 +121,7 @@ graph LR
 | **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
 | **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
-| **Tests** | 395 passing, ~57% coverage on core analysis (55% gate, target 90%) |
+| **Tests** | ~1,100 passing (1104), ~97% coverage on the physics/math core (all of `src/core` plus the engine math modules) behind a 95% gate |
 
 ### Visual Quantum Laboratory (React Native / Expo)
 
@@ -335,7 +335,7 @@ Requires IBM Quantum credentials. See [docs/guides/hardware-setup.md](docs/guide
 | Engine | Python 3.12+, Pydantic 2, NumPy |
 | API | FastAPI, Uvicorn |
 | Frontend | React Native 0.81, Expo SDK 54, TypeScript 5.9, Three.js |
-| Code quality | ruff, mypy (strict), pytest (395 tests), pre-commit hooks |
+| Code quality | ruff, mypy (strict), pytest (~1,100 tests), pre-commit hooks |
 
 ---
 

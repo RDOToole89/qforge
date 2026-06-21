@@ -33,6 +33,9 @@ This layer contains **pure physics calculations, metrics, and data schemas**. It
 
 ```
 src/core/
+├── math/               # Shared math primitives — SINGLE SOURCE OF TRUTH
+│                       #   (Pauli matrices, relaxation_probability, TVD/Gini,
+│                       #    canonical qubit/bit indexing). Import, don't re-derive.
 ├── analysis/
 │   ├── core/           # Information theory (entropy, mutual info)
 │   ├── metrics/        # Research metrics (EEC, PCR, Structure Score)

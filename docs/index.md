@@ -32,7 +32,7 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 ### Information Theory
 
 - **Total Correlation**: Multivariate mutual information
-- **Structure Score**: Jensen-Shannon divergence from uniform distribution
+- **Structure Score**: Jensen-Shannon divergence from the factorized (independent-marginals) null model
 - **Concentration Index**: Economic inequality measures for pathway preferences
 
 ## Quick Start

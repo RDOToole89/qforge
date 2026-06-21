@@ -43,6 +43,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, pauli_error
 
+from src.core.math import PAULI_I, PAULI_X
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -170,10 +172,10 @@ class BitFlipNoise(BaseNoise):
         basis structure while corrupting stored digital information.
 
         # Gate Application Strategy
-        Bit flip noise primarily affects single-qubit operations:
-        - X gates: Maximum sensitivity (coherent amplitude errors)
-        - Z gates: Minimal sensitivity (different error axis)
-        - General gates: Intermediate sensitivity based on X component
+        A single, uniform single-qubit Pauli-X error with probability p is applied
+        to every target gate, exactly matching the documented Kraus operators
+        K₀ = √(1-p)I, K₁ = √p X. Two-qubit gates (which cannot accept a 1-qubit
+        error) are skipped and reported as failures.
 
         Args:
             noise_model: Qiskit noise model to modify with bit flip errors
@@ -182,7 +184,7 @@ class BitFlipNoise(BaseNoise):
 
         Example:
             >>> noise_model = NoiseModel()
-            >>> gates = ['h', 'x', 'cx']  # All gates get bit flip noise
+            >>> gates = ['h', 'x']  # All single-qubit gates get uniform bit flip
             >>> bit_flip_noise.apply(noise_model, gates)
         """
         # Bit flip is inherently single-qubit but can affect all operations
@@ -191,34 +193,18 @@ class BitFlipNoise(BaseNoise):
                 f"Bit flip is single-qubit, but applying to {qubits_for_error}-qubit gates"
             )
 
-        # Gate sensitivity mapping for bit flip errors
-        gate_sensitivity = self._get_gate_sensitivity_map()
+        # Uniform single-qubit bit-flip channel: K₀ = √(1-p)I, K₁ = √p X
+        p = self.error_rate
+        bit_flip_channel = pauli_error([("I", 1.0 - p), ("X", p)])
 
-        # Apply bit flip noise to all gates with sensitivity weighting
+        # Apply the same channel to every target gate
         successful_gates = []
         failed_gates = []
 
         for gate in gate_list:
             try:
-                # Get gate-specific sensitivity
-                sensitivity = gate_sensitivity.get(gate, 0.5)
-
-                if sensitivity > 0:
-                    # Calculate effective flip probability
-                    effective_flip_prob = self.error_rate * sensitivity
-                    identity_prob = 1.0 - effective_flip_prob
-
-                    # Create Pauli error with bit flip probability
-                    bit_flip_channel = pauli_error(
-                        [("I", identity_prob), ("X", effective_flip_prob)]
-                    )
-
-                    noise_model.add_all_qubit_quantum_error(bit_flip_channel, gate)
-                    successful_gates.append(f"{gate}(s={sensitivity:.2f})")
-                else:
-                    # Gates immune to bit flip (pure Z operations)
-                    successful_gates.append(f"{gate}(immune)")
-
+                noise_model.add_all_qubit_quantum_error(bit_flip_channel, gate)
+                successful_gates.append(gate)
             except Exception as e:
                 failed_gates.append((gate, str(e)))
 
@@ -256,10 +242,10 @@ class BitFlipNoise(BaseNoise):
         p = self.error_rate
 
         # Identity operator (no bit flip)
-        K0 = np.sqrt(1 - p) * np.eye(2, dtype=complex)
+        K0 = np.sqrt(1 - p) * PAULI_I
 
         # Pauli X operator (bit flip)
-        K1 = np.sqrt(p) * np.array([[0, 1], [1, 0]], dtype=complex)
+        K1 = np.sqrt(p) * PAULI_X
 
         return [K0, K1]
 
@@ -375,44 +361,6 @@ class BitFlipNoise(BaseNoise):
             Dict mapping operators to their probabilities
         """
         return {"identity": 1 - self.error_rate, "bit_flip_x": self.error_rate}
-
-    def _get_gate_sensitivity_map(self) -> dict[str, float]:
-        """Get gate-specific bit flip sensitivity factors.
-
-        # Gate Sensitivity Physics
-        Different gates have different sensitivities to bit flip errors:
-        - X gates: Maximum sensitivity (direct amplitude coupling)
-        - Z gates: Minimal sensitivity (orthogonal error axis)
-        - General gates: Sensitivity based on X component
-
-        Returns:
-            Dict mapping gate names to sensitivity factors [0, 1]
-        """
-        return {
-            # X-axis gates (maximum sensitivity)
-            "x": 1.0,
-            "rx": 1.0,
-            # Y-axis gates (moderate sensitivity - has X component)
-            "y": 0.7,
-            "ry": 0.7,
-            # Hadamard (moderate sensitivity - creates X component)
-            "h": 0.5,
-            # Z-axis gates (minimal sensitivity - orthogonal axis)
-            "z": 0.0,
-            "rz": 0.0,
-            "u1": 0.0,
-            "p": 0.0,
-            "s": 0.0,
-            "t": 0.0,
-            "sdg": 0.0,
-            "tdg": 0.0,
-            # Identity (small sensitivity during idle)
-            "id": 0.1,
-            # General single-qubit gates (intermediate sensitivity)
-            "u2": 0.5,
-            "u3": 0.8,
-            "u": 0.8,
-        }
 
     def _calculate_channel_capacity(self) -> float:
         """Calculate quantum channel capacity for bit flip channel.

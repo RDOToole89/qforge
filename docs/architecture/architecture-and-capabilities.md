@@ -25,7 +25,7 @@ _Pure physics logic. Independent of execution environment._
   - **`metrics/`**: Custom research metrics including:
     - **EEC (Entanglement-Error Correlation)**: Correlates error topology with state topology.
     - **PCR (Pathway Concentration Ratio)**: Measures if errors localize in specific qubits.
-    - **Structure Score**: Quantifies deviation from random noise (using TVD).
+    - **Structure Score**: Jensen-Shannon divergence between the observed distribution and its factorized (independent-marginals) null model. (Distinct from the Asymmetry Index, which is TVD from uniform.)
   - **`pipelines/`**: Automated analysis workflows (e.g., `pathway_analysis.py`).
 
 ### B. The Execution Engine (`src/engine`)
@@ -44,6 +44,9 @@ _Orchestration, I/O, and Qiskit integration._
 ```text
 src/
 ├── core/                           # SCIENTIFIC KERNEL
+│   ├── math/                       # Shared math primitives (single source of truth):
+│   │   │                           #   Pauli matrices, relaxation_probability,
+│   │   │                           #   TVD/Gini, canonical qubit indexing
 │   ├── analysis/
 │   │   ├── core/                   # Information theory basics (Entropy, Mutual Info)
 │   │   ├── metrics/                # Research metrics (EEC, PCR, Structure Score)

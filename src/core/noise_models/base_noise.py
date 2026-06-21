@@ -345,31 +345,6 @@ class BaseNoise(ABC):
                 f"noise operators with {4**num_qubits:,} elements"
             )
 
-    def _validate_physics_parameters(self, **params: Any) -> None:
-        """Validate physics parameters against quantum mechanics constraints.
-
-        # Quantum Physics Compliance
-        Ensures all physics parameters (T1, T2, temperature, etc.) satisfy
-        fundamental quantum mechanics relationships and thermodynamic bounds.
-        """
-        # T1/T2 relationship validation
-        t1 = params.get("t1")
-        t2 = params.get("t2")
-        if t1 and t2 and t2 > 2 * t1:
-            raise ValueError(
-                f"T2 ({t2:.2e}s) cannot exceed 2*T1 ({2 * t1:.2e}s) - violates quantum physics"
-            )
-
-        # Temperature validation
-        temperature = params.get("temperature")
-        if temperature and temperature < 0:
-            raise ValueError(f"Temperature must be non-negative, got {temperature}K")
-
-        # Gate time validation
-        gate_time = params.get("gate_time")
-        if gate_time and gate_time <= 0:
-            raise ValueError(f"Gate time must be positive, got {gate_time}s")
-
     def _estimate_decoherence_timescale(self) -> str:
         """Estimate characteristic decoherence timescale for this noise type.
 

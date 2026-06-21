@@ -35,7 +35,14 @@ import logging
 from typing import Any
 
 import numpy as np
-from scipy.stats import spearmanr
+
+from ..core.information_theory import (
+    all_bitstrings,
+    counts_to_probabilities,
+    jensen_shannon_divergence,
+    n_qubits_from_counts,
+)
+from ..core.null_models import factorized_null_model
 
 # Delegate to rigorously implemented metric modules to avoid duplication and drift.
 from .asymmetry_index import compute_asymmetry_index as _ai_compute
@@ -49,42 +56,61 @@ from .pathway_concentration_ratio import (
     compute_pathway_concentration_ratio as _pcr_compute,
 )
 
+# Canonical TPS lives in temporal_pathway_stability; re-export to keep one impl.
+from .temporal_pathway_stability import compute_temporal_pathway_stability
+
 logger = logging.getLogger(__name__)
 
 
 def compute_structure_score(*, counts: dict[str, int], **kwargs: Any) -> dict[str, Any]:
-    """Compute Structure Score (Asymmetry Index).
+    """Compute Structure Score (JSD from factorized null model).
 
-    This is a thin wrapper around the canonical implementation of Asymmetry Index.
-    Confidence intervals and validation status are handled by higher-level
-    pipelines (e.g., bootstrap module) and not in this core wrapper.
+    The Structure Score quantifies how much the observed distribution deviates
+    from its factorized (independent-marginals) null model. A perfectly
+    independent (separable) distribution yields ~0; any inter-qubit structure
+    (correlations) raises the score.
+
+    Mathematical Definition:
+        SS = JSD(P_observed || Q_factorized)
+
+    where P_observed is the full-support smoothed distribution and
+    Q_factorized = ∏ᵢ q(xᵢ) is the product of per-qubit marginals. The JSD is
+    computed in bits and bounded to [0, 1].
 
     Args:
         counts: Measurement counts {bitstring: count}
-        **kwargs: Forwarded to the underlying implementation (if supported)
+        **kwargs: Forwarded for API compatibility (unused).
 
     Returns:
         dict: Minimal MetricResult-like payload:
               {
                 "value": <float>,
                 "status": "computed",
-                "extras": {"method": "total_variation_distance"}
+                "extras": {"method": "jsd_factorized_null"}
               }
               (CI and final status should be attached by the bootstrap pipeline.)
 
     Notes:
-        - Keeps this "core" file lightweight and in sync with schema specs.
-        - JSD (Jensen-Shannon Divergence) is an alternative metric that is more
-          sensitive to tail deviations than TVD. While TVD is the primary
-          "Structure Score" for its linear interpretability, JSD can be useful
-          for sensitivity analysis in "Fog vs River" detection.
+        - Observed and null probability vectors are aligned over the same
+          canonical lexicographic ordering of all 2^n bitstrings.
+        - Distinct from the Asymmetry Index (TVD vs uniform); both measure
+          different aspects of structure.
     """
     try:
-        value = compute_asymmetry_index(counts)
+        n = n_qubits_from_counts(counts)
+        order = all_bitstrings(n)
+
+        observed_probs = counts_to_probabilities(counts)
+        null_probs = factorized_null_model(counts)
+
+        p = np.asarray([observed_probs[bs] for bs in order], dtype=np.float64)
+        q = np.asarray([null_probs[bs] for bs in order], dtype=np.float64)
+
+        value = jensen_shannon_divergence(p, q)
         return {
             "value": float(value),
             "status": "computed",
-            "extras": {"method": "total_variation_distance"},
+            "extras": {"method": "jsd_factorized_null"},
         }
     except Exception as e:
         logger.error("Structure Score computation failed: %s", e)
@@ -138,52 +164,6 @@ def compute_entanglement_error_correlation(
         float: EEC in [-1, 1]
     """
     return float(_eec_compute(counts, state_type=state_type))
-
-
-def compute_temporal_pathway_stability(pathway_rankings: list[list]) -> float:
-    """Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
-
-    TPS is computed as the average pairwise Spearman rank correlation ρ across all
-    provided rankings, mapped to [0, 1] via (ρ̄ + 1)/2 for interpretability.
-
-    Args:
-        pathway_rankings: A list of pathway orderings (each ordering is a list of IDs)
-
-    Returns:
-        float: TPS in [0, 1] (higher = more stable)
-
-    Notes:
-        - Only elements common to a pair of rankings contribute to that pair’s ρ.
-        - If there are fewer than two rankings, returns 1.0 by convention.
-        - If no pair has ≥2 elements in common, returns 0.0.
-    """
-    if not pathway_rankings or len(pathway_rankings) < 2:
-        return 1.0
-
-    def _to_rank_map(r: list) -> dict[Any, int]:
-        return {k: i for i, k in enumerate(r)}
-
-    maps = [_to_rank_map(r) for r in pathway_rankings]
-
-    rhos: list[float] = []
-    for i in range(len(maps)):
-        for j in range(i + 1, len(maps)):
-            common = sorted(set(maps[i]) & set(maps[j]))
-            if len(common) < 2:
-                continue
-            a = [maps[i][k] for k in common]
-            b = [maps[j][k] for k in common]
-            rho, _ = spearmanr(a, b)
-            if np.isnan(rho):
-                continue
-            rhos.append(float(rho))
-
-    if not rhos:
-        return 0.0
-
-    # Map average Spearman ρ from [-1, 1] to [0, 1]
-    tps = (float(np.mean(rhos)) + 1.0) / 2.0
-    return float(np.clip(tps, 0.0, 1.0))
 
 
 def compute_complexity_emergence_score(

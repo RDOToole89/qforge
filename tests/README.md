@@ -1,6 +1,6 @@
 # Test Suite
 
-395 tests organized by layer (core, engine, integration, physics, schemas) with custom pytest markers. Coverage of core analysis is currently ~57%, enforced at a 55% gate (target: 90%).
+~1,100 tests (1104 passing) organized by layer (core, engine, integration, physics, schemas) with custom pytest markers. The physics/math core (all of `src/core` plus the engine math modules: `fidelity`, `bloch_math`, `analysis/research_integration`, `models/measurement`) is at ~97% coverage, enforced by a 95% gate; the verified-value suites assert outputs against analytical/closed-form calculations.
 
 ---
 
@@ -97,7 +97,7 @@ Custom markers from `pytest.ini`:
 
 ## Coverage
 
-- **Gate**: 55% on `src/core/analysis`, enforced by `--cov-fail-under=55` (currently ~57%; raise toward the 90% target as analysis tests are added)
+- **Gate**: 95% on `src/core`, enforced by `--cov-fail-under=95` (currently ~97%; remaining lines are unreachable defensive guards)
 - **Report**: HTML report generated at `htmlcov/`
 - **Scope**: Coverage is measured on `src/core/analysis` only; other modules are tested but not coverage-gated
 - **CI**: `make test` runs the full suite with coverage enforcement
