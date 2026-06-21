@@ -45,6 +45,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
 
+from src.core.math import relaxation_probability
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -457,7 +459,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T1 error probability for single gate operation
         """
-        return float(1 - np.exp(-self.gate_time / self.t1))
+        return relaxation_probability(self.gate_time, self.t1)
 
     def _calculate_t2_error_rate(self) -> float:
         """Calculate T2 error rate for the gate time.
@@ -465,7 +467,7 @@ class ThermalRelaxationNoise(BaseNoise):
         Returns:
             T2 error probability for single gate operation
         """
-        return float(1 - np.exp(-self.gate_time / self.t2))
+        return relaxation_probability(self.gate_time, self.t2)
 
     def _calculate_combined_error_rate(self) -> float:
         """Calculate combined T1/T2 error rate.

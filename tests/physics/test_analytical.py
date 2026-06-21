@@ -71,11 +71,13 @@ class TestAnalyticalBaselines:
     def test_ghz_state_correlations(self):
         """
         Theory: A structured state should show high EEC.
-        We use a Bell pair on qubits 0-1, with 2-3 fixed to 0.
-        This matches the 'Bell' topology which emphasizes (0,1).
+        We use a Bell pair on physical qubits 0-1, with the rest fixed to 0.
+        Under the canonical convention physical qubits 0-1 are the two RIGHTMOST
+        bitstring positions, which is where the extended 'Bell' topology places
+        its strong bond (consistent with the MI matrix it is correlated against).
         """
-        # Bell pair on 0-1 (|00> + |11>), 2-3 are |00>
-        counts = {"0000": 500, "1100": 500}
+        # Bell pair on physical qubits 0-1 (rightmost bits): |0000> + |0011>
+        counts = {"0000": 500, "0011": 500}
 
         # Entanglement Error Correlation (EEC)
         eec = compute_entanglement_error_correlation(counts, state_type="Bell")

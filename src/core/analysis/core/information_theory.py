@@ -38,6 +38,8 @@ from typing import cast
 import numpy as np
 from numpy.typing import NDArray
 
+from src.core.math import bit_for_qubit
+
 from ..constants import (
     ALPHA,
     LOG_BASE,
@@ -195,7 +197,7 @@ def marginal_distribution(
     marginal_counts = [0, 0]  # [count for bit=0, count for bit=1]
 
     for bitstring, count in counts_clean.items():
-        bit_value = int(bitstring[qubit_index])
+        bit_value = int(bit_for_qubit(bitstring, qubit_index))
         marginal_counts[bit_value] += count
 
     # Apply Jeffreys smoothing
@@ -253,8 +255,8 @@ def pairwise_joint_distribution(
     joint_counts = np.zeros((2, 2), dtype=int)
 
     for bitstring, count in counts_clean.items():
-        bit_i = int(bitstring[qubit_i])
-        bit_j = int(bitstring[qubit_j])
+        bit_i = int(bit_for_qubit(bitstring, qubit_i))
+        bit_j = int(bit_for_qubit(bitstring, qubit_j))
         joint_counts[bit_i, bit_j] += count
 
     # Apply Jeffreys smoothing

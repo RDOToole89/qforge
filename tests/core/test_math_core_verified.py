@@ -59,6 +59,7 @@ from src.core.analysis.core.topology import (
     chain_adjacency,
     star_adjacency,
 )
+from tests._qhelpers import fraction_ones_q0 as _fraction_ones_q0
 
 # ---------------------------------------------------------------------------
 # information_theory.py
@@ -626,12 +627,6 @@ class TestGHZAwareNull:
 
 def _total_shots(counts):
     return float(sum(counts.values()))
-
-
-def _fraction_ones_q0(counts):
-    total = sum(counts.values())
-    ones = sum(c for bs, c in counts.items() if bs[0] == "1")
-    return ones / total if total else 0.0
 
 
 class TestBootstrapCI:

@@ -140,7 +140,18 @@ module = [
 ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["src/core"]
+# The gate spans the whole physics/math core: all of src/core plus the
+# math-bearing engine modules (fidelity, Bloch geometry, counts canonicalization,
+# measurement normalization). Uses `include` (with a bare `--cov` in pytest.ini)
+# rather than `source` so the engine math files can be gated without pulling in
+# the rest of the engine (runner/viz/etc.).
+include = [
+    "src/core/*",
+    "src/engine/fidelity.py",
+    "src/engine/bloch_math.py",
+    "src/engine/analysis/research_integration.py",
+    "src/engine/models/measurement.py",
+]
 omit = [
     "*/tests/*",
     "*/venv/*",

@@ -35,7 +35,6 @@ import logging
 from typing import Any
 
 import numpy as np
-from scipy.stats import spearmanr
 
 from ..core.information_theory import (
     all_bitstrings,
@@ -56,6 +55,9 @@ from .entanglement_error_correlation import (
 from .pathway_concentration_ratio import (
     compute_pathway_concentration_ratio as _pcr_compute,
 )
+
+# Canonical TPS lives in temporal_pathway_stability; re-export to keep one impl.
+from .temporal_pathway_stability import compute_temporal_pathway_stability
 
 logger = logging.getLogger(__name__)
 
@@ -162,52 +164,6 @@ def compute_entanglement_error_correlation(
         float: EEC in [-1, 1]
     """
     return float(_eec_compute(counts, state_type=state_type))
-
-
-def compute_temporal_pathway_stability(pathway_rankings: list[list]) -> float:
-    """Compute Temporal Pathway Stability (TPS) — ranking consistency across conditions.
-
-    TPS is computed as the average pairwise Spearman rank correlation ρ across all
-    provided rankings, mapped to [0, 1] via (ρ̄ + 1)/2 for interpretability.
-
-    Args:
-        pathway_rankings: A list of pathway orderings (each ordering is a list of IDs)
-
-    Returns:
-        float: TPS in [0, 1] (higher = more stable)
-
-    Notes:
-        - Only elements common to a pair of rankings contribute to that pair’s ρ.
-        - If there are fewer than two rankings, returns 1.0 by convention.
-        - If no pair has ≥2 elements in common, returns 0.0.
-    """
-    if not pathway_rankings or len(pathway_rankings) < 2:
-        return 1.0
-
-    def _to_rank_map(r: list) -> dict[Any, int]:
-        return {k: i for i, k in enumerate(r)}
-
-    maps = [_to_rank_map(r) for r in pathway_rankings]
-
-    rhos: list[float] = []
-    for i in range(len(maps)):
-        for j in range(i + 1, len(maps)):
-            common = sorted(set(maps[i]) & set(maps[j]))
-            if len(common) < 2:
-                continue
-            a = [maps[i][k] for k in common]
-            b = [maps[j][k] for k in common]
-            rho, _ = spearmanr(a, b)
-            if np.isnan(rho):
-                continue
-            rhos.append(float(rho))
-
-    if not rhos:
-        return 0.0
-
-    # Map average Spearman ρ from [-1, 1] to [0, 1]
-    tps = (float(np.mean(rhos)) + 1.0) / 2.0
-    return float(np.clip(tps, 0.0, 1.0))
 
 
 def compute_complexity_emergence_score(

@@ -15,8 +15,11 @@ from collections.abc import Mapping, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
+from src.core.math import bit_for_qubit
+
 from ..constants import ALPHA, EEC_LAMBDA, validate_counts_dict
 from .information_theory import mutual_information, n_qubits_from_counts
+from .topology import all_to_all_adjacency, chain_adjacency, star_adjacency
 
 logger = logging.getLogger(__name__)
 
@@ -183,23 +186,19 @@ def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.floa
     if n_qubits < 2:
         raise ValueError(f"Need ≥2 qubits, got {n_qubits}")
 
-    adj = np.zeros((n_qubits, n_qubits), dtype=np.float64)
-
     if topology_type == "linear":
-        # Linear chain: nearest neighbors only
-        for i in range(n_qubits - 1):
-            adj[i, i + 1] = 1.0
-            adj[i + 1, i] = 1.0
+        # Linear chain (== chain_adjacency): nearest neighbors only
+        adj = chain_adjacency(n_qubits)
 
     elif topology_type == "ring":
         # Ring: linear chain + wraparound
-        for i in range(n_qubits - 1):
-            adj[i, i + 1] = 1.0
-            adj[i + 1, i] = 1.0
+        adj = chain_adjacency(n_qubits)
         adj[0, n_qubits - 1] = 1.0
         adj[n_qubits - 1, 0] = 1.0
 
     elif topology_type == "grid":
+        adj = np.zeros((n_qubits, n_qubits), dtype=np.float64)
+
         # Near-rectangular grid; handles non-perfect squares robustly
         rows = int(np.floor(np.sqrt(n_qubits)))
         cols = int(np.ceil(n_qubits / rows))
@@ -225,15 +224,12 @@ def get_topology_adjacency(topology_type: str, n_qubits: int) -> NDArray[np.floa
                 adj[idx, j] = adj[j, idx] = 1.0
 
     elif topology_type == "all_to_all":
-        # Complete graph
-        adj = np.ones((n_qubits, n_qubits))
-        np.fill_diagonal(adj, 0)
+        # Complete graph (== all_to_all_adjacency)
+        adj = all_to_all_adjacency(n_qubits)
 
     elif topology_type == "star":
-        # Star graph: central node connected to all others
-        central = 0
-        for i in range(1, n_qubits):
-            adj[central, i] = adj[i, central] = 1.0
+        # Star graph (== star_adjacency): central node connected to all others
+        adj = star_adjacency(n_qubits)
 
     else:
         raise ValueError(f"Unknown topology type: {topology_type}")
@@ -305,7 +301,9 @@ def bit_covariance_matrix(
     bb_mean = np.zeros((n_qubits, n_qubits), dtype=np.float64)
 
     for bitstring, count in counts.items():
-        b = np.array([float(bitstring[i]) for i in range(n_qubits)], dtype=np.float64)
+        b = np.array(
+            [float(bit_for_qubit(bitstring, i)) for i in range(n_qubits)], dtype=np.float64
+        )
         weight = count / total
         b_mean += weight * b
         bb_mean += weight * np.outer(b, b)

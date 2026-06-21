@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from qiskit.quantum_info import Choi, Kraus
 from qiskit_aer.noise import (
     NoiseModel,
     amplitude_damping_error,
@@ -44,39 +43,13 @@ from src.core.noise_models.noise_factory import (
 from src.core.noise_models.phase_damping import PhaseDampingNoise
 from src.core.noise_models.phase_flip import PhaseFlipNoise
 from src.core.noise_models.thermal_relaxation import ThermalRelaxationNoise
+from tests._qhelpers import I2, X, Y, Z, apply_channel, choi_equal, completeness_sum
 
 # --------------------------------------------------------------------------- #
 # Constants and helpers
 # --------------------------------------------------------------------------- #
 
-I2 = np.eye(2, dtype=complex)
-X = np.array([[0, 1], [1, 0]], dtype=complex)
-Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
-Z = np.array([[1, 0], [0, -1]], dtype=complex)
-
 ATOL = 1e-12
-
-
-def completeness_sum(kraus: list[np.ndarray]) -> np.ndarray:
-    """Return Σ Kᵢ† Kᵢ for a list of Kraus operators."""
-    dim = kraus[0].shape[0]
-    acc = np.zeros((dim, dim), dtype=complex)
-    for k in kraus:
-        acc += k.conj().T @ k
-    return acc
-
-
-def apply_channel(kraus: list[np.ndarray], rho: np.ndarray) -> np.ndarray:
-    """Apply a Kraus channel to a density matrix: ρ → Σ Kᵢ ρ Kᵢ†."""
-    out = np.zeros_like(rho, dtype=complex)
-    for k in kraus:
-        out += k @ rho @ k.conj().T
-    return out
-
-
-def choi_equal(kraus: list[np.ndarray], qiskit_error) -> bool:
-    """Decomposition-independent channel equality via Choi matrices."""
-    return np.allclose(Choi(Kraus(kraus)).data, Choi(qiskit_error).data, atol=1e-10)
 
 
 # Kraus-bearing channels (correlated depolarizing returns [] by design).

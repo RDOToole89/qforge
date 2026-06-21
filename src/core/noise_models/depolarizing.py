@@ -43,6 +43,8 @@ import numpy as np
 from qiskit.quantum_info import Kraus
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 
+from src.core.math import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -259,11 +261,7 @@ class DepolarizingNoise(BaseNoise):
         """
         if self.num_qubits == 1:
             # Single-qubit closed form (equivalent to depolarizing_error(p, 1)).
-            Id = np.array([[1, 0], [0, 1]], dtype=complex)
-            X = np.array([[0, 1], [1, 0]], dtype=complex)
-            Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
-            Z = np.array([[1, 0], [0, -1]], dtype=complex)
-            pauli_ops = [Id, X, Y, Z]
+            pauli_ops = [PAULI_I, PAULI_X, PAULI_Y, PAULI_Z]
             pauli_probs = [1 - 3 * self.error_rate / 4] + [self.error_rate / 4] * 3
             return [np.sqrt(prob) * op for prob, op in zip(pauli_probs, pauli_ops, strict=True)]
 

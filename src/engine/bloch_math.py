@@ -12,12 +12,7 @@ from typing import Any, cast
 import numpy as np
 from numpy.typing import NDArray
 
-# Pauli matrices
-_I = np.eye(2, dtype=np.complex128)
-_X = np.array([[0, 1], [1, 0]], dtype=np.complex128)
-_Y = np.array([[0, -1j], [1j, 0]], dtype=np.complex128)
-_Z = np.array([[1, 0], [0, -1]], dtype=np.complex128)
-
+from src.core.math import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z
 
 # ── Partial traces ──────────────────────────────────────────────────
 
@@ -94,9 +89,9 @@ def density_matrix_to_bloch(rho_1q: NDArray[np.complex128]) -> dict[str, float]:
     rho = (I + rx*X + ry*Y + rz*Z) / 2
     => rx = Tr(rho*X), ry = Tr(rho*Y), rz = Tr(rho*Z)
     """
-    rx = float(np.real(np.trace(rho_1q @ _X)))
-    ry = float(np.real(np.trace(rho_1q @ _Y)))
-    rz = float(np.real(np.trace(rho_1q @ _Z)))
+    rx = float(np.real(np.trace(rho_1q @ PAULI_X)))
+    ry = float(np.real(np.trace(rho_1q @ PAULI_Y)))
+    rz = float(np.real(np.trace(rho_1q @ PAULI_Z)))
     return {"rx": rx, "ry": ry, "rz": rz}
 
 
@@ -106,7 +101,7 @@ def two_qubit_correlators(rho_2q: NDArray[np.complex128]) -> dict[str, float]:
     Each correlator is Tr(rho * (Pa x Pb)).
     """
     result = {}
-    ops = {"z": _Z, "i": _I, "x": _X, "y": _Y}
+    ops = {"z": PAULI_Z, "i": PAULI_I, "x": PAULI_X, "y": PAULI_Y}
 
     for label, (a, b) in [
         ("zi", ("z", "i")),

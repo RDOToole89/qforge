@@ -39,9 +39,9 @@ from src.core.state_preparation import (
 )
 from src.core.state_preparation import state_constants as sc
 from src.core.state_preparation.base_state import BaseState
+from tests._qhelpers import BELL_STATEVECTORS, INV_SQRT2, ghz_statevector, w_statevector
 
 ATOL = 1e-9
-INV_SQRT2 = 1.0 / np.sqrt(2.0)
 
 
 def actual(state: BaseState) -> np.ndarray:
@@ -60,9 +60,7 @@ def popcount(i: int) -> int:
 
 class TestGHZ:
     def test_ghz3_closed_form(self):
-        expected = np.zeros(8, dtype=complex)
-        expected[0] = INV_SQRT2
-        expected[7] = INV_SQRT2
+        expected = ghz_statevector(3)
         sv = actual(GHZState(3))
         assert np.allclose(sv, expected, atol=ATOL)
         # Spot-check the published numeric vector.
@@ -138,9 +136,7 @@ class TestW:
     def test_w3_exact_amplitudes(self):
         amp = 1.0 / np.sqrt(3.0)
         assert amp == pytest.approx(0.5773502691896257, abs=1e-15)
-        expected = np.zeros(8, dtype=complex)
-        for idx in (1, 2, 4):
-            expected[idx] = amp
+        expected = w_statevector(3)
         sv = actual(WState(3))
         # Global phase can appear from transpilation; compare up to phase, then
         # confirm the theoretical vector is exactly the closed form.
@@ -148,14 +144,12 @@ class TestW:
         assert np.allclose(WState(3).get_theoretical_state_vector(), expected, atol=ATOL)
 
     def test_w2_closed_form(self):
-        expected = np.array([0, INV_SQRT2, INV_SQRT2, 0], dtype=complex)
+        expected = w_statevector(2)
         assert _equal_up_to_global_phase(actual(WState(2)), expected)
         assert np.allclose(WState(2).get_theoretical_state_vector(), expected, atol=ATOL)
 
     def test_w4_indices(self):
-        expected = np.zeros(16, dtype=complex)
-        for idx in (1, 2, 4, 8):
-            expected[idx] = 0.5
+        expected = w_statevector(4)
         assert _equal_up_to_global_phase(actual(WState(4)), expected)
         assert np.allclose(WState(4).get_theoretical_state_vector(), expected, atol=ATOL)
 
@@ -206,12 +200,7 @@ def _equal_up_to_global_phase(a: np.ndarray, b: np.ndarray) -> bool:
 # ===========================================================================
 
 
-BELL_REFS = {
-    "phi_plus": np.array([INV_SQRT2, 0, 0, INV_SQRT2], dtype=complex),
-    "phi_minus": np.array([INV_SQRT2, 0, 0, -INV_SQRT2], dtype=complex),
-    "psi_plus": np.array([0, INV_SQRT2, INV_SQRT2, 0], dtype=complex),
-    "psi_minus": np.array([0, INV_SQRT2, -INV_SQRT2, 0], dtype=complex),
-}
+BELL_REFS = BELL_STATEVECTORS
 
 
 class TestBell:

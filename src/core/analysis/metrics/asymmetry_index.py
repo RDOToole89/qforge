@@ -48,6 +48,8 @@ from typing import Literal, overload
 
 import numpy as np
 
+from src.core.math import total_variation_distance
+
 from ..constants import (
     ALPHA,
     MAX_OUTCOMES_EXACT,
@@ -402,7 +404,7 @@ def compute_asymmetry_index_with_null_comparison(
     obs_array = np.array([observed_probs[o] for o in outcomes], dtype=np.float64)
     null_array = np.array([null_model.get(o, 0.0) for o in outcomes], dtype=np.float64)
     null_array = null_array / null_array.sum()  # defensive renormalization
-    ai_factorized = 0.5 * float(np.sum(np.abs(obs_array - null_array)))
+    ai_factorized = total_variation_distance(obs_array, null_array)
 
     # Interpretation based on comparison
     if ai_uniform >= STRUCTURE_MODERATE_THRESHOLD and ai_factorized >= STRUCTURE_WEAK_THRESHOLD:

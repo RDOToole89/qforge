@@ -46,6 +46,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, phase_damping_error
 
+from src.core.math import relaxation_probability
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -136,7 +138,7 @@ class PhaseDampingNoise(BaseNoise):
         # Calculate effective dephasing rate
         if t2_star is not None:
             # Physics-based calculation: λ = 1 - exp(-t_gate/T2*)
-            self._physics_dephasing_rate = 1 - np.exp(-gate_time / t2_star)
+            self._physics_dephasing_rate = relaxation_probability(gate_time, t2_star)
             effective_error_rate = self._physics_dephasing_rate
         else:
             # Use phenomenological rate

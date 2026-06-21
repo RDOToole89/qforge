@@ -20,6 +20,7 @@ from src.core.analysis.core.bootstrap import (
     bootstrap_confidence_interval,
 )
 from src.core.analysis.core.null_models import ghz_aware_null_model
+from tests._qhelpers import fraction_ones_q0 as _fraction_ones_q0
 
 # ---------------------------------------------------------------------------
 # null_models.ghz_aware_null_model
@@ -50,13 +51,6 @@ class TestGHZAwareNullIntermediates:
 # ---------------------------------------------------------------------------
 # bootstrap.bootstrap_confidence_interval (percentile endpoints)
 # ---------------------------------------------------------------------------
-
-
-def _fraction_ones_q0(counts):
-    """Fraction of shots whose qubit-0 bit is 1 (same statistic as core tests)."""
-    total = sum(counts.values())
-    ones = sum(c for bs, c in counts.items() if bs[0] == "1")
-    return ones / total if total else 0.0
 
 
 class TestBootstrapPercentileEndpoints:

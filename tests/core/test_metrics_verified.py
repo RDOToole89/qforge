@@ -201,10 +201,15 @@ class TestStructureScore:
         assert ss_compute_ai(GHZ_3Q) == pytest.approx(compute_asymmetry_index(GHZ_3Q))
         assert ss_compute_pcr(GHZ_3Q) == pytest.approx(compute_pathway_concentration_ratio(GHZ_3Q))
         assert ss_compute_eec(STRUCTURED_4Q, state_type="GHZ") == pytest.approx(0.5)
-        # TPS wrapper: <2 rankings -> 1.0 by convention; identical -> 1.0.
+        # TPS wrapper now delegates to the canonical temporal_pathway_stability
+        # implementation, which needs >= PP_MIN_RUNS (3) rankings; fewer -> 1.0
+        # by convention. Extremes still hold over >=3 runs: identical -> 1.0,
+        # anti-stable (alternating reversal) -> 0.0.
         assert ss_compute_tps([["a", "b"]]) == 1.0
-        assert ss_compute_tps([["a", "b", "c"], ["a", "b", "c"]]) == pytest.approx(1.0)
-        assert ss_compute_tps([["a", "b", "c"], ["c", "b", "a"]]) == pytest.approx(0.0)
+        assert ss_compute_tps([["a", "b", "c"]] * 3) == pytest.approx(1.0)
+        assert ss_compute_tps([["a", "b", "c"], ["c", "b", "a"], ["a", "b", "c"]]) == pytest.approx(
+            0.0
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1082,8 +1087,10 @@ class TestRegistryExceptionBranches:
 
 class TestStructureScoreDelegationBranches:
     def test_tps_no_common_pathways_returns_zero(self):
-        # Two rankings with no shared elements -> <2 common -> empty rhos -> 0.0.
-        assert ss_compute_tps([["a", "b", "c"], ["x", "y", "z"]]) == 0.0
+        # Rankings with no shared elements -> every pair has <2 common -> all
+        # correlations 0 -> mean 0 -> 0.0. Uses >= PP_MIN_RUNS (3) rankings since
+        # the wrapper now delegates to the canonical temporal_pathway_stability.
+        assert ss_compute_tps([["a", "b", "c"], ["x", "y", "z"], ["p", "q", "r"]]) == 0.0
 
     def test_ces_delegation(self):
         from src.core.analysis.metrics.structure_score import (

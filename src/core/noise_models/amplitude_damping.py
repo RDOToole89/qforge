@@ -43,6 +43,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, amplitude_damping_error
 
+from src.core.math import relaxation_probability
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -132,7 +134,7 @@ class AmplitudeDampingNoise(BaseNoise):
         # Calculate effective damping rate
         if t1 is not None:
             # Physics-based calculation: γ = 1 - exp(-t_gate/T1)
-            self._physics_damping_rate = 1 - np.exp(-gate_time / t1)
+            self._physics_damping_rate = relaxation_probability(gate_time, t1)
             effective_error_rate = self._physics_damping_rate
         else:
             # Use phenomenological rate

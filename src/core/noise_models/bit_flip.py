@@ -43,6 +43,8 @@ from typing import Any
 import numpy as np
 from qiskit_aer.noise import NoiseModel, pauli_error
 
+from src.core.math import PAULI_I, PAULI_X
+
 from .base_noise import BaseNoise
 
 logger = logging.getLogger(__name__)
@@ -240,10 +242,10 @@ class BitFlipNoise(BaseNoise):
         p = self.error_rate
 
         # Identity operator (no bit flip)
-        K0 = np.sqrt(1 - p) * np.eye(2, dtype=complex)
+        K0 = np.sqrt(1 - p) * PAULI_I
 
         # Pauli X operator (bit flip)
-        K1 = np.sqrt(p) * np.array([[0, 1], [1, 0]], dtype=complex)
+        K1 = np.sqrt(p) * PAULI_X
 
         return [K0, K1]
 

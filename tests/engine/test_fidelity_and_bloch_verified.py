@@ -40,6 +40,7 @@ from src.engine.fidelity import (
     _compute_fidelity_statevector,
     extract_simulation_data,
 )
+from tests._qhelpers import density_matrix_from_statevector as _dm
 
 # ── single-qubit kets / density matrices ────────────────────────────────────
 KET0 = np.array([1, 0], dtype=complex)
@@ -47,10 +48,6 @@ KET1 = np.array([0, 1], dtype=complex)
 KETP = np.array([1, 1], dtype=complex) / np.sqrt(2)  # |+>
 KETM = np.array([1, -1], dtype=complex) / np.sqrt(2)  # |->
 KETi = np.array([1, 1j], dtype=complex) / np.sqrt(2)  # |i> = (|0>+i|1>)/sqrt2
-
-
-def _dm(psi: np.ndarray) -> np.ndarray:
-    return np.outer(psi, psi.conj())
 
 
 class _DataObj:
