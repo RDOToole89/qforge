@@ -3,6 +3,7 @@
  * Includes vector helpers, point generation, channel compilation, and noise application.
  */
 import * as THREE from "three";
+import { Matrix, EigenvalueDecomposition } from "ml-matrix";
 import type {
   BlochMapDef,
   BlochMapFn,
@@ -236,16 +237,21 @@ export function stateVectorToBloch(
       // qubit k is |0⟩ — contributes to ρ_00 and ρ_01
       rho00 += sv[i][0] * sv[i][0] + sv[i][1] * sv[i][1];
       const j = i | bit; // partner state with qubit k flipped to |1⟩
-      // ρ_01 += ⟨i|ψ⟩* ⟨j|ψ⟩ = conj(sv[i]) * sv[j]
-      rho01_re += sv[i][0] * sv[j][0] + sv[i][1] * sv[j][1];
-      rho01_im += sv[i][0] * sv[j][1] - sv[i][1] * sv[j][0];
+      // Accumulate conj(sv[i]) * sv[j] = Σ conj(a_{0,rest}) a_{1,rest} = ρ_10.
+      rho01_re += sv[i][0] * sv[j][0] + sv[i][1] * sv[j][1]; // Re(ρ_10) = Re(ρ_01)
+      rho01_im += sv[i][0] * sv[j][1] - sv[i][1] * sv[j][0]; // Im(ρ_10) = -Im(ρ_01)
     }
   }
 
+  // Note: the accumulators above hold ρ_10 (not ρ_01). Since Re(ρ_10)=Re(ρ_01)
+  // and Im(ρ_10)=-Im(ρ_01):
+  //   ⟨σ_x⟩ =  2 Re(ρ_01) =  2·rho01_re
+  //   ⟨σ_y⟩ = -2 Im(ρ_01) =  2·rho01_im   (the +y eigenstate (|0⟩+i|1⟩)/√2 → +1)
+  //   ⟨σ_z⟩ = ρ_00 − ρ_11
   return {
-    rx: 2 * rho01_re,      // Tr(ρ σ_x) = 2 Re(ρ_01)
-    ry: -2 * rho01_im,     // Tr(ρ σ_y) = -2 Im(ρ_01)
-    rz: rho00 - rho11,     // Tr(ρ σ_z) = ρ_00 - ρ_11
+    rx: 2 * rho01_re,
+    ry: 2 * rho01_im,
+    rz: rho00 - rho11,
   };
 }
 
@@ -330,13 +336,22 @@ export function correlationMatrix(
 }
 
 /**
- * Compute concurrence for a 2-qubit reduced state extracted from an n-qubit
- * state vector. Uses the Wootters formula for pure states:
- * C = 2|ad - bc| where |ψ⟩ = a|00⟩ + b|01⟩ + c|10⟩ + d|11⟩ in the
- * reduced 2-qubit space.
+ * Compute the Wootters concurrence of the 2-qubit reduced density matrix for
+ * qubits (qi, qj) extracted from an n-qubit pure state vector.
  *
- * For mixed reduced states (n > 2), computes concurrence from the
- * 4×4 reduced density matrix using the eigenvalue formula.
+ * This is the exact Wootters formula — no approximations:
+ *   1. Partial-trace the statevector over all other qubits to get ρ (4×4).
+ *   2. ρ̃ = (σ_y⊗σ_y) ρ* (σ_y⊗σ_y).
+ *   3. P = ρ ρ̃ (eigenvalues are real and ≥ 0).
+ *   4. Eigenvalues of the complex matrix P are obtained via the real 8×8
+ *      embedding E = [[A,-B],[B,A]] where P = A + iB; each eigenvalue of P
+ *      appears twice among E's eigenvalues.
+ *   5. λ_k = √(max(0, e_k)) sorted descending; deduplicate by taking the
+ *      values at indices [0,2,4,6]. Then C = max(0, λ1 − λ2 − λ3 − λ4),
+ *      clamped to [0, 1].
+ *
+ * Uses the MSB qubit convention (qubit 0 = MSB, bit = 1<<(n-1-q)) consistent
+ * with stateVectorToBloch.
  */
 export function pairConcurrence(
   sv: Complex[],
@@ -350,15 +365,15 @@ export function pairConcurrence(
   const bitI = 1 << (numQubits - 1 - qi);
   const bitJ = 1 << (numQubits - 1 - qj);
 
-  // Compute 4×4 reduced density matrix ρ_{ij} by partial trace
-  // Basis: |00⟩, |01⟩, |10⟩, |11⟩ for qubits (qi, qj)
+  // Compute 4×4 reduced density matrix ρ_{ij} by partial trace.
+  // Basis: |00⟩, |01⟩, |10⟩, |11⟩ for qubits (qi, qj).
   const rho_re: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   const rho_im: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
 
   for (let k = 0; k < dim; k++) {
     const row = ((k & bitI) ? 2 : 0) | ((k & bitJ) ? 1 : 0);
     for (let l = 0; l < dim; l++) {
-      // Check that k and l agree on all qubits except qi and qj
+      // Check that k and l agree on all qubits except qi and qj.
       const mask = ~(bitI | bitJ);
       if ((k & mask) !== (l & mask)) continue;
       const col = ((l & bitI) ? 2 : 0) | ((l & bitJ) ? 1 : 0);
@@ -368,33 +383,22 @@ export function pairConcurrence(
     }
   }
 
-  // σ_y ⊗ σ_y = [[0,0,0,-1],[0,0,1,0],[0,1,0,0],[-1,0,0,0]]
-  // ρ̃ = (σ_y⊗σ_y) ρ* (σ_y⊗σ_y)
-  // For the concurrence formula: compute R = ρ ρ̃, find eigenvalues, C = max(0, √λ1 - √λ2 - √λ3 - √λ4)
-  // For small matrices, use a simpler approach: compute tr(ρ̃ρ) route
-
-  // Actually for efficiency, use the formula via spin-flipped state:
-  // R = sqrt(sqrt(ρ) * ρ̃ * sqrt(ρ)) eigenvalues
-  // This is complex for a general mixed state. Use a simplified approach:
-  // Compute the 4 eigenvalues of R = ρ * (σy⊗σy) * ρ* * (σy⊗σy)
-
-  // σy⊗σy matrix (real): rows/cols in basis 00,01,10,11
-  // = [[0,0,0,-1],[0,0,1,0],[0,1,0,0],[-1,0,0,0]]
+  // σ_y⊗σ_y is a real matrix in the 00,01,10,11 basis.
   const sysy = [[0,0,0,-1],[0,0,1,0],[0,1,0,0],[-1,0,0,0]];
 
-  // Compute ρ̃ = (σy⊗σy) ρ* (σy⊗σy)
-  // Step 1: tmp = ρ* * (σy⊗σy)
+  // ρ̃ = (σy⊗σy) ρ* (σy⊗σy). conj(ρ) has the same real part and negated imag.
+  // Step 1: tmp = ρ* (σy⊗σy)
   const tmp_re: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   const tmp_im: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       for (let k = 0; k < 4; k++) {
-        tmp_re[i][j] += rho_re[i][k] * sysy[k][j]; // ρ* real part = ρ real part
-        tmp_im[i][j] += -rho_im[i][k] * sysy[k][j]; // ρ* imag part = -ρ imag part
+        tmp_re[i][j] += rho_re[i][k] * sysy[k][j];
+        tmp_im[i][j] += -rho_im[i][k] * sysy[k][j];
       }
     }
   }
-  // Step 2: ρ̃ = (σy⊗σy) * tmp
+  // Step 2: ρ̃ = (σy⊗σy) tmp
   const rtilde_re: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   const rtilde_im: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   for (let i = 0; i < 4; i++) {
@@ -406,119 +410,45 @@ export function pairConcurrence(
     }
   }
 
-  // Compute R = ρ * ρ̃ (complex matrix multiply)
-  const R_re: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-  const R_im: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  // P = ρ ρ̃ (complex 4×4 matrix multiply). P = A + iB.
+  const A: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  const B: number[][] = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       for (let k = 0; k < 4; k++) {
-        R_re[i][j] += rho_re[i][k] * rtilde_re[k][j] - rho_im[i][k] * rtilde_im[k][j];
-        R_im[i][j] += rho_re[i][k] * rtilde_im[k][j] + rho_im[i][k] * rtilde_re[k][j];
+        A[i][j] += rho_re[i][k] * rtilde_re[k][j] - rho_im[i][k] * rtilde_im[k][j];
+        B[i][j] += rho_re[i][k] * rtilde_im[k][j] + rho_im[i][k] * rtilde_re[k][j];
       }
     }
   }
 
-  // Eigenvalues of R (4×4 Hermitian-ish matrix) — use trace powers for a simpler approach
-  // For a rank-1 or rank-2 ρ (common in circuit simulation), most eigenvalues are 0
-  // Use the characteristic polynomial approach via Newton's identities:
-  // tr(R), tr(R²), tr(R³), tr(R⁴) → eigenvalues
-  const trR = R_re[0][0] + R_re[1][1] + R_re[2][2] + R_re[3][3];
-
-  // For most practical cases in circuit simulation, a simpler formula works:
-  // C = max(0, 2*max_eigenvalue_of_sqrt(R) - tr(sqrt(R)))
-  // But computing sqrt of a matrix is expensive. Use a known shortcut:
-  // The eigenvalues of R are real and non-negative (R = ρ ρ̃ where ρ̃ is related to ρ by antiunitary)
-
-  // Compute tr(R²) for the characteristic polynomial
-  let trR2 = 0;
-  for (let i = 0; i < 4; i++) {
-    for (let k = 0; k < 4; k++) {
-      trR2 += R_re[i][k] * R_re[k][i] - R_im[i][k] * R_im[k][i];
-    }
-  }
-
-  // For 2-qubit pure states (no other qubits), concurrence = 2|ad-bc|
-  // For general case with small eigenvalues, use approximate formula
-  // eigenvalues λ from: λ⁴ - trR·λ² + ... = 0
-  // Simplified: if R ≈ rank 1, then C ≈ √trR
-
-  // Use the proper formula: eigenvalues of R via 4×4 determinant
-  // But for a research tool, the practical shortcut for pure global states:
-  // When the global state is pure, concurrence(i,j) = 2*sqrt(det(ρ_ij_reduced))
-  // ... but ρ_ij might be mixed even if global is pure
-
-  // Use the simplest correct approach: C = max(0, √λ₁ - √λ₂ - √λ₃ - √λ₄)
-  // where λᵢ are eigenvalues of R, sorted descending.
-  // For a 4×4 matrix, compute eigenvalues via the characteristic polynomial.
-
-  // Actually, for the specific case where the GLOBAL state is pure (which it always is
-  // in our simulator since we track statevectors), there's a much simpler formula:
-  // C(qi,qj) = 2 * |det_reduced_amplitudes|... but this only works for 2-qubit systems.
-
-  // For n>2 with pure global state, the concurrence of the reduced 2-qubit state is:
-  // C = sqrt(2(1 - tr(ρ_reduced²)))... NO, that's the tangle/linear entropy.
-
-  // Let's just use: for pure global states, the concurrence of qubits i,j equals
-  // the concurrence computed from ρ_{ij} via the Wootters formula.
-  // The eigenvalues of R = ρ ρ̃ can be found numerically.
-
-  // For a 4×4 matrix, find eigenvalues by solving the characteristic polynomial.
-  // Coefficients: det(R - λI) = λ⁴ - c₃λ³ + c₂λ² - c₁λ + c₀ = 0
-  // c₃ = tr(R), c₂ = (tr(R)² - tr(R²))/2, etc.
-
-  const c3 = trR;
-  const c2 = (trR * trR - trR2) / 2;
-
-  // tr(R³)
-  let trR3 = 0;
+  // Eigenvalues of the complex matrix P via the real 8×8 embedding
+  // E = [[A, -B], [B, A]]. Each eigenvalue of P appears twice in E.
+  const E: number[][] = Array.from({ length: 8 }, () => new Array(8).fill(0));
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
-      for (let k = 0; k < 4; k++) {
-        trR3 += R_re[i][j] * R_re[j][k] * R_re[k][i]
-              - R_re[i][j] * R_im[j][k] * R_im[k][i]
-              - R_im[i][j] * R_re[j][k] * R_im[k][i]
-              - R_im[i][j] * R_im[j][k] * R_re[k][i];  // Re part of trace
-      }
-    }
-  }
-  const c1 = (trR * trR * trR - 3 * trR * trR2 + 2 * trR3) / 6;
-
-  // For c₀ = det(R), use the cofactor expansion (simplified for real eigenvalues assumption)
-  // Since eigenvalues should be real and non-negative, and for most circuit states
-  // only 0-2 eigenvalues are nonzero, use a practical approach:
-
-  // If trR < 1e-10, concurrence is 0 (no entanglement)
-  if (trR < 1e-10) return 0;
-
-  // Solve for eigenvalues using the depressed quartic / quadratic-of-quadratic approach
-  // For most circuit states, c₀ and c₁ are very small, so eigenvalues are approx:
-  // λ ≈ roots of λ² - c₃λ + c₂ = 0 (ignoring small terms)
-  const disc = c3 * c3 - 4 * c2;
-  let sqrtLambdas: number[];
-  if (disc < 0 || c2 < -1e-10) {
-    // Fallback: just use √trR as approximation (works for rank-1 R)
-    sqrtLambdas = [Math.sqrt(Math.max(0, trR)), 0, 0, 0];
-  } else {
-    const sqD = Math.sqrt(Math.max(0, disc));
-    const l1 = Math.max(0, (c3 + sqD) / 2);
-    const l2 = Math.max(0, (c3 - sqD) / 2);
-    // Refine: check if c₁ contributes (usually not for circuit states)
-    sqrtLambdas = [Math.sqrt(l1), Math.sqrt(l2), 0, 0];
-    // If there are more eigenvalues from c₁, add them
-    if (Math.abs(c1) > 1e-10 && l2 > 1e-10) {
-      // Subdivide l2 further
-      const subDisc = l2 * l2 - 4 * Math.abs(c1) / c3;
-      if (subDisc > 0) {
-        const subSqD = Math.sqrt(subDisc);
-        sqrtLambdas[1] = Math.sqrt(Math.max(0, (l2 + subSqD) / 2));
-        sqrtLambdas[2] = Math.sqrt(Math.max(0, (l2 - subSqD) / 2));
-      }
+      E[i][j] = A[i][j];          // top-left  A
+      E[i][j + 4] = -B[i][j];     // top-right -B
+      E[i + 4][j] = B[i][j];      // bottom-left  B
+      E[i + 4][j + 4] = A[i][j];  // bottom-right A
     }
   }
 
-  sqrtLambdas.sort((a, b) => b - a);
-  const C = Math.max(0, sqrtLambdas[0] - sqrtLambdas[1] - sqrtLambdas[2] - sqrtLambdas[3]);
-  return C;
+  const eig = new EigenvalueDecomposition(new Matrix(E));
+  const realEig = eig.realEigenvalues;
+
+  // sqrt(max(0, e)) for each, sorted descending. Eigenvalues are duplicated,
+  // so the distinct Wootters λ's live at indices [0, 2, 4, 6].
+  const sqrtEig = realEig.map((e) => Math.sqrt(Math.max(0, e)));
+  sqrtEig.sort((a, b) => b - a);
+
+  const lambda1 = sqrtEig[0];
+  const lambda2 = sqrtEig[2];
+  const lambda3 = sqrtEig[4];
+  const lambda4 = sqrtEig[6];
+
+  const C = lambda1 - lambda2 - lambda3 - lambda4;
+  return Math.min(1, Math.max(0, C));
 }
 
 // ── Multipartite entanglement ───────────────────────────────────
