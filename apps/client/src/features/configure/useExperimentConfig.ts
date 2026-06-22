@@ -8,11 +8,16 @@ import type {
   ResearchType,
   ExperimentConfig,
 } from "../../lib/types";
+import {
+  buildExperimentConfig,
+  computeConfigWarnings,
+  isConfigValid,
+  noiseDisabledReason as computeNoiseDisabledReason,
+  type ConfigState,
+  type ConfigWarning,
+} from "./configLogic";
 
-export interface ConfigWarning {
-  level: "error" | "warning" | "info";
-  message: string;
-}
+export type { ConfigWarning };
 
 export interface UseExperimentConfigReturn {
   // State
@@ -73,7 +78,7 @@ export interface UseExperimentConfigReturn {
 }
 
 export function useExperimentConfig(): UseExperimentConfigReturn {
-  // ── State ────────────────────────────────────────────────────────────
+  // -- State --------------------------------------------------------------
   const [stateType, setStateType] = useState<StateType>("GHZ");
   const [numQubits, setNumQubits] = useState(3);
   const [simMode, setSimMode] = useState<SimMode>("qasm");
@@ -97,7 +102,7 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
   const [optimizationLevel, setOptimizationLevel] = useState(1);
   const [hardwareSession, setHardwareSession] = useState(false);
 
-  // ── Cross-field side effects ─────────────────────────────────────────
+  // -- Cross-field side effects -------------------------------------------
 
   // Statevector and hardware modes do not support simulated noise.
   useEffect(() => {
@@ -135,134 +140,68 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
     }
   }, [t1, t2]);
 
-  // ── Validation warnings ──────────────────────────────────────────────
+  // -- Config snapshot for the pure transforms ----------------------------
 
-  const warnings = useMemo<ConfigWarning[]>(() => {
-    const w: ConfigWarning[] = [];
+  const configState = useMemo<ConfigState>(
+    () => ({
+      stateType,
+      numQubits,
+      simMode,
+      shots,
+      rngSeed,
+      noiseEnabled,
+      noiseType,
+      errorRate,
+      t1,
+      t2,
+      readoutErrorRate,
+      balanceCircuit,
+      metricsEnabled,
+      metricsMode,
+      selectedProfile,
+      selectedMetrics,
+      researchType,
+      multipleRuns,
+      trackConvergence,
+      backendName,
+      optimizationLevel,
+      hardwareSession,
+    }),
+    [
+      stateType, numQubits, simMode, shots, rngSeed, noiseEnabled, noiseType,
+      errorRate, t1, t2, readoutErrorRate, balanceCircuit, metricsEnabled,
+      metricsMode, selectedProfile, selectedMetrics, researchType, multipleRuns,
+      trackConvergence, backendName, optimizationLevel, hardwareSession,
+    ],
+  );
 
-    if (simMode === "statevector" && noiseEnabled) {
-      w.push({ level: "info", message: "Noise auto-disabled: statevector mode is noiseless by design." });
-    }
-    if (simMode === "hardware" && noiseEnabled) {
-      w.push({ level: "info", message: "Noise auto-disabled: real hardware has physical noise." });
-    }
-    if (errorRate > 0.5) {
-      w.push({ level: "warning", message: "High error rate \u2014 quantum advantage may be lost." });
-    }
-    if (simMode === "density_matrix" && numQubits > 10) {
-      w.push({ level: "warning", message: "Dense simulation: may be slow for >10 qubits." });
-    }
-    if (shots < 100 && metricsEnabled) {
-      w.push({ level: "warning", message: "Too few shots for reliable metrics." });
-    }
-    if (simMode === "hardware" && shots > 100000) {
-      w.push({ level: "error", message: "Exceeds IBM Quantum limit (100,000 shots)." });
-    }
-    if (readoutErrorRate !== null && readoutErrorRate > 0.3) {
-      w.push({ level: "warning", message: "Unusually high readout error." });
-    }
-    if (stateType === "BELL" && numQubits !== 2) {
-      w.push({ level: "error", message: "Bell states require exactly 2 qubits." });
-    }
+  // -- Validation warnings ------------------------------------------------
 
-    return w;
-  }, [simMode, noiseEnabled, errorRate, numQubits, shots, metricsEnabled, readoutErrorRate, stateType]);
+  const warnings = useMemo<ConfigWarning[]>(
+    () => computeConfigWarnings(configState),
+    [configState],
+  );
 
-  // ── Computed properties ──────────────────────────────────────────────
+  // -- Computed properties ------------------------------------------------
 
-  const isValid = useMemo(() => !warnings.some((w) => w.level === "error"), [warnings]);
+  const isValid = useMemo(() => isConfigValid(warnings), [warnings]);
 
-  const noiseDisabledReason = useMemo(() => {
-    if (simMode === "statevector") {
-      return "Statevector mode is noiseless by design. Use Density Matrix for noisy simulations.";
-    }
-    if (simMode === "hardware") {
-      return "Real hardware has physical noise. Simulated noise cannot be applied.";
-    }
-    return null;
-  }, [simMode]);
+  const noiseDisabledReason = useMemo(
+    () => computeNoiseDisabledReason(simMode),
+    [simMode],
+  );
 
   const showThermalParams = noiseType === "thermal_relaxation" && noiseEnabled;
   const showHardwareSection = simMode === "hardware";
 
-  // ── Config assembly ──────────────────────────────────────────────────
+  // -- Config assembly ----------------------------------------------------
 
-  const buildConfig = useCallback((): ExperimentConfig => {
-    const config: ExperimentConfig = {
-      num_qubits: numQubits,
-      state_type: stateType,
-      shots,
-      noise_enabled: noiseEnabled,
-      sim_mode: simMode,
-      visualization_type: "none",
-    };
+  const buildConfig = useCallback(
+    (): ExperimentConfig => buildExperimentConfig(configState),
+    [configState],
+  );
 
-    // Noise params (only when enabled).
-    if (noiseEnabled) {
-      config.noise_type = noiseType;
-      config.error_rate = errorRate;
-
-      if (readoutErrorRate !== null) {
-        config.readout_error_rate = readoutErrorRate;
-      }
-
-      if (noiseType === "thermal_relaxation") {
-        if (t1 !== null) config.t1 = t1;
-        if (t2 !== null) config.t2 = t2;
-      }
-    }
-
-    // Metrics.
-    if (metricsEnabled) {
-      config.metrics =
-        metricsMode === "profile" ? selectedProfile : selectedMetrics;
-    }
-
-    // Research type.
-    if (researchType !== null) {
-      config.research_type = researchType;
-    }
-
-    // Balance circuit.
-    if (balanceCircuit) {
-      config.balance_circuit = "gate_count";
-    }
-
-    // RNG seed (not applicable for hardware).
-    if (rngSeed !== null && simMode !== "hardware") {
-      config.rng_seed = rngSeed;
-    }
-
-    // Multiple runs / convergence.
-    if (multipleRuns > 1) {
-      config.multiple_runs = multipleRuns;
-    }
-    if (trackConvergence) {
-      config.track_convergence = true;
-    }
-
-    // Hardware params.
-    if (simMode === "hardware") {
-      if (backendName) {
-        config.backend_name = backendName;
-      }
-      config.optimization_level = optimizationLevel;
-      if (hardwareSession) {
-        config.hardware_session = true;
-      }
-    }
-
-    return config;
-  }, [
-    numQubits, stateType, shots, noiseEnabled, simMode,
-    noiseType, errorRate, readoutErrorRate, t1, t2,
-    metricsEnabled, metricsMode, selectedProfile, selectedMetrics,
-    researchType, balanceCircuit, rngSeed,
-    multipleRuns, trackConvergence,
-    backendName, optimizationLevel, hardwareSession,
-  ]);
-
-  // ── Return ───────────────────────────────────────────────────────────
+  // -- Return -------------------------------------------------------------
 
   return {
     stateType, setStateType,

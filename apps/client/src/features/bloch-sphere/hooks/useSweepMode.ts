@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { BlochVisualizerData, BlochSweepResponse } from "../../../lib/types";
 import { runBlochSweep } from "../../../lib/api";
+import { interpolateSnapshot } from "../sweepInterpolation";
 
 export interface UseSweepModeReturn {
   sweepData: BlochSweepResponse | null;
@@ -43,70 +44,11 @@ export function useSweepMode(): UseSweepModeReturn {
   const [sweepSteps, setSweepSteps] = useState(8);
 
   // Sweep: interpolate between snapshots based on sweepProgress (0..1)
-  const sweepSnapshot = useMemo((): BlochVisualizerData | null => {
-    if (!sweepData || sweepData.snapshots.length === 0) return null;
-    const snaps = sweepData.snapshots;
-    if (snaps.length === 1) return snaps[0];
-
-    // Map progress to snapshot index (fractional)
-    const fIdx = sweepProgress * (snaps.length - 1);
-    const lo = Math.floor(fIdx);
-    const hi = Math.min(lo + 1, snaps.length - 1);
-    const t = fIdx - lo; // interpolation factor 0..1
-
-    if (lo === hi) return snaps[lo];
-    const a = snaps[lo];
-    const b = snaps[hi];
-
-    // Lerp helper
-    const lerp = (x: number, y: number) => x + (y - x) * t;
-
-    // Interpolate qubits
-    const qubits = a.qubits.map((qa, i) => {
-      const qb = b.qubits[i];
-      return {
-        qubit_index: qa.qubit_index,
-        bloch_vector: {
-          rx: lerp(qa.bloch_vector.rx, qb.bloch_vector.rx),
-          ry: lerp(qa.bloch_vector.ry, qb.bloch_vector.ry),
-          rz: lerp(qa.bloch_vector.rz, qb.bloch_vector.rz),
-        },
-        purity: lerp(qa.purity, qb.purity),
-      };
-    });
-
-    // Interpolate pairs
-    const pairs = a.pairs.map((pa, i) => {
-      const pb = b.pairs[i];
-      return {
-        qubit_i: pa.qubit_i,
-        qubit_j: pa.qubit_j,
-        correlators: {
-          zi: lerp(pa.correlators.zi, pb.correlators.zi),
-          iz: lerp(pa.correlators.iz, pb.correlators.iz),
-          zz: lerp(pa.correlators.zz, pb.correlators.zz),
-          xx: lerp(pa.correlators.xx, pb.correlators.xx),
-          yy: lerp(pa.correlators.yy, pb.correlators.yy),
-        },
-        mutual_information: lerp(pa.mutual_information, pb.mutual_information),
-      };
-    });
-
-    // Interpolate MI matrix
-    const mi_matrix = a.mi_matrix.map((row, i) =>
-      row.map((v, j) => lerp(v, b.mi_matrix[i][j]))
-    );
-
-    return {
-      ...a,
-      error_rate: lerp(a.error_rate ?? 0, b.error_rate ?? 0),
-      fidelity: a.fidelity != null && b.fidelity != null
-        ? lerp(a.fidelity, b.fidelity) : null,
-      qubits,
-      pairs,
-      mi_matrix,
-    };
-  }, [sweepData, sweepProgress]);
+  const sweepSnapshot = useMemo(
+    (): BlochVisualizerData | null =>
+      sweepData ? interpolateSnapshot(sweepData.snapshots, sweepProgress) : null,
+    [sweepData, sweepProgress],
+  );
 
   // Sweep animation toggle
   const toggleSweepAnim = useCallback(() => {
