@@ -151,6 +151,7 @@ include = [
     "src/engine/bloch_math.py",
     "src/engine/analysis/research_integration.py",
     "src/engine/models/measurement.py",
+    "src/engine/execution/hardware_validation.py",
 ]
 omit = [
     "*/tests/*",

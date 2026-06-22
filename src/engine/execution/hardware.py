@@ -18,6 +18,11 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 
+from src.engine.execution.hardware_validation import (
+    HardwareFeasibilityError,
+    validate_circuit_for_backend,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -262,6 +267,17 @@ def execute_on_hardware(
         and calibration snapshot.
     """
     from qiskit_ibm_runtime import SamplerV2 as Sampler
+
+    # 0. Dynamic feasibility gate — never submit an impossible job.
+    feasibility = validate_circuit_for_backend(circuit, backend, shots)
+    for warning in feasibility.warnings:
+        logger.warning(f"Hardware feasibility warning: {warning}")
+    if not feasibility.feasible:
+        violations = "\n  - ".join(feasibility.violations)
+        raise HardwareFeasibilityError(
+            f"Job is not feasible on backend '{feasibility.backend_name}'. "
+            f"Refusing to submit. Violations:\n  - {violations}"
+        )
 
     # 1. Transpile for target hardware
     isa_circuit, transpilation_info = transpile_for_hardware(circuit, backend, optimization_level)
