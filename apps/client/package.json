@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint:tokens": "node scripts/check-no-raw-hex.mjs",
     "gen:catalog": "uv run --project ../.. python ../../scripts/gen_frontend_constants.py"
   },
   "dependencies": {

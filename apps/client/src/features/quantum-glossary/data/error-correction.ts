@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "error_correction",
   name: "Quantum Error Correction",
   icon: "shield",
-  color: "#22c55e",
+  color: viz.gate.green,
   description: "Protecting quantum information from noise",
 };
 

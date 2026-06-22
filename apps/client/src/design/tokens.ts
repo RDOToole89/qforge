@@ -89,6 +89,7 @@ export const viz = {
   lime: "#84cc16",
   crimson: "#e11d48",
   azure: "#0ea5e9",
+  emeraldDeep: "#10b981", // glossary "states" category accent (deeper than `emerald`)
 
   series: ["#6366f1", "#f472b6", "#44c8ff", "#ff9933", "#a78bfa", "#44ff88"],
 

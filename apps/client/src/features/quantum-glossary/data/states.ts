@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "states",
   name: "Quantum States",
   icon: "layer-group",
-  color: "#10b981",
+  color: viz.emeraldDeep,
   description: "Important multi-qubit states and their properties",
 };
 

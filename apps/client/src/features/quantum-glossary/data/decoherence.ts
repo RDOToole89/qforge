@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "decoherence",
   name: "Decoherence & Open Systems",
   icon: "water",
-  color: "#ef4444",
+  color: viz.gate.red,
   description: "How quantum systems lose coherence through environmental interaction",
 };
 

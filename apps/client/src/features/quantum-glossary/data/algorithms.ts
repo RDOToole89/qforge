@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "algorithms",
   name: "Quantum Algorithms",
   icon: "code",
-  color: "#8b5cf6",
+  color: viz.gate.violet,
   description: "Key quantum algorithms and computational primitives",
 };
 

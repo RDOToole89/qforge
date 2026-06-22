@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "reconfiguration_space",
   name: "Reconfiguration Space",
   icon: "compass",
-  color: "#8b5cf6",
+  color: viz.gate.violet,
   description:
     "Theoretical framework for predictable decoherence trajectories in fingerprint space",
 };

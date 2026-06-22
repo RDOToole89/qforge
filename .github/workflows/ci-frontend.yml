@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Design tokens — no raw hex outside src/design
+        run: pnpm --filter @qef/client run lint:tokens
+
       - name: Type check (client)
         run: pnpm --filter @qef/client run typecheck
 

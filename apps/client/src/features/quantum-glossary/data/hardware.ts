@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "hardware",
   name: "Quantum Hardware",
   icon: "cpu",
-  color: "#14b8a6",
+  color: viz.gate.teal,
   description: "Physical implementations and device characteristics",
 };
 

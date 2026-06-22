@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "density_matrices",
   name: "Density Matrices & Mixed States",
   icon: "th",
-  color: "#14b8a6",
+  color: viz.gate.teal,
   description: "The density operator formalism for open quantum systems",
 };
 

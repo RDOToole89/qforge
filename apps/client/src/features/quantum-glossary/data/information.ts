@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "information",
   name: "Quantum Information Theory",
   icon: "info-circle",
-  color: "#3b82f6",
+  color: viz.gate.blue,
   description: "Entropy, information measures, and distance metrics",
 };
 

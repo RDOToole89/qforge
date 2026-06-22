@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "noise",
   name: "Quantum Channels & Noise",
   icon: "bolt",
-  color: "#f97316",
+  color: viz.gate.orange,
   description: "CPTP maps, Kraus operators, and noise models",
 };
 

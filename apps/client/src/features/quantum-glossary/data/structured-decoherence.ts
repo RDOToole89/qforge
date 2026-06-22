@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "structured_decoherence",
   name: "Structured Decoherence",
   icon: "git-branch",
-  color: "#f59e0b",
+  color: viz.gate.amber,
   description: "Research into decoherence pathways and topology-dependent noise",
 };
 

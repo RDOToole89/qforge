@@ -6,6 +6,7 @@ import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBl
 import type { BlochDot } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 import type { Circuit } from "@/src/features/circuit-builder/types";
 import { colors, radii } from "@/src/theme";
+import { viz } from "@/src/design/tokens";
 
 /** Bloch sphere representations for each state type (theoretical, noiseless). */
 const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanation: string }> = {
@@ -15,7 +16,7 @@ const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanati
     explanation: "GHZ entanglement is global \u2014 individual qubits appear as I/2 (center of Bloch ball). The structure lives in multi-qubit correlations, not single-qubit states.",
   },
   W: {
-    dots: [{ rx: 0, ry: 0, rz: 0.33, color: "#34d399", label: "partial" }],
+    dots: [{ rx: 0, ry: 0, rz: 0.33, color: viz.emerald, label: "partial" }],
     caption: "Each qubit: partially mixed",
     explanation: "W state qubits are partially mixed with a bias toward |0\u27E9. Unlike GHZ, losing one qubit preserves entanglement among the rest.",
   },
@@ -25,7 +26,7 @@ const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanati
     explanation: "Cluster state qubits are maximally mixed individually. The entanglement structure follows the graph topology (nearest-neighbor CZ bonds).",
   },
   BELL: {
-    dots: [{ rx: 0, ry: 0, rz: 0, color: "#ec4899", label: "mixed" }],
+    dots: [{ rx: 0, ry: 0, rz: 0, color: viz.gate.pink, label: "mixed" }],
     caption: "Each qubit: maximally mixed",
     explanation: "Bell pair qubits are maximally entangled \u2014 each appears as I/2. All information is in the 2-qubit correlation.",
   },
