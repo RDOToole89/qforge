@@ -6,6 +6,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+// NativeWind global stylesheet (Tailwind base/components/utilities). Must be
+// imported once at the app root so className styling is available app-wide.
+import "../global.css";
+
 export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
