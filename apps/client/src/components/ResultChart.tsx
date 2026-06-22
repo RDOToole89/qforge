@@ -1,5 +1,7 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+
+import { Text, chrome, radii, viz } from "@/src/design";
 
 interface Props {
   /** Measurement counts: { "000": 420, "111": 380, ... } */
@@ -24,7 +26,9 @@ export default function ResultChart({ counts, topN = 16 }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Measurement Distribution</Text>
+      <Text variant="headingSm" weight="bold" tone="primary" className="mb-md">
+        Measurement Distribution
+      </Text>
       <ScrollView style={styles.scroll}>
         {sorted.map(([bitstring, count]) => {
           const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0";
@@ -32,11 +36,13 @@ export default function ResultChart({ counts, topN = 16 }: Props) {
 
           return (
             <View key={bitstring} style={styles.row}>
-              <Text style={styles.label}>|{bitstring}⟩</Text>
+              <Text variant="bodyLg" mono style={styles.label}>
+                |{bitstring}⟩
+              </Text>
               <View style={styles.barContainer}>
                 <View style={[styles.bar, { width: `${width}%` }]} />
               </View>
-              <Text style={styles.count}>
+              <Text variant="body" tone="secondary" mono style={styles.count}>
                 {count} ({pct}%)
               </Text>
             </View>
@@ -49,17 +55,11 @@ export default function ResultChart({ counts, topN = 16 }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1e293b",
-    borderRadius: 12,
+    backgroundColor: chrome.bg.surface,
+    borderRadius: radii.lg,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#334155",
-  },
-  title: {
-    color: "#e2e8f0",
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 12,
+    borderColor: chrome.border.default,
   },
   scroll: { maxHeight: 400 },
   row: {
@@ -68,28 +68,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   label: {
-    color: "#a5b4fc",
-    fontSize: 13,
-    fontFamily: "SpaceMono",
+    color: chrome.accent.light,
     width: 90,
   },
   barContainer: {
     flex: 1,
     height: 18,
-    backgroundColor: "#0f172a",
-    borderRadius: 4,
+    backgroundColor: chrome.bg.primary,
+    borderRadius: radii.sm,
     overflow: "hidden",
     marginHorizontal: 8,
   },
   bar: {
     height: 18,
-    backgroundColor: "#6366f1",
-    borderRadius: 4,
+    backgroundColor: viz.series[0],
+    borderRadius: radii.sm,
   },
   count: {
-    color: "#94a3b8",
-    fontSize: 12,
-    fontFamily: "SpaceMono",
     width: 85,
     textAlign: "right",
   },

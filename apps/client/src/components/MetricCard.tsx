@@ -1,5 +1,7 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+
+import { Card, Text, chrome, radii, spacing } from "@/src/design";
 
 interface Props {
   name: string;
@@ -15,12 +17,30 @@ export default function MetricCard({ name, value, subtitle, color }: Props) {
     value == null ? "N/A" : typeof value === "number" ? value.toFixed(4) : "—";
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.name}>{name}</Text>
-      <Text style={[styles.value, color ? { color } : undefined]}>
+    <Card variant="elevated" padding="lg" className="mb-md">
+      <Text
+        variant="body"
+        tone="secondary"
+        weight="semibold"
+        className="uppercase mb-xs"
+        style={styles.nameSpacing}
+      >
+        {name}
+      </Text>
+      <Text
+        variant="display"
+        weight="bold"
+        mono
+        tone="primary"
+        style={color ? { color } : undefined}
+      >
         {displayValue}
       </Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      {subtitle ? (
+        <Text variant="body" tone="tertiary" className="mt-xs">
+          {subtitle}
+        </Text>
+      ) : null}
 
       {/* Interpretation bar */}
       {value != null && typeof value === "number" && (
@@ -33,44 +53,22 @@ export default function MetricCard({ name, value, subtitle, color }: Props) {
           />
         </View>
       )}
-    </View>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#1e293b",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#334155",
-  },
-  name: {
-    color: "#94a3b8",
-    fontSize: 12,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  value: {
-    color: "#e2e8f0",
-    fontSize: 28,
-    fontWeight: "700",
-    fontFamily: "SpaceMono",
-  },
-  subtitle: { color: "#64748b", fontSize: 12, marginTop: 4 },
+  nameSpacing: { letterSpacing: 0.5 },
   barTrack: {
     height: 4,
-    backgroundColor: "#334155",
-    borderRadius: 2,
-    marginTop: 12,
+    backgroundColor: chrome.border.default,
+    borderRadius: radii.xs,
+    marginTop: spacing.md,
     overflow: "hidden",
   },
   barFill: {
     height: 4,
-    backgroundColor: "#6366f1",
-    borderRadius: 2,
+    backgroundColor: chrome.accent.base,
+    borderRadius: radii.xs,
   },
 });
