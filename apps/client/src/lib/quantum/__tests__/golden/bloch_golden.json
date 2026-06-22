@@ -1,0 +1,532 @@
+{
+  "schema_version": "1.0",
+  "generated_by": "scripts/gen_quantum_golden.py",
+  "source": "src/engine/bloch_math.py",
+  "convention": "qubit 0 = MSB = leftmost bitstring char; statevector amplitudes are [real, imag] pairs of length 2^n. Backend partial_trace_single_qubit uses the same MSB ordering, so qubit index q matches FE qubit index q.",
+  "states": [
+    {
+      "id": "bell_phi_plus",
+      "description": "Bell |Phi+> = (|00>+|11>)/sqrt2",
+      "num_qubits": 2,
+      "statevector": [
+        [
+          0.707106781187,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.707106781187,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 1.000000000001,
+            "xx": 1.000000000001,
+            "yy": -1.000000000001
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghz2",
+      "description": "GHZ(2) (identical to Bell |Phi+>)",
+      "num_qubits": 2,
+      "statevector": [
+        [
+          0.707106781187,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.707106781187,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 1.000000000001,
+            "xx": 1.000000000001,
+            "yy": -1.000000000001
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghz3",
+      "description": "GHZ(3) = (|000>+|111>)/sqrt2",
+      "num_qubits": 3,
+      "statevector": [
+        [
+          0.707106781187,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.707106781187,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        },
+        {
+          "qubit_index": 2,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.500000000001
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 1.000000000001,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 0,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 1.000000000001,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 1,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 1.000000000001,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "w3",
+      "description": "W(3) = (|001>+|010>+|100>)/sqrt3",
+      "num_qubits": 3,
+      "statevector": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.57735026919,
+          0.0
+        ],
+        [
+          0.57735026919,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.57735026919,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.333333333334
+          },
+          "purity": 0.555555555557
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.333333333334
+          },
+          "purity": 0.555555555557
+        },
+        {
+          "qubit_index": 2,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.333333333334
+          },
+          "purity": 0.555555555557
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 0.333333333334,
+            "iz": 0.333333333334,
+            "zz": -0.333333333334,
+            "xx": 0.666666666668,
+            "yy": 0.666666666668
+          }
+        },
+        {
+          "qubit_i": 0,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.333333333334,
+            "iz": 0.333333333334,
+            "zz": -0.333333333334,
+            "xx": 0.666666666668,
+            "yy": 0.666666666668
+          }
+        },
+        {
+          "qubit_i": 1,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.333333333334,
+            "iz": 0.333333333334,
+            "zz": -0.333333333334,
+            "xx": 0.666666666668,
+            "yy": 0.666666666668
+          }
+        }
+      ]
+    },
+    {
+      "id": "cluster3",
+      "description": "Linear cluster state on 3 qubits",
+      "num_qubits": 3,
+      "statevector": [
+        [
+          0.353553390593,
+          0.0
+        ],
+        [
+          0.353553390593,
+          0.0
+        ],
+        [
+          0.353553390593,
+          0.0
+        ],
+        [
+          -0.353553390593,
+          0.0
+        ],
+        [
+          0.353553390593,
+          0.0
+        ],
+        [
+          0.353553390593,
+          0.0
+        ],
+        [
+          -0.353553390593,
+          0.0
+        ],
+        [
+          0.353553390593,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.499999999998
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.499999999998
+        },
+        {
+          "qubit_index": 2,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 0.499999999998
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 0,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.999999999998,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 1,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "asym_product3",
+      "description": "Asymmetric product |0> (x) |+> (x) |+i> (verifies per-qubit index alignment BE<->FE)",
+      "num_qubits": 3,
+      "statevector": [
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "qubits": [
+        {
+          "qubit_index": 0,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 1.0
+          },
+          "purity": 1.0
+        },
+        {
+          "qubit_index": 1,
+          "bloch": {
+            "rx": 1.0,
+            "ry": 0.0,
+            "rz": 0.0
+          },
+          "purity": 1.0
+        },
+        {
+          "qubit_index": 2,
+          "bloch": {
+            "rx": 0.0,
+            "ry": 1.0,
+            "rz": 0.0
+          },
+          "purity": 1.0
+        }
+      ],
+      "pairs": [
+        {
+          "qubit_i": 0,
+          "qubit_j": 1,
+          "correlators": {
+            "zi": 1.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 0,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 1.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        },
+        {
+          "qubit_i": 1,
+          "qubit_j": 2,
+          "correlators": {
+            "zi": 0.0,
+            "iz": 0.0,
+            "zz": 0.0,
+            "xx": 0.0,
+            "yy": 0.0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -95,3 +95,61 @@ export function runBlochSweep(req: BlochSweepRequest): Promise<BlochSweepRespons
     body: JSON.stringify(req),
   });
 }
+
+// ── Hardware (real IBM Quantum backends) ──────────────────────────────
+
+/** Capabilities of a single hardware backend (see apps/api/routes/hardware.py). */
+export interface HardwareBackend {
+  name: string | null;
+  num_qubits: number | null;
+  max_shots: number | null;
+  basis_gates: string[];
+  operational: boolean;
+  simulator: boolean;
+}
+
+/** Response of `GET /api/hardware/backends`. */
+export interface HardwareBackendsResponse {
+  available: boolean;
+  backends: HardwareBackend[];
+  /** Why no backends are available (only present when `available` is false). */
+  reason?: string;
+}
+
+/** Response of `POST /api/hardware/validate`. */
+export interface HardwareValidationResponse {
+  available: boolean;
+  /** Present only when `available` is true. */
+  feasible?: boolean;
+  violations?: string[];
+  warnings?: string[];
+  backend_name?: string | null;
+  capabilities?: HardwareBackend;
+  /** Why validation could not run (only present when `available` is false). */
+  reason?: string;
+}
+
+/**
+ * List operational, non-simulator IBM Quantum backends with capabilities.
+ *
+ * Returns `{ available: false, reason, backends: [] }` (HTTP 200) when IBM
+ * credentials are absent or the service is unreachable.
+ */
+export function getHardwareBackends(): Promise<HardwareBackendsResponse> {
+  return request("/hardware/backends");
+}
+
+/**
+ * Validate an experiment config against a real backend before submission.
+ *
+ * Returns `{ available: false, reason }` (HTTP 200) when credentials/service
+ * are missing; otherwise reports `feasible`, `violations`, and `warnings`.
+ */
+export function validateHardwareConfig(
+  config: ExperimentConfig,
+): Promise<HardwareValidationResponse> {
+  return request("/hardware/validate", {
+    method: "POST",
+    body: JSON.stringify(config),
+  });
+}

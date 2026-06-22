@@ -80,7 +80,7 @@ export function MetricsSection({
               return (
                 <Pressable
                   key={rt.id}
-                  onPress={() => setResearchType(active ? null : rt.id)}
+                  onPress={() => setResearchType(active ? null : (rt.id as ResearchType))}
                   style={[styles.chip, active && styles.chipActive]}
                 >
                   <Text

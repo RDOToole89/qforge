@@ -73,7 +73,7 @@ export function validateGatePlacement(
   return null;
 }
 
-function circuitReducer(state: Circuit, action: CircuitAction): Circuit {
+export function circuitReducer(state: Circuit, action: CircuitAction): Circuit {
   switch (action.type) {
     case "ADD_GATE": {
       const gate = createGate(action.gateType, action.qubit, state.numQubits, action.params);
