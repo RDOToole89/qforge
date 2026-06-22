@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View } from "react-native";
+
+import { Text } from "@/src/design";
 
 interface SymbolBadgeProps {
   symbol: string;
@@ -7,23 +9,10 @@ interface SymbolBadgeProps {
 
 export function SymbolBadge({ symbol }: SymbolBadgeProps) {
   return (
-    <View style={styles.badge}>
-      <Text style={styles.text}>{symbol}</Text>
+    <View className="self-start rounded-md bg-elevated px-sm py-xs">
+      <Text variant="bodyLg" mono className="text-accent-light">
+        {symbol}
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    backgroundColor: "#312e81",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    alignSelf: "flex-start",
-  },
-  text: {
-    color: "#a5b4fc",
-    fontSize: 13,
-    fontFamily: "SpaceMono",
-  },
-});

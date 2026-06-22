@@ -10,7 +10,7 @@ import { colors, radii } from "@/src/theme";
 /** Bloch sphere representations for each state type (theoretical, noiseless). */
 const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanation: string }> = {
   GHZ: {
-    dots: [{ rx: 0, ry: 0, rz: 0, color: "#818cf8", label: "mixed" }],
+    dots: [{ rx: 0, ry: 0, rz: 0, color: colors.accent.light, label: "mixed" }],
     caption: "Each qubit: maximally mixed",
     explanation: "GHZ entanglement is global \u2014 individual qubits appear as I/2 (center of Bloch ball). The structure lives in multi-qubit correlations, not single-qubit states.",
   },
@@ -20,7 +20,7 @@ const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanati
     explanation: "W state qubits are partially mixed with a bias toward |0\u27E9. Unlike GHZ, losing one qubit preserves entanglement among the rest.",
   },
   CLUSTER: {
-    dots: [{ rx: 0, ry: 0, rz: 0, color: "#f59e0b", label: "mixed" }],
+    dots: [{ rx: 0, ry: 0, rz: 0, color: colors.status.warning, label: "mixed" }],
     caption: "Each qubit: maximally mixed",
     explanation: "Cluster state qubits are maximally mixed individually. The entanglement structure follows the graph topology (nearest-neighbor CZ bonds).",
   },
@@ -30,7 +30,7 @@ const STATE_BLOCH: Record<string, { dots: BlochDot[]; caption: string; explanati
     explanation: "Bell pair qubits are maximally entangled \u2014 each appears as I/2. All information is in the 2-qubit correlation.",
   },
   SUPERPOSITION: {
-    dots: [{ rx: 1, ry: 0, rz: 0, color: "#6366f1", label: "|+\u27E9" }],
+    dots: [{ rx: 1, ry: 0, rz: 0, color: colors.accent.base, label: "|+\u27E9" }],
     caption: "Pure state: |+\u27E9",
     explanation: "Equal superposition of |0\u27E9 and |1\u27E9. Each qubit sits on the equator of the Bloch sphere (X-axis). No entanglement \u2014 product state.",
   },

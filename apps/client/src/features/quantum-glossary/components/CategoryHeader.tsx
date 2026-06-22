@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import { Text } from "@/src/design";
 import type { GlossaryCategory } from "../types";
 
 interface CategoryHeaderProps {
@@ -30,49 +32,24 @@ export function CategoryHeader({ category, termCount }: CategoryHeaderProps) {
   const iconName = ICON_MAP[category.icon] ?? "circle";
 
   return (
-    <View style={[styles.container, { borderLeftColor: category.color }]}>
+    <View
+      className="mt-sm flex-row items-center bg-base px-lg py-sm"
+      style={{ borderLeftWidth: 3, borderLeftColor: category.color }}
+    >
       <FontAwesome
         name={iconName}
         size={16}
         color={category.color}
-        style={styles.icon}
+        style={{ marginRight: 10, width: 20, textAlign: "center" }}
       />
-      <View style={styles.text}>
-        <Text style={styles.name}>{category.name}</Text>
-        <Text style={styles.description}>
+      <View className="flex-1">
+        <Text variant="label" weight="bold" tone="primary">
+          {category.name}
+        </Text>
+        <Text variant="body" tone="tertiary" className="mt-0.5">
           {category.description} · {termCount} terms
         </Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#0f172a",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderLeftWidth: 3,
-    marginTop: 8,
-  },
-  icon: {
-    marginRight: 10,
-    width: 20,
-    textAlign: "center",
-  },
-  text: {
-    flex: 1,
-  },
-  name: {
-    color: "#f1f5f9",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  description: {
-    color: "#64748b",
-    fontSize: 12,
-    marginTop: 2,
-  },
-});

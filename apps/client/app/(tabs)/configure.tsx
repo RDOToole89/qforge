@@ -1,14 +1,7 @@
 import React, { useState, useMemo } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 
+import { Button, Card, Row, Text } from "@/src/design";
 import MetricCard from "@/src/components/MetricCard";
 import ResultChart from "@/src/components/ResultChart";
 import { useExperimentConfig, type ConfigWarning } from "@/src/features/configure/useExperimentConfig";
@@ -24,7 +17,6 @@ import { CircuitPreview } from "@/src/features/configure/components/CircuitPrevi
 import { InfoModal } from "@/src/features/configure/components/InfoModal";
 import { runExperiment } from "@/src/lib/api";
 import type { ExperimentResult } from "@/src/lib/types";
-import { colors } from "@/src/theme";
 
 export default function ConfigureScreen() {
   const config = useExperimentConfig();
@@ -104,8 +96,13 @@ export default function ConfigureScreen() {
   const infoEntry = infoKey ? INFO_TEXT[infoKey] : null;
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Configure</Text>
+    <ScrollView
+      className="flex-1 bg-base"
+      contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+    >
+      <Text weight="bold" tone="primary" className="mb-sm text-headingLg">
+        Configure
+      </Text>
 
       <StateSection
         stateType={config.stateType}
@@ -188,38 +185,36 @@ export default function ConfigureScreen() {
       <CircuitPreview configJson={configJson} />
 
       {/* Run Button */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.runBtn,
-          !canRun && styles.runBtnDisabled,
-          pressed && canRun && styles.pressed,
-        ]}
-        onPress={handleRun}
+      <Button
+        variant="primary"
+        size="lg"
+        fullWidth
+        loading={running}
         disabled={!canRun}
+        onPress={handleRun}
+        className="mt-2xl"
       >
-        {running ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.runBtnText}>Run Experiment</Text>
-        )}
-      </Pressable>
+        Run Experiment
+      </Button>
 
       {/* Results */}
       {result && (
-        <View style={styles.results}>
-          <Text style={styles.resultHeader}>Results</Text>
+        <View className="mt-2xl">
+          <Text variant="heading" weight="bold" className="mb-md">
+            Results
+          </Text>
 
-          <View style={styles.statsRow}>
+          <Row gap="md" className="mb-lg">
             <Stat label="Depth" value={result.analysis.circuit_statistics.depth} />
             <Stat label="Gates" value={result.analysis.circuit_statistics.num_gates} />
             <Stat label="Outcomes" value={result.analysis.measurement_results.unique_outcomes} />
-          </View>
+          </Row>
 
           <ResultChart counts={result.analysis.measurement_results.raw_counts} />
 
           {metrics && (
-            <View style={{ marginTop: 16 }}>
-              <Text style={styles.resultHeader}>
+            <View className="mt-lg">
+              <Text variant="heading" weight="bold" className="mb-md">
                 {metrics.profile ? `Metrics (${metrics.profile})` : "Metrics"}
               </Text>
               {Object.entries(metrics.metrics).map(([name, entry]) => (
@@ -244,57 +239,13 @@ export default function ConfigureScreen() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    <Card variant="outlined" padding="md" className="flex-1 items-center">
+      <Text weight="bold" mono tone="primary" style={{ fontSize: 22 }}>
+        {value}
+      </Text>
+      <Text variant="bodySm" tone="tertiary" className="mt-xs">
+        {label}
+      </Text>
+    </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg.primary },
-  content: { padding: 16, paddingBottom: 80 },
-  title: {
-    color: colors.text.primary,
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-
-  runBtn: {
-    backgroundColor: colors.accent.base,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  runBtnDisabled: { opacity: 0.5 },
-  runBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  pressed: { opacity: 0.8 },
-
-  results: { marginTop: 24 },
-  resultHeader: {
-    color: colors.text.primary,
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-
-  statsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
-  stat: {
-    flex: 1,
-    backgroundColor: colors.bg.surface,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  statValue: {
-    color: colors.text.primary,
-    fontSize: 22,
-    fontWeight: "700",
-    fontFamily: "SpaceMono",
-  },
-  statLabel: { color: colors.text.tertiary, fontSize: 11, marginTop: 4 },
-});

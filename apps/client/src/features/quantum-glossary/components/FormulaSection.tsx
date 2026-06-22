@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   LayoutAnimation,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import { Text, chrome } from "@/src/design";
 import { MathFormula } from "./MathFormula";
 
 interface FormulaSectionProps {
@@ -26,25 +27,31 @@ export function FormulaSection({ latex, explanation, symbolAnnotations, termId }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.labelRow}>
-        <Text style={styles.sectionLabel}>Key Equation</Text>
+    <View className="mt-sm mb-xs">
+      <View className="mb-xs flex-row items-center justify-between">
+        <Text
+          variant="body"
+          weight="bold"
+          tone="accent"
+          className="uppercase"
+          style={styles.sectionLabel}
+        >
+          Key Equation
+        </Text>
         {explanation && (
           <TouchableOpacity
             onPress={toggleExplanation}
-            style={styles.infoButton}
+            className="flex-row items-center gap-xs"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <FontAwesome
               name="info-circle"
               size={14}
-              color={showExplanation ? "#818cf8" : "#64748b"}
+              color={showExplanation ? chrome.accent.light : chrome.text.tertiary}
             />
             <Text
-              style={[
-                styles.infoText,
-                showExplanation && styles.infoTextActive,
-              ]}
+              variant="bodySm"
+              className={showExplanation ? "italic text-accent-light" : "italic text-tertiary"}
             >
               {showExplanation ? "hide explanation" : "what does this mean?"}
             </Text>
@@ -55,15 +62,21 @@ export function FormulaSection({ latex, explanation, symbolAnnotations, termId }
       <TouchableOpacity
         activeOpacity={explanation ? 0.7 : 1}
         onPress={toggleExplanation}
+        className="overflow-hidden rounded-md border bg-base"
         style={styles.formulaContainer}
       >
         <MathFormula latex={latex} symbolAnnotations={symbolAnnotations} termId={termId} />
       </TouchableOpacity>
 
       {showExplanation && explanation && (
-        <View style={styles.explanationBox}>
+        <View className="mt-xs flex-row overflow-hidden rounded-sm bg-surface py-sm pr-sm">
           <View style={styles.explanationAccent} />
-          <Text style={styles.explanationText}>{explanation}</Text>
+          <Text
+            variant="bodyLg"
+            className="flex-1 italic text-accent-light"
+          >
+            {explanation}
+          </Text>
         </View>
       )}
     </View>
@@ -71,64 +84,17 @@ export function FormulaSection({ latex, explanation, symbolAnnotations, termId }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  labelRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
   sectionLabel: {
-    color: "#6366f1",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  infoButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  infoText: {
-    color: "#64748b",
-    fontSize: 11,
-    fontStyle: "italic",
-  },
-  infoTextActive: {
-    color: "#818cf8",
-  },
   formulaContainer: {
-    backgroundColor: "#0f172a",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#1e293b",
-    overflow: "hidden",
-  },
-  explanationBox: {
-    flexDirection: "row",
-    marginTop: 6,
-    backgroundColor: "#1a1f35",
-    borderRadius: 6,
-    padding: 10,
-    paddingLeft: 0,
-    overflow: "hidden",
+    borderColor: chrome.bg.surface,
   },
   explanationAccent: {
     width: 3,
-    backgroundColor: "#818cf8",
+    backgroundColor: chrome.accent.light,
     borderTopLeftRadius: 6,
     borderBottomLeftRadius: 6,
     marginRight: 10,
-  },
-  explanationText: {
-    flex: 1,
-    color: "#c7d2fe",
-    fontSize: 13,
-    lineHeight: 19,
-    fontStyle: "italic",
   },
 });

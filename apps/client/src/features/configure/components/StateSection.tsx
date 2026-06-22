@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { colors, spacing } from "@/src/theme";
+import { View } from "react-native";
+
+import { Chip, Text } from "@/src/design";
 import { STATE_TYPES } from "../constants";
 import { SectionHeader } from "./SectionHeader";
 import ConfigSlider from "@/src/components/ConfigSlider";
@@ -24,28 +25,26 @@ export function StateSection({
   const isBell = stateType === "BELL";
 
   return (
-    <View style={styles.section}>
+    <View className="mb-lg">
       <SectionHeader title="State Type" onInfo={onInfo} />
 
-      <View style={styles.chipRow}>
+      <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
         {STATE_TYPES.map((st) => {
           const active = stateType === st.id;
           return (
-            <Pressable
+            <Chip
               key={st.id}
+              label={st.label}
+              tone={active ? "accent" : "neutral"}
+              selected={active}
               onPress={() => setStateType(st.id as StateType)}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {st.label}
-              </Text>
-            </Pressable>
+            />
           );
         })}
       </View>
 
       {isBell && (
-        <Text style={styles.infoText}>
+        <Text variant="body" tone="accent" className="mb-sm">
           Bell states are strictly 2-qubit.
         </Text>
       )}
@@ -62,39 +61,3 @@ export function StateSection({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipActive: {
-    backgroundColor: "#6366f1",
-    borderColor: "#6366f1",
-  },
-  chipText: {
-    fontSize: 13,
-    color: "#94a3b8",
-  },
-  chipTextActive: {
-    color: "#ffffff",
-  },
-  infoText: {
-    fontSize: 12,
-    color: colors.status.info,
-    marginBottom: spacing.sm,
-  },
-});

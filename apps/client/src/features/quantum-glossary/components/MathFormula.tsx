@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Platform, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 
+import { chrome } from "@/src/design";
 import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
 import { STATE_BLOCH_CONFIGS } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 
@@ -44,7 +45,7 @@ function buildHtml(
       overflow: visible;
     }
     #formula {
-      color: #e2e8f0;
+      color: ${chrome.text.primary};
       font-size: ${fontSize}px;
       padding: 20px 16px;
       line-height: 1.5;
@@ -53,7 +54,7 @@ function buildHtml(
     .katex-display { margin: 0; }
     .katex .mord, .katex .mbin, .katex .mrel,
     .katex .mopen, .katex .mclose, .katex .mpunct,
-    .katex .mop, .katex .minner { color: #e2e8f0; }
+    .katex .mop, .katex .minner { color: ${chrome.text.primary}; }
 
     .sym-hover {
       cursor: pointer;
@@ -66,14 +67,14 @@ function buildHtml(
     }
     .sym-hover.active {
       background-color: rgba(99, 102, 241, 0.35);
-      color: #c7d2fe;
+      color: ${chrome.accent.light};
     }
 
     #tooltip {
       display: none;
       position: fixed;
-      background: #312e81;
-      color: #e0e7ff;
+      background: ${chrome.bg.elevated};
+      color: ${chrome.text.primary};
       padding: 6px 10px;
       border-radius: 6px;
       font-size: 11px;
@@ -257,13 +258,13 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
     borderRadius: 8,
-    backgroundColor: "#0f172a",
+    backgroundColor: chrome.bg.primary,
   },
   containerWithLegend: {
     width: "100%",
     flexDirection: "row",
     borderRadius: 8,
-    backgroundColor: "#0f172a",
+    backgroundColor: chrome.bg.primary,
     overflow: "hidden",
   },
   formulaSide: {
@@ -275,21 +276,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderLeftWidth: 1,
-    borderLeftColor: "#1e293b",
+    borderLeftColor: chrome.bg.surface,
     backgroundColor: "rgba(15, 23, 42, 0.3)",
   },
   legend: {
     width: 140,
     maxHeight: 180,
     borderLeftWidth: 1,
-    borderLeftColor: "#1e293b",
+    borderLeftColor: chrome.bg.surface,
     backgroundColor: "rgba(15, 23, 42, 0.5)",
   },
   legendContent: {
     padding: 6,
   },
   legendTitle: {
-    color: "#6366f1",
+    color: chrome.accent.base,
     fontSize: 8,
     fontWeight: "700",
     textTransform: "uppercase",
@@ -303,14 +304,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   legendSym: {
-    color: "#a5b4fc",
+    color: chrome.accent.light,
     fontSize: 10,
     fontWeight: "700",
     minWidth: 16,
   },
   legendDesc: {
     flex: 1,
-    color: "#94a3b8",
+    color: chrome.text.secondary,
     fontSize: 9,
     lineHeight: 12,
   },

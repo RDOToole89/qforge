@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, TextInput, Switch, StyleSheet, ActivityIndicator } from "react-native";
-import { colors, spacing } from "@/src/theme";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
+  Switch,
+  View,
+} from "react-native";
+
+import { Chip, Row, Text, chrome } from "@/src/design";
 import type { HardwareBackend } from "@/src/lib/api";
 import { OPTIMIZATION_LEVELS } from "../constants";
 import { SectionHeader } from "./SectionHeader";
@@ -47,26 +54,26 @@ export function HardwareSection({
   );
 
   return (
-    <View style={styles.section}>
+    <View className="mb-lg">
       <SectionHeader title="Hardware" onInfo={onInfo} />
 
       {/* Backend selection */}
-      <Text style={styles.label}>Backend</Text>
+      <Text variant="label" weight="semibold" className="mb-xs">Backend</Text>
 
       {backendsLoading && (
-        <View style={styles.loadingRow}>
-          <ActivityIndicator size="small" color={colors.accent.base} />
-          <Text style={styles.helperText}>Loading backends…</Text>
-        </View>
+        <Row align="center" className="mb-md" style={{ gap: 8 }}>
+          <ActivityIndicator size="small" color={chrome.accent.base} />
+          <Text variant="bodySm" tone="tertiary">Loading backends…</Text>
+        </Row>
       )}
 
       {!backendsLoading && !backendsAvailable && (
-        <View style={styles.noticeBox}>
-          <Text style={styles.noticeText}>
+        <View className="mb-md rounded-md border border-warning" style={styles.noticeBox}>
+          <Text variant="body" weight="semibold">
             No live backends.{" "}
             {backendsReason ?? "IBM Quantum credentials are not configured."}
           </Text>
-          <Text style={styles.noticeSubText}>
+          <Text variant="bodySm" tone="tertiary" style={{ marginTop: 4 }}>
             Enter a backend name manually below (offline — not verified against a
             real device).
           </Text>
@@ -74,35 +81,31 @@ export function HardwareSection({
       )}
 
       {backendsAvailable && (
-        <View style={styles.chipRow}>
+        <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
           {backendNames.map((name) => {
             const active = backendName === name && !showCustom;
             return (
-              <Pressable
+              <Chip
                 key={name}
+                label={name}
+                tone={active ? "accent" : "neutral"}
+                selected={active}
                 onPress={() => {
                   setBackendName(name);
                   setShowCustom(false);
                 }}
-                style={[styles.chip, active && styles.chipActive]}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                  {name}
-                </Text>
-              </Pressable>
+              />
             );
           })}
-          <Pressable
+          <Chip
+            label="Custom"
+            tone={showCustom ? "accent" : "neutral"}
+            selected={showCustom}
             onPress={() => {
               setShowCustom(true);
               if (isKnownBackend) setBackendName("");
             }}
-            style={[styles.chip, showCustom && styles.chipActive]}
-          >
-            <Text style={[styles.chipText, showCustom && styles.chipTextActive]}>
-              Custom
-            </Text>
-          </Pressable>
+          />
         </View>
       )}
 
@@ -110,7 +113,7 @@ export function HardwareSection({
         <TextInput
           style={styles.textInput}
           placeholder="Enter backend name"
-          placeholderTextColor={colors.text.tertiary}
+          placeholderTextColor={chrome.text.tertiary}
           value={isKnownBackend ? "" : backendName}
           onChangeText={setBackendName}
           autoCapitalize="none"
@@ -119,127 +122,59 @@ export function HardwareSection({
       )}
 
       {/* Optimization level */}
-      <Text style={styles.label}>Optimization Level</Text>
-      <View style={styles.chipRow}>
+      <Text variant="label" weight="semibold" className="mb-xs">Optimization Level</Text>
+      <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
         {OPTIMIZATION_LEVELS.map((opt) => {
           const active = optimizationLevel === opt.level;
           return (
-            <Pressable
+            <Chip
               key={opt.level}
+              label={`${opt.level} - ${opt.label}`}
+              tone={active ? "accent" : "neutral"}
+              selected={active}
               onPress={() => setOptimizationLevel(opt.level)}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {opt.level} - {opt.label}
-              </Text>
-            </Pressable>
+            />
           );
         })}
       </View>
       {selectedOptLevel && (
-        <Text style={styles.helperText}>{selectedOptLevel.description}</Text>
+        <Text variant="bodySm" tone="tertiary" className="mb-md">
+          {selectedOptLevel.description}
+        </Text>
       )}
 
       {/* Hardware session */}
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleLabel}>
-          <Text style={styles.label}>Hardware Session</Text>
-          <Text style={styles.helperText}>
+      <Row align="center" justify="between">
+        <View className="mr-md flex-1">
+          <Text variant="label" weight="semibold" className="mb-xs">Hardware Session</Text>
+          <Text variant="bodySm" tone="tertiary">
             Keep backend reserved across sweep jobs
           </Text>
         </View>
         <Switch
           value={hardwareSession}
           onValueChange={setHardwareSession}
-          trackColor={{ false: colors.text.tertiary, true: colors.accent.base }}
-          thumbColor={colors.text.primary}
+          trackColor={{ false: chrome.text.tertiary, true: chrome.accent.base }}
+          thumbColor={chrome.text.primary}
         />
-      </View>
+      </Row>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipActive: {
-    backgroundColor: "#6366f1",
-    borderColor: "#6366f1",
-  },
-  chipText: {
-    fontSize: 13,
-    color: "#94a3b8",
-  },
-  chipTextActive: {
-    color: "#ffffff",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
   textInput: {
-    backgroundColor: "#1e293b",
+    backgroundColor: chrome.bg.surface,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: chrome.border.default,
     borderRadius: 8,
     padding: 10,
-    color: "#e2e8f0",
+    color: chrome.text.primary,
     fontSize: 13,
-    marginBottom: spacing.md,
-  },
-  loadingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: spacing.md,
+    marginBottom: 12,
   },
   noticeBox: {
     backgroundColor: "rgba(245, 158, 11, 0.10)",
-    borderWidth: 1,
-    borderColor: colors.status.warning,
-    borderRadius: 8,
     padding: 10,
-    marginBottom: spacing.md,
-  },
-  noticeText: {
-    fontSize: 12,
-    color: colors.text.primary,
-    fontWeight: "600",
-  },
-  noticeSubText: {
-    fontSize: 11,
-    color: colors.text.tertiary,
-    marginTop: 4,
-  },
-  helperText: {
-    fontSize: 11,
-    color: colors.text.tertiary,
-    marginBottom: spacing.md,
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  toggleLabel: {
-    flex: 1,
-    marginRight: spacing.md,
   },
 });
