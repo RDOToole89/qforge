@@ -193,16 +193,14 @@ def validate_hardware_feasibility(
     backend_qubits = capabilities.get("num_qubits")
     if backend_qubits is not None and num_qubits > backend_qubits:
         violations.append(
-            f"Circuit needs {num_qubits} qubits but backend '{label}' "
-            f"has {backend_qubits}."
+            f"Circuit needs {num_qubits} qubits but backend '{label}' has {backend_qubits}."
         )
 
     # ── HARD: shot ceiling ────────────────────────────────────────────
     max_shots = capabilities.get("max_shots")
     if max_shots is not None and shots > max_shots:
         violations.append(
-            f"Requested {shots} shots but backend '{label}' allows at "
-            f"most {max_shots}."
+            f"Requested {shots} shots but backend '{label}' allows at most {max_shots}."
         )
 
     # ── HARD: operational status ──────────────────────────────────────
@@ -215,9 +213,7 @@ def validate_hardware_feasibility(
         basis_set = {g.lower() for g in basis_gates}
         # Gates that are always handled separately by transpilation / structure.
         ignorable = {"measure", "barrier", "delay", "reset", "snapshot"}
-        unsupported = sorted(
-            {g.lower() for g in gate_names} - basis_set - ignorable
-        )
+        unsupported = sorted({g.lower() for g in gate_names} - basis_set - ignorable)
         if unsupported:
             warnings.append(
                 f"Gate(s) {unsupported} are not in backend '{label}' basis set "

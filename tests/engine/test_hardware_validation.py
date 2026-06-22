@@ -174,9 +174,7 @@ def test_unknown_gate_is_warning_not_violation():
 
 
 def test_low_shots_is_warning_not_violation():
-    result = validate_hardware_feasibility(
-        num_qubits=3, shots=10, capabilities=_caps()
-    )
+    result = validate_hardware_feasibility(num_qubits=3, shots=10, capabilities=_caps())
     assert result.feasible is True
     assert any("noisy" in w or "statistically" in w for w in result.warnings)
 

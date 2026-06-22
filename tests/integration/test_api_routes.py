@@ -189,9 +189,7 @@ def test_run_sweep() -> None:
     results = resp.json()
     assert isinstance(results, list)
     assert len(results) == 2
-    qubit_counts = sorted(
-        r["analysis"]["measurement_results"]["total_shots"] for r in results
-    )
+    qubit_counts = sorted(r["analysis"]["measurement_results"]["total_shots"] for r in results)
     # both ran with shots=64
     assert qubit_counts == [64, 64]
     for r in results:
@@ -243,9 +241,7 @@ def test_get_bloch_missing_404() -> None:
     assert "detail" in resp.json()
 
 
-def test_get_bloch_from_stored_result(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_get_bloch_from_stored_result(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """A stored density-matrix result yields Bloch visualization data."""
     import apps.api.routes.bloch as bloch_route
 
