@@ -1,7 +1,7 @@
 "use dom";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { colors, fonts } from "./styles";
+import { colors, fonts, overlay } from "./styles";
 import { useCircuit } from "./hooks/useCircuit";
 import { useSimulator, formatDirac, recognizeState } from "./hooks/useSimulator";
 import { useNarrative } from "./hooks/useNarrative";
@@ -342,7 +342,7 @@ export default function CircuitBuilderScreen() {
                   onClick={() => setInputMode(mode)}
                   style={{
                     background: inputMode === mode ? colors.accent : "transparent",
-                    color: inputMode === mode ? "#fff" : colors.textSecondary,
+                    color: inputMode === mode ? colors.text : colors.textSecondary,
                     border: "none",
                     borderRadius: 6,
                     padding: "6px 16px",
@@ -495,7 +495,7 @@ export default function CircuitBuilderScreen() {
                   background: colors.bg,
                   border: `1px solid ${placementPopover.kind === "error" ? colors.danger : colors.accent}80`,
                   borderRadius: 10,
-                  boxShadow: `0 0 20px ${placementPopover.kind === "error" ? colors.danger : colors.accent}20, 0 8px 24px rgba(0,0,0,0.4)`,
+                  boxShadow: `0 0 20px ${placementPopover.kind === "error" ? colors.danger : colors.accent}20, 0 8px 24px ${overlay(0.4)}`,
                   zIndex: 9000,
                   animation: "fadeIn 0.15s ease",
                 }}
@@ -544,7 +544,7 @@ export default function CircuitBuilderScreen() {
                     background: colors.bg,
                     border: `1px solid ${colors.border}`,
                     borderRadius: 10,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                    boxShadow: `0 8px 32px ${overlay(0.5)}`,
                     zIndex: 9000,
                     overflow: "hidden",
                     animation: "fadeIn 0.1s ease",

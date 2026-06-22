@@ -226,7 +226,7 @@ export default function LessonView({ lesson, onComplete, onBack, lessonIndex, to
             onClick={onComplete}
             style={{
               background: colors.accent,
-              color: "#fff",
+              color: colors.text,
               border: "none",
               borderRadius: 6,
               padding: "8px 20px",

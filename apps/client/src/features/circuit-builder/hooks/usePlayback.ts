@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { chrome, viz } from "@/src/design/tokens";
 import type { SimSnapshot } from "../types";
 import { stateVectorToBloch, correlationMatrix, pairConcurrence, multipartiteTangle, oneTangle } from "@/src/features/bloch-sphere/math";
 import type { BlochDot } from "@/src/features/bloch-sphere/data/stateBlochConfigs";
 
-/** Fixed color palette for qubit dots */
-const QUBIT_COLORS = ["#818cf8", "#f472b6", "#34d399", "#fb923c", "#38bdf8", "#a78bfa"];
+/** Fixed color palette for qubit dots (sourced from design tokens). */
+const QUBIT_COLORS = [chrome.accent.light, viz.pink, viz.emerald, viz.amber, viz.sky, viz.violet];
 
 export type InterpolationMode = "direct" | "ideal";
 

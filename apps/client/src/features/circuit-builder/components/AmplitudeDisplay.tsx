@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { colors, fonts } from "../styles";
+import { viz } from "@/src/design/tokens";
+import { colors, fonts, lighten } from "../styles";
 import type { SimSnapshot } from "../types";
 
 interface AmplitudeDisplayProps {
@@ -246,7 +247,7 @@ function MagnitudeRow({ entry, maxMagnitude }: {
       <div style={{
         flex: 1,
         height: 18,
-        background: "#0f1119",
+        background: colors.bg,
         borderRadius: 4,
         overflow: "hidden",
       }}>
@@ -254,7 +255,7 @@ function MagnitudeRow({ entry, maxMagnitude }: {
           width: `${barWidth}%`,
           height: "100%",
           background: entry.phase > Math.PI / 2 && entry.phase < 3 * Math.PI / 2
-            ? `linear-gradient(90deg, #ef4444, #f87171)` // red for negative real
+            ? `linear-gradient(90deg, ${colors.danger}, ${lighten(colors.danger, 0.32)})` // red for negative real
             : `linear-gradient(90deg, ${colors.accent}, ${colors.accentLight})`, // blue for positive
           borderRadius: 4,
           transition: "width 0.3s ease",
@@ -412,10 +413,10 @@ function PhaseCircle({ angle, size = 14 }: { angle: number; size?: number }) {
 // ═══════════════════════════════════════════════════════════════
 
 const PHASOR_COLORS = [
-  "#6366f1", "#ef4444", "#22c55e", "#f59e0b",
-  "#ec4899", "#14b8a6", "#8b5cf6", "#f97316",
-  "#06b6d4", "#84cc16", "#e11d48", "#0ea5e9",
-  "#a855f7", "#eab308", "#64748b", "#fb923c",
+  viz.gate.indigo, viz.gate.red, viz.gate.green, viz.gate.amber,
+  viz.gate.pink, viz.gate.teal, viz.gate.violet, viz.gate.orange,
+  viz.cyanDeep, viz.lime, viz.crimson, viz.azure,
+  viz.gate.purple, viz.gate.yellow, colors.textTertiary, viz.amber,
 ];
 
 function PhasorDiagram({ entries }: {

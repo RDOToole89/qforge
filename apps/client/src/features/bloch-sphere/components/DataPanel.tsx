@@ -1,8 +1,9 @@
 'use dom';
 
+import { chrome, viz } from "@/src/design/tokens";
 import type { BlochVisualizerData } from "../../../lib/types";
 import type { BlochConfig, ProbeStateConfig, RuntimeChannel, ExperimentalDataEntry, CorrelatorSignature } from "../types";
-import { LS, bdr, cS, cT } from "../styles";
+import { LS, bdr, cS, cT, rgba } from "../styles";
 import PTMHeatmap from "./PTMHeatmap";
 import CorrelatorBars from "./CorrelatorBars";
 import FingerprintViewer from "./FingerprintViewer";
@@ -36,6 +37,8 @@ export default function DataPanel(props: DataPanelProps) {
     activeBloch, selectedQubit, selectedPair, expPairData, expFingerprints,
   } = props;
 
+  const stateColor = activeStateCfg.color ?? viz.orange;
+
   return (
     <div style={{
       width: "280px", flexShrink: 0, padding: "12px 14px", borderLeft: bdr,
@@ -44,18 +47,18 @@ export default function DataPanel(props: DataPanelProps) {
 
       {/* STATE INFO -- always shown */}
       <div style={{
-        ...cS(`${activeStateCfg.color ?? "#ff9933"}`),
-        background: `${activeStateCfg.color ?? "#ff9933"}0a`,
-        border: `1px solid ${activeStateCfg.color ?? "#ff9933"}20`,
+        ...cS(stateColor),
+        background: `${stateColor}0a`,
+        border: `1px solid ${stateColor}20`,
       }}>
-        <div style={cT(activeStateCfg.color ?? "#ff9933")}>
+        <div style={cT(stateColor)}>
           {activeStateCfg.name} — {
             activeStateCfg.zBasisSignal === "strong" ? "Z-BASIS SENSITIVE"
             : activeStateCfg.zBasisSignal === "weak" ? "Z-BASIS WEAK"
             : "Z-BASIS BLIND"
           }
         </div>
-        <span style={{ color: "#a0b0c0" }}>{activeStateCfg.insight}</span>
+        <span style={{ color: chrome.text.secondary }}>{activeStateCfg.insight}</span>
       </div>
 
       {/* EXPERIMENT MODE RIGHT SIDEBAR */}
@@ -93,9 +96,9 @@ export default function DataPanel(props: DataPanelProps) {
                 strength={0}
                 experimentCorrelators={expPairData.correlators as { zi: number; iz: number; zz: number; xx: number; yy: number }}
               />
-              <div style={cS("rgba(68,200,255)")}>
-                <div style={cT("#44c8ff")}>MUTUAL INFORMATION</div>
-                <span style={{ color: "#a0b0c0", fontFamily: "monospace" }}>
+              <div style={cS(viz.cyan)}>
+                <div style={cT(viz.cyan)}>MUTUAL INFORMATION</div>
+                <span style={{ color: chrome.text.secondary, fontFamily: "monospace" }}>
                   I(Q{selectedPair[0]}:Q{selectedPair[1]}) = {expPairData.mutualInfo.toFixed(4)} bits
                 </span>
               </div>
@@ -108,12 +111,12 @@ export default function DataPanel(props: DataPanelProps) {
             <>
               <div style={LS}>MUTUAL INFORMATION MATRIX</div>
               <div style={{
-                background: "rgba(12,14,24,0.8)", borderRadius: "8px", padding: "10px", border: bdr,
+                background: rgba(chrome.bg.primary, 0.8), borderRadius: "8px", padding: "10px", border: bdr,
               }}>
                 <MIMatrixHeatmap matrix={ab.mi_matrix} />
               </div>
-              <div style={cS("rgba(68,200,255)")}>
-                <div style={cT("#44c8ff")}>READING THE MI MATRIX</div>
+              <div style={cS(viz.cyan)}>
+                <div style={cT(viz.cyan)}>READING THE MI MATRIX</div>
                 Mutual information measures total correlations between qubit pairs.
                 Higher values (brighter) indicate stronger quantum or classical correlations.
               </div>
@@ -132,12 +135,12 @@ export default function DataPanel(props: DataPanelProps) {
                         display: "flex", alignItems: "center", gap: "6px",
                         fontSize: "10.5px", fontFamily: "monospace",
                       }}>
-                        <span style={{ color: "#8899aa", width: "120px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        <span style={{ color: chrome.text.secondary, width: "120px", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {name}
                         </span>
-                        <span style={{ color: "#c8d4e4" }}>{entry.value.toFixed(4)}</span>
+                        <span style={{ color: chrome.text.primary }}>{entry.value.toFixed(4)}</span>
                         {entry.ci95 && (
-                          <span style={{ color: "#556677", fontSize: "9px" }}>
+                          <span style={{ color: chrome.text.tertiary, fontSize: "9px" }}>
                             [{entry.ci95[0].toFixed(3)}, {entry.ci95[1].toFixed(3)}]
                           </span>
                         )}
@@ -148,7 +151,7 @@ export default function DataPanel(props: DataPanelProps) {
                   <FingerprintViewer data={expFingerprints} />
                 </>
               ) : (
-                <div style={{ fontSize: "11px", color: "#4a5a6a", fontStyle: "italic", padding: "10px" }}>
+                <div style={{ fontSize: "11px", color: chrome.text.tertiary, fontStyle: "italic", padding: "10px" }}>
                   No metrics available. Run with enable_research_metrics=True.
                 </div>
               )}
@@ -164,21 +167,21 @@ export default function DataPanel(props: DataPanelProps) {
           {/* 1-QUBIT TAB: Channel info */}
           {tab === "single" && ch && (
             <>
-              <div style={cS("rgba(255,153,51)")}>
-                <div style={cT("#ff9933")}>KRAUS OPERATORS</div>
-                <div style={{ fontFamily: "monospace", fontSize: "10px", color: "#8899bb", wordBreak: "break-all" }}>
-                  {ch.kraus ?? "\u2014"}
+              <div style={cS(viz.orange)}>
+                <div style={cT(viz.orange)}>KRAUS OPERATORS</div>
+                <div style={{ fontFamily: "monospace", fontSize: "10px", color: chrome.text.secondary, wordBreak: "break-all" }}>
+                  {ch.kraus ?? "—"}
                 </div>
               </div>
-              <div style={cS("rgba(68,136,255)")}>
-                <div style={cT("#4488ff")}>BLOCH MAP</div>
-                <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#ccdae8" }}>{ch.formula}</div>
+              <div style={cS(viz.blue)}>
+                <div style={cT(viz.blue)}>BLOCH MAP</div>
+                <div style={{ fontFamily: "monospace", fontSize: "11px", color: chrome.text.primary }}>{ch.formula}</div>
                 {ch.geometry && <div style={{ marginTop: "4px", fontSize: "10.5px" }}>{ch.geometry}</div>}
               </div>
               {ch.insight && (
-                <div style={{ ...cS("rgba(255,153,51)"), background: "rgba(255,153,51,0.05)" }}>
-                  <div style={cT("#ff9933")}>{"\u21B3"} SQM</div>
-                  <span style={{ color: "#d4b896" }}>{ch.insight}</span>
+                <div style={{ ...cS(viz.orange), background: `${viz.orange}0d` }}>
+                  <div style={cT(viz.orange)}>{"↳"} SQM</div>
+                  <span style={{ color: chrome.text.secondary }}>{ch.insight}</span>
                 </div>
               )}
             </>
@@ -189,15 +192,15 @@ export default function DataPanel(props: DataPanelProps) {
             <>
               <div style={LS}>PAULI TRANSFER MATRIX</div>
               <div style={{
-                background: "rgba(12,14,24,0.8)", borderRadius: "8px", padding: "10px", border: bdr,
+                background: rgba(chrome.bg.primary, 0.8), borderRadius: "8px", padding: "10px", border: bdr,
               }}>
                 <PTMHeatmap runtimeCh={runtimeCh} channel={channel} strength={strength} />
               </div>
-              <div style={cS("rgba(255,153,51)")}>
-                <div style={cT("#ff9933")}>READING THE PTM</div>
+              <div style={cS(viz.orange)}>
+                <div style={cT(viz.orange)}>READING THE PTM</div>
                 Diagonal = Pauli component scaling. First row = [1,0,0,0] always (TP). Off-diagonal = mixing.
                 {stateCfg.uniform && (
-                  <span style={{ color: "#ff6666" }}>
+                  <span style={{ color: chrome.status.error }}>
                     {" "}This state is Z-uniform, so Z-row entries don't produce measurable signal.
                   </span>
                 )}
@@ -212,16 +215,16 @@ export default function DataPanel(props: DataPanelProps) {
               {Object.entries(config.topologies).map(([k, topo]) => (
                 (activeTopo === "all" || activeTopo === k) && (
                   <div key={k}>
-                    <div style={{ fontSize: "10px", color: "#8899aa", marginBottom: "4px", fontWeight: 500 }}>
+                    <div style={{ fontSize: "10px", color: chrome.text.secondary, marginBottom: "4px", fontWeight: 500 }}>
                       {topo.name}
                     </div>
                     <CorrelatorBars stateCfg={stateCfg} topo={topo} strength={strength} />
                   </div>
                 )
               ))}
-              <div style={cS("rgba(204,68,255)")}>
-                <div style={cT("#cc44ff")}>STATE x TOPOLOGY</div>
-                Switch probe states above — watch how GHZ shows strong {"\u0394\u27E8ZZ\u27E9"} while Cluster shows nearly zero.
+              <div style={cS(viz.magenta)}>
+                <div style={cT(viz.magenta)}>STATE x TOPOLOGY</div>
+                Switch probe states above — watch how GHZ shows strong {"Δ⟨ZZ⟩"} while Cluster shows nearly zero.
                 Same noise, different probe = different fingerprint. This is your Finding 1.
               </div>
             </>
@@ -232,11 +235,11 @@ export default function DataPanel(props: DataPanelProps) {
             <>
               <div style={LS}>EXPERIMENTAL FINGERPRINTS</div>
               <FingerprintViewer data={config.experimentalData} />
-              <div style={{ ...cS("rgba(68,255,136)"), background: "rgba(68,255,136,0.04)" }}>
-                <div style={cT("#44ff88")}>ADD DATA</div>
-                <div style={{ fontSize: "10px" }}>Config {"\u2192"} Exp. Data. Format:</div>
+              <div style={{ ...cS(viz.green), background: `${viz.green}0a` }}>
+                <div style={cT(viz.green)}>ADD DATA</div>
+                <div style={{ fontSize: "10px" }}>Config {"→"} Exp. Data. Format:</div>
                 <pre style={{
-                  fontSize: "9.5px", fontFamily: "monospace", color: "#8899bb",
+                  fontSize: "9.5px", fontFamily: "monospace", color: chrome.text.secondary,
                   marginTop: "4px", whiteSpace: "pre-wrap",
                 }}>
 {`[{ "label": "GHZ chain p=0.01",

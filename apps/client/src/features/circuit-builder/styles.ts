@@ -1,13 +1,30 @@
 /** Shared style constants for the circuit builder (used inside 'use dom' context). */
 
-import { chrome, fontFamily } from "../../design/tokens";
+import { chrome, fontFamily, shadows } from "../../design/tokens";
 
 /** Convert a `#rrggbb` token value to an `rgba(...)` string at the given alpha. */
-function withAlpha(hex: string, alpha: number): string {
+export function withAlpha(hex: string, alpha: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** Lighten a `#rrggbb` token value toward white by `amount` (0..1). */
+export function lighten(hex: string, amount: number): string {
+  const mix = (c: number) => Math.round(c + (255 - c) * amount);
+  const r = mix(parseInt(hex.slice(1, 3), 16));
+  const g = mix(parseInt(hex.slice(3, 5), 16));
+  const b = mix(parseInt(hex.slice(5, 7), 16));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/**
+ * Translucent black for overlays/shadows. Sourced from the shadow token's
+ * color (`#000000`) so the value has a single source of truth.
+ */
+export function overlay(alpha: number): string {
+  return withAlpha(shadows.level1.shadowColor, alpha);
 }
 
 export const colors = {

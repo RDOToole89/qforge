@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import UnifiedBlochSphere from "@/src/features/bloch-sphere/components/UnifiedBlochSphere";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import type { UsePlaybackReturn, InterpolationMode } from "../hooks/usePlayback";
-import { colors, fonts } from "../styles";
+import { colors, fonts, overlay } from "../styles";
 
 interface BlochPlaybackPanelProps {
   playback: UsePlaybackReturn;
@@ -275,7 +275,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             position: "fixed",
             inset: 0,
             zIndex: 9999,
-            background: "rgba(0, 0, 0, 0.85)",
+            background: overlay(0.85),
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -293,7 +293,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+            boxShadow: `0 24px 80px ${overlay(0.6)}`,
           }}>
             {/* Modal header */}
             <div style={{
@@ -602,9 +602,9 @@ function TransportControls({
               height: 12,
               borderRadius: 6,
               background: colors.accent,
-              border: "2px solid #fff",
+              border: `2px solid ${colors.text}`,
               transform: "translateX(-6px)",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              boxShadow: `0 1px 4px ${overlay(0.3)}`,
             }} />
           </div>
           <span style={{ fontSize: 9, color: colors.textTertiary, fontFamily: fonts.mono, minWidth: 8 }}>

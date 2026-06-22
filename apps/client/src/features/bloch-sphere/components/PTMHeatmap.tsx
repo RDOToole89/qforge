@@ -1,5 +1,7 @@
 'use dom';
 
+import { chrome, viz } from "@/src/design/tokens";
+import { rgba } from "../styles";
 import type { RuntimeChannel } from "../types";
 
 interface PTMHeatmapProps {
@@ -11,7 +13,7 @@ interface PTMHeatmapProps {
 }
 
 const LABELS = ["I", "X", "Y", "Z"];
-const LABEL_COLORS = ["#8899aa", "#ff4466", "#44ff88", "#4488ff"];
+const LABEL_COLORS = [chrome.text.secondary, viz.rose, viz.green, viz.blue];
 
 export default function PTMHeatmap({ runtimeCh, channel, strength, rawMatrix }: PTMHeatmapProps) {
   const ch = runtimeCh[channel];
@@ -22,9 +24,9 @@ export default function PTMHeatmap({ runtimeCh, channel, strength, rawMatrix }: 
 
   const bg = (v: number): string => {
     const t = v / mx;
-    if (t > 0.01) return `rgba(255,153,51,${Math.min(t * 0.7, 0.65)})`;
-    if (t < -0.01) return `rgba(68,136,255,${Math.min(Math.abs(t) * 0.7, 0.65)})`;
-    return "rgba(255,255,255,0.02)";
+    if (t > 0.01) return rgba(viz.orange, Math.min(t * 0.7, 0.65));
+    if (t < -0.01) return rgba(viz.blue, Math.min(Math.abs(t) * 0.7, 0.65));
+    return chrome.border.subtle;
   };
 
   return (
@@ -48,7 +50,7 @@ export default function PTMHeatmap({ runtimeCh, channel, strength, rawMatrix }: 
               width: "42px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center",
               background: bg(v), borderRadius: "3px", margin: "1px",
               fontSize: "10px", fontFamily: "monospace",
-              color: Math.abs(v) > 0.25 ? "#fff" : "#556",
+              color: Math.abs(v) > 0.25 ? chrome.text.primary : chrome.text.tertiary,
             }}>
               {Math.abs(v) > 0.005 ? v.toFixed(2) : ""}
             </div>

@@ -16,6 +16,7 @@
  *   uv run python scripts/gen_frontend_constants.py
  */
 import { STATE_CORRELATORS } from "@/src/generated/catalog";
+import { chrome, viz } from "@/src/design/tokens";
 import type { BlochConfig } from "./types";
 
 export const DEFAULT_CONFIG: BlochConfig = {
@@ -25,7 +26,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       desc: "Greenberger-Horne-Zeilinger",
       bloch: { rx: 0, ry: 0, rz: 0 },
       correlators: { ...STATE_CORRELATORS.ghz.correlators },
-      color: "#ff9933",
+      color: viz.orange,
       zBasisSignal: "strong",
       insight:
         "GHZ has maximal ZZ correlation. Z-basis measurement sees the full correlation structure — noise that disrupts ZZ shows up immediately. This is why GHZ is your best Z-basis probe.",
@@ -36,7 +37,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       desc: "Maximally entangled pair",
       bloch: { rx: 0, ry: 0, rz: 0 },
       correlators: { ...STATE_CORRELATORS.bell.correlators },
-      color: "#44ddff",
+      color: viz.aqua,
       zBasisSignal: "strong",
       insight:
         "Bell state = 2-qubit GHZ. Same correlator structure, same noise sensitivity.",
@@ -47,7 +48,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       desc: "W state (single-excitation superposition)",
       bloch: { rx: 0, ry: 0, rz: 0.33 },
       correlators: { ...STATE_CORRELATORS.w_state.correlators },
-      color: "#44ff88",
+      color: viz.green,
       zBasisSignal: "weak",
       insight:
         "W state has non-uniform Z-marginals but relatively weak two-qubit correlations, so it is a poor Z-basis probe.",
@@ -68,7 +69,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
         xz: 1.0,
         zx: 1.0,
       },
-      color: "#b48cff",
+      color: viz.purple,
       zBasisSignal: "zero",
       insight:
         "Cluster state: exactly zero in the Z-basis — its correlations live in the off-axis (X-Z) Pauli terms.",
@@ -79,7 +80,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       desc: "|+\u27E9\u2297n (product state)",
       bloch: { rx: 1, ry: 0, rz: 0 },
       correlators: { ...STATE_CORRELATORS.superposition.correlators },
-      color: "#ff4466",
+      color: viz.rose,
       zBasisSignal: "zero",
       insight:
         "Equal superposition is a PRODUCT state — no entanglement, no correlations. Z-basis gives uniform distribution.",
@@ -181,5 +182,5 @@ export const DEFAULT_CONFIG: BlochConfig = {
     },
   },
   experimentalData: [] as import("./types").ExperimentalDataEntry[],
-  display: { pointCount: 350, backgroundColor: "#08090e" },
+  display: { pointCount: 350, backgroundColor: chrome.bg.primary },
 };

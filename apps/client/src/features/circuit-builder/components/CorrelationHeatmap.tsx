@@ -105,7 +105,7 @@ export default function CorrelationHeatmap({ data, numQubits, mode }: Correlatio
                     {!isDiag && Math.abs(val) > 0.005 && (
                       <span style={{
                         fontSize: numQubits <= 4 ? 9 : 7,
-                        color: Math.abs(val) > 0.3 ? "#fff" : colors.textTertiary,
+                        color: Math.abs(val) > 0.3 ? colors.text : colors.textTertiary,
                         fontFamily: fonts.mono,
                         fontWeight: Math.abs(val) > 0.5 ? 700 : 400,
                       }}>

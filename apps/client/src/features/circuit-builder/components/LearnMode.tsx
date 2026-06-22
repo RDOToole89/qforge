@@ -3,7 +3,7 @@
 import { MODULES, LESSONS } from "../data/lessonContent";
 import { useLearnProgress } from "../hooks/useLearnProgress";
 import LessonView from "./LessonView";
-import { colors, fonts } from "../styles";
+import { colors, fonts, overlay } from "../styles";
 
 interface LearnModeProps {
   onClose: () => void;
@@ -149,7 +149,7 @@ export default function LearnMode({ onClose }: LearnModeProps) {
       position: "fixed",
       inset: 0,
       zIndex: 9500,
-      background: "rgba(0,0,0,0.85)",
+      background: overlay(0.85),
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -165,7 +165,7 @@ export default function LearnMode({ onClose }: LearnModeProps) {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+        boxShadow: `0 24px 80px ${overlay(0.6)}`,
       }}>
         {/* Header */}
         <div style={{

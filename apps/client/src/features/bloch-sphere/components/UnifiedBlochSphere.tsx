@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useMemo, useState } from "react";
 import * as THREE from "three";
+import { chrome, viz, fontFamily } from "@/src/design/tokens";
 import { V3, TAU, spherePoints, statePoints, blochToThree } from "../math";
 import type { ProbeStateConfig, RuntimeChannel } from "../types";
 import type { BlochDot } from "../data/stateBlochConfigs";
@@ -53,7 +54,7 @@ function makeTextSprite(text: string, color: string, size = 0.12): THREE.Sprite 
   canvas.width = 128;
   canvas.height = 64;
   const ctx = canvas.getContext("2d")!;
-  ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.font = `bold 32px ${fontFamily.sans}`;
   ctx.fillStyle = color;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -68,7 +69,7 @@ function makeTextSprite(text: string, color: string, size = 0.12): THREE.Sprite 
 
 // ── Shared scaffold builder ─────────────────────────────────────
 
-function buildScaffold(scene: THREE.Scene, opts: { background: number; detail: "full" | "mini" }) {
+function buildScaffold(scene: THREE.Scene, opts: { background: number | string; detail: "full" | "mini" }) {
   scene.background = new THREE.Color(opts.background);
 
   // Wireframe sphere
@@ -112,12 +113,12 @@ function buildScaffold(scene: THREE.Scene, opts: { background: number; detail: "
 
     // Axis labels + pole labels
     const labelData: [number, number, number, string, string][] = [
-      [1.45, 0, 0, "X", "#ff4466"],    // +X axis
-      [-1.45, 0, 0, "-X", "#ff4466"],
-      [0, 1.45, 0, "Y", "#44ff88"],    // +Y axis
-      [0, -1.45, 0, "-Y", "#44ff88"],
-      [0, 0, 1.25, "|0\u27E9", "#4488ff"],  // +Z = |0⟩ (north pole)
-      [0, 0, -1.25, "|1\u27E9", "#4488ff"],  // -Z = |1⟩ (south pole)
+      [1.45, 0, 0, "X", viz.rose],    // +X axis
+      [-1.45, 0, 0, "-X", viz.rose],
+      [0, 1.45, 0, "Y", viz.green],    // +Y axis
+      [0, -1.45, 0, "-Y", viz.green],
+      [0, 0, 1.25, "|0\u27E9", viz.blue],  // +Z = |0⟩ (north pole)
+      [0, 0, -1.25, "|1\u27E9", viz.blue],  // -Z = |1⟩ (south pole)
     ];
     for (const [bx, by, bz, text, color] of labelData) {
       const sprite = makeTextSprite(text, color, text.length > 2 ? 0.14 : 0.1);
@@ -258,12 +259,12 @@ function GlossarySphere({ dots, caption, size = 120, expandable = true }: Glossa
       <div ref={mountRef} style={{ width: currentSize, height: currentSize, transition: "width 0.25s ease, height 0.25s ease" }} />
       <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3 }}>
         {caption && (
-          <span style={{ color: "#64748b", fontSize: expanded ? 10 : 8, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", transition: "font-size 0.2s ease" }}>
+          <span style={{ color: chrome.text.tertiary, fontSize: expanded ? 10 : 8, fontFamily: fontFamily.sans, transition: "font-size 0.2s ease" }}>
             {caption}
           </span>
         )}
         {expandable && (
-          <span style={{ color: "#4f46e5", fontSize: 8, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.7 }}>
+          <span style={{ color: chrome.accent.dark, fontSize: 8, fontFamily: fontFamily.sans, opacity: 0.7 }}>
             {expanded ? "\u25BE shrink" : "\u25B8 expand"}
           </span>
         )}
@@ -306,7 +307,7 @@ function VisualizerSphere({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
 
-    buildScaffold(scene, { background: 0x08090e, detail: "full" });
+    buildScaffold(scene, { background: chrome.bg.primary, detail: "full" });
 
     // Additional state dots (experiment "All qubits" view)
     if (additionalStates?.length) {
@@ -325,7 +326,7 @@ function VisualizerSphere({
     const bLen = Math.sqrt(bv.rx * bv.rx + bv.ry * bv.ry + bv.rz * bv.rz);
     if (bLen > 0.05) {
       const dir = blochToThree(bv.rx, bv.ry, bv.rz);
-      const stColor = new THREE.Color(stateCfg.color ?? "#ffffff");
+      const stColor = new THREE.Color(stateCfg.color ?? chrome.text.primary);
       scene.add(new THREE.Line(
         new THREE.BufferGeometry().setFromPoints([V3(0, 0, 0), dir.clone().normalize().multiplyScalar(bLen)]),
         new THREE.LineBasicMaterial({ color: stColor, linewidth: 2, transparent: true, opacity: 0.8 }),
@@ -447,7 +448,7 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0, e
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x08090e, 1);
+    renderer.setClearColor(new THREE.Color(chrome.bg.primary), 1);
     el.appendChild(renderer.domElement);
 
     // Track container aspect ratio for camera fit adjustment
@@ -466,7 +467,7 @@ function CircuitSphere({ dots, size, zoom = 1, activeQubits, stepProgress = 0, e
     });
     if (!size) ro.observe(el);
 
-    buildScaffold(scene, { background: 0x08090e, detail: "full" });
+    buildScaffold(scene, { background: chrome.bg.primary, detail: "full" });
 
     // Create dot + glow + label meshes for each qubit
     const currentDots = dotsRef.current;

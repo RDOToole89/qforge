@@ -54,13 +54,62 @@ export const chrome = {
  * ordered categorical scale for per-qubit / per-series coloring.
  */
 export const viz = {
+  // ── Primary data hues (brand identity for the bloch-sphere viz) ──
   orange: "#ff9933",
   cyan: "#44c8ff",
   pink: "#f472b6",
   violet: "#a78bfa",
   sky: "#38bdf8",
   green: "#44ff88",
+
+  // ── Extended categorical palette ──
+  // Single source for per-state Bloch dots, per-qubit series, correlator
+  // axes, and channel/topology accents across the bloch-sphere feature.
+  // Distinct hues chosen so adjacent data points stay legible. Neutral
+  // tones reuse chrome text neutrals so greys are never duplicated.
+  indigo: "#818cf8", // generic mixed / probability-amplitude dots
+  emerald: "#34d399", // W-state / "good" outcome dots
+  amber: "#fb923c", // cluster / graph-state dots
+  aqua: "#44ddff", // Bell-state / qubit-series cyan
+  purple: "#b48cff", // cluster-state / qubit-series violet
+  rose: "#ff4466", // superposition / ZI correlator / qubit-series red
+  blue: "#4488ff", // ZZ correlator / Z-axis / blue map accent
+  blueDim: "#3366aa", // original (pre-map) Bloch point cloud
+  magenta: "#cc44ff", // state×topology / star-topology accent
+  yellow: "#ffdd44", // qubit-series yellow
+  teal: "#44ffdd", // qubit-series teal
+  rosePink: "#ff88cc", // qubit-series light pink
+  muted: chrome.text.secondary, // neutral / "mixed" / "null" reference dots
+  mutedDim: chrome.text.tertiary, // dimmed reference dots
+
+  // Extra categorical hues used by the circuit-builder amplitude-evolution
+  // graph (per-basis-state traces). Distinct from the brighter Bloch hues
+  // above; kept here so the amplitude scale has a single source.
+  cyanDeep: "#06b6d4",
+  lime: "#84cc16",
+  crimson: "#e11d48",
+  azure: "#0ea5e9",
+
   series: ["#6366f1", "#f472b6", "#44c8ff", "#ff9933", "#a78bfa", "#44ff88"],
+
+  /**
+   * Categorical colors keyed by quantum gate family. Gate identity is a
+   * data-visualization concern (not UI chrome), so the gate palette lives here
+   * as the single source consumed by the circuit-builder gate library.
+   */
+  gate: {
+    indigo: "#6366f1",
+    red: "#ef4444",
+    green: "#22c55e",
+    blue: "#3b82f6",
+    violet: "#8b5cf6",
+    purple: "#a855f7",
+    orange: "#f97316",
+    yellow: "#eab308",
+    teal: "#14b8a6",
+    pink: "#ec4899",
+    amber: "#f59e0b",
+  },
 } as const;
 
 // ───────────────────────────────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 'use dom';
 
 import { useState, useEffect } from "react";
+import { chrome, viz } from "@/src/design/tokens";
+import { bdr, rgba } from "../styles";
 import { DEFAULT_CONFIG } from "../config";
 import type { BlochConfig } from "../types";
 
@@ -83,32 +85,32 @@ export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditor
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(0,0,0,0.7)",
+        background: rgba(chrome.bg.primary, 0.7),
         display: "flex", alignItems: "center", justifyContent: "center",
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
-        width: "720px", maxHeight: "85vh", background: "#0c0e18",
-        border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px",
+        width: "720px", maxHeight: "85vh", background: chrome.bg.surface,
+        border: `1px solid ${chrome.border.default}`, borderRadius: "12px",
         display: "flex", flexDirection: "column", overflow: "hidden",
       }}>
         {/* Header */}
         <div style={{
-          padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)",
+          padding: "12px 16px", borderBottom: bdr,
           display: "flex", alignItems: "center", gap: "10px",
         }}>
-          <span style={{ fontSize: "14px", fontWeight: 600, color: "#e8eef6" }}>Config</span>
+          <span style={{ fontSize: "14px", fontWeight: 600, color: chrome.text.primary }}>Config</span>
           <div style={{
             display: "flex", gap: "3px",
-            background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px",
+            background: chrome.border.subtle, borderRadius: "6px", padding: "2px",
           }}>
             {(["states", "channels", "data", "topologies"] as TabKey[]).map((t) => (
               <button key={t} onClick={() => setTab(t)} style={{
                 padding: "4px 10px", borderRadius: "4px", border: "none",
                 fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
-                background: tab === t ? "rgba(255,153,51,0.15)" : "transparent",
-                color: tab === t ? "#ff9933" : "#5a6a82",
+                background: tab === t ? `${viz.orange}26` : "transparent",
+                color: tab === t ? viz.orange : chrome.text.tertiary,
               }}>
                 {t === "data" ? "Exp. Data" : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
@@ -116,13 +118,13 @@ export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditor
           </div>
           <div style={{ flex: 1 }} />
           <button onClick={onClose} style={{
-            background: "none", border: "none", color: "#667",
+            background: "none", border: "none", color: chrome.text.tertiary,
             fontSize: "18px", cursor: "pointer",
           }}>x</button>
         </div>
 
         {/* Hint */}
-        <div style={{ padding: "6px 16px 0", fontSize: "11px", color: "#5a6a82", lineHeight: "1.5" }}>
+        <div style={{ padding: "6px 16px 0", fontSize: "11px", color: chrome.text.tertiary, lineHeight: "1.5" }}>
           {HINTS[tab]}
         </div>
 
@@ -133,8 +135,8 @@ export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditor
           spellCheck={false}
           style={{
             flex: 1, margin: "10px 16px", padding: "12px",
-            background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "8px", color: "#b8c4d8", fontFamily: "monospace",
+            background: rgba(chrome.bg.primary, 0.3), border: `1px solid ${chrome.border.subtle}`,
+            borderRadius: "8px", color: chrome.text.primary, fontFamily: "monospace",
             fontSize: "11px", lineHeight: "1.5", resize: "none", outline: "none",
             minHeight: "200px",
           }}
@@ -144,20 +146,20 @@ export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditor
         {error && (
           <div style={{
             margin: "0 16px 8px", padding: "6px 10px",
-            background: "rgba(255,68,68,0.1)", border: "1px solid rgba(255,68,68,0.2)",
-            borderRadius: "6px", fontSize: "11px", color: "#ff6666",
+            background: `${chrome.status.error}1a`, border: `1px solid ${chrome.status.error}33`,
+            borderRadius: "6px", fontSize: "11px", color: chrome.status.error,
           }}>{error}</div>
         )}
 
         {/* Actions */}
         <div style={{
-          padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "10px 16px", borderTop: bdr,
           display: "flex", gap: "6px",
         }}>
           {([
-            ["Apply", "#ff9933", apply] as const,
-            ["Export", "#4488ff", exportCfg] as const,
-            ["Import", "#44ff88", importCfg] as const,
+            ["Apply", viz.orange, apply] as const,
+            ["Export", viz.blue, exportCfg] as const,
+            ["Import", viz.green, importCfg] as const,
           ]).map(([label, color, fn]) => (
             <button key={label} onClick={fn} style={{
               padding: "5px 12px", borderRadius: "5px",
@@ -168,9 +170,9 @@ export default function ConfigEditor({ config, onUpdate, onClose }: ConfigEditor
           <div style={{ flex: 1 }} />
           <button onClick={() => onUpdate(DEFAULT_CONFIG)} style={{
             padding: "5px 12px", borderRadius: "5px",
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#667", fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
+            border: `1px solid ${chrome.border.default}`,
+            background: chrome.border.subtle,
+            color: chrome.text.tertiary, fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
           }}>Reset</button>
         </div>
       </div>
