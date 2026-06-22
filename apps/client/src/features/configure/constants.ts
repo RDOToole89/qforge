@@ -114,13 +114,10 @@ export const RESEARCH_TYPES = CATALOG_RESEARCH_TYPES.filter(
   (id) => id in RESEARCH_UI,
 ).map((id) => ({ id, label: RESEARCH_UI[id].label }));
 
-export const KNOWN_BACKENDS = [
-  "ibm_brisbane",
-  "ibm_fez",
-  "ibm_kyiv",
-  "ibm_sherbrooke",
-  "ibm_nazca",
-] as const;
+// Hardware backends are NOT hardcoded here: the live list comes from the
+// backend (`GET /api/hardware/backends`) via useHardwareValidation, which is the
+// single source of truth. When credentials are absent the picker falls back to
+// manual entry (clearly flagged in the UI).
 
 export const OPTIMIZATION_LEVELS = [
   { level: 0, label: "None",   description: "No optimization" },

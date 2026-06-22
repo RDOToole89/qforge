@@ -1,15 +1,16 @@
 /**
  * Default configuration for the Bloch Sphere CPTP Visualizer.
  *
- * Two-qubit correlator signatures are backend-owned facts. Where the backend's
- * exact reduced-state correlators match the visualizer's signature (GHZ as the
- * entangled-pair signature, and Bell), they are imported from the generated
- * catalog (single source of truth). The W, Cluster, and Superposition entries
- * keep *curated/pedagogical* correlator values local: they intentionally
- * diverge from the strict reduced-state correlators (e.g. Cluster relies on the
- * xz/zx terms, which two_qubit_correlators does not compute) and changing them
- * would alter the teaching narrative. See STATE_CORRELATORS in the catalog for
- * the mathematically exact backend values.
+ * Two-qubit correlator signatures are backend-owned facts. ALL states source
+ * their zi/iz/zz/xx/yy correlators from the generated catalog (STATE_CORRELATORS
+ * in src/generated/catalog.ts), which the Python backend computes via
+ * bloch_math.two_qubit_correlators on the prepared states. This is the single
+ * source of truth — there are no competing hardcoded physics values here.
+ *
+ * The only local correlator terms are Cluster's xz/zx entries: the backend's
+ * two_qubit_correlators does not compute the off-axis xz/zx Pauli terms, so they
+ * are kept as explicit pedagogical placeholders (see the comment at that entry),
+ * not as a divergent second source for the terms the backend does compute.
  *
  * Regenerate the catalog with:
  *   uv run python scripts/gen_frontend_constants.py
@@ -45,17 +46,11 @@ export const DEFAULT_CONFIG: BlochConfig = {
       name: "W",
       desc: "W state (single-excitation superposition)",
       bloch: { rx: 0, ry: 0, rz: 0.33 },
-      correlators: {
-        zi: 0.33,
-        iz: 0.33,
-        zz: -0.11,
-        xx: 0.22,
-        yy: 0.22,
-      },
+      correlators: { ...STATE_CORRELATORS.w_state.correlators },
       color: "#44ff88",
       zBasisSignal: "weak",
       insight:
-        "W state has non-uniform Z-marginals but WEAK correlations. Your data: 0/9 detections.",
+        "W state has non-uniform Z-marginals but relatively weak two-qubit correlations, so it is a poor Z-basis probe.",
       uniform: false,
     },
     cluster: {
@@ -63,25 +58,27 @@ export const DEFAULT_CONFIG: BlochConfig = {
       desc: "Graph state (CZ entanglement)",
       bloch: { rx: 0, ry: 0, rz: 0 },
       correlators: {
-        zi: 0,
-        iz: 0,
-        zz: 0,
-        xx: 0,
-        yy: 0,
+        // zi/iz/zz/xx/yy come from the backend (all zero for the cluster
+        // state's reduced 2-qubit marginal). xz/zx are intentional pedagogical
+        // placeholders: bloch_math.two_qubit_correlators does not compute the
+        // off-axis xz/zx Pauli terms, and the cluster state's stabilizer
+        // structure lives precisely in those terms. They are NOT a competing
+        // source for the backend-computed terms above.
+        ...STATE_CORRELATORS.cluster.correlators,
         xz: 1.0,
         zx: 1.0,
       },
       color: "#b48cff",
       zBasisSignal: "zero",
       insight:
-        "Cluster state: EXACTLY zero in Z-basis. Your Pauli invariance theorem.",
+        "Cluster state: exactly zero in the Z-basis — its correlations live in the off-axis (X-Z) Pauli terms.",
       uniform: true,
     },
     superposition: {
       name: "Equal Superposition",
       desc: "|+\u27E9\u2297n (product state)",
       bloch: { rx: 1, ry: 0, rz: 0 },
-      correlators: { zi: 0, iz: 0, zz: 0, xx: 0, yy: 0 },
+      correlators: { ...STATE_CORRELATORS.superposition.correlators },
       color: "#ff4466",
       zBasisSignal: "zero",
       insight:
@@ -126,7 +123,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       kraus: "K\u2080=\u221A(1\u2212p/2)\u00B7I  K\u2081=\u221A(p/2)\u00B7Z",
       geometry: "Sphere \u2192 pancake (Z preserved)",
       insight:
-        "Z-basis sees nothing for Z-symmetric states. Your Pauli invariance.",
+        "Z-basis sees nothing for Z-symmetric states (Pauli invariance under dephasing).",
     },
     bit_flip: {
       name: "Bit Flip",

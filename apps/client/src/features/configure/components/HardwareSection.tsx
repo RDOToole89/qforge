@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, TextInput, Switch, StyleSheet } from "react-native";
+import { View, Text, Pressable, TextInput, Switch, StyleSheet, ActivityIndicator } from "react-native";
 import { colors, spacing } from "@/src/theme";
-import { KNOWN_BACKENDS, OPTIMIZATION_LEVELS } from "../constants";
+import type { HardwareBackend } from "@/src/lib/api";
+import { OPTIMIZATION_LEVELS } from "../constants";
 import { SectionHeader } from "./SectionHeader";
 
 interface HardwareSectionProps {
@@ -12,6 +13,11 @@ interface HardwareSectionProps {
   hardwareSession: boolean;
   setHardwareSession: (v: boolean) => void;
   onInfo: () => void;
+  /** Live backends from the backend API (single source of truth). */
+  backends: HardwareBackend[];
+  backendsAvailable: boolean;
+  backendsReason: string | null;
+  backendsLoading: boolean;
 }
 
 export function HardwareSection({
@@ -22,9 +28,19 @@ export function HardwareSection({
   hardwareSession,
   setHardwareSession,
   onInfo,
+  backends,
+  backendsAvailable,
+  backendsReason,
+  backendsLoading,
 }: HardwareSectionProps) {
-  const isKnownBackend = (KNOWN_BACKENDS as readonly string[]).includes(backendName);
-  const [showCustom, setShowCustom] = useState(!isKnownBackend && backendName !== "");
+  const backendNames = backends
+    .map((b) => b.name)
+    .filter((n): n is string => !!n);
+  const isKnownBackend = backendNames.includes(backendName);
+  // When the live list is unavailable, manual entry is the only path.
+  const [showCustom, setShowCustom] = useState(
+    !backendsAvailable || (!isKnownBackend && backendName !== ""),
+  );
 
   const selectedOptLevel = OPTIMIZATION_LEVELS.find(
     (o) => o.level === optimizationLevel,
@@ -36,38 +52,61 @@ export function HardwareSection({
 
       {/* Backend selection */}
       <Text style={styles.label}>Backend</Text>
-      <View style={styles.chipRow}>
-        {KNOWN_BACKENDS.map((name) => {
-          const active = backendName === name && !showCustom;
-          return (
-            <Pressable
-              key={name}
-              onPress={() => {
-                setBackendName(name);
-                setShowCustom(false);
-              }}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {name}
-              </Text>
-            </Pressable>
-          );
-        })}
-        <Pressable
-          onPress={() => {
-            setShowCustom(true);
-            if (isKnownBackend) setBackendName("");
-          }}
-          style={[styles.chip, showCustom && styles.chipActive]}
-        >
-          <Text style={[styles.chipText, showCustom && styles.chipTextActive]}>
-            Custom
-          </Text>
-        </Pressable>
-      </View>
 
-      {showCustom && (
+      {backendsLoading && (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator size="small" color={colors.accent.base} />
+          <Text style={styles.helperText}>Loading backends…</Text>
+        </View>
+      )}
+
+      {!backendsLoading && !backendsAvailable && (
+        <View style={styles.noticeBox}>
+          <Text style={styles.noticeText}>
+            No live backends.{" "}
+            {backendsReason ?? "IBM Quantum credentials are not configured."}
+          </Text>
+          <Text style={styles.noticeSubText}>
+            Enter a backend name manually below (offline — not verified against a
+            real device).
+          </Text>
+        </View>
+      )}
+
+      {backendsAvailable && (
+        <View style={styles.chipRow}>
+          {backendNames.map((name) => {
+            const active = backendName === name && !showCustom;
+            return (
+              <Pressable
+                key={name}
+                onPress={() => {
+                  setBackendName(name);
+                  setShowCustom(false);
+                }}
+                style={[styles.chip, active && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {name}
+                </Text>
+              </Pressable>
+            );
+          })}
+          <Pressable
+            onPress={() => {
+              setShowCustom(true);
+              if (isKnownBackend) setBackendName("");
+            }}
+            style={[styles.chip, showCustom && styles.chipActive]}
+          >
+            <Text style={[styles.chipText, showCustom && styles.chipTextActive]}>
+              Custom
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {(showCustom || !backendsAvailable) && (
         <TextInput
           style={styles.textInput}
           placeholder="Enter backend name"
@@ -164,6 +203,30 @@ const styles = StyleSheet.create({
     color: "#e2e8f0",
     fontSize: 13,
     marginBottom: spacing.md,
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: spacing.md,
+  },
+  noticeBox: {
+    backgroundColor: "rgba(245, 158, 11, 0.10)",
+    borderWidth: 1,
+    borderColor: colors.status.warning,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: spacing.md,
+  },
+  noticeText: {
+    fontSize: 12,
+    color: colors.text.primary,
+    fontWeight: "600",
+  },
+  noticeSubText: {
+    fontSize: 11,
+    color: colors.text.tertiary,
+    marginTop: 4,
   },
   helperText: {
     fontSize: 11,

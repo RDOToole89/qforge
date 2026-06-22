@@ -11,7 +11,8 @@ import {
 
 import MetricCard from "@/src/components/MetricCard";
 import ResultChart from "@/src/components/ResultChart";
-import { useExperimentConfig } from "@/src/features/configure/useExperimentConfig";
+import { useExperimentConfig, type ConfigWarning } from "@/src/features/configure/useExperimentConfig";
+import { useHardwareValidation } from "@/src/features/configure/useHardwareValidation";
 import { INFO_TEXT } from "@/src/features/configure/constants";
 import { StateSection } from "@/src/features/configure/components/StateSection";
 import { SimulationSection } from "@/src/features/configure/components/SimulationSection";
@@ -39,8 +40,51 @@ export default function ConfigureScreen() {
   const [infoKey, setInfoKey] = useState<string | null>(null);
   const [metricsOpen, setMetricsOpen] = useState(false);
 
+  // Real hardware backend list + pre-submission feasibility check.
+  const hw = useHardwareValidation(
+    config.simMode === "hardware",
+    config.buildConfig,
+  );
+
+  // Hardware feasibility violations/warnings, surfaced in the validation banner.
+  const hardwareWarnings = useMemo<ConfigWarning[]>(() => {
+    if (config.simMode !== "hardware") return [];
+    const w: ConfigWarning[] = [];
+    const v = hw.validation;
+    if (v) {
+      if (!v.available && v.reason) {
+        w.push({
+          level: "info",
+          message: `Hardware feasibility not verified: ${v.reason}`,
+        });
+      }
+      if (v.available) {
+        for (const msg of v.violations ?? []) {
+          w.push({ level: "error", message: msg });
+        }
+        for (const msg of v.warnings ?? []) {
+          w.push({ level: "warning", message: msg });
+        }
+      }
+    }
+    return w;
+  }, [config.simMode, hw.validation]);
+
+  const allWarnings = useMemo(
+    () => [...config.warnings, ...hardwareWarnings],
+    [config.warnings, hardwareWarnings],
+  );
+
+  // Block hardware runs only when the backend explicitly reports infeasibility.
+  const hardwareBlocked =
+    config.simMode === "hardware" &&
+    hw.validation?.available === true &&
+    hw.validation?.feasible === false;
+
+  const canRun = config.isValid && !hardwareBlocked && !running;
+
   const handleRun = async () => {
-    if (!config.isValid) return;
+    if (!config.isValid || hardwareBlocked) return;
     setRunning(true);
     setResult(null);
     try {
@@ -131,10 +175,14 @@ export default function ConfigureScreen() {
           hardwareSession={config.hardwareSession}
           setHardwareSession={config.setHardwareSession}
           onInfo={() => setInfoKey("hardware")}
+          backends={hw.backends}
+          backendsAvailable={hw.backendsAvailable}
+          backendsReason={hw.backendsReason}
+          backendsLoading={hw.backendsLoading}
         />
       )}
 
-      <ValidationBanner warnings={config.warnings} />
+      <ValidationBanner warnings={allWarnings} />
 
       {/* Circuit Preview -- auto-updates when config changes */}
       <CircuitPreview configJson={configJson} />
@@ -143,11 +191,11 @@ export default function ConfigureScreen() {
       <Pressable
         style={({ pressed }) => [
           styles.runBtn,
-          (!config.isValid || running) && styles.runBtnDisabled,
-          pressed && config.isValid && !running && styles.pressed,
+          !canRun && styles.runBtnDisabled,
+          pressed && canRun && styles.pressed,
         ]}
         onPress={handleRun}
-        disabled={!config.isValid || running}
+        disabled={!canRun}
       >
         {running ? (
           <ActivityIndicator color="#fff" />

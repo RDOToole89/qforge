@@ -2,6 +2,11 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // React Native injects `__DEV__` at build time; api.ts reads it for the base
+  // URL. Define it for the node test runner so importing api.ts doesn't throw.
+  define: {
+    __DEV__: "true",
+  },
   resolve: {
     alias: [
       // Mirror tsconfig "paths": { "@/*": ["./*"] } so re-exports through the
