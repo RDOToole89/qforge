@@ -10,7 +10,8 @@
     "dev": "expo start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "gen:catalog": "uv run --project ../.. python ../../scripts/gen_frontend_constants.py"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

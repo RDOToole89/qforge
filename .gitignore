@@ -46,7 +46,7 @@ apps/client/ios/
 apps/client/android/
 apps/client/.expo/
 *.tsbuildinfo
-pnpm-lock.yaml
+# pnpm-lock.yaml is committed for reproducible, deterministic installs.
 
 # MkDocs build output
 site/

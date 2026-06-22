@@ -1,6 +1,20 @@
 /**
  * Default configuration for the Bloch Sphere CPTP Visualizer.
+ *
+ * Two-qubit correlator signatures are backend-owned facts. Where the backend's
+ * exact reduced-state correlators match the visualizer's signature (GHZ as the
+ * entangled-pair signature, and Bell), they are imported from the generated
+ * catalog (single source of truth). The W, Cluster, and Superposition entries
+ * keep *curated/pedagogical* correlator values local: they intentionally
+ * diverge from the strict reduced-state correlators (e.g. Cluster relies on the
+ * xz/zx terms, which two_qubit_correlators does not compute) and changing them
+ * would alter the teaching narrative. See STATE_CORRELATORS in the catalog for
+ * the mathematically exact backend values.
+ *
+ * Regenerate the catalog with:
+ *   uv run python scripts/gen_frontend_constants.py
  */
+import { STATE_CORRELATORS } from "@/src/generated/catalog";
 import type { BlochConfig } from "./types";
 
 export const DEFAULT_CONFIG: BlochConfig = {
@@ -9,13 +23,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       name: "GHZ",
       desc: "Greenberger-Horne-Zeilinger",
       bloch: { rx: 0, ry: 0, rz: 0 },
-      correlators: {
-        zi: 0,
-        iz: 0,
-        zz: 1.0,
-        xx: 1.0,
-        yy: -1.0,
-      },
+      correlators: { ...STATE_CORRELATORS.ghz.correlators },
       color: "#ff9933",
       zBasisSignal: "strong",
       insight:
@@ -26,7 +34,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       name: "Bell (|\u03A6+\u27E9)",
       desc: "Maximally entangled pair",
       bloch: { rx: 0, ry: 0, rz: 0 },
-      correlators: { zi: 0, iz: 0, zz: 1.0, xx: 1.0, yy: -1.0 },
+      correlators: { ...STATE_CORRELATORS.bell.correlators },
       color: "#44ddff",
       zBasisSignal: "strong",
       insight:

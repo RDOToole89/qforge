@@ -1,3 +1,4 @@
+import { NAMED_STATEVECTORS } from "@/src/generated/catalog";
 import type { Complex, SimSnapshot } from "../types";
 
 export interface IdealState {
@@ -11,6 +12,16 @@ export interface IdealState {
 
 const S2 = 1 / Math.SQRT2;
 const S3 = 1 / Math.sqrt(3);
+
+/**
+ * Amplitudes sourced from the generated backend catalog (single source of
+ * truth) for states the backend can prepare. Returns fresh mutable tuples so
+ * callers may treat the result as ordinary Complex[]. Names/descriptions remain
+ * local UI metadata. States with no clean backend source (single-qubit basis
+ * states, GHZ-minus, the Dicke state) keep their amplitudes inline below.
+ */
+const fromCatalog = (id: string): Complex[] =>
+  NAMED_STATEVECTORS[id].amplitudes.map(([re, im]) => [re, im] as Complex);
 
 export const IDEAL_STATES: IdealState[] = [
   // ── 1-qubit ──
@@ -44,34 +55,34 @@ export const IDEAL_STATES: IdealState[] = [
   {
     id: "bell_phi_plus", name: "Bell |\u03A6\u207A\u27E9", numQubits: 2,
     description: "(|00\u27E9 + |11\u27E9)/\u221A2 \u2014 maximally entangled, correlated.",
-    amplitudes: () => [[S2, 0], [0, 0], [0, 0], [S2, 0]],
+    amplitudes: () => fromCatalog("bell_phi_plus"),
   },
   {
     id: "bell_phi_minus", name: "Bell |\u03A6\u207B\u27E9", numQubits: 2,
     description: "(|00\u27E9 \u2212 |11\u27E9)/\u221A2 \u2014 maximally entangled, correlated with phase.",
-    amplitudes: () => [[S2, 0], [0, 0], [0, 0], [-S2, 0]],
+    amplitudes: () => fromCatalog("bell_phi_minus"),
   },
   {
     id: "bell_psi_plus", name: "Bell |\u03A8\u207A\u27E9", numQubits: 2,
     description: "(|01\u27E9 + |10\u27E9)/\u221A2 \u2014 maximally entangled, anti-correlated.",
-    amplitudes: () => [[0, 0], [S2, 0], [S2, 0], [0, 0]],
+    amplitudes: () => fromCatalog("bell_psi_plus"),
   },
   {
     id: "bell_psi_minus", name: "Bell |\u03A8\u207B\u27E9 (singlet)", numQubits: 2,
     description: "(|01\u27E9 \u2212 |10\u27E9)/\u221A2 \u2014 singlet state. Rotationally invariant.",
-    amplitudes: () => [[0, 0], [S2, 0], [-S2, 0], [0, 0]],
+    amplitudes: () => fromCatalog("bell_psi_minus"),
   },
 
   // ── 3-qubit entangled ──
   {
     id: "ghz3", name: "GHZ (3Q)", numQubits: 3,
     description: "(|000\u27E9 + |111\u27E9)/\u221A2 \u2014 maximal 3-tangle, zero pairwise concurrence.",
-    amplitudes: () => [[S2, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [S2, 0]],
+    amplitudes: () => fromCatalog("ghz3"),
   },
   {
     id: "w3", name: "W (3Q)", numQubits: 3,
     description: "(|001\u27E9 + |010\u27E9 + |100\u27E9)/\u221A3 \u2014 zero 3-tangle, maximal pairwise concurrence.",
-    amplitudes: () => [[0, 0], [S3, 0], [S3, 0], [0, 0], [S3, 0], [0, 0], [0, 0], [0, 0]],
+    amplitudes: () => fromCatalog("w3"),
   },
   {
     id: "ghz3_minus", name: "GHZ\u207B (3Q)", numQubits: 3,
@@ -88,36 +99,20 @@ export const IDEAL_STATES: IdealState[] = [
   {
     id: "ghz4", name: "GHZ (4Q)", numQubits: 4,
     description: "(|0000\u27E9 + |1111\u27E9)/\u221A2 \u2014 4-qubit cat state.",
-    amplitudes: () => {
-      const sv: Complex[] = Array.from({ length: 16 }, (): Complex => [0, 0]);
-      sv[0] = [S2, 0];
-      sv[15] = [S2, 0];
-      return sv;
-    },
+    amplitudes: () => fromCatalog("ghz4"),
   },
   {
     id: "w4", name: "W (4Q)", numQubits: 4,
     description: "(|0001\u27E9 + |0010\u27E9 + |0100\u27E9 + |1000\u27E9)/2 \u2014 4-qubit W state.",
-    amplitudes: () => {
-      const sv: Complex[] = Array.from({ length: 16 }, (): Complex => [0, 0]);
-      sv[1] = [0.5, 0]; sv[2] = [0.5, 0]; sv[4] = [0.5, 0]; sv[8] = [0.5, 0];
-      return sv;
-    },
+    amplitudes: () => fromCatalog("w4"),
   },
   {
     id: "cluster4_ideal", name: "Cluster (4Q)", numQubits: 4,
     description: "Linear cluster state \u2014 CZ graph on |+\u27E9\u2297\u2074. Resource for measurement-based QC.",
-    amplitudes: () => {
-      // |cluster⟩ = CZ₂₃ CZ₁₂ CZ₀₁ |+⟩⊗4
-      // Manually computed: equal amplitudes with specific sign pattern
-      const a = 0.25;
-      return [
-        [a, 0], [a, 0], [a, 0], [-a, 0],   // 0000,0001,0010,0011
-        [a, 0], [a, 0], [-a, 0], [a, 0],    // 0100,0101,0110,0111
-        [a, 0], [a, 0], [-a, 0], [a, 0],    // 1000,1001,1010,1011
-        [a, 0], [a, 0], [a, 0], [-a, 0],    // 1100,1101,1110,1111
-      ];
-    },
+    // Amplitudes from the backend catalog (CZ_01 CZ_12 CZ_23 on |+>^4). This
+    // corrects the previous hand-computed array, which had the wrong sign on
+    // 4 of the 16 basis states.
+    amplitudes: () => fromCatalog("cluster4_ideal"),
   },
 ];
 
