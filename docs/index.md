@@ -1,39 +1,41 @@
 # QForge
 
-A research-grade quantum experiment framework for structured decoherence analysis built on Qiskit.
-
-> **For Researchers:** See the [Comprehensive Design Document](reference/design-document.md) for full technical details, metric definitions, architecture, and research roadmap.
+A general-purpose quantum experiment framework built on Qiskit — for learning, tinkering, and running real experiments.
 
 ## Overview
 
-This framework provides comprehensive tools for analyzing quantum decoherence patterns and detecting structured error pathways in quantum systems. It implements the **Spring Network Model** hypothesis, which proposes that quantum decoherence follows structured pathways determined by entanglement network topology rather than random patterns.
+QForge abstracts away the plumbing of quantum experimentation. You pick a quantum state, choose a noise model, configure a simulation mode (or point it at real IBM Quantum hardware), and hit run. The framework handles circuit construction, noise application, execution, measurement canonicalization, and analysis — all through a clean two-function API (`run()` and `sweep()`).
 
 ## Key Features
 
-- **Research-Grade Metrics**: 8 specialized metrics for structured decoherence analysis
-- **Information Theory Foundation**: Robust statistical analysis with full-support Jeffreys smoothing
-- **Bootstrap Validation**: Confidence intervals and statistical significance testing
-- **Schema Compliance**: v1.0 frozen schema format for reproducible research
-- **Pipeline Architecture**: High-level orchestration for complex analysis workflows
+- **State preparation**: GHZ, W, Bell, Cluster, Superposition, and custom circuits
+- **Noise models**: 8 physics-based noise channels (depolarizing, amplitude/phase damping, bit/phase flip, thermal relaxation, correlated depolarizing, readout error)
+- **Simulation modes**: `qasm` (shot-based), `statevector` (exact), `density_matrix` (mixed state), `hardware` (IBM Quantum)
+- **Analysis metrics**: 8 information-theoretic metrics with bootstrap 95% confidence intervals
+- **Parameter sweeps**: Multi-dimensional sweeps over any configuration field
+- **Provenance**: Git SHA, software versions, host info, and full reproducibility tracking
+- **Schema output**: Versioned, standardized result format for programmatic analysis
 
-## Core Research Metrics
+## Analysis Metrics
 
-### Structure Detection
+All metrics are general-purpose information-theoretic and statistical measures over measurement outcome distributions:
 
-- **Asymmetry Index (AI)**: Primary screening metric for structured vs random decoherence
-- **Pathway Concentration Ratio (PCR)**: Quantifies concentration in preferred pathways
-- **Entanglement-Error Correlation (EEC)**: Correlation between topology and error patterns
+### Distribution Structure
 
-### Temporal & Complexity Analysis
+- **Asymmetry Index**: Total variation distance from the uniform distribution (full 2^n support)
+- **Structure Score**: Jensen-Shannon divergence from the factorized (independent-marginals) null model
+- **Concentration Index**: ratio of probability mass in the most-likely vs least-likely quartile of outcomes
+- **Pathway Concentration Ratio**: Probability mass in top vs bottom outcome quartiles
 
-- **Temporal Pathway Stability (TPS)**: Consistency across experimental conditions
-- **Complexity Emergence Score (CES)**: Critical threshold detection for structure emergence
+### Correlation & Stability
+
+- **Entanglement-Error Correlation**: Pearson correlation between an entanglement topology matrix and the pairwise mutual-information matrix
+- **Temporal Pathway Stability**: Spearman rank correlation of outcome orderings across conditions
+- **Complexity Emergence Score**: Logistic fit locating a threshold in a metric-vs-size curve
 
 ### Information Theory
 
-- **Total Correlation**: Multivariate mutual information
-- **Structure Score**: Jensen-Shannon divergence from the factorized (independent-marginals) null model
-- **Concentration Index**: Economic inequality measures for pathway preferences
+- **Total Correlation**: Multi-information across all qubits
 
 ## Quick Start
 
@@ -41,34 +43,18 @@ This framework provides comprehensive tools for analyzing quantum decoherence pa
 
 ```bash
 # List available experiments
-qforge list
+uv run python -m src.cli list
 
 # Run an experiment
-qforge run 01_superposition
+uv run python -m src.cli run 01_superposition
 
 # With custom parameters
-qforge run 01_superposition -s error_rate=0.1 -s num_qubits=3
+uv run python -m src.cli run 01_superposition -s error_rate=0.1 -s num_qubits=3
 ```
 
 See [CLI Reference](reference/cli.md) for full documentation.
 
-**Using ExperimentProgram (Recommended):**
-
-```python
-from src.experiments import 01_superposition
-
-# Run with defaults
-result = 01_superposition.run()
-
-# Or customize parameters
-result = 01_superposition.run({"num_qubits": 3, "error_rate": 0.1})
-
-# Access metrics
-metrics = result.structured_decoherence_metrics
-print(f"Asymmetry Index: {metrics.asymmetry_index:.4f}")
-```
-
-**Using Engine API Directly:**
+**Using the Engine API:**
 
 ```python
 from src.engine.api import run
@@ -77,27 +63,26 @@ from src.engine.models import ExperimentConfig
 config = ExperimentConfig(
     num_qubits=3,
     state_type="GHZ",
-    enable_research_metrics=True,
-    research_type="structured_decoherence",
     shots=1024,
     noise_enabled=True,
     noise_type="depolarizing",
-    error_rate=0.05
+    error_rate=0.05,
+    metrics="decoherence",
 )
 
 result = run(config)
-metrics = result.structured_decoherence_metrics
-print(f"Asymmetry Index: {metrics.asymmetry_index:.4f}")
+for name, entry in result.metrics_bundle.metrics.items():
+    print(f"{name}: {entry.value:.4f}")
 ```
 
 See the [Quick Start](guides/getting-started/quickstart.md) for more usage examples.
 
-## Research Applications
+## Use Cases
 
-- **Quantum Error Analysis**: Detecting non-random decoherence patterns
-- **Entanglement Dynamics**: Understanding how topology influences error propagation
-- **Critical Phenomena**: Identifying emergence thresholds in quantum systems
-- **Noise Characterization**: Distinguishing structured from stochastic noise sources
+- **Learning quantum mechanics**: Preset experiments with step-by-step explanations, from superposition to entanglement
+- **Noise characterization**: Compare noise channels and their effect on different entangled states
+- **Entanglement studies**: See how different topologies (GHZ, W, Cluster) respond to noise
+- **Hardware experiments**: Run the same experiments on real IBM Quantum processors with full provenance
 
 ## Architecture
 
@@ -105,23 +90,18 @@ The framework follows an **engine-first architecture** with clean separation:
 
 - **Engine API**: Clean entry points via `run()` and `sweep()` functions
 - **Core Logic**: Quantum mechanics implementation and analysis algorithms
-- **Analysis Framework**: Specialized metrics and statistical methods
-- **Schema System**: Standardized data formats for reproducible research
+- **Analysis Framework**: Information-theoretic metrics and statistical methods
+- **Schema System**: Standardized data formats for reproducible experiments
 
-See [Architecture](architecture/architecture.md) for the detailed design blueprint and [Framework Integration](architecture/framework-integration.md) for how the components work together.
+See [Architecture](architecture/architecture.md) for the detailed design.
 
 ## Documentation Structure
 
-- **[Design Document](reference/design-document.md)**: Comprehensive framework design (metrics, architecture, roadmap)
 - **[CLI Reference](reference/cli.md)**: Command-line tool usage and examples
 - **Getting Started**: [Installation](guides/getting-started/installation.md) and [Quick Start](guides/getting-started/quickstart.md)
 - **API Reference**: [Metrics](guides/api/metrics.md) and [Constants](guides/api/constants.md)
-- **Research**: [Research Direction](research/research-direction.md) and [Hardware Results](research/2026-04-hardware-decoherence/hardware-scaling-results.md)
+- **[Hardware Setup](guides/hardware-setup.md)**: Running on IBM Quantum
 - **[Architecture](architecture/architecture.md)**: System design and integration patterns
-
-## Research Background
-
-This framework implements research on **structured decoherence pathways** - the hypothesis that quantum errors follow predictable patterns determined by entanglement network topology. The Spring Network Model treats entanglement bonds as springs, with decoherence flowing along tension patterns rather than random diffusion.
 
 ## Getting Started
 

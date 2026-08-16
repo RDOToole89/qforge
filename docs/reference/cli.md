@@ -7,9 +7,11 @@ The `qforge` command-line tool provides quick access to the quantum experiment f
 After installing the package, the `qforge` command is available:
 
 ```bash
-pip install -e .
-qforge --help
+uv sync
+uv run qforge --help
 ```
+
+The examples below use the bare `qforge` command; prefix with `uv run` if you have not activated the project virtual environment.
 
 ## Commands
 
@@ -22,9 +24,8 @@ $ qforge list
 ┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Name              ┃ Description                                              ┃
 ┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 01_superposition            │ Test whether entanglement topology influences            │
-│                   │ decoherence pathways                                     │
-│ 01_superposition_structured │ Structured decoherence Q1 with amplitude damping noise   │
+│ 01_superposition            │ What IS a qubit? Superposition and measurement           │
+│ 11_noise_and_entanglement   │ How entanglement changes error patterns                  │
 │ bell_correlation  │ Bell state correlation test - quantum vs classical       │
 │                   │ bounds                                                   │
 └───────────────────┴──────────────────────────────────────────────────────────┘
@@ -73,7 +74,7 @@ Overrides: {'num_qubits': 3, 'error_rate': 0.1}
 Status: completed
 Timestamp: 2025-12-02T17:51:18.395984
 
-Structured Decoherence Metrics:
+Analysis Metrics:
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
 ┃ Metric                               ┃   Value ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
@@ -116,8 +117,7 @@ qforge run-config <config_path> [OPTIONS]
   "noise_type": "depolarizing",
   "error_rate": 0.05,
   "shots": 4096,
-  "enable_research_metrics": true,
-  "research_type": "structured_decoherence"
+  "metrics": "decoherence"
 }
 ```
 
@@ -140,8 +140,8 @@ When using `-s` overrides or JSON config files, these parameters are available:
 | `noise_type` | str | "depolarizing" | Noise model: "depolarizing", "amplitude_damping" |
 | `error_rate` | float | 0.05 | Noise strength (0.0 to 1.0) |
 | `shots` | int | 4096 | Number of measurement shots |
-| `enable_research_metrics` | bool | true | Compute structured decoherence metrics |
-| `research_type` | str | "structured_decoherence" | Type of research metrics |
+| `metrics` | str \| list | None | Metric profile name ("decoherence", "quick", "information_theory") or explicit list of metric names |
+| `experiment_type` | str | "decoherence" | Experiment category tag ("decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep") |
 
 ## Scripting Examples
 
@@ -158,7 +158,7 @@ done
 
 ```bash
 # Extract asymmetry index from result
-qforge run 01_superposition --json | jq '.structured_decoherence_metrics.asymmetry_index'
+qforge run 01_superposition --json | jq '.metrics_bundle.metrics.asymmetry_index.value'
 
 # Get measurement counts
 qforge run bell_correlation --json | jq '.analysis.measurement_results.raw_counts'

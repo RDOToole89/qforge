@@ -1,34 +1,34 @@
 # Metrics
 
-Structured decoherence analysis metrics for quantum error pattern detection.
+Information-theoretic and statistical metrics over quantum measurement outcome distributions.
 
 ## Asymmetry Index
 
-Primary screening metric for structured vs random decoherence patterns.
+Total variation distance between the observed outcome distribution and the uniform distribution over all 2^n outcomes.
 
 ::: src.core.analysis.metrics.asymmetry_index
 
 ## Pathway Concentration Ratio
 
-Quantifies concentration of errors in preferred pathways.
+Ratio of probability mass in the top outcome quartile versus the bottom quartile.
 
 ::: src.core.analysis.metrics.pathway_concentration_ratio
 
 ## Entanglement-Error Correlation
 
-Measures correlation between entanglement topology and error patterns.
+Pearson correlation between an entanglement topology adjacency matrix and the pairwise mutual-information matrix computed from measurement counts.
 
 ::: src.core.analysis.metrics.entanglement_error_correlation
 
 ## Temporal Pathway Stability
 
-Analyzes consistency of pathway rankings across experimental conditions.
+Spearman rank correlation of outcome orderings across experimental conditions.
 
 ::: src.core.analysis.metrics.temporal_pathway_stability
 
 ## Complexity Emergence Score
 
-Detects critical thresholds for structure emergence as system complexity increases.
+Logistic fit locating a threshold in a metric-versus-system-size curve.
 
 ::: src.core.analysis.metrics.complexity_emergence_score
 

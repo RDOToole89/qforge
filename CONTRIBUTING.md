@@ -9,8 +9,8 @@ Install uv once, then everything else is a single command.
 
 ```bash
 # Clone the repository
-git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
+git clone https://github.com/RDOToole89/qforge.git
+cd qforge
 
 # Create the .venv and install all runtime + dev + test dependencies from uv.lock.
 # uv also installs the pinned Python interpreter (3.12) automatically.
@@ -95,7 +95,7 @@ Coverage is tracked for `src/core/analysis/`. When adding new metrics or analysi
 The framework follows a strict three-layer architecture:
 
 ```
-src/experiments/    Research-specific experiment programs
+src/experiments/    Opinionated experiment programs
        |
        v
 src/engine/         Orchestration: run(), sweep(), Pydantic models, storage
@@ -114,7 +114,7 @@ For the full architectural description, see [CLAUDE.md](CLAUDE.md).
 
 ## Adding a New Metric
 
-All structured decoherence metrics live in `src/core/analysis/metrics/`. To add a new one:
+All analysis metrics live in `src/core/analysis/metrics/`. To add a new one:
 
 1. **Create the metric module** in `src/core/analysis/metrics/your_metric.py`. Implement a function that takes measurement counts (a `dict[str, int]`) and returns a `float`.
 

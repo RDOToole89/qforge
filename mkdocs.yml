@@ -1,8 +1,8 @@
 site_name: QForge
 site_description: A general-purpose quantum experiment engine built on Qiskit
-site_url: https://RDOToole89.github.io/qiskit-experiment-framework/
-repo_url: https://github.com/RDOToole89/qiskit-experiment-framework
-repo_name: RDOToole89/qiskit-experiment-framework
+site_url: https://RDOToole89.github.io/qforge/
+repo_url: https://github.com/RDOToole89/qforge
+repo_name: RDOToole89/qforge
 
 theme:
   name: material
@@ -61,23 +61,5 @@ nav:
     - Constants: guides/api/constants.md
   - Reference:
     - CLI: reference/cli.md
-    - Design Document: reference/design-document.md
   - Architecture:
     - Overview: architecture/architecture.md
-    - Capabilities: architecture/architecture-and-capabilities.md
-    - Framework Integration: architecture/framework-integration.md
-    - Engine Refactor: architecture/engine-first-refactor-plan.md
-  - Research:
-    - Research Direction: research/research-direction.md
-    - Hardware Results: research/2026-04-hardware-decoherence/hardware-scaling-results.md
-    - Structured Decoherence: research/2026-04-hardware-decoherence/structured-decoherence-paper.md
-    - State Probe Study:
-      - Findings: research/2026-02-state-probe-study/state-probe-findings.md
-      - Correlation & Noise: research/2026-02-state-probe-study/correlation-noise-findings.md
-      - Pilot Evidence Audit: research/2026-02-state-probe-study/pilot-evidence-audit.md
-    - Delta-Cov Fingerprints: research/delta-cov-fingerprints.md
-    - Reconfiguration Space: research/reconfiguration-space-hypothesis.md
-    - Spectral Bridge: research/spectral-bridge-prediction.md
-  - Planning:
-    - Roadmap: planning/roadmap.md
-    - Phase 1 - Scientific Rigor: planning/phase1-scientific-rigor.md

@@ -16,8 +16,8 @@ For development and testing:
 
 ```bash
 # Clone the repository
-git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
+git clone https://github.com/RDOToole89/qforge.git
+cd qforge
 
 # Create the .venv and install runtime + dev + test deps from uv.lock.
 # uv reads .python-version and installs Python 3.12 if needed.
@@ -115,7 +115,7 @@ export IBM_QUANTUM_TOKEN=your_token_here  # For hardware experiments
 After installation, your project structure should look like:
 
 ```
-qiskit-experiment-framework/
+qforge/
 ├── src/
 │   ├── engine/              # Engine API: run(), sweep()
 │   ├── core/                # Pure physics: circuits, noise, metrics

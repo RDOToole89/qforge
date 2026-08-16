@@ -1,10 +1,10 @@
 # QForge
 
-[![CI](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/RDOToole89/qiskit-experiment-framework/actions/workflows/ci.yml)
+[![CI](https://github.com/RDOToole89/qforge/actions/workflows/ci.yml/badge.svg)](https://github.com/RDOToole89/qforge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware.**
+**A general-purpose quantum experiment engine built on Qiskit — for learning, tinkering, and real hardware.**
 
 ## Table of Contents
 
@@ -13,7 +13,6 @@
 - [Features at a Glance](#features-at-a-glance)
 - [Quick Start](#quick-start)
 - [Learning Path](#learning-path)
-- [Research](#research-structured-decoherence-on-real-hardware)
 - [Experiments](#experiments)
 - [Tech Stack](#tech-stack)
 - [Contributing](#contributing)
@@ -21,13 +20,13 @@
 
 I'm a software engineer, not a physicist. I fell in love with quantum mechanics as a kid watching BBC science programs — Schrodinger's cat completely blew my mind. When I asked my teacher about it, she said: *"We're not discussing that in this class."* I never ended up in physics.
 
-About eight years ago, stuck in the Australian outback on a working-holiday visa — isolated from the world for three months with nothing but an internet connection — I started watching physics lectures from the Royal Institution. Sean Carroll's clarity and elegance in explaining physics was addictive. I fell in love with the topic all over again and went deep: thousands of hours of lectures and videos from all kinds of thinkers. I'm particularly inspired by Deutsch and Marletto's constructor theory — the idea that physics should be framed in terms of what transformations are and aren't possible.
+About eight years ago, stuck in the Australian outback on a working-holiday visa — isolated from the world for three months with nothing but an internet connection — I started watching physics lectures from the Royal Institution. Sean Carroll's clarity and elegance in explaining physics was addictive. I fell in love with the topic all over again and went deep: thousands of hours of lectures and videos from all kinds of thinkers.
 
-That inspiration led to a specific question: **if we can characterize the *structure* of how quantum states decohere — not just how fast, but in what pattern — could we predict decoherence pathways and build smarter error correction?** That's speculative, and I'd be the first to admit it. But the question drove me to build this framework, which grew into something much more general than my original research direction.
+Eventually, watching wasn't enough — I wanted to experiment. So I built a general-purpose framework to explore quantum computing hands-on.
 
 The core idea is simple: **abstract away the hard parts of quantum experimentation**. You pick a quantum state, choose a noise model, configure your simulation (or point it at real hardware), and hit run. The framework handles circuit construction, noise application, execution, measurement canonicalization, and structured analysis output — all through a clean two-function API. Results come back as typed Pydantic models with provenance, metrics with confidence intervals, and schema-compliant output you can actually analyze programmatically.
 
-This framework sits between a teaching tool and a research instrument. It's educational enough to learn from (interactive Bloch sphere, 135-term glossary, 22 preset circuits with step-by-step explanations) and rigorous enough to produce results worth discussing (8 information-theoretic metrics with bootstrap CIs, 4 simulation backends, real IBM Quantum hardware integration with full provenance). I've used it to run experiments on three IBM quantum processors, and the results were interesting enough to write up.
+This framework sits between a teaching tool and an experiment platform. It's educational enough to learn from (interactive Bloch sphere, 135-term glossary, 22 preset circuits with step-by-step explanations) and capable enough for serious tinkering (8 information-theoretic metrics with bootstrap CIs, 4 simulation backends, and real IBM Quantum hardware integration with full provenance).
 
 I'm open-sourcing it because I believe quantum computing should be accessible to anyone willing to tinker — you don't need a physics PhD to set up an experiment, visualize a quantum state, or explore how noise shapes entanglement. I hope this framework helps spark that curiosity in others the way Sean Carroll's lectures sparked it in me.
 
@@ -38,7 +37,7 @@ I'm open-sourcing it because I believe quantum computing should be accessible to
 Most quantum computing tools are either toy tutorials or impenetrable research code. This framework tries to be the bridge:
 
 - **Learn by doing** — 22 preset circuits with step-by-step explanations, animated Bloch sphere playback, entanglement analysis at every gate
-- **Progress to research** — same engine that teaches Bell states also runs 47-condition sensitivity studies on real hardware
+- **Progress to real experiments** — the same engine that teaches Bell states also runs multi-condition parameter sweeps on real hardware
 - **See the physics** — every experiment produces visualizable output: Bloch vectors, correlator spaces, mutual information heatmaps, decoherence sweeps
 - **Run on real hardware** — `sim_mode="hardware"` sends your circuit to IBM Quantum with full transpilation and calibration capture
 
@@ -102,7 +101,7 @@ graph LR
     VIZ & CB & GL & CFG --> API
 ```
 
-**Key principle**: `src/core/` is pure physics — it has no idea what "structured decoherence" means. `src/engine/` orchestrates without domain knowledge. Only `src/experiments/` carries research-specific semantics. This means you can build completely new research programs on top of the same engine.
+**Key principle**: `src/core/` is pure physics and statistics. `src/engine/` orchestrates without domain knowledge. Only `src/experiments/` carries opinionated experiment programs. This means you can build completely new experiment suites on top of the same engine.
 
 ---
 
@@ -121,11 +120,11 @@ graph LR
 | **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
 | **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
-| **Tests** | ~1,100 passing (1104), ~97% coverage on the physics/math core (all of `src/core` plus the engine math modules) behind a 95% gate |
+| **Tests** | ~1,100 tests, ~97% coverage on the physics/math core (all of `src/core` plus the engine math modules) behind a 95% gate |
 
 ### Visual Quantum Laboratory (React Native / Expo)
 
-The frontend isn't just a dashboard — it's an **interactive quantum laboratory**. The Circuit Builder with live Bloch sphere playback is, as far as we know, unique: no existing tool combines drag-and-drop circuit construction, step-by-step 3D state visualization, and real-time entanglement analysis in a single integrated view.
+The frontend isn't just a dashboard — it's an **interactive quantum laboratory**. The Circuit Builder combines drag-and-drop circuit construction, step-by-step 3D Bloch sphere playback, and real-time entanglement analysis in a single integrated view.
 
 | Feature | What it does |
 |---------|-------------|
@@ -152,8 +151,8 @@ The frontend isn't just a dashboard — it's an **interactive quantum laboratory
 ### Run an Experiment (Python)
 
 ```bash
-git clone https://github.com/RDOToole89/qiskit-experiment-framework.git
-cd qiskit-experiment-framework
+git clone https://github.com/RDOToole89/qforge.git
+cd qforge
 
 # Install uv once (https://docs.astral.sh/uv/), then:
 uv sync   # creates .venv and installs everything from uv.lock
@@ -186,7 +185,7 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="structured_decoherence",
+    metrics="decoherence",
 ))
 
 # Results are typed Pydantic models
@@ -203,7 +202,7 @@ result = run(ExperimentConfig(
     state_type="GHZ",
     sim_mode="hardware",      # Send to IBM Quantum
     shots=8192,
-    metrics="structured_decoherence",
+    metrics="decoherence",
 ))
 
 print(f"Backend: {result.provenance.simulator_info['backend_name']}")
@@ -227,7 +226,7 @@ cd apps/client && pnpm install && pnpm run web
 ## Learning Path
 
 ```
-Start here                      Go deeper                        Do research
+Start here                      Go deeper                        Study noise
     │                               │                                │
     ▼                               ▼                                ▼
 ┌──────────┐                 ┌──────────────┐                ┌──────────────┐
@@ -249,27 +248,11 @@ Start here                      Go deeper                        Do research
                                                              └──────────────┘
 ```
 
-**New to quantum?** Start with `01_superposition` and work through all 11 steps in order. By step 11 you'll understand superposition, entanglement, noise, and why decoherence structure matters. Then open the Circuit Builder and play with the 22 presets.
+**New to quantum?** Start with `01_superposition` and work through all 11 steps in order. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement. Then open the Circuit Builder and play with the 22 presets.
 
 **Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/experiments/AGENTS.md) for the full guide.
 
 **Want to run on real hardware?** See [hardware setup](docs/guides/hardware-setup.md). One config change: `sim_mode="hardware"`.
-
----
-
-## Research: Structured Decoherence on Real Hardware
-
-The framework's flagship research investigates how entanglement topology shapes the structure of decoherence. We ran experiments on three IBM Heron r2 processors (ibm_fez, ibm_kingston, ibm_marrakesh) and found:
-
-- **GHZ states** produce concentrated, correlated error patterns (Structure Score = 0.80-0.90). Probability funnels into |000...0⟩ and |111...1⟩ and their single-bit-flip neighbors.
-- **W states** produce distributed, locally structured patterns (SS = 0.73). Probability spreads across N single-excitation outcomes.
-- **Cluster and product states** produce near-uniform distributions (SS ≈ 0.06) — no detectable structure.
-- **Structure is consistent across three independent processors** (CV = 5.7%), suggesting it's a property of the quantum state, not the chip.
-- **Structure grows with qubit count** (SS: 0.45 → 0.79 for 2→6 qubits), even as fidelity decreases.
-
-These findings are preliminary and exploratory. The full analysis, raw data, and an honest discussion of limitations are in [docs/research/](docs/research/).
-
-> *Different entanglement topologies do not merely decohere at different rates. They decohere into qualitatively different classical structures.*
 
 ---
 
@@ -289,7 +272,7 @@ These findings are preliminary and exploratory. The full analysis, raw data, and
 | 8 | `08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis |
 | 9 | `09_noise_intro` | What noise does to a qubit |
 | 10 | `10_noise_types` | Five noise models compared on the same state |
-| 11 | `11_noise_and_entanglement` | River vs Fog — entanglement shapes error patterns |
+| 11 | `11_noise_and_entanglement` | How entanglement changes error patterns |
 
 ### Advanced (classic algorithms)
 
@@ -301,15 +284,15 @@ These findings are preliminary and exploratory. The full analysis, raw data, and
 | `vqe` | Find molecular ground states with hybrid quantum-classical loops |
 | `qaoa` | Solve combinatorial optimization (MaxCut) |
 
-### Decoherence — 6-Step Research Path
+### Decoherence — 6-Step Noise Study Path
 
-| Step | Experiment | What it tests |
+| Step | Experiment | What it explores |
 |------|-----------|--------------|
-| 1 | `dec_01_river_vs_fog` | The foundational observation — structured vs uniform errors |
-| 2 | `dec_02_topology_matters` | Four topologies, four different behaviors |
-| 3 | `dec_03_scaling` | Does structure grow with qubit count? |
-| 4 | `dec_04_noise_resilience` | How robust is structure under increasing noise? |
-| 5 | `dec_05_global_vs_local` | GHZ structure is global, W is local |
+| 1 | `dec_01_structured_vs_uniform` | Do errors spread uniformly, or concentrate on certain outcomes? |
+| 2 | `dec_02_topology_matters` | Four entanglement topologies compared under the same noise |
+| 3 | `dec_03_scaling` | How error patterns change with qubit count |
+| 4 | `dec_04_noise_resilience` | Error patterns under increasing noise strength |
+| 5 | `dec_05_global_vs_local` | Global (GHZ) vs local (W) entanglement under noise |
 | 6 | `dec_06_simulation_vs_reality` | Where do noise models break down? |
 
 ### Hardware — 5-Step Path to Real Quantum Processors
@@ -320,7 +303,7 @@ These findings are preliminary and exploratory. The full analysis, raw data, and
 | 2 | `hw_02_hardware_vs_simulation` | Same circuit, hardware vs simulation |
 | 3 | `hw_03_transpilation` | See your logical circuit become physical gates |
 | 4 | `hw_04_backend_exploration` | Compare processors — is your result chip-independent? |
-| 5 | `hw_05_real_decoherence` | River vs Fog on real hardware — the culmination |
+| 5 | `hw_05_real_decoherence` | Compare noisy-simulator error patterns with real-device decoherence |
 
 Requires IBM Quantum credentials. See [docs/guides/hardware-setup.md](docs/guides/hardware-setup.md).
 
