@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quantum Experiment Schema Suite Validation Script (Research-Grade)
+Quantum Experiment Schema Suite Validation Script
 
 Validates all JSON schemas and example payloads using schema_index.json as the source of truth.
 Also supports validating produced artifacts and targeted validation for a single schema.

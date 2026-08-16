@@ -152,8 +152,8 @@ export default function ConfigureScreen() {
         setSelectedProfile={config.setSelectedProfile}
         selectedMetrics={config.selectedMetrics}
         setSelectedMetrics={config.setSelectedMetrics}
-        researchType={config.researchType}
-        setResearchType={config.setResearchType}
+        experimentType={config.experimentType}
+        setExperimentType={config.setExperimentType}
         multipleRuns={config.multipleRuns}
         setMultipleRuns={config.setMultipleRuns}
         trackConvergence={config.trackConvergence}

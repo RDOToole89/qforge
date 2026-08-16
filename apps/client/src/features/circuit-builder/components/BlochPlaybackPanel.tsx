@@ -173,7 +173,7 @@ export default function BlochPlaybackPanel({ playback, numQubits, fullscreenOpen
             <InterpToggle interpMode={interpMode} onInterpModeChange={onInterpModeChange} />
             <button
               onClick={() => setShowSprings((v) => !v)}
-              title={showSprings ? "Hide entanglement springs" : "Show entanglement springs"}
+              title={showSprings ? "Hide entanglement links" : "Show entanglement links"}
               style={{
                 background: showSprings ? colors.accentDim : "transparent",
                 color: showSprings ? colors.accentLight : colors.textTertiary,

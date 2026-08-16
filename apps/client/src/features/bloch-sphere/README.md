@@ -1,10 +1,10 @@
 # Bloch Sphere CPTP Visualizer
 
-Interactive 3D visualization of quantum noise channels, probe state sensitivity, and structured decoherence — built to work with the QForge's research data.
+Interactive 3D visualization of quantum noise channels, probe state sensitivity, and decoherence — built to work with QForge experiment data.
 
 ## What This Component Does
 
-This is a **research visualization tool** that makes abstract quantum concepts tangible:
+This is an **interactive visualization tool** that makes abstract quantum concepts tangible:
 
 - **See** how CPTP (Completely Positive, Trace-Preserving) maps deform the Bloch sphere in real-time
 - **Compare** how different probe states respond to the same noise channel
@@ -64,7 +64,7 @@ The interface uses a **dark hacker aesthetic** (#08090e background, #ff9933 oran
 - **Header**: Title + tab buttons (1-Qubit, 2-Qubit, PTM, Data) + Config button
 - **Left sidebar**: Button-style selectors with colored dots and Z-basis badges. Shows state/channel/topology selectors contextually based on active tab. Includes strength slider, animate button, and view mode toggle.
 - **Center**: Full-screen 3D scene (drag to rotate). Shows BlochScene or TwoQubitScene depending on tab.
-- **Right sidebar**: Context-dependent info panels — Kraus operators, Bloch map formulas, PTM heatmap, delta-correlator bars, fingerprint viewer, research insights.
+- **Right sidebar**: Context-dependent info panels — Kraus operators, Bloch map formulas, PTM heatmap, delta-correlator bars, fingerprint viewer, physics insights.
 - **Config modal**: Full JSON editor for states, channels, topologies, and experimental data.
 
 ---
@@ -98,7 +98,7 @@ Toggle between **Built-in** and **Experiment** mode via the header toggle.
 ### 1-Qubit View: Bloch Sphere Deformation
 
 - **5 probe states** preconfigured: GHZ, Bell, W, Cluster, Superposition
-  - Each with Bloch vector, Z-basis signal strength badge, and research insight text
+  - Each with Bloch vector, Z-basis signal strength badge, and insight text
   - States marked as Z-uniform show the Pauli invariance warning
 - **5 noise channels**: Depolarizing, Amplitude Damping, Dephasing, Bit Flip, Phase Flip
   - Each with Kraus operators, Bloch map formula, and geometric description
@@ -146,17 +146,17 @@ Toggle between **Built-in** and **Experiment** mode via the header toggle.
 
 ---
 
-## Connection to Research Findings
+## What the Visualizer Illustrates
 
-This visualizer directly illustrates the framework's key results:
+Concrete physics effects you can see directly:
 
-| Finding | How to See It |
-|---------|---------------|
-| **GHZ detects correlated noise** | Select GHZ in 2-qubit view, watch Delta-ZZ grow with error rate under Chain topology |
+| Effect | How to See It |
+|--------|---------------|
+| **GHZ is sensitive to correlated noise** | Select GHZ in 2-qubit view, watch Delta-ZZ grow with error rate under Chain topology |
 | **Cluster is Z-basis blind** | Select Cluster — correlator bars stay at zero regardless of noise |
-| **Pauli invariance theorem** | Cluster and Superposition show "Z-basis blind" badge; dephasing channel preserves Z component |
-| **Fingerprints scale not shift** | Load multiple fingerprint conditions in Data tab, check cosine similarity matrix |
-| **Topology matching** | Compare Chain vs Star topology in 2-qubit view with GHZ state |
+| **Pauli invariance** | Cluster and Superposition show "Z-basis blind" badge; dephasing channel preserves Z component |
+| **Comparing fingerprints** | Load multiple fingerprint conditions in Data tab, check cosine similarity matrix |
+| **Topology dependence** | Compare Chain vs Star topology in 2-qubit view with GHZ state |
 | **Amplitude damping asymmetry** | Switch to Amplitude Damping in 1-qubit view — sphere shifts toward |0>, not symmetric shrinkage |
 
 ---
@@ -241,7 +241,7 @@ Backend source: `apps/api/routes/bloch.py`
 
 ### v5.1 — Measurement Basis Toggle (High Priority)
 
-This maps directly to the framework's highest-priority experiment (X-basis measurement for Cluster states).
+X-basis measurement for Cluster states — the correlations that are invisible in Z-basis become visible.
 
 - [ ] Add X/Y/Z basis selector to the 2-qubit correlator view
 - [ ] When X-basis is selected, show XZ/ZX correlators instead of ZI/IZ/ZZ
@@ -252,20 +252,20 @@ This maps directly to the framework's highest-priority experiment (X-basis measu
 
 - [ ] PCA projection of loaded fingerprints in PC1/PC2 space
 - [ ] Color-code points by noise topology (chain=orange, star=purple)
-- [ ] Visually confirm the "scaling not shifting" finding (points along a line, not a cloud)
+- [ ] See whether fingerprints scale (points along a line) or shift (a scattered cloud) as noise increases
 - [ ] Hover to see condition labels
 
 ### v5.3 — Diff Mode
 
 - [ ] Pick two states (e.g. GHZ vs Cluster) and see fingerprint responses side-by-side under identical noise
-- [ ] Direct visual of Finding 1 (state sensitivity ordering)
+- [ ] Direct visual comparison of state sensitivity ordering
 - [ ] Overlay delta-correlator bars for comparison
 
 ### Explicitly Not Planned
 
 - Full state tomography visualization (not useful at this stage)
 - Multi-qubit PTMs (16x16 or 64x64 matrices are unreadable as heatmaps)
-- Hardware noise model import (rabbit hole that doesn't serve current research questions)
+- Hardware noise model import (out of scope for this visualizer)
 
 ---
 

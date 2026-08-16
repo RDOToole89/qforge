@@ -114,7 +114,7 @@ export const DEFAULT_CONFIG: BlochConfig = {
       kraus: "K\u2080=[[1,0],[0,\u221A(1\u2212\u03B3)]]  K\u2081=[[0,\u221A\u03B3],[0,0]]",
       geometry: "Sphere \u2192 ellipsoid shifted to |0\u27E9",
       insight:
-        "K\u2081 maps |1\u27E9\u21920\u27E9 — the pathway IS the Kraus operator.",
+        "K\u2081 maps |1\u27E9\u21920\u27E9 — energy relaxation written directly as a Kraus operator.",
     },
     phase_damping: {
       name: "Dephasing",

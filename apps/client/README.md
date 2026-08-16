@@ -43,9 +43,9 @@ Searchable reference of 100+ quantum computing terms across 16 categories:
 - Fundamentals, States, Gates, Entanglement, Measurement
 - Noise, Decoherence, Error Correction, Algorithms
 - Information Theory, Linear Algebra, Hardware
-- Bloch Sphere, Density Matrices, Structured Decoherence
+- Bloch Sphere, Density Matrices, Distribution Metrics
 
-Each term includes: formal definition, intuitive explanation, key equations (with LaTeX rendering), symbol annotations, related term links, and research context.
+Each term includes: formal definition, intuitive explanation, key equations (with LaTeX rendering), symbol annotations, and related term links.
 
 ---
 

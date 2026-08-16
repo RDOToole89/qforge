@@ -1,7 +1,7 @@
 """
 Run key experiments with full visualizations and metrics.
 
-Covers the most informative conditions from the research:
+Covers a representative set of conditions:
 1. GHZ - the proven probe (clean vs noise comparison)
 2. W - structured state under noise (ChatGPT's interesting case)
 3. Cluster - Pauli invariant control
@@ -11,8 +11,8 @@ Covers the most informative conditions from the research:
 All runs: 6 qubits, 8192 shots, seed=42, all visualizations enabled.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -35,7 +35,7 @@ def print_result_summary(label: str, result):
 
     # Top 5 outcomes
     sorted_probs = sorted(meas.outcome_probabilities.items(), key=lambda x: -x[1])
-    print(f"  Top 5 outcomes:")
+    print("  Top 5 outcomes:")
     for bs, p in sorted_probs[:5]:
         print(f"    {bs}: {p:.4f} ({int(p * meas.total_shots)} shots)")
 
@@ -49,7 +49,7 @@ def print_result_summary(label: str, result):
     # Artifacts
     viz_artifacts = [a for a in result.artifacts if a.kind != "analysis"]
     if viz_artifacts:
-        print(f"  Visualizations saved:")
+        print("  Visualizations saved:")
         for a in viz_artifacts:
             print(f"    [{a.kind}] {a.path}")
     print()
@@ -73,7 +73,7 @@ experiments.append(("GHZ 6q Clean (ideal reference)", ExperimentConfig(
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -90,7 +90,7 @@ experiments.append(("GHZ 6q Correlated Noise (p=0.2, cs=0.6, chain)", Experiment
     noise_type="correlated_depolarizing",
     error_rate=0.2,
     custom_params={"correlation_strength": 0.6, "topology": "chain"},
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -107,7 +107,7 @@ experiments.append(("GHZ 6q Heavy Noise (p=0.3, cs=0.8, chain)", ExperimentConfi
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -121,7 +121,7 @@ experiments.append(("W 6q Clean (ideal reference)", ExperimentConfig(
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -138,7 +138,7 @@ experiments.append(("W 6q Heavy Noise (p=0.3, cs=0.8, chain)", ExperimentConfig(
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -152,7 +152,7 @@ experiments.append(("Cluster 6q Clean (uniform Z-basis reference)", ExperimentCo
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -169,7 +169,7 @@ experiments.append(("Cluster 6q Heavy Noise (p=0.3, cs=0.8) - Pauli invariant?",
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -186,7 +186,7 @@ experiments.append(("Superposition 6q Heavy Noise (p=0.3, cs=0.8) - control", Ex
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -203,7 +203,7 @@ experiments.append(("GHZ 6q Density Matrix (p=0.2 depolarizing)", ExperimentConf
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.2,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -220,7 +220,7 @@ experiments.append(("W 6q Density Matrix (p=0.2 depolarizing)", ExperimentConfig
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.2,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     print(f"  Total visualizations generated: {total_artifacts}")
 
     # List all output directories
-    print(f"\n  Output directories:")
+    print("\n  Output directories:")
     seen_dirs = set()
     for _, r in results:
         for a in r.artifacts:

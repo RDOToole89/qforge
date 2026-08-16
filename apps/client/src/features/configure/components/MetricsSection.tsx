@@ -2,9 +2,9 @@ import React from "react";
 import { Pressable, Switch, View } from "react-native";
 
 import { Chip, Row, SegmentedControl, Text, chrome } from "@/src/design";
-import type { ResearchType } from "@/src/lib/types";
+import type { ExperimentType } from "@/src/lib/types";
 import {
-  RESEARCH_TYPES,
+  EXPERIMENT_TYPES,
   METRIC_PROFILES,
   INDIVIDUAL_METRICS,
 } from "../constants";
@@ -19,8 +19,8 @@ interface MetricsSectionProps {
   setSelectedProfile: (v: string) => void;
   selectedMetrics: string[];
   setSelectedMetrics: (v: string[]) => void;
-  researchType: ResearchType | null;
-  setResearchType: (v: ResearchType | null) => void;
+  experimentType: ExperimentType | null;
+  setExperimentType: (v: ExperimentType | null) => void;
   multipleRuns: number;
   setMultipleRuns: (v: number) => void;
   trackConvergence: boolean;
@@ -39,8 +39,8 @@ export function MetricsSection({
   setSelectedProfile,
   selectedMetrics,
   setSelectedMetrics,
-  researchType,
-  setResearchType,
+  experimentType,
+  setExperimentType,
   multipleRuns,
   setMultipleRuns,
   trackConvergence,
@@ -63,7 +63,7 @@ export function MetricsSection({
   return (
     <View className="mb-lg">
       <SectionHeader
-        title="Research Metrics"
+        title="Analysis Metrics"
         switchValue={metricsEnabled}
         onSwitchChange={setMetricsEnabled}
         collapsed={collapsed}
@@ -73,13 +73,13 @@ export function MetricsSection({
 
       {metricsEnabled && !collapsed && (
         <>
-          {/* Research type */}
+          {/* Experiment type */}
           <Text variant="label" weight="semibold" className="mb-xs">
-            Research Type
+            Experiment Type
           </Text>
           <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
-            {RESEARCH_TYPES.map((rt) => {
-              const active = researchType === rt.id;
+            {EXPERIMENT_TYPES.map((rt) => {
+              const active = experimentType === rt.id;
               return (
                 <Chip
                   key={rt.id}
@@ -87,7 +87,7 @@ export function MetricsSection({
                   tone={active ? "accent" : "neutral"}
                   selected={active}
                   onPress={() =>
-                    setResearchType(active ? null : (rt.id as ResearchType))
+                    setExperimentType(active ? null : (rt.id as ExperimentType))
                   }
                 />
               );

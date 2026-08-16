@@ -263,7 +263,7 @@ export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: st
     caption: "X,Y shrink, Z kept",
   },
 
-  // ── Structured Decoherence Metrics ──
+  // ── Distribution Metrics ──
   automorphism_invariance: {
     dots: [
       { rx: 0.7, ry: 0, rz: 0.7, color: viz.indigo, label: "AI" },
@@ -498,7 +498,7 @@ export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: st
     caption: "Frequent meas. freezes",
   },
 
-  // ── Structured Decoherence (extra) ──
+  // ── Distribution Metrics (extra) ──
   structure_score: {
     dots: [
       { rx: 0.6, ry: 0.3, rz: 0.5, color: viz.emerald, label: "SS" },
@@ -510,22 +510,7 @@ export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: st
     dots: [
       { rx: 0.8, ry: 0, rz: 0, color: viz.indigo, label: "ΔCov" },
     ],
-    caption: "Error signature",
-  },
-  fingerprint_trajectory: {
-    dots: [
-      { rx: 0.9, ry: 0, rz: 0, color: viz.sky, label: "t₁" },
-      { rx: 0.5, ry: 0.3, rz: 0, color: viz.indigo, label: "t₂" },
-      { rx: 0.2, ry: 0.1, rz: 0, color: viz.pink, label: "t₃" },
-    ],
-    caption: "Path through space",
-  },
-  decoherence_flow_generator: {
-    dots: [
-      { rx: 0.8, ry: 0, rz: 0.6, color: viz.sky, label: "flow" },
-      { rx: 0, ry: 0, rz: 0, color: viz.muted, label: "sink" },
-    ],
-    caption: "Decoherence flow",
+    caption: "Covariance change",
   },
   correlators: {
     dots: [
@@ -635,7 +620,7 @@ export const STATE_BLOCH_CONFIGS: Record<string, { dots: BlochDot[]; caption: st
     caption: "ℂ^{2ⁿ} state space",
   },
 
-  // ── Reconfiguration Space ──
+  // ── Additional gates ──
   sx_gate: {
     dots: [
       { rx: 0, ry: 0, rz: 1, color: viz.mutedDim, label: "|0⟩" },

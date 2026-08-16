@@ -86,11 +86,11 @@ export default function ReducedStateExplainer({
   if (context === "multi_qubit_insight") {
     return (
       <div style={cS}>
-        <div style={cT}>STRUCTURED DECOHERENCE</div>
+        <div style={cT}>PER-QUBIT DECOHERENCE</div>
         <span style={{ color: chrome.text.secondary }}>
-          Non-uniform Bloch vector lengths across qubits indicate structured
-          decoherence — some qubits decohere faster than others based on their
-          position in the entanglement network.
+          Non-uniform Bloch vector lengths across qubits mean the qubits are
+          not decohering at the same rate — their reduced states have
+          different purities.
         </span>
         {sourceMode === "diagonal_estimate" && (
           <div style={{ marginTop: "6px", fontSize: "10.5px", color: chrome.text.secondary }}>

@@ -27,9 +27,9 @@ function baseState(over: Partial<ConfigState> = {}): ConfigState {
     balanceCircuit: false,
     metricsEnabled: false,
     metricsMode: "profile",
-    selectedProfile: "structured_decoherence",
+    selectedProfile: "decoherence",
     selectedMetrics: [],
-    researchType: null,
+    experimentType: null,
     multipleRuns: 1,
     trackConvergence: false,
     backendName: "",
@@ -145,7 +145,7 @@ describe("buildExperimentConfig", () => {
 
   it("selects profile vs individual metrics based on metricsMode", () => {
     expect(buildExperimentConfig(baseState({ metricsEnabled: true, metricsMode: "profile" })).metrics).toBe(
-      "structured_decoherence",
+      "decoherence",
     );
     expect(
       buildExperimentConfig(
@@ -178,11 +178,11 @@ describe("buildExperimentConfig", () => {
     expect(nonHw.optimization_level).toBeUndefined();
   });
 
-  it("adds balance_circuit and research_type when set", () => {
+  it("adds balance_circuit and experiment_type when set", () => {
     const cfg = buildExperimentConfig(
-      baseState({ balanceCircuit: true, researchType: "structured_decoherence" }),
+      baseState({ balanceCircuit: true, experimentType: "decoherence" }),
     );
     expect(cfg.balance_circuit).toBe("gate_count");
-    expect(cfg.research_type).toBe("structured_decoherence");
+    expect(cfg.experiment_type).toBe("decoherence");
   });
 });

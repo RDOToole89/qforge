@@ -152,7 +152,7 @@ export default function DataPanel(props: DataPanelProps) {
                 </>
               ) : (
                 <div style={{ fontSize: "11px", color: chrome.text.tertiary, fontStyle: "italic", padding: "10px" }}>
-                  No metrics available. Run with enable_research_metrics=True.
+                  No metrics available. Run with metrics enabled (e.g. metrics="decoherence").
                 </div>
               )}
             </>
@@ -180,7 +180,7 @@ export default function DataPanel(props: DataPanelProps) {
               </div>
               {ch.insight && (
                 <div style={{ ...cS(viz.orange), background: `${viz.orange}0d` }}>
-                  <div style={cT(viz.orange)}>{"↳"} SQM</div>
+                  <div style={cT(viz.orange)}>{"↳"} INSIGHT</div>
                   <span style={{ color: chrome.text.secondary }}>{ch.insight}</span>
                 </div>
               )}

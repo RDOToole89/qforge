@@ -80,7 +80,7 @@ components/
                       Topologies. Apply/Export/Import/Reset buttons.
   ReducedStateExplainer.tsx  Educational panel for experiment mode. Four contexts:
                       "single" (reduced density matrix), "diagonal_warning" (Z-basis only),
-                      "multi_qubit_insight" (structured decoherence), "multi" (two-qubit
+                      "multi_qubit_insight" (per-qubit decoherence), "multi" (two-qubit
                       correlators). Explains partial traces, purity, and measurement limits.
 ```
 
@@ -119,9 +119,9 @@ position[i*3+2] = pt.y;   // Three.js Z = Bloch Y
 
 ### State Types and Z-Basis Signal
 
-Each probe state has a `zBasisSignal` field: `"strong"`, `"weak"`, or `"zero"`. This directly maps to the framework's research findings:
-- `"strong"` = detects correlated noise via NTC (GHZ, Bell)
-- `"weak"` = marginal detection (W)
+Each probe state has a `zBasisSignal` field: `"strong"`, `"weak"`, or `"zero"`. This categorizes how visible noise is in Z-basis measurement statistics:
+- `"strong"` = correlated noise is clearly visible in Z-basis correlators (GHZ, Bell)
+- `"weak"` = marginal visibility (W)
 - `"zero"` = Pauli invariant, invisible to Z-basis measurement (Cluster, Superposition)
 
 ### 2-Qubit Correlator Model
@@ -189,7 +189,7 @@ myState: {
   correlators: { zi: 0, iz: 0, zz: 0, xx: 0, yy: 0 },  // 2-qubit correlator signature
   color: "#hexcolor",
   zBasisSignal: "strong" | "weak" | "zero",
-  insight: "Why this state matters for the research.",
+  insight: "Why this state is interesting.",
   uniform: false,                          // true if Z-basis distribution is uniform
 }
 ```
@@ -235,7 +235,7 @@ The Data tab accepts JSON arrays of fingerprint entries via the Config modal:
 
 - Do NOT import React Native components (View, Text, etc.) in `'use dom'` files
 - Do NOT try to render full multi-qubit PTMs (16x16+) as heatmaps — they're unreadable
-- Do NOT add hardware noise model import — it's a rabbit hole for current research stage
+- Do NOT add hardware noise model import — it's out of scope for this visualizer
 - Do NOT replace button-style selectors with dropdowns — the button layout is intentional for visual density
 - Do NOT split the center 3D scene into side-by-side views — the full-screen scene is a deliberate design choice
 - Do NOT move quantum math (partial traces, Bloch vectors) to the frontend — it must stay in Python/NumPy for scientific rigor
@@ -243,4 +243,4 @@ The Data tab accepts JSON arrays of fingerprint entries via the Config modal:
 
 ## Next Priority
 
-**Measurement basis toggle** (v5.1) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. This maps to the framework's highest-priority experiment. See README.md roadmap for details.
+**Measurement basis toggle** (v5.1) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. See README.md roadmap for details.
