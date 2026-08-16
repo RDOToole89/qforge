@@ -1,4 +1,4 @@
-"""QForge - Research-grade quantum computing experiments."""
+"""QForge - A general-purpose quantum experiment framework built on Qiskit."""
 
 try:
     from ._version import version as __version__

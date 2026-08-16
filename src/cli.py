@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
 
@@ -17,6 +18,13 @@ from rich.table import Table
 
 if TYPE_CHECKING:
     from src.engine.models import ExperimentResult
+
+# Descriptions contain quantum notation (kets like |0⟩). On Windows, piped or
+# legacy consoles default to a cp125x encoding that cannot represent them, so
+# force UTF-8 on the output streams when possible.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure") and (_stream.encoding or "").lower() not in ("utf-8", "utf8"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 app = typer.Typer(
     name="qforge",

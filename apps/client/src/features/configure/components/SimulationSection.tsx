@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
-import { colors, spacing } from "@/src/theme";
+import { StyleSheet, TextInput, View } from "react-native";
+
+import { Chip, Text, chrome } from "@/src/design";
 import { SIM_MODES, SHOT_PRESETS } from "../constants";
 import { SectionHeader } from "./SectionHeader";
 import type { SimMode } from "@/src/lib/types";
@@ -42,50 +43,51 @@ export function SimulationSection({
   };
 
   return (
-    <View style={styles.section}>
+    <View className="mb-lg">
       <SectionHeader title="Simulation" onInfo={onInfo} />
 
       {/* Sim mode chips */}
-      <View style={styles.chipRow}>
+      <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
         {SIM_MODES.map((mode) => {
           const active = simMode === mode.id;
           return (
-            <Pressable
+            <Chip
               key={mode.id}
+              label={mode.label}
+              tone={active ? "accent" : "neutral"}
+              selected={active}
               onPress={() => setSimMode(mode.id as SimMode)}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {mode.label}
-              </Text>
-            </Pressable>
+            />
           );
         })}
       </View>
 
       {/* Shot presets */}
-      <Text style={styles.label}>Shots</Text>
-      <View style={styles.chipRow}>
+      <Text variant="label" weight="semibold" className="mb-xs">
+        Shots
+      </Text>
+      <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
         {SHOT_PRESETS.map((preset) => {
           const active = shots === preset;
           return (
-            <Pressable
+            <Chip
               key={preset}
+              label={formatShots(preset)}
+              tone={active ? "accent" : "neutral"}
+              selected={active}
               onPress={() => setShots(preset)}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {formatShots(preset)}
-              </Text>
-            </Pressable>
+            />
           );
         })}
       </View>
 
       {/* RNG Seed */}
-      <Text style={styles.label}>
+      <Text variant="label" weight="semibold" className="mb-xs">
         RNG Seed
-        <Text style={styles.secondaryText}> (deterministic reproducibility)</Text>
+        <Text variant="body" tone="secondary">
+          {" "}
+          (deterministic reproducibility)
+        </Text>
       </Text>
       <TextInput
         style={[styles.textInput, showHardwareSection && styles.inputDisabled]}
@@ -95,7 +97,7 @@ export function SimulationSection({
             ? "Not available in hardware mode"
             : "Optional (for reproducibility)"
         }
-        placeholderTextColor={colors.text.tertiary}
+        placeholderTextColor={chrome.text.tertiary}
         value={rngSeed !== null ? String(rngSeed) : ""}
         onChangeText={handleSeedChange}
         editable={!showHardwareSection}
@@ -105,54 +107,15 @@ export function SimulationSection({
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipActive: {
-    backgroundColor: "#6366f1",
-    borderColor: "#6366f1",
-  },
-  chipText: {
-    fontSize: 13,
-    color: "#94a3b8",
-  },
-  chipTextActive: {
-    color: "#ffffff",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  secondaryText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: colors.text.secondary,
-  },
   textInput: {
-    backgroundColor: "#1e293b",
+    backgroundColor: chrome.bg.surface,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: chrome.border.default,
     borderRadius: 8,
     padding: 10,
-    color: "#e2e8f0",
+    color: chrome.text.primary,
     fontSize: 13,
-    marginBottom: spacing.md,
+    marginBottom: 12,
   },
   inputDisabled: {
     opacity: 0.4,

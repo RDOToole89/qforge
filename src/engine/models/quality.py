@@ -32,17 +32,6 @@ class QualityMetrics(BaseModel):
 
     convergence_achieved: bool = Field(description="Whether statistical convergence was achieved")
 
-    research_significance: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1.0,
-        description="Research significance score for structured decoherence studies",
-    )
-
-    publication_readiness: str | None = Field(
-        default=None, description="Assessment of publication readiness"
-    )
-
     @classmethod
     def from_measurements(
         cls,
@@ -98,18 +87,11 @@ class QualityMetrics(BaseModel):
 
         converged = adequacy >= convergence_threshold
 
-        pub = None
-        if converged and confidence >= 0.9:
-            pub = "figure-ready"
-        elif adequacy >= 0.7:
-            pub = "draft"
-
         return cls(
             shot_adequacy=adequacy,
             outcome_coverage=coverage,
             confidence_level=confidence,
             convergence_achieved=converged,
-            publication_readiness=pub,
         )
 
 

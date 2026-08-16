@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { colors, fonts } from "../styles";
+import { colors, fonts, overlay } from "../styles";
 import { SINGLE_QUBIT_GATES, MULTI_QUBIT_GATES, getGateDef } from "../data/gateLibrary";
 import type { GateType } from "../types";
 
@@ -158,7 +158,7 @@ export default function GatePalette({ onGateSelect, activeGate, numQubits }: Gat
               background: colors.bg,
               border: `1px solid ${colors.border}`,
               borderRadius: 10,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              boxShadow: `0 8px 32px ${overlay(0.5)}`,
               zIndex: 9000,
               overflow: "hidden",
               animation: "fadeIn 0.1s ease",

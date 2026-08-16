@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "entanglement",
   name: "Entanglement & Correlations",
   icon: "link",
-  color: "#ec4899",
+  color: viz.gate.pink,
   description: "Quantum correlations beyond classical physics",
 };
 

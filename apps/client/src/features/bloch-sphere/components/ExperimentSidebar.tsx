@@ -1,5 +1,6 @@
 'use dom';
 
+import { chrome, viz } from "@/src/design/tokens";
 import type { BlochVisualizerData, StoredResultEntry } from "../../../lib/types";
 import { LS, bdr, cS, cT } from "../styles";
 
@@ -54,8 +55,8 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
           onChange={(e) => setSelectedResult(e.target.value || null)}
           style={{
             width: "100%", padding: "5px 8px", borderRadius: "5px",
-            background: "rgba(255,255,255,0.04)", border: bdr,
-            color: "#c8d4e4", fontSize: "10.5px", fontFamily: "inherit",
+            background: chrome.border.subtle, border: bdr,
+            color: chrome.text.primary, fontSize: "10.5px", fontFamily: "inherit",
           }}
         >
           <option value="">Select a result...</option>
@@ -73,8 +74,8 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           <select value={sweepStateType} onChange={(e) => setSweepStateType(e.target.value)} style={{
             width: "100%", padding: "4px 6px", borderRadius: "4px",
-            background: "rgba(255,255,255,0.04)", border: bdr,
-            color: "#c8d4e4", fontSize: "10px", fontFamily: "inherit",
+            background: chrome.border.subtle, border: bdr,
+            color: chrome.text.primary, fontSize: "10px", fontFamily: "inherit",
           }}>
             {["GHZ", "W", "BELL", "CLUSTER", "SUPERPOSITION"].map(s => (
               <option key={s} value={s}>{s}</option>
@@ -83,8 +84,8 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
           <div style={{ display: "flex", gap: "4px" }}>
             <select value={sweepQubits} onChange={(e) => setSweepQubits(Number(e.target.value))} style={{
               flex: 1, padding: "4px 6px", borderRadius: "4px",
-              background: "rgba(255,255,255,0.04)", border: bdr,
-              color: "#c8d4e4", fontSize: "10px", fontFamily: "inherit",
+              background: chrome.border.subtle, border: bdr,
+              color: chrome.text.primary, fontSize: "10px", fontFamily: "inherit",
             }}>
               {[2,3,4,5,6].map(n => (
                 <option key={n} value={n}>{n}q</option>
@@ -92,8 +93,8 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
             </select>
             <select value={sweepNoiseType} onChange={(e) => setSweepNoiseType(e.target.value)} style={{
               flex: 2, padding: "4px 6px", borderRadius: "4px",
-              background: "rgba(255,255,255,0.04)", border: bdr,
-              color: "#c8d4e4", fontSize: "10px", fontFamily: "inherit",
+              background: chrome.border.subtle, border: bdr,
+              color: chrome.text.primary, fontSize: "10px", fontFamily: "inherit",
             }}>
               {["depolarizing", "amplitude_damping", "phase_damping", "bit_flip", "phase_flip"].map(n => (
                 <option key={n} value={n}>{n.replace(/_/g, " ")}</option>
@@ -106,11 +107,11 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
             style={{
               padding: "6px 12px", borderRadius: "5px",
               fontSize: "11px", fontFamily: "inherit", cursor: sweepLoading ? "wait" : "pointer",
-              background: "rgba(68,200,255,0.12)", border: "1px solid rgba(68,200,255,0.3)",
-              color: "#44c8ff", fontWeight: 600,
+              background: `${viz.cyan}1f`, border: `1px solid ${viz.cyan}4d`,
+              color: viz.cyan, fontWeight: 600,
             }}
           >
-            {sweepLoading ? "Running sweep..." : "Run Sweep (0 \u2192 0.5)"}
+            {sweepLoading ? "Running sweep..." : "Run Sweep (0 → 0.5)"}
           </button>
         </div>
       </div>
@@ -119,7 +120,7 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
       {hasSweep && (
         <div>
           <div style={LS}>
-            ERROR RATE — <span style={{ color: "#44c8ff" }}>
+            ERROR RATE — <span style={{ color: viz.cyan }}>
               {(activeBloch?.error_rate ?? sweepProgress * 0.5).toFixed(3)}
             </span>
           </div>
@@ -130,28 +131,28 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
               if (sweepAnimating) { setSweepAnimating(false); cancelAnimationFrame(sweepAnimRef.current); }
               setSweepProgress(parseFloat(e.target.value));
             }}
-            style={{ width: "100%", accentColor: "#44c8ff" }}
+            style={{ width: "100%", accentColor: viz.cyan }}
           />
           <button onClick={toggleSweepAnim} style={{
             width: "100%", padding: "5px 12px", borderRadius: "5px",
             fontSize: "11px", fontFamily: "inherit", cursor: "pointer",
-            background: sweepAnimating ? "rgba(68,200,255,0.2)" : "rgba(255,255,255,0.04)",
-            border: sweepAnimating ? "1px solid rgba(68,200,255,0.4)" : bdr,
-            color: sweepAnimating ? "#44c8ff" : "#667788",
+            background: sweepAnimating ? `${viz.cyan}33` : chrome.border.subtle,
+            border: sweepAnimating ? `1px solid ${viz.cyan}66` : bdr,
+            color: sweepAnimating ? viz.cyan : chrome.text.tertiary,
             marginTop: "4px",
           }}>
-            {sweepAnimating ? "\u23F8 Pause" : "\u25B6 Animate Decoherence"}
+            {sweepAnimating ? "⏸ Pause" : "▶ Animate Decoherence"}
           </button>
         </div>
       )}
 
       {(expLoading || sweepLoading) && (
-        <div style={{ fontSize: "11px", color: "#5a6a82", padding: "8px" }}>
+        <div style={{ fontSize: "11px", color: chrome.text.tertiary, padding: "8px" }}>
           {sweepLoading ? "Running sweep..." : "Loading Bloch data..."}
         </div>
       )}
       {expError && (
-        <div style={{ fontSize: "11px", color: "#ff4466", padding: "8px" }}>
+        <div style={{ fontSize: "11px", color: chrome.status.error, padding: "8px" }}>
           {expError}
         </div>
       )}
@@ -159,9 +160,9 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
       {activeBloch && (
         <>
           {/* Experiment metadata */}
-          <div style={cS("rgba(68,200,255)")}>
-            <div style={cT("#44c8ff")}>EXPERIMENT</div>
-            <div style={{ fontSize: "10.5px", color: "#a0b0c0" }}>
+          <div style={cS(viz.cyan)}>
+            <div style={cT(viz.cyan)}>EXPERIMENT</div>
+            <div style={{ fontSize: "10.5px", color: chrome.text.secondary }}>
               <div>{activeBloch.state_type} — {activeBloch.num_qubits} qubits</div>
               {activeBloch.noise_type && (
                 <div>Noise: {activeBloch.noise_type} ({activeBloch.error_rate})</div>
@@ -169,7 +170,7 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
               {activeBloch.fidelity != null && (
                 <div>Fidelity: {activeBloch.fidelity.toFixed(4)}</div>
               )}
-              <div style={{ fontSize: "9px", color: "#667788", marginTop: "2px" }}>
+              <div style={{ fontSize: "9px", color: chrome.text.tertiary, marginTop: "2px" }}>
                 Source: {activeBloch.source_mode}
               </div>
             </div>
@@ -185,9 +186,9 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
                   style={{
                     padding: "4px 10px", borderRadius: "5px",
                     fontSize: "10px", fontFamily: "inherit", cursor: "pointer",
-                    background: selectedQubit === "all" ? "rgba(68,200,255,0.15)" : "rgba(255,255,255,0.02)",
-                    border: selectedQubit === "all" ? "1px solid rgba(68,200,255,0.3)" : bdr,
-                    color: selectedQubit === "all" ? "#44c8ff" : "#667788",
+                    background: selectedQubit === "all" ? `${viz.cyan}26` : chrome.border.subtle,
+                    border: selectedQubit === "all" ? `1px solid ${viz.cyan}4d` : bdr,
+                    color: selectedQubit === "all" ? viz.cyan : chrome.text.tertiary,
                   }}
                 >All</button>
                 {Array.from({ length: activeBloch.num_qubits }, (_, i) => (
@@ -197,9 +198,9 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
                     style={{
                       padding: "4px 10px", borderRadius: "5px",
                       fontSize: "10px", fontFamily: "inherit", cursor: "pointer",
-                      background: selectedQubit === i ? "rgba(68,200,255,0.15)" : "rgba(255,255,255,0.02)",
-                      border: selectedQubit === i ? "1px solid rgba(68,200,255,0.3)" : bdr,
-                      color: selectedQubit === i ? "#44c8ff" : "#667788",
+                      background: selectedQubit === i ? `${viz.cyan}26` : chrome.border.subtle,
+                      border: selectedQubit === i ? `1px solid ${viz.cyan}4d` : bdr,
+                      color: selectedQubit === i ? viz.cyan : chrome.text.tertiary,
                     }}
                   >Q{i}</button>
                 ))}
@@ -219,8 +220,8 @@ export default function ExperimentSidebar(props: ExperimentSidebarProps) {
                 }}
                 style={{
                   width: "100%", padding: "5px 8px", borderRadius: "5px",
-                  background: "rgba(255,255,255,0.04)", border: bdr,
-                  color: "#c8d4e4", fontSize: "10.5px", fontFamily: "inherit",
+                  background: chrome.border.subtle, border: bdr,
+                  color: chrome.text.primary, fontSize: "10.5px", fontFamily: "inherit",
                 }}
               >
                 {expQubitPairs.map(([a, b]) => (

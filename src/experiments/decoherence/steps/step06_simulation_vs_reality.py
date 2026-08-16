@@ -14,23 +14,22 @@ THE EXPERIMENT:
   damping (2%), and compare the Structure Scores.
 
 WHAT TO LOOK FOR:
-  - Depolarizing: symmetric noise. Over-predicts GHZ structure (sim SS ~0.89
-    vs hardware SS ~0.75-0.80). The model is too "clean."
-  - Amplitude damping: directional noise (|1⟩→|0⟩). Better match for W
-    (sim SS ~0.76 vs hardware SS ~0.73). Models the real T1 relaxation.
-  - Different topologies need different noise models to predict accurately
-  - This IS the research frontier: finding which models best capture reality
+  - Depolarizing noise is symmetric: it mixes in errors uniformly.
+  - Amplitude damping is directional (|1⟩→|0⟩), modeling T1 relaxation.
+  - The two models give different Structure Scores for the same state,
+    because they redistribute probability differently.
+  - Real hardware combines several physical error mechanisms, so no
+    single textbook model matches it exactly.
 
 CIRCUIT:
   Same GHZ-6 and W-6 circuits as step 2.
   What changes is the noise model applied by the engine.
 
 WHY THIS MATTERS:
-  Understanding simulation accuracy is essential before claiming any
-  result is "real physics." This step teaches you to be skeptical of
-  your own simulations — the right mindset for research.
-
-  After this step, you're ready for hardware/ steps to see the real thing.
+  Simulated noise models are simplifications. Comparing models against
+  each other (and later against hardware in the hardware/ steps) shows
+  where those simplifications matter — a healthy dose of skepticism
+  about simulation results.
 
 TRY IT:
     from src.experiments.decoherence.steps.step06_simulation_vs_reality import sim_vs_reality
@@ -60,7 +59,7 @@ class SimVsRealityExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.02,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

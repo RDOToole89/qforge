@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Pressable, Switch, StyleSheet } from "react-native";
-import { colors, spacing } from "@/src/theme";
+import { Pressable, Switch, View } from "react-native";
+
+import { Row, Text, chrome, cn } from "@/src/design";
 
 interface SectionHeaderProps {
   title: string;
@@ -22,23 +23,30 @@ export function SectionHeader({
   disabled = false,
 }: SectionHeaderProps) {
   return (
-    <View style={[styles.container, disabled && styles.disabled]}>
-      <Text style={[styles.title, disabled && styles.disabledText]}>
+    <Row align="center" className={cn("mb-md", disabled && "opacity-50")}>
+      <Text
+        variant="headingSm"
+        weight="bold"
+        tone={disabled ? "tertiary" : "primary"}
+      >
         {title}
       </Text>
 
       {onInfo != null && (
         <Pressable
           onPress={onInfo}
-          style={styles.infoButton}
+          className="ml-sm items-center justify-center rounded-pill border border-tertiary"
+          style={{ width: 20, height: 20 }}
           hitSlop={8}
           disabled={disabled}
         >
-          <Text style={styles.infoIcon}>i</Text>
+          <Text variant="bodySm" weight="semibold" tone="secondary">
+            i
+          </Text>
         </Pressable>
       )}
 
-      <View style={styles.spacer} />
+      <View className="flex-1" />
 
       {switchValue != null && onSwitchChange != null && (
         <Switch
@@ -46,66 +54,25 @@ export function SectionHeader({
           onValueChange={onSwitchChange}
           disabled={disabled}
           trackColor={{
-            false: colors.text.tertiary,
-            true: colors.accent.base,
+            false: chrome.text.tertiary,
+            true: chrome.accent.base,
           }}
-          thumbColor={colors.text.primary}
+          thumbColor={chrome.text.primary}
         />
       )}
 
       {collapsed != null && onToggleCollapse != null && (
-        <Pressable
-          onPress={onToggleCollapse}
-          hitSlop={8}
-          disabled={disabled}
-        >
-          <Text style={[styles.chevron, disabled && styles.disabledText]}>
-            {collapsed ? "\u25B8" : "\u25BE"}
+        <Pressable onPress={onToggleCollapse} hitSlop={8} disabled={disabled}>
+          <Text
+            variant="headingSm"
+            weight="regular"
+            tone={disabled ? "tertiary" : "secondary"}
+            className="ml-sm"
+          >
+            {collapsed ? "▸" : "▾"}
           </Text>
         </Pressable>
       )}
-    </View>
+    </Row>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.md,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text.primary,
-  },
-  disabledText: {
-    color: colors.text.tertiary,
-  },
-  infoButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.text.tertiary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: spacing.sm,
-  },
-  infoIcon: {
-    fontSize: 11,
-    color: colors.text.secondary,
-    fontWeight: "600",
-  },
-  spacer: {
-    flex: 1,
-  },
-  chevron: {
-    fontSize: 16,
-    color: colors.text.secondary,
-    marginLeft: spacing.sm,
-  },
-});

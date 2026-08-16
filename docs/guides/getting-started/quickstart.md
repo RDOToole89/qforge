@@ -42,9 +42,9 @@ print(f"Fidelity: {meas.fidelity:.4f}")
 print(f"Top outcomes: {dict(list(meas.outcome_probabilities.items())[:3])}")
 ```
 
-## 3. Research Metrics
+## 3. Analysis Metrics
 
-Enable structured decoherence analysis to compute all 8 research metrics:
+Request a metric profile (or an explicit list of metric names) via `metrics=` to compute information-theoretic analysis metrics with bootstrap confidence intervals:
 
 ```python
 result = run(ExperimentConfig(
@@ -54,15 +54,17 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    enable_research_metrics=True,
-    research_type="structured_decoherence",
+    metrics="decoherence",  # profile name, or a list like ["asymmetry_index"]
 ))
 
-metrics = result.structured_decoherence_metrics
-print(f"Asymmetry Index: {metrics.asymmetry_index:.4f}")
-print(f"Pathway Concentration: {metrics.pathway_concentration_ratio:.4f}")
-print(f"Topology Correlation: {metrics.entanglement_error_correlation:.4f}")
+bundle = result.metrics_bundle
+print(f"Asymmetry Index: {bundle.metrics['asymmetry_index'].value:.4f}")
+print(f"Structure Score: {bundle.metrics['structure_score'].value:.4f}")
+for name, entry in bundle.metrics.items():
+    print(f"  {name}: {entry.value:.4f} (CI95: {entry.ci95})")
 ```
+
+Available profiles: `"decoherence"` (the full 8-metric suite), `"quick"`, and `"information_theory"`.
 
 ## 4. Direct Analysis Pipeline
 

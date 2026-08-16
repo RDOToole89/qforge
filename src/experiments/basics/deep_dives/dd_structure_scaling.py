@@ -1,33 +1,27 @@
-"""Deep Dive: Structure Scaling — Watch the River grow.
+"""Deep Dive: Structure Scaling — distribution metrics vs system size.
 
-BEST AFTER: Step 11 (noise and entanglement / River vs Fog)
+BEST AFTER: Step 11 (noise and entanglement)
 
 WHAT YOU'LL LEARN:
-  In Step 11 you saw that entangled states show structured decoherence
-  patterns (River) while unentangled states show uniform patterns (Fog).
+  In Step 11 you saw that states with concentrated ideal distributions
+  (GHZ) keep concentrated measured distributions under noise, while
+  product states stay near-uniform.
 
-  Now the question: does the structure GROW with system size?
+  Now the question: how do the metrics change with system size?
 
-  If you add more qubits to a GHZ state, does the "River" get deeper?
-  Does the Structure Score increase? What about Total Correlation?
-
-  This is the scaling experiment that produced one of the framework's
-  key findings on real hardware: structure grows monotonically with
-  qubit count, even as fidelity decreases.
+  If you add more qubits to a GHZ state, what happens to the Structure
+  Score? What about Total Correlation?
 
 THE EXPERIMENT:
   Run GHZ from 2 to 6 qubits with depolarizing noise and track
   Structure Score (SS) and Total Correlation (TC) at each size.
 
 WHAT TO LOOK FOR:
-  - SS increases: 2q (~0.45) → 3q (~0.67) → 4q (~0.75) → 5q (~0.80) → 6q (~0.80)
-  - TC increases roughly linearly: ~+0.7 per qubit
-  - Fidelity DECREASES (more qubits = more accumulated error)
-  - But structure INCREASES — the noise becomes MORE organized, not less
-
-  This is counterintuitive: more noise should mean more randomness.
-  Instead, the entanglement network channels the noise into specific
-  pathways. Wider river, deeper channel.
+  - How SS changes as the outcome space (2^N) grows around the
+    two ideal GHZ peaks
+  - How TC changes as qubits are added
+  - Fidelity decreases with size (more gates, more noise exposure) —
+    compare that trend against the distribution-shape metrics
 
 CIRCUITS (GHZ at each qubit count):
   2q: q0: ─H──●── M          3q: q0: ─H──●──●── M
@@ -39,7 +33,7 @@ CIRCUITS (GHZ at each qubit count):
       q2: ───────X──┼── M        ...
       q3: ──────────X── M        q5: ───────────────────X── M
 
-  Same pattern, more qubits. Structure Score grows at each step.
+  Same pattern, more qubits. Watch how the metrics change.
 
 TRY IT:
     from src.experiments.basics.deep_dives.dd_structure_scaling import structure_scaling
@@ -71,7 +65,7 @@ class StructureScalingExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

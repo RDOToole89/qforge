@@ -1,6 +1,6 @@
 # Constants
 
-Core constants and validation functions for the quantum decoherence analysis framework.
+Core constants and validation functions for the analysis framework.
 
 ::: src.core.analysis.constants
 

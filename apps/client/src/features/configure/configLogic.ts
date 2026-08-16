@@ -10,7 +10,7 @@ import type {
   StateType,
   NoiseType,
   SimMode,
-  ResearchType,
+  ExperimentType,
   ExperimentConfig,
 } from "../../lib/types";
 
@@ -37,7 +37,7 @@ export interface ConfigState {
   metricsMode: "profile" | "individual";
   selectedProfile: string;
   selectedMetrics: string[];
-  researchType: ResearchType | null;
+  experimentType: ExperimentType | null;
   multipleRuns: number;
   trackConvergence: boolean;
   backendName: string;
@@ -125,9 +125,9 @@ export function buildExperimentConfig(s: ConfigState): ExperimentConfig {
       s.metricsMode === "profile" ? s.selectedProfile : s.selectedMetrics;
   }
 
-  // Research type.
-  if (s.researchType !== null) {
-    config.research_type = s.researchType;
+  // Experiment type.
+  if (s.experimentType !== null) {
+    config.experiment_type = s.experimentType;
   }
 
   // Balance circuit.

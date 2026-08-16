@@ -1,4 +1,4 @@
-"""Research-focused visualization renderers.
+"""Visualization renderers for experiment results.
 
 Each renderer is a plugin that can create specific types of visualizations
 from quantum experiment data.
@@ -60,13 +60,13 @@ def _build_title(params: dict[str, Any]) -> str:
 
 
 class HistogramRenderer(VisualizationRenderer):
-    """Renders measurement histograms optimized for research analysis.
+    """Renders measurement histograms for measurement counts with optional metric annotations.
 
     Features:
-    - Clean, publication-ready styling
+    - Clean, consistent styling
     - Auto-detect counts vs probabilities (axis labeling)
     - Top-K compaction with 'OTHER' bucket for high-dimensional outcomes
-    - Research metric annotations (AI / PCR / EEC) when provided
+    - Metric annotations (from the metrics bundle) when provided
     - Optional highlight of top pathways when PCR is large
     - Stable sorting (value_desc by default; bitstring optional)
     - Multi-format export (PNG/PDF/SVG)
@@ -112,7 +112,7 @@ class HistogramRenderer(VisualizationRenderer):
         analysis = data.get("analysis", {})
         measurement_results = analysis.get("measurement_results", {})
         experiment_params = analysis.get("experiment_parameters", {}) or {}
-        research_metrics = data.get("metrics_bundle")
+        metrics_bundle_data = data.get("metrics_bundle")
         export_formats = data.get("export_formats", ["png"])
 
         counts = (
@@ -178,11 +178,11 @@ class HistogramRenderer(VisualizationRenderer):
 
         ax.set_title(_build_title(experiment_params), fontsize=14, fontweight="bold", pad=20)
 
-        self._annotate_metrics(ax, research_metrics)
+        self._annotate_metrics(ax, metrics_bundle_data)
 
-        if research_metrics:
+        if metrics_bundle_data:
             try:
-                ci_entry = (research_metrics.get("metrics", {}) or {}).get(
+                ci_entry = (metrics_bundle_data.get("metrics", {}) or {}).get(
                     "concentration_index", {}
                 )
                 pcr = float(ci_entry.get("value", 1.0)) if isinstance(ci_entry, dict) else 1.0
@@ -206,7 +206,7 @@ class HistogramRenderer(VisualizationRenderer):
         plt.close(fig)
 
         primary_path = saved_paths[0] if saved_paths else str(base)
-        logger.info("Saved research histogram to %s", primary_path)
+        logger.info("Saved histogram to %s", primary_path)
 
         meta_total_shots = None
         if not is_prob:
@@ -228,7 +228,7 @@ class HistogramRenderer(VisualizationRenderer):
                 "sorted_by": sort_mode,
                 "is_probability": is_prob,
                 "total_shots": meta_total_shots,
-                "has_research_metrics": research_metrics is not None,
+                "has_metrics_bundle_data": metrics_bundle_data is not None,
                 "saved_formats": [Path(p).suffix.lstrip(".") for p in saved_paths],
             },
         )
@@ -749,7 +749,7 @@ class CircuitDiagramRenderer(VisualizationRenderer):
 
 
 class MetricsSummaryRenderer(VisualizationRenderer):
-    """Render a horizontal bar chart of structured decoherence metrics."""
+    """Render a horizontal bar chart of the computed analysis metrics."""
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
         """Return True if a metrics bundle is available for a metrics summary."""

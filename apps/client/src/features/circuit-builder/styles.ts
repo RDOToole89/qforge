@@ -1,23 +1,50 @@
-/** Shared style constants for the circuit builder (used inside 'use dom' context) */
+/** Shared style constants for the circuit builder (used inside 'use dom' context). */
+
+import { chrome, fontFamily, shadows } from "../../design/tokens";
+
+/** Convert a `#rrggbb` token value to an `rgba(...)` string at the given alpha. */
+export function withAlpha(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** Lighten a `#rrggbb` token value toward white by `amount` (0..1). */
+export function lighten(hex: string, amount: number): string {
+  const mix = (c: number) => Math.round(c + (255 - c) * amount);
+  const r = mix(parseInt(hex.slice(1, 3), 16));
+  const g = mix(parseInt(hex.slice(3, 5), 16));
+  const b = mix(parseInt(hex.slice(5, 7), 16));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/**
+ * Translucent black for overlays/shadows. Sourced from the shadow token's
+ * color (`#000000`) so the value has a single source of truth.
+ */
+export function overlay(alpha: number): string {
+  return withAlpha(shadows.level1.shadowColor, alpha);
+}
 
 export const colors = {
-  bg: "#0a0c14",
-  surface: "#131620",
-  card: "#1a1e2e",
-  border: "#2a2f42",
-  wire: "#3a4060",
-  wireActive: "#6366f1",
-  text: "#e2e8f0",
-  textSecondary: "#94a3b8",
-  textTertiary: "#64748b",
-  accent: "#6366f1",
-  accentLight: "#818cf8",
-  accentDim: "#312e81",
-  success: "#22c55e",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-  dropZone: "rgba(99, 102, 241, 0.15)",
-  dropZoneBorder: "rgba(99, 102, 241, 0.4)",
+  bg: chrome.bg.primary,
+  surface: chrome.bg.surface,
+  card: chrome.bg.elevated,
+  border: chrome.border.default,
+  wire: chrome.border.default,
+  wireActive: chrome.accent.base,
+  text: chrome.text.primary,
+  textSecondary: chrome.text.secondary,
+  textTertiary: chrome.text.tertiary,
+  accent: chrome.accent.base,
+  accentLight: chrome.accent.light,
+  accentDim: chrome.accent.dark,
+  success: chrome.status.success,
+  warning: chrome.status.warning,
+  danger: chrome.status.error,
+  dropZone: withAlpha(chrome.accent.base, 0.15),
+  dropZoneBorder: withAlpha(chrome.accent.base, 0.4),
 } as const;
 
 export const layout = {
@@ -38,8 +65,8 @@ export const layout = {
 } as const;
 
 export const fonts = {
-  mono: "'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace",
-  sans: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+  mono: fontFamily.mono,
+  sans: fontFamily.sans,
 } as const;
 
 /** Compute the x position of a moment column */

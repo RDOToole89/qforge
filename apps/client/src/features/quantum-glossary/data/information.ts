@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "information",
   name: "Quantum Information Theory",
   icon: "info-circle",
-  color: "#3b82f6",
+  color: viz.gate.blue,
   description: "Entropy, information measures, and distance metrics",
 };
 
@@ -43,9 +44,9 @@ export const terms: GlossaryTerm[] = [
     id: "total_correlation",
     name: "Total Correlation",
     formalDefinition:
-      "Multi-partite generalization of mutual information: TC = Σᵢ S(ρᵢ) − S(ρ). Measures the total amount of correlation across all subsystems. Also called multi-information. One of the 8 structured decoherence metrics in the framework.",
+      "Multi-partite generalization of mutual information: TC = Σᵢ S(ρᵢ) − S(ρ). Measures the total amount of correlation across all subsystems. Also called multi-information. One of the distribution metrics computed by the framework.",
     intuitiveExplanation:
-      "How much total 'connectedness' exists among all qubits simultaneously. Higher TC means more structure in the distribution. In the framework, TC helps distinguish structured decoherence from random noise.",
+      "How much total 'connectedness' exists among all qubits simultaneously. Higher TC means more correlation in the distribution. In the framework, TC helps distinguish correlated from independent noise.",
     symbol: "TC",
     keyEquation:
       "TC = \\sum_i S(\\rho_i) - S(\\rho)",

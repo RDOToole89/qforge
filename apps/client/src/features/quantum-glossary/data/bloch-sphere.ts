@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "bloch_sphere",
   name: "The Bloch Sphere",
   icon: "globe",
-  color: "#8b5cf6",
+  color: viz.gate.violet,
   description: "Geometric representation of single-qubit states",
 };
 

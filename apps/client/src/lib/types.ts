@@ -20,7 +20,7 @@ export type NoiseType =
   | "correlated_depolarizing";
 
 export type SimMode = "qasm" | "statevector" | "density_matrix" | "hardware";
-export type ResearchType = "structured_decoherence" | "parameter_sweep" | "noise_comparison" | "control" | "scaling" | "convergence";
+export type ExperimentType = "decoherence" | "parameter_sweep" | "noise_comparison" | "control" | "scaling" | "convergence";
 export type VisualizationType = "histogram" | "density_matrix" | "correlation" | "circuit" | "all" | "none";
 
 export interface ExperimentConfig {
@@ -31,7 +31,7 @@ export interface ExperimentConfig {
   noise_type?: NoiseType;
   error_rate?: number;
   metrics?: string | string[] | null;
-  research_type?: string;
+  experiment_type?: string;
   balance_circuit?: string;
   rng_seed?: number;
   visualization_type?: VisualizationType;
@@ -91,7 +91,7 @@ export interface ExperimentAnalysis {
     experiment_id: string;
     timestamp: string;
     framework_version: string;
-    research_type: string | null;
+    experiment_type: string | null;
   };
   experiment_parameters: Record<string, unknown>;
   circuit_statistics: CircuitStatistics;

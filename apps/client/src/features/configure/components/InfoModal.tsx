@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
-import { colors, spacing, radii } from "@/src/theme";
+import { Modal, Pressable, ScrollView } from "react-native";
+
+import { Text } from "@/src/design";
 import { INFO_TEXT } from "../constants";
 
 interface InfoModalProps {
@@ -30,58 +24,32 @@ export function InfoModal({ visible, infoKey, onClose }: InfoModalProps) {
       animationType="fade"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.card} onPress={() => {}}>
+      <Pressable
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+        onPress={onClose}
+      >
+        <Pressable
+          className="rounded-xl border border-default bg-surface p-2xl"
+          style={{ maxWidth: 500, maxHeight: "80%", width: "90%" }}
+          onPress={() => {}}
+        >
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.title}>{entry.title}</Text>
-            <Text style={styles.content}>{entry.content}</Text>
+            <Text variant="heading" weight="bold" className="mb-lg">
+              {entry.title}
+            </Text>
+            <Text variant="label" weight="regular" tone="secondary" style={{ lineHeight: 22 }}>
+              {entry.content}
+            </Text>
           </ScrollView>
 
-          <Pressable onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>Got it</Text>
+          <Pressable onPress={onClose} className="mt-lg items-center py-md">
+            <Text weight="semibold" tone="accent" style={{ fontSize: 15 }}>
+              Got it
+            </Text>
           </Pressable>
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    backgroundColor: colors.bg.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    padding: spacing.xl,
-    maxWidth: 500,
-    maxHeight: "80%",
-    width: "90%",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.text.primary,
-    marginBottom: spacing.lg,
-  },
-  content: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: colors.text.secondary,
-  },
-  closeButton: {
-    alignItems: "center",
-    paddingVertical: spacing.md,
-    marginTop: spacing.lg,
-  },
-  closeText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.accent.base,
-  },
-});

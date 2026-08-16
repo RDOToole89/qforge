@@ -1,7 +1,6 @@
 # AGENTS.md — Execution Subsystem
 
-Owner: Research Engineering
-Last updated: 2026-04-04
+Owner: Roibín O'Toole
 Token budget: 250
 
 ## Purpose

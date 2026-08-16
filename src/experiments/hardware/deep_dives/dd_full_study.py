@@ -115,7 +115,7 @@ def _base_config(mode: str, **overrides: Any) -> dict[str, Any]:
             "shots": SHOTS,
             "optimization_level": 1,
             "visualization_type": "none",
-            "metrics": "structured_decoherence",
+            "metrics": "decoherence",
         }
     else:
         cfg = {
@@ -126,7 +126,7 @@ def _base_config(mode: str, **overrides: Any) -> dict[str, Any]:
             "error_rate": 0.02,
             "rng_seed": 42,
             "visualization_type": "none",
-            "metrics": "structured_decoherence",
+            "metrics": "decoherence",
         }
     cfg.update(overrides)
     return cfg

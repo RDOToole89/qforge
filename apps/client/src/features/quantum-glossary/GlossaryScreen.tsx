@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import {
   View,
-  Text,
   SectionList,
-  StyleSheet,
   type SectionListData,
 } from "react-native";
+
+import { Text } from "@/src/design";
 import { SearchBar } from "./components/SearchBar";
 import { TermCard } from "./components/TermCard";
 import { CategoryHeader } from "./components/CategoryHeader";
@@ -102,10 +102,10 @@ export default function GlossaryScreen() {
   const keyExtractor = useCallback((item: GlossaryTerm) => item.id, []);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-base">
       <SearchBar value={query} onChangeText={setQuery} />
       {query.length > 0 && (
-        <Text style={styles.resultCount}>
+        <Text variant="body" tone="tertiary" className="px-lg pb-xs">
           {totalResults} result{totalResults !== 1 ? "s" : ""}
         </Text>
       )}
@@ -116,10 +116,12 @@ export default function GlossaryScreen() {
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
         stickySectionHeadersEnabled={false}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={{ paddingBottom: 32 }}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>No terms match "{query}"</Text>
+          <View className="items-center pt-[60px]">
+            <Text variant="label" tone="tertiary">
+              No terms match "{query}"
+            </Text>
           </View>
         }
         getItemLayout={(_data, index) => ({
@@ -131,27 +133,3 @@ export default function GlossaryScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-  },
-  list: {
-    paddingBottom: 32,
-  },
-  resultCount: {
-    color: "#64748b",
-    fontSize: 12,
-    paddingHorizontal: 16,
-    paddingBottom: 4,
-  },
-  empty: {
-    alignItems: "center",
-    paddingTop: 60,
-  },
-  emptyText: {
-    color: "#64748b",
-    fontSize: 15,
-  },
-});

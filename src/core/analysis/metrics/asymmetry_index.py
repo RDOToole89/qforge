@@ -1,21 +1,19 @@
-"""Asymmetry Index (AI) - Structured Decoherence Pathway Detection.
+"""Asymmetry Index (AI) - Total variation distance from the uniform distribution.
 
 # Mathematical Foundation
-The Asymmetry Index quantifies deviation from a uniform error distribution using
-information-theoretic principles. It serves as a primary indicator of
-structured vs random decoherence patterns in quantum measurements.
+The Asymmetry Index quantifies deviation of a measurement outcome distribution
+from the uniform distribution. It is a primary indicator of how non-uniform
+(concentrated) the observed distribution is.
 
 # Physical Interpretation
-In quantum systems, uniform error distribution indicates random decoherence
-where all measurement outcomes are equally likely. Structured decoherence
-creates preferential pathways, leading to non-uniform distributions that
-AI detects and quantifies.
+A uniform outcome distribution means all measurement outcomes are equally
+likely. Non-uniform distributions concentrate probability on a subset of
+outcomes; AI detects and quantifies this concentration.
 
-# Research Applications
-- Primary screening metric for structured decoherence detection
-- Baseline metric for pathway emergence analysis
+# Applications
+- Primary screening metric for non-uniformity in outcome distributions
 - Foundation for complexity emergence scoring (CES)
-- Statistical validation against a null hypothesis of random decoherence
+- Statistical comparison against a uniform baseline
 
 # Mathematical Definition
 AI is based on Total Variation Distance (TVD) from the uniform distribution:
@@ -78,7 +76,7 @@ class AsymmetryAnalysis:
     """Complete asymmetry analysis results with statistical interpretation.
 
     This structure provides the AI (TVD vs uniform), auxiliary stats,
-    and concise research-focused interpretation.
+    and a concise interpretation.
     """
 
     asymmetry_index: float
@@ -145,7 +143,6 @@ def _tvd_vs_uniform_from_counts_fast(
     M = len(counts_clean)
     delta0 = abs((alpha / denom) - u)
 
-    # Numerical safety: clamp into [0, 0.5]
     tvd = 0.5 * (s_obs + (K - M) * delta0)
     return float(tvd), K, M
 
@@ -217,18 +214,19 @@ def compute_asymmetry_index(
     Jeffreys prior (α), i.e. p̃(xᵢ) = (cᵢ + α) / (N + αK), including unobserved outcomes.
 
     Returns:
-        float: Asymmetry Index ∈ [0, 0.5]
+        float: Asymmetry Index ∈ [0, 1). The maximum for a deterministic
+            distribution is 1 - 1/K, reduced slightly by the smoothing prior.
         OR AsymmetryAnalysis: Complete educational analysis (if return_analysis=True)
 
-    Physical Interpretation:
-        - AI = 0: Perfect uniform distribution (random decoherence)
-        - AI = 0.5: Maximum asymmetry (deterministic outcomes)
-        - AI ∈ (0, 0.5): Structured decoherence with varying concentration
+    Interpretation:
+        - AI = 0: Uniform distribution
+        - Larger AI: probability concentrated in fewer outcomes
+        - AI → 1 - 1/K: (near-)deterministic distribution
 
-    Research Thresholds (from constants):
-        - AI ≥ STRUCTURE_WEAK_THRESHOLD: weak evidence
-        - AI ≥ STRUCTURE_MODERATE_THRESHOLD: moderate evidence
-        - AI ≥ STRUCTURE_STRONG_THRESHOLD: strong evidence (often near-deterministic if set to 0.5)
+    Interpretation Thresholds (from constants):
+        - AI ≥ STRUCTURE_WEAK_THRESHOLD: weak concentration
+        - AI ≥ STRUCTURE_MODERATE_THRESHOLD: moderate concentration
+        - AI ≥ STRUCTURE_STRONG_THRESHOLD: strong concentration
 
     Numerical Features:
         - Uses a closed-form TVD vs uniform without enumerating all 2^n outcomes
@@ -259,22 +257,6 @@ def compute_asymmetry_index(
             entropy_reduction=0.0,
             dominant_outcomes=[],
             statistical_summary="No data available for analysis",
-        )
-
-    # Handle the degenerate 1-outcome case explicitly (deterministic)
-    if len(counts_clean) == 1:
-        if not return_analysis:
-            return 0.5
-        n_qubits = n_qubits_from_counts(counts_clean)
-        H_max = float(n_qubits)  # bits
-        return AsymmetryAnalysis(
-            asymmetry_index=0.5,
-            total_variation_distance=0.5,
-            structure_evidence="strong",
-            uniform_deviation=0.5,
-            entropy_reduction=1.0 if H_max > 0 else 0.0,
-            dominant_outcomes=list(counts_clean.keys()),
-            statistical_summary="Deterministic outcome — maximum asymmetry and near-zero entropy.",
         )
 
     # Fast, exact AI without enumerating 2^n outcomes
@@ -371,8 +353,8 @@ def compute_asymmetry_index_with_null_comparison(
 
     Returns:
         (AI_uniform, AI_factorized, interpretation)
-        interpretation ∈ {"structured_decoherence", "marginal_bias_only",
-                          "random_decoherence", "intermediate_structure"}
+        interpretation ∈ {"structured", "marginal_bias_only",
+                          "unstructured", "intermediate_structure"}
     """
     counts_clean = validate_counts_dict(counts)
 
@@ -384,10 +366,10 @@ def compute_asymmetry_index_with_null_comparison(
             ai_uniform,
             float("nan"),
             (
-                "random_decoherence"
+                "unstructured"
                 if ai_uniform < STRUCTURE_WEAK_THRESHOLD
                 else (
-                    "structured_decoherence"
+                    "structured"
                     if ai_uniform >= STRUCTURE_MODERATE_THRESHOLD
                     else "intermediate_structure"
                 )
@@ -408,11 +390,11 @@ def compute_asymmetry_index_with_null_comparison(
 
     # Interpretation based on comparison
     if ai_uniform >= STRUCTURE_MODERATE_THRESHOLD and ai_factorized >= STRUCTURE_WEAK_THRESHOLD:
-        interpretation = "structured_decoherence"
+        interpretation = "structured"
     elif ai_uniform >= STRUCTURE_WEAK_THRESHOLD and ai_factorized < STRUCTURE_WEAK_THRESHOLD:
         interpretation = "marginal_bias_only"
     elif ai_uniform < STRUCTURE_WEAK_THRESHOLD:
-        interpretation = "random_decoherence"
+        interpretation = "unstructured"
     else:
         interpretation = "intermediate_structure"
 
@@ -434,10 +416,10 @@ def validate_asymmetry_index_properties(
     """Validate key mathematical properties of the computed Asymmetry Index.
 
     Validated Properties:
-      1) Range: AI ∈ [0, 0.5]
+      1) Range: AI ∈ [0, 1)
       2) Non-negativity
-      3) Uniform case: AI ≈ 0 when all shown outcomes have equal counts
-      4) Deterministic case: AI ≈ 0.5 for single-outcome
+      3) Uniform case: AI ≈ 0 when the full support is observed with equal counts
+      4) Single-outcome case: AI matches the closed form (N+α)/(N+αK) − 1/K
       5) Finite/real
 
     Returns:
@@ -446,16 +428,22 @@ def validate_asymmetry_index_properties(
     counts_clean = validate_counts_dict(counts)
 
     # 1) Range and 2) Non-negativity
-    assert -tolerance <= ai <= 0.5 + tolerance, f"AI={ai} outside [0, 0.5]"
+    assert -tolerance <= ai < 1.0, f"AI={ai} outside [0, 1)"
     assert ai >= -tolerance, f"AI={ai} is negative"
 
     # 3) Uniform (observed) case — crude but reasonable check
     if len(counts_clean) > 1 and len(set(counts_clean.values())) == 1:
         assert ai <= tolerance, f"AI={ai} should be ~0 for uniform observed counts"
 
-    # 4) Deterministic
+    # 4) Single observed outcome: TVD equals the positive deviation of that outcome
     if len(counts_clean) == 1:
-        assert abs(ai - 0.5) <= tolerance, f"AI={ai} should be ~0.5 for single outcome"
+        n_qubits = len(next(iter(counts_clean.keys())))
+        big_k = 1 << n_qubits
+        n_shots = sum(counts_clean.values())
+        expected = (n_shots + ALPHA) / (n_shots + ALPHA * big_k) - 1.0 / big_k
+        assert abs(ai - expected) <= tolerance, (
+            f"AI={ai} should be {expected} for a single observed outcome"
+        )
 
     # 5) Finite and real
     assert np.isfinite(ai), f"AI={ai} not finite"
@@ -491,7 +479,7 @@ def asymmetry_index_educational_demo() -> dict:
     demo_results["ghz_structure"] = {
         "counts": ghz_counts,
         "asymmetry_index": ai_ghz,
-        "interpretation": "Structured decoherence — GHZ-like correlations preserved",
+        "interpretation": "Concentrated distribution — GHZ-like correlations preserved",
     }
 
     # Example 3: Single dominant pathway (valid bitstrings only)
@@ -515,7 +503,7 @@ def asymmetry_index_educational_demo() -> dict:
     demo_results["summary"] = {
         "ai_range_observed": [ai_uniform, ai_ghz, ai_dominant, ai_bimodal],
         "structure_progression": "uniform < bimodal < ghz < dominant",
-        "research_insight": "AI increases with pathway concentration and structure",
+        "insight": "AI increases as the outcome distribution becomes more concentrated",
     }
 
     logger.info("AI educational demo complete.")

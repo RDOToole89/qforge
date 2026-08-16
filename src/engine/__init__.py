@@ -8,7 +8,7 @@ Structure:
 - persistence/  : Result storage and config hashing
 - infrastructure/: Event bus and cross-cutting concerns
 - models/       : Pydantic schemas for configs and results
-- analysis/     : Research metrics integration
+- analysis/     : Analysis metrics integration
 - visualization/: Plotting and rendering
 
 Public API:

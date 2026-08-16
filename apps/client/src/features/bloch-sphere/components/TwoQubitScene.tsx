@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
+import { chrome } from "@/src/design/tokens";
 import { V3, generate2QFromState, apply2QNoise } from "../math";
 import type { ProbeStateConfig, TopologyConfig } from "../types";
 
@@ -40,7 +41,7 @@ export default function TwoQubitScene({
     const w = el.clientWidth, h = el.clientHeight;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x08090e);
+    scene.background = new THREE.Color(chrome.bg.primary);
     const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(w, h);

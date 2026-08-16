@@ -1,22 +1,19 @@
 """Entanglement-Error Correlation (EEC) - Topology-Error Pattern Analysis.
 
 # Mathematical Foundation
-The Entanglement-Error Correlation quantifies how well decoherence patterns
+The Entanglement-Error Correlation quantifies how well error patterns
 correlate with the underlying entanglement topology of quantum states. It
-combines graph theory, quantum information, and statistical correlation to
-detect structured pathway preferences.
+combines graph theory, quantum information, and statistical correlation.
 
 # Physical Interpretation
-EEC tests the hypothesis that decoherence follows entanglement bonds - errors
-should preferentially occur along highly entangled qubit connections. High
-positive correlation suggests structure-preserving decoherence, while low or
-negative correlation indicates topology-independent random errors.
+EEC measures whether errors occur preferentially along highly entangled
+qubit connections. High positive correlation means error patterns align
+with the entanglement topology; low or near-zero correlation means error
+patterns are independent of the topology.
 
-# Research Applications
-- Testing the "entanglement-guided decoherence" hypothesis
-- Identifying which quantum state topologies preserve structure under noise
+# Applications
 - Characterizing error correlations in multi-qubit entangled systems
-- Validating theoretical predictions about decoherence pathways
+- Comparing error patterns across quantum state topologies
 
 # Mathematical Definition
 EEC computes Pearson correlation between:
@@ -34,7 +31,7 @@ This implementation demonstrates:
 - Graph theory applications in quantum information
 - Statistical correlation analysis with confidence intervals
 - Quantum state topology characterization and analysis
-- Interdisciplinary research combining physics, mathematics, and statistics
+- Methods combining physics, graph theory, and statistics
 
 References:
 - Nielsen & Chuang (2010), "Quantum Computation and Quantum Information"
@@ -139,9 +136,9 @@ def compute_entanglement_error_correlation(
         4. Apply statistical significance testing and interpretation
 
     Physical Interpretation:
-        - EEC > 0: Errors follow entanglement topology (structured decoherence)
-        - EEC ≈ 0: No correlation between topology and errors (random decoherence)
-        - EEC < 0: Anti-correlation (rare, suggests topology-avoiding errors)
+        - EEC > 0: Error patterns align with the entanglement topology
+        - EEC ≈ 0: No correlation between topology and errors
+        - EEC < 0: Anti-correlation (errors avoid topology-connected pairs)
 
     State-Specific Topologies:
         - **GHZ**: All-to-all connectivity with distance decay
@@ -150,11 +147,11 @@ def compute_entanglement_error_correlation(
         - **Cluster**: Nearest-neighbor linear or 2D lattice connectivity
         - **Custom**: User-defined topology matrix
 
-    Research Thresholds:
+    Interpretation Thresholds:
         - |EEC| < 0.2: No significant correlation
         - |EEC| ∈ [0.2, 0.5): Weak topology-error correlation
-        - |EEC| ∈ [0.5, 0.8): Moderate correlation (structured pathways)
-        - |EEC| ≥ 0.8: Strong correlation (topology-guided decoherence)
+        - |EEC| ∈ [0.5, 0.8): Moderate correlation
+        - |EEC| ≥ 0.8: Strong correlation
 
     Args:
         counts: Measurement counts {bitstring: count}
@@ -191,7 +188,7 @@ def compute_entanglement_error_correlation(
         - Alternative: Spearman correlation for non-linear monotonic relationships
         - Statistical significance testing prevents false positive correlations
     """
-    # Input validation with research-grade error handling
+    # Input validation with strict error handling
     counts_clean = validate_counts_dict(counts, "entanglement-error correlation input")
 
     if not counts_clean:
@@ -269,9 +266,9 @@ def compute_multiway_entanglement_correlation(
         - k-way error frequencies from measurement data
         - Correlation between these k-dimensional structures
 
-    Research Applications:
-        - Detecting genuine multipartite entanglement effects on decoherence
-        - Understanding how higher-order correlations survive noise
+    Applications:
+        - Detecting genuine multipartite correlations in error patterns
+        - Measuring how higher-order correlations survive noise
         - Characterizing error correlations in large quantum systems
 
     Args:
@@ -681,8 +678,8 @@ def entanglement_error_correlation_educational_demo() -> dict:
     }
 
     demo_results["quantum_insight"] = {
-        "hypothesis": "Decoherence follows entanglement bonds",
-        "evidence": "High positive EEC indicates topology-guided errors",
+        "meaning": "EEC measures alignment between error patterns and entanglement topology",
+        "evidence": "High positive EEC indicates errors concentrated on topology-connected pairs",
         "applications": "Characterizing error correlations in quantum systems",
     }
 

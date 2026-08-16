@@ -48,7 +48,7 @@ basics/
 |------|-----|-------------------|
 | 9 | `python -m src.cli run 09_noise_intro` | What noise does to a qubit |
 | 10 | `python -m src.cli run 10_noise_types` | Five noise models on the same state |
-| 11 | `python -m src.cli run 11_noise_and_entanglement` | River vs Fog — the capstone |
+| 11 | `python -m src.cli run 11_noise_and_entanglement` | Structured vs uniform decoherence — the capstone |
 
 ---
 
@@ -81,10 +81,10 @@ After the 11 steps + deep dives, you'll know:
 - Why some entangled states are fragile and others are robust
 - How noise degrades quantum states and why noise type matters
 - What a density matrix reveals that measurement can't
-- The "River vs Fog" phenomenon in structured decoherence
-- How structure scales with system size
+- How entanglement topology shapes the error patterns noise produces
+- How structure metrics scale with system size
 
 You're then ready for:
 - **`advanced/`** — Shor's, Grover's, VQE, QAOA, Teleportation
-- **`decoherence/`** — Structured decoherence research experiments
+- **`decoherence/`** — Decoherence structure experiments
 - **`hardware/`** — Run experiments on real IBM Quantum processors

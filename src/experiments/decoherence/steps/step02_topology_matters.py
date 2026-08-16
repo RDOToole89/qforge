@@ -1,28 +1,25 @@
-"""Step 2: Topology Matters — Four entanglement types, four behaviors.
+"""Step 2: Topology Matters — Four entanglement types, four distributions.
 
 WHAT YOU'LL LEARN:
-  Step 1 showed River (GHZ) vs Fog (Product). But entanglement isn't
-  binary — there are many TYPES of entanglement, each with a different
-  topology. Does the topology determine the structure?
-
-  We test four fundamentally different states:
-  - GHZ: all-to-all correlation → "Correlated River" (2 peaks)
-  - W: symmetric excitation sharing → "Distributed River" (N peaks)
-  - Cluster: nearest-neighbor graph → "Fog" (uniform, despite entanglement!)
-  - Product: no entanglement → "Fog" (uniform, as expected)
+  Step 1 compared GHZ against a product state. But entanglement isn't
+  binary — different entangled states have different structure, and
+  their ideal Z-basis distributions look very different:
+  - GHZ: probability on 2 outcomes (|00...0⟩ and |11...1⟩)
+  - W: probability on the N single-excitation outcomes
+  - Cluster: uniform over all outcomes (despite being entangled!)
+  - Product: uniform over all outcomes (no entanglement)
 
 THE EXPERIMENT:
   Run all four at 6 qubits with amplitude damping noise.
   Compare Structure Score, Total Correlation, and Concentration Index.
 
 WHAT TO LOOK FOR:
-  - GHZ and W BOTH show high SS (>0.7) but with different TC
-  - Cluster shows SS ≈ 0.05 — indistinguishable from Product!
-  - This means entanglement is NECESSARY but NOT SUFFICIENT for structure
-  - The entanglement TOPOLOGY determines whether structure survives
-
-  The W state surprise: higher SS than GHZ despite a 2x deeper circuit.
-  Structure comes from the state, not from circuit depth.
+  - GHZ and W both keep concentrated distributions under noise
+    (high Structure Score), but with different Total Correlation.
+  - Cluster's Z-basis counts look like the product state's — a reminder
+    that these metrics describe the measured distribution, not the
+    amount of entanglement. Entanglement that is invisible in the
+    Z basis is invisible to these metrics.
 
 CIRCUIT:
   GHZ:     q0: ─H──●──●──●──●──●── M    (all-to-all via CNOT chain)
@@ -46,7 +43,7 @@ class TopologyMattersExperiment(BaseExperiment):
     """Step 2: Compare four entanglement topologies under the same noise."""
 
     name = "dec_02_topology_matters"
-    description = "Step 2: Four topologies, four behaviors — entanglement type determines structure"
+    description = "Step 2: Four entanglement topologies compared under identical noise"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -58,7 +55,7 @@ class TopologyMattersExperiment(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

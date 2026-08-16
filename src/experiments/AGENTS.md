@@ -1,13 +1,12 @@
 # AGENTS.md — Experiments Module
 
-Owner: Research Engineering
-Last updated: 2026-04-05
+Owner: Roibín O'Toole
 
 ## Purpose
 
-Pluggable experiment programs built on a **general-purpose quantum experiment engine**. The current research focus is structured decoherence, but the engine supports any quantum experiment — entanglement witnesses, variational circuits, benchmarking, error correction, or anything that fits "prepare state → apply noise/operations → measure → analyze."
+Pluggable experiment programs built on a **general-purpose quantum experiment engine**. The engine supports any quantum experiment — entanglement witnesses, variational circuits, benchmarking, error correction, or anything that fits "prepare state → apply noise/operations → measure → analyze."
 
-Every folder follows the same pattern: `steps/` for guided progressions and `deep_dives/` for extended explorations. New experiment types and new research directions are welcome.
+Every folder follows the same pattern: `steps/` for guided progressions and `deep_dives/` for extended explorations. New experiment types and directions are welcome.
 
 ## Structure
 
@@ -30,7 +29,7 @@ experiments/
 │   │   ├── step08_cluster_states.py        # Cluster states
 │   │   ├── step09_noise_intro.py           # What noise does
 │   │   ├── step10_noise_types.py           # Five noise models
-│   │   └── step11_noise_and_entanglement.py # River vs Fog (capstone)
+│   │   └── step11_noise_and_entanglement.py # Structured vs uniform noise (capstone)
 │   └── deep_dives/
 │       ├── dd_bloch_geometry.py            # Gates as Bloch rotations
 │       ├── dd_bell_basics.py               # Bell with noise sweeps
@@ -62,9 +61,9 @@ experiments/
 │       ├── dd_bernstein_vazirani.py        # Hidden string
 │       └── dd_bb84.py                      # Quantum key distribution
 │
-├── decoherence/             # Structured decoherence research (6 steps + 2 deep dives)
+├── decoherence/             # Decoherence structure experiments (6 steps + 2 deep dives)
 │   ├── steps/
-│   │   ├── step01_river_vs_fog.py          # Foundational observation
+│   │   ├── step01_structured_vs_uniform.py # Structured vs uniform decoherence
 │   │   ├── step02_topology_matters.py      # Four topologies compared
 │   │   ├── step03_scaling.py               # Structure grows with qubits
 │   │   ├── step04_noise_resilience.py      # How robust is structure?
@@ -83,9 +82,9 @@ experiments/
     │   ├── step02_hardware_vs_simulation.py # HW vs sim comparison
     │   ├── step03_transpilation.py         # Logical → physical
     │   ├── step04_backend_exploration.py   # Compare processors
-    │   └── step05_real_decoherence.py      # River vs Fog on hardware
+    │   └── step05_real_decoherence.py      # Decoherence structure on hardware
     └── deep_dives/
-        ├── dd_full_study.py                # 10-experiment research suite
+        ├── dd_full_study.py                # 10-experiment study suite
         └── dd_readout_errors.py            # Gate vs readout noise
 ```
 
@@ -107,7 +106,7 @@ All experiments registered in `__init__.py` under `EXPERIMENT_REGISTRY` (49 tota
 | `08_cluster_states` | basics/steps/ | Cluster states |
 | `09_noise_intro` | basics/steps/ | What noise does |
 | `10_noise_types` | basics/steps/ | Five noise models |
-| `11_noise_and_entanglement` | basics/steps/ | River vs Fog |
+| `11_noise_and_entanglement` | basics/steps/ | Structured vs uniform noise |
 | `dd_bloch_geometry` | basics/deep_dives/ | Gates as Bloch rotations |
 | `dd_bell_correlations` | basics/deep_dives/ | Full Bell metrics |
 | `dd_teleportation_intro` | basics/deep_dives/ | Teleportation protocol |
@@ -142,7 +141,7 @@ All experiments registered in `__init__.py` under `EXPERIMENT_REGISTRY` (49 tota
 
 | Key | Folder | Description |
 |-----|--------|-------------|
-| `dec_01_river_vs_fog` | decoherence/steps/ | Foundational observation |
+| `dec_01_structured_vs_uniform` | decoherence/steps/ | Structured vs uniform decoherence |
 | `dec_02_topology_matters` | decoherence/steps/ | Four topologies |
 | `dec_03_scaling` | decoherence/steps/ | Structure grows with qubits |
 | `dec_04_noise_resilience` | decoherence/steps/ | Noise robustness |
@@ -159,7 +158,7 @@ All experiments registered in `__init__.py` under `EXPERIMENT_REGISTRY` (49 tota
 | `hw_02_hardware_vs_simulation` | hardware/steps/ | HW vs sim |
 | `hw_03_transpilation` | hardware/steps/ | Logical → physical |
 | `hw_04_backend_exploration` | hardware/steps/ | Compare processors |
-| `hw_05_real_decoherence` | hardware/steps/ | River vs Fog on hardware |
+| `hw_05_real_decoherence` | hardware/steps/ | Decoherence structure on hardware |
 | `dd_readout_errors` | hardware/deep_dives/ | Gate vs readout noise |
 
 Hardware `dd_full_study` is run programmatically (not via registry) because it manages backend sessions internally.
@@ -172,8 +171,8 @@ Hardware `dd_full_study` is run programmatically (not via registry) because it m
 - **basics/deep_dives/** — Goes deeper on a concept from the steps. Prefixed `dd_`.
 - **advanced/steps/** — Teaches an algorithm or protocol technique. Numbered `adv_NN_`.
 - **advanced/deep_dives/** — Applies techniques to real problems. Prefixed `dd_`.
-- **decoherence/steps/** — Guided structured decoherence research. Numbered `dec_NN_`.
-- **decoherence/deep_dives/** — Full research experiments. Prefixed `dd_`.
+- **decoherence/steps/** — Guided decoherence-structure experiments. Numbered `dec_NN_`.
+- **decoherence/deep_dives/** — Extended decoherence studies. Prefixed `dd_`.
 - **hardware/steps/** — Hardware learning path. Numbered `hw_NN_`.
 - **hardware/deep_dives/** — Advanced hardware experiments. Prefixed `dd_`.
 - **New folders welcome** — Create `benchmarking/`, `error_correction/`, etc. as needed.
@@ -215,7 +214,6 @@ python -m src.cli run my_experiment_name
 
 - Put analysis logic in experiments (belongs in `src/core/analysis/`)
 - Put visualization logic here (handled by the engine)
-- Reference SST, SQM, or personal theory branding — use "structured decoherence"
 - Hardcode hardware-specific logic in basics/ or advanced/ experiments
 
 ### ALWAYS

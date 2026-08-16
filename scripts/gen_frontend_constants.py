@@ -3,7 +3,7 @@
 This script makes the Python backend the single source of truth for the static
 catalogs that the React Native client would otherwise hardcode. It introspects:
 
-- State types / sim modes / noise types / research types / qubit range:
+- State types / sim modes / noise types / experiment types / qubit range:
   the ``ExperimentConfig`` Pydantic model (``src/engine/models/config.py``).
 - Metric profiles + individual metric names:
   ``src/core/analysis/metrics/profiles.py`` and the metric registry.
@@ -34,18 +34,17 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, get_args, get_origin
+from typing import Any, Literal, get_args, get_origin
 
 import annotated_types as at
 import numpy as np
 from numpy.typing import NDArray
 from qiskit.quantum_info import DensityMatrix, Statevector, partial_trace
-from typing import Literal
 
 from src.core.analysis.metrics.profiles import METRIC_PROFILES
+from src.core.state_preparation.state_factory import prepare_state
 from src.engine.bloch_math import two_qubit_correlators
 from src.engine.models.config import ExperimentConfig
-from src.core.state_preparation.state_factory import prepare_state
 
 # Tolerances for cleaning floating-point dust before emission.
 _ZERO_TOL = 1e-12
@@ -201,7 +200,7 @@ def _build_ts() -> str:
     state_ids = [s for s in _field_literals("state_type") if s != "CUSTOM"]
     sim_modes = _field_literals("sim_mode")
     noise_types = _field_literals("noise_type")
-    research_types = _field_literals("research_type")
+    experiment_types = _field_literals("experiment_type")
 
     # Union of all profile metrics, preserving first-seen order.
     metric_names: list[str] = []
@@ -270,8 +269,8 @@ export const SIM_MODES: readonly string[] = {_str_array(sim_modes)} as const;
 /** Noise channel ids (ExperimentConfig.noise_type). */
 export const NOISE_TYPES: readonly string[] = {_str_array(noise_types)} as const;
 
-/** Research analysis types (ExperimentConfig.research_type). */
-export const RESEARCH_TYPES: readonly string[] = {_str_array(research_types)} as const;
+/** Experiment categories (ExperimentConfig.experiment_type). */
+export const EXPERIMENT_TYPES: readonly string[] = {_str_array(experiment_types)} as const;
 
 /** Individual metric ids (union of all profile metrics, registry-backed). */
 export const METRIC_NAMES: readonly string[] = {_str_array(metric_names)} as const;
@@ -352,7 +351,9 @@ def _verify_against_ideal_states() -> None:
         "w3": [0, s3, s3, 0, s3, 0, 0, 0],
         "ghz4": [s2] + [0] * 14 + [s2],
         "w4": [0, 0.5, 0.5, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0],
-        "cluster4_ideal": [a, a, a, -a, a, a, -a, a, a, a, -a, a, a, a, a, -a],
+        # Sign of basis state |b3 b2 b1 b0> is (-1)^(b0*b1 + b1*b2 + b2*b3)
+        # (CZ chain 0-1, 1-2, 2-3 on |+>^4): negative at 3, 6, 11, 12, 13, 15.
+        "cluster4_ideal": [a, a, a, -a, a, a, -a, a, a, a, a, -a, -a, -a, a, -a],
     }
     print("\nBasis-match verification (generated vs existing idealStates.ts):")
     all_pass = True

@@ -1,8 +1,8 @@
-"""Structured Decoherence Metrics - Canonical Registry API.
+"""Distribution-structure metrics - Canonical Registry API.
 
-Research-grade metrics for detecting and quantifying structured decoherence
-patterns in quantum measurements. All metrics follow rigorous mathematical
-definitions with educational documentation and statistical validation.
+Metrics for quantifying structure in quantum measurement outcome
+distributions. All metrics follow rigorous mathematical definitions with
+educational documentation and statistical validation.
 
 Canonical API:
 - compute_metric(name, **kwargs): Compute single metric by name
@@ -19,7 +19,7 @@ Core Metrics (Canonical Names):
 
 Educational Features:
 - Unified registry system with type safety
-- Schema compliance for reproducible research
+- Schema compliance for reproducible output
 - Bootstrap confidence intervals and statistical validation
 - Educational documentation bridging quantum mechanics and information theory
 """

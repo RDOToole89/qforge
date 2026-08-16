@@ -1,16 +1,16 @@
-"""Analysis Constants for Structured Decoherence Research.
+"""Analysis constants and defaults.
 
 # Central Configuration & Defaults
 This module defines all numerical constants, tolerances, and default parameters
-used throughout the quantum decoherence analysis framework. Centralizing these
-values ensures consistency and makes the framework easy to tune.
+used throughout the analysis framework. Centralizing these values ensures
+consistency and makes the framework easy to tune.
 
-# Research Standards
+# Rationale
 All constants are chosen based on:
 - Statistical best practices (Jeffreys prior for uninformative priors)
 - Numerical stability (epsilon values for log safety)
 - Computational efficiency (bootstrap sample sizes)
-- Research reproducibility (fixed random seeds)
+- Reproducibility (fixed random seeds)
 
 # Educational Framework
 These constants embody key principles from:
@@ -53,7 +53,7 @@ Base-2 ensures all entropy measures are in bits.
 DEFAULT_BOOTSTRAP_B: Final[int] = 1000
 """Default number of bootstrap samples for confidence intervals.
 B = 1000 provides good balance between accuracy and computation time.
-For publication-quality results, consider B = 5000-10000.
+For higher-precision intervals, consider B = 5000-10000.
 Reference: Efron & Tibshirani (1993), "An Introduction to the Bootstrap"
 """
 
@@ -63,8 +63,8 @@ Used in unit tests to maintain reasonable execution times.
 """
 
 SLOW_BOOTSTRAP_B: Final[int] = 5000
-"""High-precision bootstrap for critical research results.
-Use for final publication numbers and important hypothesis tests.
+"""High-precision bootstrap sample count.
+Use when tighter confidence intervals are worth the extra computation.
 """
 
 # Confidence Levels
@@ -157,7 +157,7 @@ UNSTABLE_MAX_SAMPLES: Final[int] = 20
 # Statistical Significance
 SIGNIFICANCE_P_VALUE: Final[float] = 0.05
 """P-value threshold for statistical significance.
-Used in null hypothesis testing for structure detection.
+Used when comparing metric values against null-model baselines.
 """
 
 # =============================================================================
@@ -187,18 +187,18 @@ TC = 3 * 1 - 1 = 2 bits for ideal case.
 """
 
 # =============================================================================
-# RESEARCH QUALITY THRESHOLDS
+# INTERPRETATION THRESHOLDS
 # =============================================================================
 
 # Structure Detection
 STRUCTURE_WEAK_THRESHOLD: Final[float] = 0.1
-"""Weak evidence threshold for structured decoherence."""
+"""Weak threshold for distribution-structure metrics."""
 
 STRUCTURE_MODERATE_THRESHOLD: Final[float] = 0.3
-"""Moderate evidence threshold for structured decoherence."""
+"""Moderate threshold for distribution-structure metrics."""
 
 STRUCTURE_STRONG_THRESHOLD: Final[float] = 0.5
-"""Strong evidence threshold for structured decoherence."""
+"""Strong threshold for distribution-structure metrics."""
 
 # Correlation Strength
 CORRELATION_WEAK_THRESHOLD: Final[float] = 0.2
@@ -272,7 +272,7 @@ DEFAULT_N_JOBS: Final[int] = -1
 
 # Cache Settings
 ENABLE_RESULT_CACHING: Final[bool] = False
-"""Whether to enable result caching (disable for research to ensure freshness)."""
+"""Whether to enable result caching (disabled by default to ensure freshness)."""
 
 # =============================================================================
 # VALIDATION HELPERS

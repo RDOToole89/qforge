@@ -1,49 +1,40 @@
-# Quantum State Preparation Framework
+# Quantum State Preparation
 
-**Research-Grade Educational Masterpiece for Structured Decoherence Pathway Studies**
+An educational quantum state preparation system for studying how entanglement topology shapes quantum behavior under noise. Each component serves both as a learning resource and a production tool for quantum experiments.
 
-This framework provides a comprehensive, educational, and research-focused quantum state preparation system for studying how entanglement topology affects decoherence pathways. Each component serves both as a learning resource and a production-ready tool for quantum computing research.
+## State Types at a Glance
 
-## 🎯 **Research Mission**
+Different quantum states exhibit different entanglement topologies:
 
-### The Entanglement-Decoherence Hypothesis
-
-**Central Question**: Does quantum decoherence follow structured pathways determined by the underlying entanglement topology, rather than random patterns?
-
-### Experimental Strategy
-
-Different quantum states test different aspects of this hypothesis:
-
-- **GHZ States**: Global entanglement → study pathway propagation across all qubits
-- **Bell States**: Bipartite entanglement → fundamental pathway structures
-- **W States**: Symmetric entanglement → asymmetric pathway emergence patterns
-- **Cluster States**: Local correlations → network-like decoherence topologies
-- **Superposition States**: Non-entangled controls → baseline random decoherence
-- **Custom States**: Novel topologies → test specific research hypotheses
+- **GHZ States**: Global entanglement — correlations span all qubits
+- **Bell States**: Bipartite entanglement — the fundamental two-qubit building block
+- **W States**: Symmetric, distributed entanglement — robust to single-qubit loss
+- **Cluster States**: Local correlations forming network-like topologies
+- **Superposition States**: Non-entangled product states — the natural control baseline
+- **Custom States**: Arbitrary user-defined circuits for novel topologies and algorithms
 
 ---
 
-## 🏗️ **Framework Architecture**
+## Framework Architecture
 
-### LEAN Design Principles
+### Design Principles
 
 - **Single Responsibility**: Each component has one clear purpose
 - **Separation of Concerns**: State preparation cleanly separated from analysis
 - **Educational Value**: Every component teaches quantum mechanics principles
-- **Research Focus**: Optimized for decoherence pathway experiments
 - **Framework Integration**: Clean interfaces with engine and analysis modules
 
-### Data Flow Architecture
+### Data Flow
 
 ```
 User Request → Factory → State.create() → Circuit → Engine → Noise → Analysis
-                ↑              ↑               ↑
-         Registry Pattern   BaseState    Research Framework
+                ↑              ↑
+         Registry Pattern   BaseState
 ```
 
 ---
 
-## 📁 **File Organization & Connections**
+## File Organization & Connections
 
 ### Core Components
 
@@ -65,6 +56,7 @@ class BaseState(ABC):
 
 - `create()`: Abstract method each state implements
 - `get_theoretical_state_vector()`: Calculate ideal state
+- `get_experiment_metadata()`: State metadata for provenance and reporting
 - `validate_for_hardware()`: Check real device compatibility
 - `_simulate_circuit_state_vector()`: Common simulation helper
 - `_validate_large_system()`: Consistent size validation
@@ -130,7 +122,7 @@ STATE_CLASSES = {
 
 ### State Implementation Classes
 
-#### 4. `ghz_state.py` - **Global Entanglement Specialist**
+#### 4. `ghz_state.py` - **Global Entanglement**
 
 ```python
 class GHZState(BaseState):
@@ -138,7 +130,6 @@ class GHZState(BaseState):
 ```
 
 **Quantum Mechanics**: Maximally entangled state with global correlations
-**Research Focus**: Pathway propagation across entire quantum system
 **Implementation**: Analytical formula (H + CNOT chain)
 **Educational Value**: Teaches global entanglement and multipartite correlations
 
@@ -152,9 +143,8 @@ class BellState(BaseState):
 ```
 
 **Quantum Mechanics**: Maximally entangled two-qubit states
-**Research Focus**: Fundamental pathway structures and Bell inequality violations
 **Implementation**: Analytical formulas for all four variants
-**Educational Value**: Foundation of quantum entanglement theory
+**Educational Value**: Foundation of quantum entanglement theory and Bell inequality violations
 
 ---
 
@@ -166,7 +156,6 @@ class WState(BaseState):
 ```
 
 **Quantum Mechanics**: Symmetric multipartite entanglement with robustness
-**Research Focus**: Asymmetric pathway emergence from symmetric initial conditions
 **Implementation**: Analytical W-state vector with optimized circuit construction
 **Educational Value**: Demonstrates robustness vs fragility in quantum states
 
@@ -180,9 +169,8 @@ class ClusterState(BaseState):
 ```
 
 **Quantum Mechanics**: Local correlations creating global entanglement
-**Research Focus**: Network topology effects on decoherence patterns
 **Implementation**: Circuit simulation (topology-dependent)
-**Educational Value**: Bridges quantum computing and network science
+**Educational Value**: Bridges quantum computing and network science; foundation of measurement-based computation
 
 ---
 
@@ -194,13 +182,12 @@ class SuperpositionState(BaseState):
 ```
 
 **Quantum Mechanics**: Separable states with classical correlations only
-**Research Focus**: Control baseline for structured decoherence studies
 **Implementation**: Tensor product of single-qubit superpositions
-**Educational Value**: Contrast between quantum and classical correlations
+**Educational Value**: Contrast between quantum and classical correlations; natural control baseline
 
 ---
 
-#### 9. `custom_state.py` - **Advanced Research Flexibility**
+#### 9. `custom_state.py` - **Arbitrary Circuits**
 
 ```python
 class CustomState(BaseState):
@@ -208,9 +195,8 @@ class CustomState(BaseState):
 ```
 
 **Quantum Mechanics**: Arbitrary quantum states via circuit specification
-**Research Focus**: Novel topologies and algorithm development
 **Implementation**: Circuit simulation with multiple input methods
-**Educational Value**: Demonstrates quantum circuit model flexibility
+**Educational Value**: Demonstrates quantum circuit model flexibility; enables algorithm experiments
 
 ---
 
@@ -229,15 +215,13 @@ from .state_constants import STATE_CLASSES, get_available_states
 
 ---
 
-## 🔄 **Framework Integration**
-
-### Integration with Larger Framework
+## Framework Integration
 
 #### 1. **Engine Layer**
 
 ```python
 # In engine/api.py
-from core.state_preparation import prepare_state
+from src.core.state_preparation import prepare_state
 
 def run_experiment(config):
     circuit = prepare_state(
@@ -252,8 +236,7 @@ def run_experiment(config):
 #### 2. **CLI Layer**
 
 ```python
-# In cli/interactive.py
-from core.state_preparation import get_available_states, prepare_state
+from src.core.state_preparation import get_available_states, prepare_state
 
 available = get_available_states()
 # Display to user for selection
@@ -263,7 +246,6 @@ circuit = prepare_state(user_choice, user_qubits, user_params)
 #### 3. **Visualization Layer**
 
 ```python
-# In visualization/
 circuit = prepare_state("GHZ", 3)
 # → Generate circuit diagrams
 # → Create educational visualizations
@@ -272,15 +254,15 @@ circuit = prepare_state("GHZ", 3)
 #### 4. **Analysis Layer**
 
 ```python
-# Analysis modules receive prepared circuits
-# State preparation provides metadata for analysis context
+# Analysis modules receive prepared circuits.
+# State preparation provides metadata for context:
 state_info = state.get_theoretical_properties()
-research_context = state.get_research_context()
+metadata = state.get_experiment_metadata()
 ```
 
 ---
 
-## 🎓 **Educational Architecture**
+## Educational Architecture
 
 ### Teaching Quantum Mechanics Concepts
 
@@ -288,7 +270,7 @@ research_context = state.get_research_context()
 
 - **Quantum Superposition**: Demonstrated in all states
 - **Quantum Entanglement**: Different topologies in each state type
-- **Quantum Measurement**: Correlation predictions in research context
+- **Quantum Measurement**: Correlation predictions per state type
 - **Quantum Circuits**: Gate sequences for state preparation
 
 #### **Advanced Topics**
@@ -298,87 +280,38 @@ research_context = state.get_research_context()
 - **Quantum Algorithms**: State preparation for algorithm development
 - **Hardware Constraints**: Real device limitations and compatibility
 
-#### **Research Methods**
+#### **Experimental Method**
 
-- **Hypothesis Testing**: Structured vs random decoherence patterns
 - **Experimental Design**: Control states and systematic comparisons
 - **Data Analysis**: Theoretical predictions vs experimental results
 - **Reproducibility**: Exact state specifications and provenance tracking
 
 ---
 
-## 🔬 **Research Framework Integration**
+## Quality Standards
 
-### Structured Decoherence Research Pipeline
-
-#### **Phase 1: State Preparation** (This Framework)
-
-```python
-circuit = prepare_state("GHZ", 3)  # Global entanglement
-circuit = prepare_state("W", 3)    # Symmetric entanglement
-circuit = prepare_state("CLUSTER", 6, {"lattice": "2d"})  # Network topology
-```
-
-#### **Phase 2: Noise Application**
-
-```python
-# Framework passes circuits to noise models
-from core.noise_models import create_noise_model
-noisy_circuit = apply_noise(circuit, noise_model)
-```
-
-#### **Phase 3: Pathway Analysis**
-
-```python
-# Framework provides state context to analysis
-theoretical_properties = state.get_theoretical_properties()
-research_predictions = state.get_research_context()
-# → Analysis uses context to interpret results
-```
-
-#### **Phase 4: Visualization & Reporting**
-
-```python
-# Framework provides state information for reporting
-state_description = str(state)
-state_metadata = state.get_research_metadata()
-# → Generate research reports with proper attribution
-```
-
----
-
-## 🏆 **Quality Standards**
-
-### Code Quality Metrics
+### Code Quality
 
 - **Test Coverage**: >95% for all core functionality
 - **Documentation**: Every method includes educational explanations
 - **Type Safety**: Full typing annotations throughout
 - **Error Handling**: Graceful degradation with educational messages
-- **Performance**: Optimized for both education and research
 
-### Educational Quality Standards
+### Educational Quality
 
 - **Clarity**: Every concept explained with quantum mechanics context
 - **Completeness**: Full coverage of relevant quantum computing topics
 - **Accuracy**: All theoretical calculations verified against known results
 - **Accessibility**: Explanations appropriate for different skill levels
 
-### Research Quality Standards
-
-- **Reproducibility**: Full provenance tracking and exact specifications
-- **Validation**: Theoretical predictions vs experimental verification
-- **Extensibility**: Easy addition of new state types for future research
-- **Integration**: Clean interfaces with broader research framework
-
 ---
 
-## 🚀 **Usage Examples**
+## Usage Examples
 
 ### Basic State Creation
 
 ```python
-from core.state_preparation import prepare_state
+from src.core.state_preparation import prepare_state
 
 # Create GHZ state for 3 qubits
 circuit = prepare_state("GHZ", 3)
@@ -397,12 +330,12 @@ circuit = prepare_state("CLUSTER", 6, {
 ### Hardware-Aware Creation
 
 ```python
-from core.state_preparation import prepare_state_for_hardware
-from qiskit import IBMQ
+from src.core.state_preparation import prepare_state_for_hardware
+from qiskit_ibm_runtime import QiskitRuntimeService
 
-# Load real quantum backend
-provider = IBMQ.load_account()
-backend = provider.get_backend('ibmq_manila')
+# Load a real quantum backend
+service = QiskitRuntimeService()
+backend = service.backend("ibm_brisbane")
 
 # Create state with hardware validation
 circuit = prepare_state_for_hardware(
@@ -414,14 +347,14 @@ circuit = prepare_state_for_hardware(
 ### Advanced State Instance Access
 
 ```python
-from core.state_preparation import create_state_instance
+from src.core.state_preparation import create_state_instance
 
 # Create state object for detailed analysis
 ghz_state = create_state_instance("GHZ", 3)
 
 # Access theoretical properties
 properties = ghz_state.get_theoretical_properties()
-research_context = ghz_state.get_research_context()
+metadata = ghz_state.get_experiment_metadata()
 state_vector = ghz_state.get_theoretical_state_vector()
 
 # Hardware validation
@@ -431,7 +364,7 @@ warnings = ghz_state.validate_for_hardware(backend_constraints)
 ### State Discovery and Documentation
 
 ```python
-from core.state_preparation import get_available_states, get_state_info
+from src.core.state_preparation import get_available_states, get_state_info
 
 # Discover available states
 available = get_available_states()
@@ -445,25 +378,16 @@ print(info["GHZ"]["description"])
 
 ---
 
-## 🎯 **Future Extensions**
+## Future Extensions
 
-### Planned Enhancements
-
-- **Additional State Types**: Spin squeezed states, NOON states, graph states
+- **Additional State Types**: Spin squeezed states, NOON states, Dicke states
 - **Hardware Optimization**: Automatic circuit compilation for specific devices
 - **Educational Tools**: Interactive visualizations and quantum mechanics tutorials
-- **Research Integration**: Direct integration with quantum error correction studies
-
-### Research Applications
-
-- **Quantum Error Correction**: Foundation states for topological codes
-- **Quantum Algorithms**: Optimized initialization states for specific algorithms
-- **Quantum Networks**: Distributed state preparation for quantum internet
-- **Quantum Simulation**: Preparation of many-body quantum states
+- **Applications**: Error-correction code states, algorithm initialization, many-body state preparation
 
 ---
 
-## 📚 **Learning Resources**
+## Learning Resources
 
 ### For Beginners
 
@@ -479,15 +403,8 @@ print(info["GHZ"]["description"])
 3. Explore custom states for algorithm development
 4. Investigate hardware validation for real devices
 
-### For Advanced Researchers
+### For Advanced Users
 
-1. Extend framework with novel state types
-2. Integrate with decoherence analysis modules
+1. Extend the framework with novel state types
+2. Combine with the noise models and analysis metrics
 3. Develop hardware-specific optimizations
-4. Contribute to structured decoherence research
-
----
-
-This state preparation framework represents the perfect balance of **educational excellence**, **research rigor**, and **production quality**. Every component serves multiple purposes: teaching quantum mechanics, enabling cutting-edge research, and providing a foundation for quantum computing applications.
-
-The framework's **LEAN architecture** ensures that each component has a single, clear responsibility while maintaining clean integration with the broader quantum experiment framework. Whether you're learning quantum mechanics, conducting research, or developing quantum applications, this framework provides the tools and knowledge you need to succeed.

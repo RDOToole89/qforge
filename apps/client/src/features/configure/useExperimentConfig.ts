@@ -5,7 +5,7 @@ import type {
   StateType,
   NoiseType,
   SimMode,
-  ResearchType,
+  ExperimentType,
   ExperimentConfig,
 } from "../../lib/types";
 import {
@@ -37,7 +37,7 @@ export interface UseExperimentConfigReturn {
   metricsMode: "profile" | "individual";
   selectedProfile: string;
   selectedMetrics: string[];
-  researchType: ResearchType | null;
+  experimentType: ExperimentType | null;
   multipleRuns: number;
   trackConvergence: boolean;
   backendName: string;
@@ -61,7 +61,7 @@ export interface UseExperimentConfigReturn {
   setMetricsMode: (v: "profile" | "individual") => void;
   setSelectedProfile: (v: string) => void;
   setSelectedMetrics: (v: string[]) => void;
-  setResearchType: (v: ResearchType | null) => void;
+  setExperimentType: (v: ExperimentType | null) => void;
   setMultipleRuns: (v: number) => void;
   setTrackConvergence: (v: boolean) => void;
   setBackendName: (v: string) => void;
@@ -93,9 +93,9 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
   const [balanceCircuit, setBalanceCircuit] = useState(false);
   const [metricsEnabled, setMetricsEnabled] = useState(false);
   const [metricsMode, setMetricsMode] = useState<"profile" | "individual">("profile");
-  const [selectedProfile, setSelectedProfile] = useState("structured_decoherence");
+  const [selectedProfile, setSelectedProfile] = useState("decoherence");
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
-  const [researchType, setResearchType] = useState<ResearchType | null>(null);
+  const [experimentType, setExperimentType] = useState<ExperimentType | null>(null);
   const [multipleRuns, setMultipleRuns] = useState(1);
   const [trackConvergence, setTrackConvergence] = useState(false);
   const [backendName, setBackendName] = useState("");
@@ -160,7 +160,7 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
       metricsMode,
       selectedProfile,
       selectedMetrics,
-      researchType,
+      experimentType,
       multipleRuns,
       trackConvergence,
       backendName,
@@ -170,7 +170,7 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
     [
       stateType, numQubits, simMode, shots, rngSeed, noiseEnabled, noiseType,
       errorRate, t1, t2, readoutErrorRate, balanceCircuit, metricsEnabled,
-      metricsMode, selectedProfile, selectedMetrics, researchType, multipleRuns,
+      metricsMode, selectedProfile, selectedMetrics, experimentType, multipleRuns,
       trackConvergence, backendName, optimizationLevel, hardwareSession,
     ],
   );
@@ -220,7 +220,7 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
     metricsMode, setMetricsMode,
     selectedProfile, setSelectedProfile,
     selectedMetrics, setSelectedMetrics,
-    researchType, setResearchType,
+    experimentType, setExperimentType,
     multipleRuns, setMultipleRuns,
     trackConvergence, setTrackConvergence,
     backendName, setBackendName,

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { colors, spacing, radii } from "@/src/theme";
+import { StyleSheet, View } from "react-native";
+
+import { Row, Stack, Text, chrome } from "@/src/design";
 import type { ConfigWarning } from "../useExperimentConfig";
 
 interface ValidationBannerProps {
@@ -13,17 +14,17 @@ const LEVEL_STYLES: Record<
 > = {
   error: {
     background: "rgba(239, 68, 68, 0.12)",
-    border: colors.status.error,
+    border: chrome.status.error,
     icon: "!",
   },
   warning: {
     background: "rgba(245, 158, 11, 0.12)",
-    border: colors.status.warning,
+    border: chrome.status.warning,
     icon: "!",
   },
   info: {
     background: "rgba(99, 102, 241, 0.08)",
-    border: colors.status.info,
+    border: chrome.status.info,
     icon: "i",
   },
 };
@@ -34,12 +35,14 @@ export function ValidationBanner({ warnings }: ValidationBannerProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <Stack className="mt-md" style={{ gap: 6 }}>
       {warnings.map((w, idx) => {
         const level = LEVEL_STYLES[w.level];
         return (
-          <View
+          <Row
             key={idx}
+            align="center"
+            className="rounded-md"
             style={[
               styles.banner,
               {
@@ -49,49 +52,32 @@ export function ValidationBanner({ warnings }: ValidationBannerProps) {
             ]}
           >
             <View
+              className="mr-sm items-center justify-center rounded-pill"
               style={[styles.iconCircle, { borderColor: level.border }]}
             >
-              <Text style={[styles.iconText, { color: level.border }]}>
+              <Text variant="caption" weight="bold" style={{ color: level.border }}>
                 {level.icon}
               </Text>
             </View>
-            <Text style={styles.message}>{w.message}</Text>
-          </View>
+            <Text variant="body" className="flex-1">
+              {w.message}
+            </Text>
+          </Row>
         );
       })}
-    </View>
+    </Stack>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: spacing.md,
-    gap: 6,
-  },
   banner: {
-    flexDirection: "row",
-    alignItems: "center",
     borderLeftWidth: 4,
-    borderRadius: radii.sm,
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
   iconCircle: {
     width: 18,
     height: 18,
-    borderRadius: 9,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
-  iconText: {
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  message: {
-    fontSize: 12,
-    color: colors.text.primary,
-    flex: 1,
   },
 });

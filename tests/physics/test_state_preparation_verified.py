@@ -101,7 +101,6 @@ class TestGHZ:
         assert GHZState(1).get_theoretical_properties()["entanglement_type"] == "none"
         assert GHZState(2).get_theoretical_properties()["bell_inequality_violation"] == "maximal"
         assert "mermin_inequality_violation" in GHZState(4).get_theoretical_properties()
-        assert "pathway_hypothesis" in st.get_research_context()
         assert "GHZ(3" in str(st)
         assert "no entanglement" in str(GHZState(1))
 
@@ -174,7 +173,6 @@ class TestW:
         assert "cx" in WState(3)._get_required_gates()
         assert WState(1).get_theoretical_properties()["entanglement_type"] == "none"
         assert WState(3).get_theoretical_properties()["excitation_number"] == 1
-        assert "pathway_hypothesis" in WState(3).get_research_context()
         assert "W(1 qubit)" in str(WState(1))
         assert "W(3 qubits)" in str(WState(3))
         assert "..." in str(WState(6))
@@ -243,13 +241,12 @@ class TestBell:
     def test_bell_required_gates(self, variant, gates):
         assert BellState(2, {"variant": variant})._get_required_gates() == gates
 
-    def test_bell_props_and_context_and_str(self):
+    def test_bell_props_and_str(self):
         for variant in BELL_REFS:
             st = BellState(2, {"variant": variant})
             props = st.get_theoretical_properties()
             assert props["variant"] == variant
             assert props["concurrence"] == 1.0
-            assert "pathway_hypothesis" in st.get_research_context()
             assert variant.upper() in str(st)
         assert BellState(2, {"variant": "phi_plus"}).create(add_barrier=True).num_qubits == 2
 
@@ -378,7 +375,6 @@ class TestSuperposition:
             2, {"angles": {"theta": 0.1, "phi": 0.0}}
         )._get_required_gates() == ["ry", "rz"]
         assert SuperpositionState(2).get_theoretical_properties()["entanglement_type"] == "none"
-        assert "pathway_hypothesis" in SuperpositionState(2).get_research_context()
         assert "no entanglement" in str(SuperpositionState(2))
         assert "qubits [0, 2]" in str(SuperpositionState(3, {"qubits": [0, 2]}))
         assert "Parametric" in str(SuperpositionState(2, {"angles": {"theta": 0.1, "phi": 0.0}}))
@@ -482,7 +478,6 @@ class TestCluster:
             6, {"lattice": "2d", "rows": 2, "cols": 3}
         ).get_theoretical_properties()
         assert props2d["graph_topology"] == "2d"
-        assert "pathway_hypothesis" in st.get_research_context()
         assert "chain" in str(st)
         assert "ring" in str(ClusterState(4, {"lattice": "1d", "ring": True}))
         assert "grid" in str(ClusterState(6, {"lattice": "2d", "rows": 2, "cols": 3}))
@@ -680,7 +675,6 @@ class TestCustom:
         assert st._estimate_circuit_depth() >= 1
         assert "h" in st._get_required_gates()
         assert st.get_theoretical_properties()["entanglement_type"] == "user_defined"
-        assert "pathway_hypothesis" in st.get_research_context()
         assert "user-defined" in str(st)
         assert st.create(add_barrier=True).num_qubits == 2
         # __str__ for each source variant
@@ -808,13 +802,12 @@ class TestConstants:
             sc.validate_state_registry()
 
     def test_validate_registry_rejects_missing_method(self, monkeypatch):
-        # Subclass of BaseState but missing a required method.
+        # Subclass of BaseState but missing a required method
+        # (get_theoretical_properties is not defined on BaseState).
         class PartialState(BaseState):
             def create(self, add_barrier: bool = False) -> QuantumCircuit:
                 return QuantumCircuit(self.num_qubits)
 
-        # Remove a required method so the registry check fails.
-        monkeypatch.delattr(PartialState, "get_research_context", raising=False)
         monkeypatch.setitem(sc.STATE_CLASSES, "PARTIAL", PartialState)
         with pytest.raises(RuntimeError):
             sc.validate_state_registry()
@@ -858,9 +851,9 @@ class TestBaseState:
         assert bp["num_qubits"] == 3
         assert bp["hilbert_dimension"] == 8
         assert bp["has_entanglement"] is True
-        meta = st.get_research_metadata()
+        meta = st.get_experiment_metadata()
         assert meta["num_qubits"] == 3
-        assert "structured_decoherence_pathways" in meta["research_framework"]
+        assert meta["state_class"] == "_MinimalState"
 
     def test_default_depth_and_gates(self):
         st = _MinimalState(4)

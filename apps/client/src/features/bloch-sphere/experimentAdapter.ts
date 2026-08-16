@@ -3,6 +3,7 @@
  * component prop shapes so BlochScene, TwoQubitScene, etc. work unchanged.
  */
 
+import { viz } from "@/src/design/tokens";
 import type { BlochVisualizerData } from "../../lib/types";
 import type {
   ProbeStateConfig,
@@ -10,10 +11,10 @@ import type {
   ExperimentalDataEntry,
 } from "./types";
 
-/** Per-qubit color palette (up to 8 qubits) */
+/** Per-qubit color palette (up to 8 qubits) — viz data tokens only. */
 const QUBIT_COLORS = [
-  "#ff9933", "#44ddff", "#44ff88", "#b48cff",
-  "#ff4466", "#ffdd44", "#44ffdd", "#ff88cc",
+  viz.orange, viz.aqua, viz.green, viz.purple,
+  viz.rose, viz.yellow, viz.teal, viz.rosePink,
 ];
 
 /**

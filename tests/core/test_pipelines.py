@@ -1,5 +1,5 @@
 """
-Test pipeline integration for structured decoherence analysis.
+Test pipeline integration for the analysis framework.
 """
 
 from src.core.analysis.pipelines.pathway_analysis import (

@@ -175,7 +175,7 @@ export default function CircuitToolbar({
           disabled={isRunning}
           style={{
             background: isRunning ? colors.border : colors.accent,
-            color: isRunning ? colors.textTertiary : "#fff",
+            color: isRunning ? colors.textTertiary : colors.text,
             border: "none",
             borderRadius: 6,
             padding: "6px 18px",

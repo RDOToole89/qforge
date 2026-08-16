@@ -13,7 +13,7 @@ import {
   STATE_TYPES as CATALOG_STATE_TYPES,
   SIM_MODES as CATALOG_SIM_MODES,
   NOISE_TYPES as CATALOG_NOISE_TYPES,
-  RESEARCH_TYPES as CATALOG_RESEARCH_TYPES,
+  EXPERIMENT_TYPES as CATALOG_EXPERIMENT_TYPES,
   METRIC_NAMES as CATALOG_METRIC_NAMES,
   METRIC_PROFILES as CATALOG_METRIC_PROFILES,
 } from "@/src/generated/catalog";
@@ -45,10 +45,10 @@ const NOISE_UI: Record<string, { label: string; description: string }> = {
   correlated_depolarizing: { label: "Correlated Depolarizing", description: "Multi-qubit correlated Pauli errors on entangling gates." },
 };
 
-// Research types shown in the UI. The catalog also exposes "batch_sweep"; it is
+// Experiment types shown in the UI. The catalog also exposes "batch_sweep"; it is
 // intentionally omitted from this picker (no UI label -> not rendered).
-const RESEARCH_UI: Record<string, { label: string }> = {
-  structured_decoherence: { label: "Structured Decoherence" },
+const EXPERIMENT_TYPE_UI: Record<string, { label: string }> = {
+  decoherence: { label: "Decoherence" },
   parameter_sweep:        { label: "Parameter Sweep" },
   noise_comparison:       { label: "Noise Comparison" },
   control:                { label: "Control" },
@@ -57,15 +57,15 @@ const RESEARCH_UI: Record<string, { label: string }> = {
 };
 
 const PROFILE_UI: Record<string, { label: string; description: string }> = {
-  structured_decoherence: { label: "Structured Decoherence", description: "Full structured decoherence suite" },
-  quick:                  { label: "Quick",                  description: "Fast overview with 2 key metrics" },
-  information_theory:     { label: "Information Theory",      description: "Information-theoretic analysis" },
+  decoherence:        { label: "Decoherence",        description: "Full distribution-structure metric suite" },
+  quick:              { label: "Quick",              description: "Fast overview with 2 key metrics" },
+  information_theory: { label: "Information Theory", description: "Information-theoretic analysis" },
 };
 
 const METRIC_UI: Record<string, { label: string; description: string }> = {
   structure_score:                { label: "Structure Score",                description: "Jensen-Shannon divergence from factorized null model" },
   entanglement_error_correlation: { label: "Entanglement-Error Correlation", description: "Pearson correlation between topology and MI matrices" },
-  concentration_index:            { label: "Concentration Index",            description: "Gini-like pathway concentration measure" },
+  concentration_index:            { label: "Concentration Index",            description: "Top-vs-bottom quartile probability ratio" },
   pathway_persistence:            { label: "Pathway Persistence",            description: "Rank correlation consistency across conditions" },
   complexity_emergence_score:     { label: "Complexity Emergence",           description: "Logistic emergence threshold detection" },
   total_correlation:              { label: "Total Correlation",              description: "Multi-information across all qubits" },
@@ -110,9 +110,9 @@ export const INDIVIDUAL_METRICS = CATALOG_METRIC_NAMES.map((id) => ({
   description: METRIC_UI[id].description,
 }));
 
-export const RESEARCH_TYPES = CATALOG_RESEARCH_TYPES.filter(
-  (id) => id in RESEARCH_UI,
-).map((id) => ({ id, label: RESEARCH_UI[id].label }));
+export const EXPERIMENT_TYPES = CATALOG_EXPERIMENT_TYPES.filter(
+  (id) => id in EXPERIMENT_TYPE_UI,
+).map((id) => ({ id, label: EXPERIMENT_TYPE_UI[id].label }));
 
 // Hardware backends are NOT hardcoded here: the live list comes from the
 // backend (`GET /api/hardware/backends`) via useHardwareValidation, which is the
@@ -130,9 +130,9 @@ export const INFO_TEXT: Record<string, { title: string; content: string }> = {
   state: {
     title: "Quantum State Preparation",
     content:
-      "GHZ states create maximal entanglement across all qubits and are the primary probe for " +
-      "structured decoherence. W states spread a single excitation symmetrically and decohere " +
-      "differently due to their topology. Cluster states use nearest-neighbor CZ gates and form " +
+      "GHZ states create maximal entanglement across all qubits. W states spread a single " +
+      "excitation symmetrically and respond to noise differently due to their topology. " +
+      "Cluster states use nearest-neighbor CZ gates and form " +
       "graph states useful for measurement-based quantum computing. Bell states are the simplest " +
       "entangled pair (2 qubits only). Superposition creates an unentangled product state " +
       "(H on each qubit) and serves as a control baseline with no entanglement structure.",
@@ -157,12 +157,12 @@ export const INFO_TEXT: Record<string, { title: string; content: string }> = {
       "multi-qubit Pauli errors to pairs of qubits sharing entangling gates.",
   },
   metrics: {
-    title: "Research Metrics",
+    title: "Analysis Metrics",
     content:
-      "Profiles select curated sets of metrics for common analysis tasks. The Structured " +
-      "Decoherence profile computes all 6 metrics: Structure Score (JSD from null model), " +
+      "Profiles select curated sets of metrics for common analysis tasks. The Decoherence " +
+      "profile computes all 6 metrics: Structure Score (JSD from null model), " +
       "Entanglement-Error Correlation (topology vs mutual information), Concentration Index " +
-      "(Gini-like pathway measure), Pathway Persistence (rank stability across conditions), " +
+      "(Gini-like concentration measure), Pathway Persistence (rank stability across conditions), " +
       "Complexity Emergence (logistic threshold detection), and Total Correlation " +
       "(multi-information). Individual mode lets you pick specific metrics.",
   },

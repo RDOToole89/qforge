@@ -59,7 +59,7 @@ class NoiseSweep(BaseExperiment):
             error_rate=0.05,
             shots=8192,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type="all",
         )
 

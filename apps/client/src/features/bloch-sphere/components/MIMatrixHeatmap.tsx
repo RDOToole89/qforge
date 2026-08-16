@@ -1,5 +1,8 @@
 'use dom';
 
+import { chrome, viz } from "@/src/design/tokens";
+import { rgba } from "../styles";
+
 /** Simple MI matrix heatmap for experiment mode PTM tab */
 export default function MIMatrixHeatmap({ matrix }: { matrix: number[][] }) {
   const n = matrix.length;
@@ -11,7 +14,7 @@ export default function MIMatrixHeatmap({ matrix }: { matrix: number[][] }) {
         {Array.from({ length: n }, (_, i) => (
           <div key={i} style={{
             width: "32px", textAlign: "center", fontSize: "9px",
-            color: "#8899aa", fontFamily: "monospace", fontWeight: 600,
+            color: chrome.text.secondary, fontFamily: "monospace", fontWeight: 600,
           }}>Q{i}</div>
         ))}
       </div>
@@ -19,18 +22,18 @@ export default function MIMatrixHeatmap({ matrix }: { matrix: number[][] }) {
         <div key={i} style={{ display: "flex", alignItems: "center" }}>
           <div style={{
             width: "28px", fontSize: "9px", textAlign: "right", paddingRight: "5px",
-            color: "#8899aa", fontFamily: "monospace", fontWeight: 600,
+            color: chrome.text.secondary, fontFamily: "monospace", fontWeight: 600,
           }}>Q{i}</div>
           {row.map((v, j) => (
             <div key={j} style={{
               width: "32px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center",
-              background: i === j ? "rgba(255,255,255,0.02)"
-                : `rgba(68,200,255,${Math.min(v / mx * 0.7, 0.7)})`,
+              background: i === j ? chrome.border.subtle
+                : rgba(viz.cyan, Math.min(v / mx * 0.7, 0.7)),
               borderRadius: "3px", margin: "1px",
               fontSize: "8px", fontFamily: "monospace",
-              color: i === j ? "#334" : v / mx > 0.4 ? "#fff" : "#556",
+              color: i === j ? chrome.text.tertiary : v / mx > 0.4 ? chrome.text.primary : chrome.text.tertiary,
             }}>
-              {i === j ? "\u2014" : v.toFixed(2)}
+              {i === j ? "—" : v.toFixed(2)}
             </div>
           ))}
         </div>

@@ -7,15 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (breaking)
+- `ExperimentConfig.research_type` renamed to `experiment_type` (values:
+  "decoherence", "parameter_sweep", "noise_comparison", "control", "scaling",
+  "convergence", "batch_sweep")
+- Metric profile `structured_decoherence` renamed to `decoherence`; metrics are
+  requested via `metrics=` (profile name or explicit list) and results are
+  exposed as `result.metrics_bundle` (dict of name → entry with value/ci95/status)
+- `src/engine/models/research.py` renamed to `src/engine/models/analysis.py`;
+  `src/engine/analysis/research_integration.py` renamed to
+  `src/engine/analysis/metrics.py`
+- Noise catalog key `research_application` renamed to `use_case`
+- Experiment `dec_01_river_vs_fog` renamed to `dec_01_structured_vs_uniform`
+
+### Removed
+- `enable_research_metrics` config flag and `result.structured_decoherence_metrics`
+  (replaced by `metrics=` / `metrics_bundle`)
+- `ResearchMetadata`, `SweepResearchMetadata`, `SweepResearchInsights`,
+  `publication_ready`, `publication_readiness`, `research_significance` model
+  fields, and `get_research_context`
+- Personal research-program documentation (docs/research/, docs/planning/, and
+  stale historical design documents); docs now describe the general-purpose
+  framework only
+
 ### Added
 - `src/core/math/` shared math primitives — single source of truth for Pauli
   matrices, `relaxation_probability`, total-variation-distance / Gini, and the
   canonical qubit/bit indexing convention; imported across noise models,
   analysis metrics, and the engine
 - ~700 new exact-value tests asserting calculations against analytical/closed-form
-  results; suite now ~1,100 tests (1104 passing)
+  results; suite now ~1,100 tests
 - Coverage gate now spans the whole physics/math core (all of `src/core` plus the
-  engine math modules `fidelity`, `bloch_math`, `analysis/research_integration`,
+  engine math modules `fidelity`, `bloch_math`, `analysis/metrics`,
   `models/measurement`) at ~97% behind a 95% gate
 - Deployment configs: Dockerfile, railway.json, vercel.json
 - Environment variable handling for CORS origins and API URL
@@ -49,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-04-03
 
 ### Added
-- Research-grade analysis framework with 8 structured decoherence metrics
+- Analysis framework with 8 information-theoretic metrics
 - Engine-first architecture with `run()` and `sweep()` API
 - Interactive quantum circuit builder with learn mode (18 lessons)
 - Bloch sphere 3D visualizer with noise channel exploration

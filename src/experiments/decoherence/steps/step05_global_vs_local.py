@@ -14,32 +14,24 @@ THE EXPERIMENT:
 
 WHAT TO LOOK FOR:
   GHZ:
-  - Full 6-qubit: KL = 4.4 (high structure)
-  - Mean 3-qubit: KL = 1.7
-  - Mean 2-qubit: KL = 0.8
-  - Mean 1-qubit: KL ≈ 0 (NO local structure!)
-  → GHZ structure is PURELY GLOBAL. Individual qubits are 50/50.
+  - The ideal single-qubit marginals are exactly 50/50, so the 1-qubit
+    KL divergence from uniform is ≈ 0 even though the full 6-qubit
+    distribution is far from uniform. The deviation from uniform lives
+    entirely in the correlations.
 
   W:
-  - Full 6-qubit: KL = 2.3
-  - Mean 3-qubit: KL = 1.0
-  - Mean 2-qubit: KL = 0.6
-  - Mean 1-qubit: KL = 0.3 (LOCAL structure persists!)
-  → W structure is LOCAL AND GLOBAL. Each qubit is biased ~80/20.
-
-  The analogy:
-  - GHZ = a canyon visible only from satellite. Up close, flat terrain.
-  - W = a river delta visible at every zoom level. Even single streams show flow.
+  - Each ideal single-qubit marginal is biased (P(1) = 1/N), so some
+    deviation from uniform is visible even at the 1-qubit level, and
+    more appears at each higher marginal level.
 
 CIRCUIT:
   No new circuits — this is ANALYSIS of existing measurement data.
   Run GHZ-6 and W-6 (step 2), then analyze the counts.
 
 WHY THIS MATTERS:
-  The global vs local distinction has practical implications:
-  - GHZ errors require full-system monitoring to detect
-  - W errors are detectable at the individual qubit level
-  - This affects error correction strategy choices
+  It shows, concretely, the difference between a distribution whose
+  deviation from uniform is visible in single-qubit marginals and one
+  where it only appears in multi-qubit correlations.
 
 TRY IT:
     from src.experiments.decoherence.steps.step05_global_vs_local import global_vs_local
@@ -57,7 +49,7 @@ class GlobalVsLocalExperiment(BaseExperiment):
     """Step 5: Compare global (GHZ) and local (W) structure."""
 
     name = "dec_05_global_vs_local"
-    description = "Step 5: Global vs local — where does the structure live?"
+    description = "Step 5: Marginal analysis — correlations vs single-qubit statistics"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -69,7 +61,7 @@ class GlobalVsLocalExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

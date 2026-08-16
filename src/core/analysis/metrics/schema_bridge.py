@@ -20,7 +20,7 @@ Supported Metrics:
 - complexity_emergence_score → complexity_emergence_score (nullable)
 
 This bridge ensures complete compatibility with downstream analysis pipelines
-and research tooling that depends on the frozen schema format.
+and tooling that depends on the frozen schema format.
 """
 
 import logging

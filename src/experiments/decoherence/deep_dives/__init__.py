@@ -1,4 +1,4 @@
-"""Decoherence deep dives — full research experiments and validation.
+"""Decoherence deep dives — larger sweep-based studies.
 
 After Step 2:  dd_topology_full      — Full topology comparison with all metrics
 After Step 3:  dd_scaling_full       — Complete GHZ + W scaling ladder

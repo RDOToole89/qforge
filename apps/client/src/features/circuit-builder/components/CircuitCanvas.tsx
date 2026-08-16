@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from "react";
-import { colors, layout, fonts, momentX, wireY, canvasWidth, canvasHeight } from "../styles";
+import { colors, layout, fonts, momentX, wireY, canvasWidth, canvasHeight, withAlpha } from "../styles";
 import GateBlock from "./GateBlock";
 import { getGateDef } from "../data/gateLibrary";
 import type { Circuit } from "../types";
@@ -261,7 +261,7 @@ export default function CircuitCanvas({
                   y={layout.padding}
                   width={layout.momentWidth}
                   height={height - layout.padding * 2}
-                  fill={mi % 2 === 0 ? "rgba(99, 102, 241, 0.04)" : "transparent"}
+                  fill={mi % 2 === 0 ? withAlpha(colors.accent, 0.04) : "transparent"}
                   stroke={colors.border}
                   strokeWidth={0.5}
                   opacity={0.5}

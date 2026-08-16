@@ -30,7 +30,7 @@ def _ghz_qasm(**overrides):
         noise_enabled=True,
         noise_type="depolarizing",
         error_rate=0.05,
-        metrics="structured_decoherence",
+        metrics="decoherence",
     )
     cfg.update(overrides)
     return run(ExperimentConfig(**cfg))

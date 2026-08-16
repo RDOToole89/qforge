@@ -1,5 +1,5 @@
 """
-Test metric calculation modules for structured decoherence analysis.
+Test metric calculation modules.
 """
 
 import numpy as np
@@ -36,10 +36,10 @@ class TestAsymmetryIndex:
         assert ai < 0.05  # Should be close to 0
 
     def test_deterministic_ai(self):
-        """Test AI for deterministic distribution."""
+        """Test AI for deterministic distribution ((N+a)/(N+aK) - 1/K = 750/1002)."""
         counts = {"00": 1000}
         ai = compute_asymmetry_index(counts)
-        assert abs(ai - 0.5) < 0.01  # Should be close to maximum
+        assert abs(ai - 750.0 / 1002.0) < 1e-10  # Near the 1 - 1/K maximum
 
     def test_structured_ai(self):
         """Test AI for structured distribution."""
@@ -70,10 +70,10 @@ class TestAsymmetryIndex:
             compute_asymmetry_index({})
 
     def test_ai_single_outcome(self):
-        """Test AI with single outcome."""
+        """Test AI with single outcome (closed form: (N+a)/(N+aK) - 1/K)."""
         counts = {"000": 1000}
         ai = compute_asymmetry_index(counts)
-        assert abs(ai - 0.5) < 1e-10
+        assert abs(ai - 875.0 / 1004.0) < 1e-10
 
 
 class TestPathwayConcentrationRatio:

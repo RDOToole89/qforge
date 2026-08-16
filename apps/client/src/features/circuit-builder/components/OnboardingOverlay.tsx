@@ -1,7 +1,7 @@
 "use dom";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { colors, fonts } from "../styles";
+import { colors, fonts, overlay } from "../styles";
 
 const STORAGE_KEY = "circuit-builder-onboarding-v2";
 
@@ -306,7 +306,7 @@ export default function OnboardingOverlay({ actions }: OnboardingOverlayProps) {
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0, 0, 0, 0.75)",
+          background: overlay(0.75),
           transition: "clip-path 0.3s ease",
           clipPath: hasHighlight
             ? `polygon(
@@ -345,7 +345,7 @@ export default function OnboardingOverlay({ actions }: OnboardingOverlayProps) {
             width: highlightRect!.width + pad * 2,
             height: highlightRect!.height + pad * 2,
             border: current.highlight === "expand-bloch"
-              ? `3px solid #fff`
+              ? `3px solid ${colors.text}`
               : `2px solid ${colors.accent}`,
             borderRadius: current.highlight === "expand-bloch" ? 8 : 10,
             boxShadow: current.highlight === "expand-bloch"
@@ -365,7 +365,7 @@ export default function OnboardingOverlay({ actions }: OnboardingOverlayProps) {
               fontSize: 24,
               pointerEvents: "none",
               animation: "onboarding-pointer 1s ease-in-out infinite",
-              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+              filter: `drop-shadow(0 2px 4px ${overlay(0.5)})`,
             }}>
               {"\uD83D\uDC46"}
             </div>
@@ -382,7 +382,7 @@ export default function OnboardingOverlay({ actions }: OnboardingOverlayProps) {
         border: `1px solid ${colors.accent}80`,
         borderRadius: 12,
         padding: 24,
-        boxShadow: `0 0 40px ${colors.accent}20, 0 20px 60px rgba(0,0,0,0.5)`,
+        boxShadow: `0 0 40px ${colors.accent}20, 0 20px 60px ${overlay(0.5)}`,
         zIndex: tooltipZ,
       }}>
         {/* Step indicator */}
@@ -480,7 +480,7 @@ export default function OnboardingOverlay({ actions }: OnboardingOverlayProps) {
 
 const btnStyle = (primary: boolean): React.CSSProperties => ({
   background: primary ? colors.accent : "transparent",
-  color: primary ? "#fff" : colors.textSecondary,
+  color: primary ? colors.text : colors.textSecondary,
   border: primary ? "none" : `1px solid ${colors.border}`,
   borderRadius: 6,
   padding: "7px 18px",

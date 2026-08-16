@@ -7,7 +7,7 @@ A small, focused driver that:
   1) Expands a `SweepManifest` into concrete `ExperimentConfig`s
   2) Runs each config via the engine's `EngineExperimentRunner`
   3) Canonicalizes counts and assembles typed `ExperimentResult`s
-  4) (Optional) Computes research metrics per run
+  4) (Optional) Computes analysis metrics per run
   5) (Optional) Persists each run's analysis JSON (deterministic paths)
   6) (Optional) Renders per-run histograms (png)
   7) Builds a typed `SweepResult` with a minimal aggregated analysis
@@ -188,7 +188,6 @@ def _maybe_save_histogram(
             title=title or "Outcome Histogram",
             description="Histogram of measurement counts (sorted by frequency)",
             public=False,
-            publication_ready=False,
         )
     except Exception as e:
         logger.warning(f"Failed to write histogram for {exp_id}: {e}")
@@ -328,7 +327,7 @@ def run_sweep(
                 experiment_id=exp_id,
                 timestamp=datetime.now().isoformat(),
                 framework_version=get_version(),
-                research_type=cfg.research_type,
+                experiment_type=cfg.experiment_type,
             )
 
             analysis = ExperimentAnalysis(
@@ -372,7 +371,6 @@ def run_sweep(
             exp_result = ExperimentResult(
                 analysis=analysis,
                 metrics_bundle=metrics_bundle,
-                research_metadata=None,
                 provenance=prov,
                 artifacts=artifacts,
                 config_hash=_hash_config(cfg),
@@ -465,7 +463,6 @@ def run_sweep(
         experiment_results=results,
         parameter_analysis=param_analysis,
         statistical_summary=stat_summary,
-        research_insights=None,
         execution_metadata=exec_meta,
     )
 

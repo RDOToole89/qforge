@@ -1,13 +1,11 @@
 """Step 11: Noise + Entanglement — How noise shapes error patterns.
 
 WHAT YOU'LL LEARN:
-  This is where things get interesting. When noise hits an ENTANGLED
-  state, the errors don't spread randomly. They follow patterns
-  determined by the entanglement topology.
-
-  This is the "River vs Fog" phenomenon:
-  - FOG: errors spread uniformly (product/unentangled states)
-  - RIVER: errors flow along specific pathways (entangled states)
+  Different quantum states produce very differently shaped measurement
+  distributions under the same noise. A state whose ideal distribution
+  is concentrated (like GHZ) stays concentrated under moderate noise; a
+  state whose ideal distribution is uniform (like a product of |+⟩
+  states) stays close to uniform.
 
 THE EXPERIMENT:
   Apply the same depolarizing noise to four different states:
@@ -16,23 +14,22 @@ THE EXPERIMENT:
   - Cluster: nearest-neighbor
   - Product (Superposition): no entanglement
 
-  Then look at the structure metrics — especially Structure Score.
+  Then look at the structure metrics — especially Structure Score
+  (Jensen-Shannon divergence from a factorized null model).
 
 WHAT TO LOOK FOR:
-  - GHZ: high Structure Score (~0.7-0.9). Errors concentrate in
-    |000...0⟩ and |111...1⟩ and their single-bit-flip neighbors.
-  - W: high Structure Score (~0.7-0.8). Errors concentrate in
-    the N single-excitation states.
-  - Cluster: low Structure Score (~0.05). Errors spread uniformly.
-  - Product: low Structure Score (~0.05). Errors spread uniformly.
+  - GHZ: high Structure Score. Counts concentrate in |000...0⟩ and
+    |111...1⟩ and their single-bit-flip neighbors.
+  - W: high Structure Score. Counts concentrate in the N
+    single-excitation states.
+  - Cluster: low Structure Score. In the Z basis, the ideal cluster
+    state distribution is uniform, so counts stay spread out.
+  - Product: low Structure Score. Counts stay near-uniform.
 
-  The 12x difference between GHZ and Product is the "River vs Fog"
-  separation. Entanglement topology determines error structure.
-
-WHY THIS MATTERS:
-  If errors follow predictable patterns, error correction can be
-  TARGETED at those patterns instead of defending against everything.
-  This is the core idea behind structured decoherence research.
+  Note that a low Structure Score does not mean "no entanglement" —
+  the cluster state is entangled but its Z-basis distribution is
+  uniform. The metric measures the shape of the measured distribution,
+  nothing more.
 
 CIRCUITS (four different states, same noise):
   GHZ:          q0: ─H──●──●──●── M      (all-to-all entanglement)
@@ -58,7 +55,7 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
     """Step 11: See how different entanglement topologies shape noise patterns."""
 
     name = "11_noise_and_entanglement"
-    description = "Step 11: River vs Fog — how entanglement shapes decoherence patterns"
+    description = "Step 11: How entanglement changes the shape of error distributions"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -69,7 +66,7 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

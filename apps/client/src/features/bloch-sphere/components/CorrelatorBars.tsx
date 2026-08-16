@@ -1,6 +1,7 @@
 'use dom';
 
 import { useMemo } from "react";
+import { chrome, viz } from "@/src/design/tokens";
 import { generate2QFromState, apply2QNoise } from "../math";
 import type { ProbeStateConfig, TopologyConfig } from "../types";
 
@@ -21,11 +22,11 @@ export default function CorrelatorBars({ stateCfg, topo, strength, experimentCor
   if (experimentCorrelators) {
     // Experiment mode: show actual measured values (not deltas)
     bars = [
-      { label: "\u27E8ZI\u27E9", value: experimentCorrelators.zi, color: "#ff4466" },
-      { label: "\u27E8IZ\u27E9", value: experimentCorrelators.iz, color: "#44ff88" },
-      { label: "\u27E8ZZ\u27E9", value: experimentCorrelators.zz, color: "#4488ff" },
-      { label: "\u27E8XX\u27E9", value: experimentCorrelators.xx, color: "#ff9933" },
-      { label: "\u27E8YY\u27E9", value: experimentCorrelators.yy, color: "#b48cff" },
+      { label: "\u27E8ZI\u27E9", value: experimentCorrelators.zi, color: viz.rose },
+      { label: "\u27E8IZ\u27E9", value: experimentCorrelators.iz, color: viz.green },
+      { label: "\u27E8ZZ\u27E9", value: experimentCorrelators.zz, color: viz.blue },
+      { label: "\u27E8XX\u27E9", value: experimentCorrelators.xx, color: viz.orange },
+      { label: "\u27E8YY\u27E9", value: experimentCorrelators.yy, color: viz.purple },
     ];
   } else {
     const avgOrig = { zi: 0, iz: 0, zz: 0 };
@@ -41,9 +42,9 @@ export default function CorrelatorBars({ stateCfg, topo, strength, experimentCor
     };
 
     bars = [
-      { label: "\u0394\u27E8ZI\u27E9", value: delta.zi, color: "#ff4466" },
-      { label: "\u0394\u27E8IZ\u27E9", value: delta.iz, color: "#44ff88" },
-      { label: "\u0394\u27E8ZZ\u27E9", value: delta.zz, color: "#4488ff" },
+      { label: "\u0394\u27E8ZI\u27E9", value: delta.zi, color: viz.rose },
+      { label: "\u0394\u27E8IZ\u27E9", value: delta.iz, color: viz.green },
+      { label: "\u0394\u27E8ZZ\u27E9", value: delta.zz, color: viz.blue },
     ];
   }
   const mx = Math.max(...bars.map((b) => Math.abs(b.value)), 0.001);
@@ -56,12 +57,12 @@ export default function CorrelatorBars({ stateCfg, topo, strength, experimentCor
             {b.label}
           </div>
           <div style={{
-            flex: 1, height: "12px", background: "rgba(255,255,255,0.03)",
+            flex: 1, height: "12px", background: chrome.border.subtle,
             borderRadius: "3px", position: "relative", overflow: "hidden",
           }}>
             <div style={{
               position: "absolute", left: "50%", top: 0, bottom: 0,
-              width: "1px", background: "rgba(255,255,255,0.1)",
+              width: "1px", background: chrome.border.default,
             }} />
             <div style={{
               position: "absolute", left: "50%", top: 0, bottom: 0,
@@ -70,7 +71,7 @@ export default function CorrelatorBars({ stateCfg, topo, strength, experimentCor
               transform: b.value >= 0 ? "none" : "translateX(-100%)",
             }} />
           </div>
-          <div style={{ width: "48px", fontSize: "9px", fontFamily: "monospace", color: "#667", textAlign: "right" }}>
+          <div style={{ width: "48px", fontSize: "9px", fontFamily: "monospace", color: chrome.text.tertiary, textAlign: "right" }}>
             {b.value.toFixed(4)}
           </div>
         </div>

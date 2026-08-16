@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   LayoutAnimation,
@@ -9,6 +8,8 @@ import {
   UIManager,
 } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import { Text, card, chrome } from "@/src/design";
 import { SymbolBadge } from "./SymbolBadge";
 import { RelatedTermLink } from "./RelatedTermLink";
 import { FormulaSection } from "./FormulaSection";
@@ -27,6 +28,21 @@ interface TermCardProps {
   onRelatedPress: (termId: string) => void;
 }
 
+/** Accent, uppercase sub-section label used inside an expanded term card. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Text
+      variant="body"
+      weight="bold"
+      tone="accent"
+      className="mt-xs mb-xs uppercase"
+      style={styles.sectionLabel}
+    >
+      {children}
+    </Text>
+  );
+}
+
 export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -39,28 +55,41 @@ export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={toggle}
+      className={card({
+        variant: "outlined",
+        padding: "md",
+      })}
       style={[styles.card, highlighted && styles.highlighted]}
     >
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Text style={styles.name}>{term.name}</Text>
+      <View className="mb-xs flex-row items-center justify-between">
+        <View className="flex-1 flex-row items-center gap-sm">
+          <Text variant="headingSm" weight="semibold" tone="primary">
+            {term.name}
+          </Text>
           {term.symbol && <SymbolBadge symbol={term.symbol} />}
         </View>
         <FontAwesome
           name={expanded ? "chevron-up" : "chevron-down"}
           size={12}
-          color="#64748b"
+          color={chrome.text.tertiary}
         />
       </View>
 
-      <Text style={styles.intuitive} numberOfLines={expanded ? undefined : 2}>
+      <Text
+        variant="label"
+        weight="regular"
+        tone="secondary"
+        numberOfLines={expanded ? undefined : 2}
+      >
         {term.intuitiveExplanation}
       </Text>
 
       {expanded && (
-        <View style={styles.details}>
-          <Text style={styles.sectionLabel}>Formal Definition</Text>
-          <Text style={styles.formal}>{term.formalDefinition}</Text>
+        <View className="mt-md border-t border-default pt-md">
+          <SectionLabel>Formal Definition</SectionLabel>
+          <Text variant="bodyLg" tone="secondary" className="mb-sm">
+            {term.formalDefinition}
+          </Text>
 
           {term.keyEquation && (
             <FormulaSection
@@ -73,8 +102,8 @@ export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
 
           {term.relatedTerms.length > 0 && (
             <>
-              <Text style={styles.sectionLabel}>Related</Text>
-              <View style={styles.related}>
+              <SectionLabel>Related</SectionLabel>
+              <View className="flex-row flex-wrap">
                 {term.relatedTerms.map((id) => (
                   <RelatedTermLink
                     key={id}
@@ -93,63 +122,14 @@ export function TermCard({ term, highlighted, onRelatedPress }: TermCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1e293b",
-    borderRadius: 10,
-    padding: 14,
     marginHorizontal: 16,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#334155",
   },
   highlighted: {
-    borderColor: "#6366f1",
+    borderColor: chrome.accent.base,
     borderWidth: 2,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-  },
-  name: {
-    color: "#f1f5f9",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  intuitive: {
-    color: "#94a3b8",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  details: {
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#334155",
-    paddingTop: 12,
-  },
   sectionLabel: {
-    color: "#6366f1",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginBottom: 6,
-    marginTop: 4,
-  },
-  formal: {
-    color: "#cbd5e1",
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: 10,
-  },
-  related: {
-    flexDirection: "row",
-    flexWrap: "wrap",
   },
 });

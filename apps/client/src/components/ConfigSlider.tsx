@@ -1,6 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Slider from "@react-native-community/slider";
+
+import { Row, Text, chrome } from "@/src/design";
 
 interface Props {
   label: string;
@@ -27,10 +29,14 @@ export default function ConfigSlider({
 
   return (
     <View style={[styles.container, disabled && styles.disabled]}>
-      <View style={styles.header}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{display}</Text>
-      </View>
+      <Row justify="between" className="mb-xs">
+        <Text variant="label" weight="semibold" tone="primary">
+          {label}
+        </Text>
+        <Text variant="label" tone="secondary" mono>
+          {display}
+        </Text>
+      </Row>
       <Slider
         style={styles.slider}
         minimumValue={min}
@@ -38,9 +44,9 @@ export default function ConfigSlider({
         step={step}
         value={value}
         onValueChange={onValueChange}
-        minimumTrackTintColor="#6366f1"
-        maximumTrackTintColor="#334155"
-        thumbTintColor="#6366f1"
+        minimumTrackTintColor={chrome.accent.base}
+        maximumTrackTintColor={chrome.border.default}
+        thumbTintColor={chrome.accent.base}
         disabled={disabled}
       />
     </View>
@@ -50,12 +56,5 @@ export default function ConfigSlider({
 const styles = StyleSheet.create({
   container: { marginBottom: 16 },
   disabled: { opacity: 0.4 },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  label: { color: "#e2e8f0", fontSize: 14, fontWeight: "600" },
-  value: { color: "#94a3b8", fontSize: 14, fontFamily: "SpaceMono" },
   slider: { width: "100%", height: 40 },
 });

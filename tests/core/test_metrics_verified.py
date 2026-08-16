@@ -106,8 +106,9 @@ class TestAsymmetryIndex:
     def test_ghz_three_qubit_exact(self):
         assert compute_asymmetry_index(GHZ_3Q) == pytest.approx(0.547808764940239)
 
-    def test_single_outcome_is_half(self):
-        assert compute_asymmetry_index({"0000": 1000}) == 0.5
+    def test_single_outcome_closed_form(self):
+        # K=16, N=1000, alpha=0.5: TVD = (N+a)/(N+aK) - 1/K = 937.5/1008.
+        assert compute_asymmetry_index({"0000": 1000}) == pytest.approx(937.5 / 1008)
 
     def test_empty_counts_returns_zero(self):
         # validate_counts_dict raises on empty -> ValueError, not returned 0.0.
@@ -115,14 +116,15 @@ class TestAsymmetryIndex:
             compute_asymmetry_index({})
 
     def test_return_analysis_single_outcome(self):
+        # K=8, N=500, alpha=0.5: TVD = (N+a)/(N+aK) - 1/K = 437.5/504.
         a = compute_asymmetry_index({"000": 500}, return_analysis=True)
         assert isinstance(a, AsymmetryAnalysis)
-        assert a.asymmetry_index == 0.5
+        assert a.asymmetry_index == pytest.approx(437.5 / 504)
         assert a.structure_evidence == "strong"
-        assert a.dominant_outcomes == ["000"]
+        assert a.dominant_outcomes[0] == "000"
         # to_dict round-trips all fields.
         d = a.to_dict()
-        assert d["asymmetry_index"] == 0.5
+        assert d["asymmetry_index"] == pytest.approx(437.5 / 504)
 
     def test_return_analysis_full_support(self):
         a = compute_asymmetry_index(GHZ_3Q, return_analysis=True)
@@ -141,21 +143,21 @@ class TestAsymmetryIndex:
     def test_with_null_comparison_structured(self):
         ai_u, ai_f, interp = compute_asymmetry_index_with_null_comparison(GHZ_3Q)
         assert ai_u == pytest.approx(0.547808764940239)
-        assert interp == "structured_decoherence"
+        assert interp == "structured"
 
     def test_with_null_comparison_random(self):
         ai_u, ai_f, interp = compute_asymmetry_index_with_null_comparison(UNIFORM_2Q)
         assert ai_u == pytest.approx(0.0, abs=1e-9)
-        assert interp == "random_decoherence"
+        assert interp == "unstructured"
 
     def test_validate_properties(self):
-        # Use a genuine full-support distribution (AI < 0.5) so the validator's
-        # built-in range/uniform checks are satisfied.
         moderate = {"00": 300, "01": 250, "10": 200, "11": 150}
         ai = compute_asymmetry_index(moderate)
         assert validate_asymmetry_index_properties(ai, moderate) is True
         assert validate_asymmetry_index_properties(0.0, UNIFORM_2Q) is True
-        assert validate_asymmetry_index_properties(0.5, {"00": 10}) is True
+        single = {"00": 10}
+        ai_single = compute_asymmetry_index(single)
+        assert validate_asymmetry_index_properties(ai_single, single) is True
 
     def test_educational_demo_runs(self):
         demo = asymmetry_index_educational_demo()
@@ -853,8 +855,8 @@ class TestProfiles:
         assert resolve_metrics(None) is None
 
     def test_resolve_profile_name(self):
-        out = resolve_metrics("structured_decoherence")
-        assert out == METRIC_PROFILES["structured_decoherence"]
+        out = resolve_metrics("decoherence")
+        assert out == METRIC_PROFILES["decoherence"]
 
     def test_resolve_list_passthrough(self):
         out = resolve_metrics(["structure_score", "total_correlation"])
@@ -893,7 +895,7 @@ class TestAsymmetryBranches:
     def test_large_k_null_comparison(self):
         ai_u, ai_f, interp = compute_asymmetry_index_with_null_comparison(LARGE_K_COUNTS)
         assert math.isnan(ai_f)
-        assert interp == "random_decoherence"
+        assert interp == "unstructured"
 
     def test_evidence_weak(self):
         a = compute_asymmetry_index(

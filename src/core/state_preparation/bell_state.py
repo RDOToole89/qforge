@@ -1,4 +1,4 @@
-"""Bell State Preparation for Fundamental Entanglement Research.
+"""Bell state preparation.
 
 # The Bell States (Einstein-Podolsky-Rosen Pairs)
 Bell states represent the fundamental building blocks of quantum entanglement,
@@ -10,12 +10,6 @@ classical physics. These states form the foundation of quantum information.
 |Φ-⟩ = (|00⟩ - |11⟩)/√2  [phi_minus] - Phase-flipped entangled state
 |Ψ+⟩ = (|01⟩ + |10⟩)/√2  [psi_plus]  - Bit-flipped entangled state
 |Ψ-⟩ = (|01⟩ - |10⟩)/√2  [psi_minus] - Both phase and bit flipped
-
-# Research Applications in Decoherence Studies
-Bell states provide the minimal case for studying structured decoherence:
-- Binary entanglement: Simplest case of quantum correlation breakdown
-- Local vs global effects: How noise on one qubit affects the other
-- Entanglement sudden death: Discrete loss of quantum correlations
 """
 
 from typing import Any
@@ -27,7 +21,7 @@ from .base_state import BaseState
 
 
 class BellState(BaseState):
-    """Bell state preparation for fundamental entanglement research.
+    """Bell state preparation.
 
     # Quantum Entanglement Foundation
     Bell states demonstrate the core phenomenon of quantum mechanics:
@@ -283,37 +277,6 @@ class BellState(BaseState):
         )
 
         return base_properties
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for Bell state decoherence studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        variant = (self.custom_params or {}).get("variant", "phi_plus").lower()
-
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Binary entanglement → coupled decoherence pathways",
-                "test_method": "Monitor correlation decay between entangled outcomes",
-                "expected_signature": "Synchronized loss of quantum correlations",
-            },
-            "decoherence_characteristics": {
-                "entanglement_sudden_death": "Finite-time complete correlation loss",
-                "local_vs_global": "Test whether single-qubit noise affects both qubits",
-                "symmetry_breaking": f"Monitor {variant} state symmetry under noise",
-            },
-            "research_applications": {
-                "quantum_communication": "Bell states enable quantum teleportation",
-                "cryptography": "Foundation for quantum key distribution",
-                "computation": "Building blocks for quantum algorithms",
-            },
-            "experimental_advantages": {
-                "simplicity": "Only 2 qubits - minimal complexity",
-                "clear_signatures": "Binary outcomes easy to analyze",
-                "theoretical_foundation": "Well-understood analytical predictions",
-            },
-        }
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

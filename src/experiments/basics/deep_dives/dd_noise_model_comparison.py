@@ -65,7 +65,7 @@ class NoiseComparison(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

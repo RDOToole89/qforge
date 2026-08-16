@@ -1,20 +1,20 @@
-"""Statistical Confidence Methods for Structured Decoherence Metrics.
+"""Statistical confidence methods for analysis metrics.
 
 # Bootstrap Confidence Intervals for Quantum Measurements
 This module implements bootstrap methods to compute 95% confidence intervals
-for all structured decoherence metrics, as required by the v1.0 schemas.
+for all analysis metrics, as required by the v1.0 schemas.
 
 # Statistical Foundation
 Bootstrap resampling (Efron 1979) provides non-parametric confidence intervals
 without assumptions about the underlying distribution. For quantum measurements,
 this is crucial since error distributions can be highly non-Gaussian.
 
-# Research Significance
+# Statistical Significance
 Confidence intervals enable:
-- Statistical validation of pathway structure claims
+- Quantifying uncertainty in each metric value
 - Comparison across different experimental conditions
-- Publication-quality error bars for all metrics
-- Hypothesis testing with proper significance levels
+- Error bars for all metrics
+- Significance testing with proper thresholds
 
 # Educational Framework
 This module bridges quantum mechanics with statistical inference:
@@ -305,7 +305,7 @@ def determine_validation_status(ci_width: float, metric_value: float, n_samples:
        - High coefficient of variation
        - Results should be interpreted with caution
 
-    # Research Implications
+    # Interpretation
     - Only "validated" metrics should be used for strong claims
     - "Experimental" metrics suggest trends worth investigating
     - "Unstable" metrics need more data before interpretation

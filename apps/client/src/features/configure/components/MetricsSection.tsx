@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Text, Pressable, Switch, StyleSheet } from "react-native";
-import { colors, spacing } from "@/src/theme";
-import type { ResearchType } from "@/src/lib/types";
+import { Pressable, Switch, View } from "react-native";
+
+import { Chip, Row, SegmentedControl, Text, chrome } from "@/src/design";
+import type { ExperimentType } from "@/src/lib/types";
 import {
-  RESEARCH_TYPES,
+  EXPERIMENT_TYPES,
   METRIC_PROFILES,
   INDIVIDUAL_METRICS,
 } from "../constants";
@@ -18,8 +19,8 @@ interface MetricsSectionProps {
   setSelectedProfile: (v: string) => void;
   selectedMetrics: string[];
   setSelectedMetrics: (v: string[]) => void;
-  researchType: ResearchType | null;
-  setResearchType: (v: ResearchType | null) => void;
+  experimentType: ExperimentType | null;
+  setExperimentType: (v: ExperimentType | null) => void;
   multipleRuns: number;
   setMultipleRuns: (v: number) => void;
   trackConvergence: boolean;
@@ -38,8 +39,8 @@ export function MetricsSection({
   setSelectedProfile,
   selectedMetrics,
   setSelectedMetrics,
-  researchType,
-  setResearchType,
+  experimentType,
+  setExperimentType,
   multipleRuns,
   setMultipleRuns,
   trackConvergence,
@@ -60,9 +61,9 @@ export function MetricsSection({
   const incRuns = () => setMultipleRuns(Math.min(100, multipleRuns + 1));
 
   return (
-    <View style={styles.section}>
+    <View className="mb-lg">
       <SectionHeader
-        title="Research Metrics"
+        title="Analysis Metrics"
         switchValue={metricsEnabled}
         onSwitchChange={setMetricsEnabled}
         collapsed={collapsed}
@@ -72,84 +73,54 @@ export function MetricsSection({
 
       {metricsEnabled && !collapsed && (
         <>
-          {/* Research type */}
-          <Text style={styles.label}>Research Type</Text>
-          <View style={styles.chipRow}>
-            {RESEARCH_TYPES.map((rt) => {
-              const active = researchType === rt.id;
+          {/* Experiment type */}
+          <Text variant="label" weight="semibold" className="mb-xs">
+            Experiment Type
+          </Text>
+          <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
+            {EXPERIMENT_TYPES.map((rt) => {
+              const active = experimentType === rt.id;
               return (
-                <Pressable
+                <Chip
                   key={rt.id}
-                  onPress={() => setResearchType(active ? null : (rt.id as ResearchType))}
-                  style={[styles.chip, active && styles.chipActive]}
-                >
-                  <Text
-                    style={[styles.chipText, active && styles.chipTextActive]}
-                  >
-                    {rt.label}
-                  </Text>
-                </Pressable>
+                  label={rt.label}
+                  tone={active ? "accent" : "neutral"}
+                  selected={active}
+                  onPress={() =>
+                    setExperimentType(active ? null : (rt.id as ExperimentType))
+                  }
+                />
               );
             })}
           </View>
 
           {/* Metrics mode segmented control */}
-          <Text style={styles.label}>Metrics Selection</Text>
-          <View style={styles.modeRow}>
-            <Pressable
-              onPress={() => setMetricsMode("profile")}
-              style={[
-                styles.modeChip,
-                metricsMode === "profile" && styles.chipActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  metricsMode === "profile" && styles.chipTextActive,
-                ]}
-              >
-                Profile
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setMetricsMode("individual")}
-              style={[
-                styles.modeChip,
-                metricsMode === "individual" && styles.chipActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  metricsMode === "individual" && styles.chipTextActive,
-                ]}
-              >
-                Individual
-              </Text>
-            </Pressable>
-          </View>
+          <Text variant="label" weight="semibold" className="mb-xs">
+            Metrics Selection
+          </Text>
+          <SegmentedControl<"profile" | "individual">
+            className="mb-md"
+            value={metricsMode}
+            onChange={setMetricsMode}
+            options={[
+              { label: "Profile", value: "profile" },
+              { label: "Individual", value: "individual" },
+            ]}
+          />
 
           {/* Profile mode */}
           {metricsMode === "profile" && (
-            <View style={styles.chipRow}>
+            <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
               {METRIC_PROFILES.map((profile) => {
                 const active = selectedProfile === profile.id;
                 return (
-                  <Pressable
+                  <Chip
                     key={profile.id}
+                    label={`${profile.label} (${profile.metrics.length} metrics)`}
+                    tone={active ? "accent" : "neutral"}
+                    selected={active}
                     onPress={() => setSelectedProfile(profile.id)}
-                    style={[styles.chip, active && styles.chipActive]}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        active && styles.chipTextActive,
-                      ]}
-                    >
-                      {profile.label} ({profile.metrics.length} metrics)
-                    </Text>
-                  </Pressable>
+                  />
                 );
               })}
             </View>
@@ -157,26 +128,28 @@ export function MetricsSection({
 
           {/* Individual mode */}
           {metricsMode === "individual" && (
-            <View style={styles.metricsList}>
+            <View className="mb-md">
               {INDIVIDUAL_METRICS.map((metric) => {
                 const checked = selectedMetrics.includes(metric.id);
                 return (
                   <Pressable
                     key={metric.id}
                     onPress={() => toggleMetric(metric.id)}
-                    style={styles.metricRow}
+                    className="flex-row items-start"
+                    style={{ paddingVertical: 6 }}
                   >
                     <Text
-                      style={[
-                        styles.checkbox,
-                        checked && styles.checkboxActive,
-                      ]}
+                      tone={checked ? "accent" : "tertiary"}
+                      className="mr-sm"
+                      style={{ fontSize: 18, lineHeight: 20 }}
                     >
-                      {checked ? "\u25A0" : "\u25A1"}
+                      {checked ? "■" : "□"}
                     </Text>
-                    <View style={styles.metricInfo}>
-                      <Text style={styles.metricName}>{metric.label}</Text>
-                      <Text style={styles.metricDesc}>
+                    <View className="flex-1">
+                      <Text variant="bodyLg" weight="semibold">
+                        {metric.label}
+                      </Text>
+                      <Text variant="bodySm" tone="tertiary" style={{ marginTop: 2 }}>
                         {metric.description}
                       </Text>
                     </View>
@@ -187,155 +160,59 @@ export function MetricsSection({
           )}
 
           {/* Separator */}
-          <View style={styles.separator} />
+          <View className="my-md h-px bg-default" />
 
           {/* Multiple runs */}
-          <Text style={styles.label}>Multiple Runs</Text>
-          <View style={styles.counterRow}>
-            <Pressable onPress={decRuns} style={styles.counterBtn}>
-              <Text style={styles.counterBtnText}>-</Text>
+          <Text variant="label" weight="semibold" className="mb-xs">
+            Multiple Runs
+          </Text>
+          <Row align="center" className="mb-md">
+            <Pressable
+              onPress={decRuns}
+              className="items-center justify-center rounded-md border border-default bg-surface"
+              style={{ width: 36, height: 36 }}
+            >
+              <Text variant="heading" weight="semibold">
+                -
+              </Text>
             </Pressable>
-            <Text style={styles.counterValue}>{multipleRuns}</Text>
-            <Pressable onPress={incRuns} style={styles.counterBtn}>
-              <Text style={styles.counterBtnText}>+</Text>
+            <Text
+              variant="headingSm"
+              weight="semibold"
+              mono
+              className="text-center"
+              style={{ minWidth: 48 }}
+            >
+              {multipleRuns}
+            </Text>
+            <Pressable
+              onPress={incRuns}
+              className="items-center justify-center rounded-md border border-default bg-surface"
+              style={{ width: 36, height: 36 }}
+            >
+              <Text variant="heading" weight="semibold">
+                +
+              </Text>
             </Pressable>
-          </View>
+          </Row>
 
           {/* Track convergence */}
-          <View style={styles.toggleRow}>
-            <Text style={styles.label}>Track Convergence</Text>
+          <Row align="center" justify="between" className="mb-md">
+            <Text variant="label" weight="semibold">
+              Track Convergence
+            </Text>
             <Switch
               value={trackConvergence}
               onValueChange={setTrackConvergence}
               trackColor={{
-                false: colors.text.tertiary,
-                true: colors.accent.base,
+                false: chrome.text.tertiary,
+                true: chrome.accent.base,
               }}
-              thumbColor={colors.text.primary}
+              thumbColor={chrome.text.primary}
             />
-          </View>
+          </Row>
         </>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipActive: {
-    backgroundColor: "#6366f1",
-    borderColor: "#6366f1",
-  },
-  chipText: {
-    fontSize: 13,
-    color: "#94a3b8",
-  },
-  chipTextActive: {
-    color: "#ffffff",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  modeRow: {
-    flexDirection: "row",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  modeChip: {
-    flex: 1,
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    paddingVertical: 8,
-    alignItems: "center",
-  },
-  metricsList: {
-    marginBottom: spacing.md,
-  },
-  metricRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: 6,
-  },
-  checkbox: {
-    fontSize: 18,
-    color: "#64748b",
-    marginRight: spacing.sm,
-    lineHeight: 20,
-  },
-  checkboxActive: {
-    color: "#6366f1",
-  },
-  metricInfo: {
-    flex: 1,
-  },
-  metricName: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.text.primary,
-  },
-  metricDesc: {
-    fontSize: 11,
-    color: colors.text.tertiary,
-    marginTop: 2,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#334155",
-    marginVertical: spacing.md,
-  },
-  counterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.md,
-  },
-  counterBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  counterBtnText: {
-    fontSize: 18,
-    color: colors.text.primary,
-    fontWeight: "600",
-  },
-  counterValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text.primary,
-    minWidth: 48,
-    textAlign: "center",
-    fontFamily: "SpaceMono",
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
-  },
-});

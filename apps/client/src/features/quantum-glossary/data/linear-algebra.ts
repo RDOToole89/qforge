@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "linear_algebra",
   name: "Linear Algebra for QM",
   icon: "calculator",
-  color: "#a855f7",
+  color: viz.gate.purple,
   description: "Mathematical foundations underlying quantum mechanics",
 };
 

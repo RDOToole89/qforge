@@ -4,7 +4,7 @@ Purpose: Define the top-level structure for quantum experiment results.
 These models compose the focused submodules (metadata, circuit, measurement,
 provenance, quality) into the complete experiment result.
 
-Dependencies: Pydantic, research models, submodule models
+Dependencies: Pydantic, analysis models, submodule models
 Used by: Engine API, storage systems, analysis pipelines
 """
 
@@ -15,12 +15,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .analysis import MetricsBundle
 from .circuit import CircuitStatistics
 from .measurement import MeasurementResults
 from .metadata import ExperimentMetadata
 from .provenance import Provenance
 from .quality import QualityMetrics, compute_quality_metrics
-from .research import MetricsBundle, ResearchMetadata
 from .storage import ArtifactRef
 
 # Re-export submodule models for backward compatibility
@@ -56,11 +56,6 @@ class ExperimentResult(BaseModel):
     metrics_bundle: MetricsBundle | None = Field(
         default=None,
         description="Computed analysis metrics (profile-based or explicit selection)",
-    )
-
-    research_metadata: ResearchMetadata | None = Field(
-        default=None,
-        description="Research context and experimental metadata",
     )
 
     provenance: Provenance = Field(

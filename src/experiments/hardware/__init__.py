@@ -5,7 +5,7 @@ Requires IBM Quantum credentials. See docs/guides/hardware-setup.md.
 Organized into two parts:
 
   steps/       — 5-step progression from first run to real decoherence
-  deep_dives/  — Full research suites and advanced hardware experiments
+  deep_dives/  — Larger hardware studies
 """
 
 # Steps

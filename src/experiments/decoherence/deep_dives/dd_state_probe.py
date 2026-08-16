@@ -6,8 +6,6 @@ noise topologies using the NTC (Noise Topology Correlation) metric.
 Phase 1: Sensitivity ranking across 4 states x 3 error rates x 3 correlation strengths
 Phase 2: Topology matching (3 states x 2 noise topologies)
 Phase 3: Scaling with qubit count (best state from Phase 1, n=4..8)
-
-See docs/research-docs/research_direction.md for full protocol.
 """
 
 from __future__ import annotations
@@ -30,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 StateTypeLiteral = Literal["GHZ", "W", "CLUSTER", "BELL", "SUPERPOSITION", "CUSTOM"]
 
-# --- Constants from research protocol ---
+# --- Study constants ---
 
 STATES = ["SUPERPOSITION", "GHZ", "W", "CLUSTER"]
 

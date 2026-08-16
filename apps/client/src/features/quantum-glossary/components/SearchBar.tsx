@@ -1,6 +1,8 @@
 import React from "react";
-import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import { TextInput, TouchableOpacity } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+
+import { Row, chrome } from "@/src/design";
 
 interface SearchBarProps {
   value: string;
@@ -9,12 +11,17 @@ interface SearchBarProps {
 
 export function SearchBar({ value, onChangeText }: SearchBarProps) {
   return (
-    <View style={styles.container}>
-      <FontAwesome name="search" size={14} color="#64748b" style={styles.icon} />
+    <Row className="mx-lg my-sm h-10 rounded-lg border border-default bg-surface px-md">
+      <FontAwesome
+        name="search"
+        size={14}
+        color={chrome.text.tertiary}
+        style={{ marginRight: 8 }}
+      />
       <TextInput
-        style={styles.input}
+        className="flex-1 text-label text-primary"
         placeholder="Search terms, definitions..."
-        placeholderTextColor="#64748b"
+        placeholderTextColor={chrome.text.tertiary}
         value={value}
         onChangeText={onChangeText}
         autoCapitalize="none"
@@ -22,36 +29,14 @@ export function SearchBar({ value, onChangeText }: SearchBarProps) {
         clearButtonMode="while-editing"
       />
       {value.length > 0 && (
-        <TouchableOpacity onPress={() => onChangeText("")} style={styles.clear}>
-          <FontAwesome name="times-circle" size={16} color="#64748b" />
+        <TouchableOpacity onPress={() => onChangeText("")} className="p-xs">
+          <FontAwesome
+            name="times-circle"
+            size={16}
+            color={chrome.text.tertiary}
+          />
         </TouchableOpacity>
       )}
-    </View>
+    </Row>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1e293b",
-    borderRadius: 10,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    paddingHorizontal: 12,
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#334155",
-  },
-  icon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    color: "#e2e8f0",
-    fontSize: 15,
-  },
-  clear: {
-    padding: 4,
-  },
-});

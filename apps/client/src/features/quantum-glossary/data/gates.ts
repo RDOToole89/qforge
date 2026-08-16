@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "gates",
   name: "Quantum Gates & Circuits",
   icon: "microchip",
-  color: "#f59e0b",
+  color: viz.gate.amber,
   description: "Operations on qubits and their circuit representations",
 };
 

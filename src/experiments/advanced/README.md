@@ -52,7 +52,7 @@ Put it all together. Design, configure, run, and analyze your own experiment.
 |------|-----|-------------------|
 | 8 | `python -m src.cli run adv_08_design_your_own` | The experiment design pattern — hypothesis → config → run → analyze |
 
-After Step 8, you're ready to create experiments in `decoherence/`, `hardware/`, or an entirely new research direction.
+After Step 8, you're ready to create experiments in `decoherence/`, `hardware/`, or an entirely new direction.
 
 ---
 
@@ -74,12 +74,12 @@ Apply the techniques from the steps to real-world problems.
 ## The Complete Arc
 
 ```
-Basics (11 steps)          Advanced (8 steps)           Research
-─────────────────          ──────────────────           ────────
+Basics (11 steps)          Advanced (8 steps)           Beyond
+─────────────────          ──────────────────           ──────
 What is a qubit?     →     Quantum superpowers    →     Topology comparison
 What is entanglement? →    Entanglement as tool   →     Scaling ladder
 What is noise?       →     QFT + Error correction →     Noise sweep
-River vs Fog         →     Design your own        →     Hardware experiments
+Noise & entanglement →     Design your own        →     Hardware experiments
                                    ↓
                            You are here: ready to
                            create your own experiments

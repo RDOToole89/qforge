@@ -1,3 +1,4 @@
+import { viz } from "@/src/design/tokens";
 import type { GateDefinition, GateType } from "../types";
 
 export const GATE_DEFS: Record<GateType, GateDefinition> = {
@@ -9,7 +10,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\\\1&-1\\end{pmatrix}",
     description:
       "Creates equal superposition. Maps |0> to |+> and |1> to |->. The most common first step in quantum algorithms.",
-    color: "#6366f1",
+    color: viz.gate.indigo,
     label: "H",
     glossaryTermId: "hadamard",
     qiskitName: "h",
@@ -22,7 +23,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}",
     description:
       "Quantum NOT gate. Flips |0> to |1> and vice versa. A 180 degree rotation around the X-axis of the Bloch sphere.",
-    color: "#ef4444",
+    color: viz.gate.red,
     label: "X",
     glossaryTermId: "pauli_x",
     qiskitName: "x",
@@ -35,7 +36,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\begin{pmatrix}0&-i\\\\i&0\\end{pmatrix}",
     description:
       "Combines a bit flip with a phase flip. A 180 degree rotation around the Y-axis of the Bloch sphere.",
-    color: "#22c55e",
+    color: viz.gate.green,
     label: "Y",
     glossaryTermId: "pauli_y",
     qiskitName: "y",
@@ -48,7 +49,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}",
     description:
       "Phase flip gate. Leaves |0> unchanged and maps |1> to -|1>. Invisible to Z-basis measurement.",
-    color: "#3b82f6",
+    color: viz.gate.blue,
     label: "Z",
     glossaryTermId: "pauli_z",
     qiskitName: "z",
@@ -61,7 +62,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\begin{pmatrix}1&0\\\\0&i\\end{pmatrix}",
     description:
       "Quarter-turn phase gate. Adds a 90 degree phase to |1>. The square root of Z: S*S = Z.",
-    color: "#8b5cf6",
+    color: viz.gate.violet,
     label: "S",
     qiskitName: "s",
   },
@@ -73,7 +74,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\begin{pmatrix}1&0\\\\0&e^{i\\pi/4}\\end{pmatrix}",
     description:
       "Eighth-turn phase gate. Adds a 45 degree phase to |1>. Essential for universal quantum computation. The square root of S.",
-    color: "#a855f7",
+    color: viz.gate.purple,
     label: "T",
     qiskitName: "t",
   },
@@ -88,7 +89,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\begin{pmatrix}\\cos\\frac{\\theta}{2}&-i\\sin\\frac{\\theta}{2}\\\\-i\\sin\\frac{\\theta}{2}&\\cos\\frac{\\theta}{2}\\end{pmatrix}",
     description:
       "Rotates the qubit by angle theta around the X-axis of the Bloch sphere. Rx(pi) = X gate.",
-    color: "#f97316",
+    color: viz.gate.orange,
     label: "Rx",
     qiskitName: "rx",
   },
@@ -103,7 +104,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\begin{pmatrix}\\cos\\frac{\\theta}{2}&-\\sin\\frac{\\theta}{2}\\\\\\sin\\frac{\\theta}{2}&\\cos\\frac{\\theta}{2}\\end{pmatrix}",
     description:
       "Rotates the qubit by angle theta around the Y-axis of the Bloch sphere. Ry(pi) = Y gate (up to global phase).",
-    color: "#eab308",
+    color: viz.gate.yellow,
     label: "Ry",
     qiskitName: "ry",
   },
@@ -118,7 +119,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\begin{pmatrix}e^{-i\\theta/2}&0\\\\0&e^{i\\theta/2}\\end{pmatrix}",
     description:
       "Rotates the qubit by angle theta around the Z-axis of the Bloch sphere. Rz(pi) = Z gate (up to global phase).",
-    color: "#14b8a6",
+    color: viz.gate.teal,
     label: "Rz",
     qiskitName: "rz",
   },
@@ -131,7 +132,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "|0\\rangle\\langle0|\\otimes I + |1\\rangle\\langle1|\\otimes X",
     description:
       "If control qubit is |1>, flip the target qubit. The primary tool for creating entanglement. H + CNOT = Bell state.",
-    color: "#6366f1",
+    color: viz.gate.indigo,
     label: "CX",
     glossaryTermId: "cnot",
     qiskitName: "cx",
@@ -145,7 +146,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\text{diag}(1, 1, 1, -1)",
     description:
       "Applies a phase flip when both qubits are |1>. Symmetric between control and target. Used to build cluster states.",
-    color: "#3b82f6",
+    color: viz.gate.blue,
     label: "CZ",
     glossaryTermId: "cz_gate",
     qiskitName: "cz",
@@ -159,7 +160,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\begin{pmatrix}1&0&0&0\\\\0&0&1&0\\\\0&1&0&0\\\\0&0&0&1\\end{pmatrix}",
     description:
       "Exchanges the states of two qubits. Can be decomposed into three CNOTs.",
-    color: "#ec4899",
+    color: viz.gate.pink,
     label: "SW",
     qiskitName: "swap",
   },
@@ -171,7 +172,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
     matrixLatex: "\\text{CCX: flip target iff both controls are } |1\\rangle",
     description:
       "Flips target qubit only when both control qubits are |1>. Universal for classical reversible computation.",
-    color: "#f59e0b",
+    color: viz.gate.amber,
     label: "CCX",
     glossaryTermId: "toffoli",
     qiskitName: "ccx",
@@ -185,7 +186,7 @@ export const GATE_DEFS: Record<GateType, GateDefinition> = {
       "\\frac{1}{2}\\begin{pmatrix}1+i&1-i\\\\1-i&1+i\\end{pmatrix}",
     description:
       "Square root of Pauli-X. Applying SX twice gives X. Common in transpiled circuits on IBM hardware.",
-    color: "#ec4899",
+    color: viz.gate.pink,
     label: "\u221AX",
     glossaryTermId: "sqrt_x",
     qiskitName: "sx",

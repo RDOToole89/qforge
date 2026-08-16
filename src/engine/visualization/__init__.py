@@ -1,4 +1,4 @@
-"""Research-focused visualization system for quantum experiments.
+"""Visualization system for quantum experiments.
 
 This package provides clean, extensible visualization capabilities with a
 plugin architecture:

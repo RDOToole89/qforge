@@ -9,7 +9,7 @@ This package provides a *stable* engine-facing API for:
 Only re-export the small surface the engine needs to import.
 """
 
-from .research_integration import (
+from .metrics import (
     compute_metrics_bundle,
     extract_counts_from_result,
 )

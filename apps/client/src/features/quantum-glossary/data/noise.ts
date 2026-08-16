@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "noise",
   name: "Quantum Channels & Noise",
   icon: "bolt",
-  color: "#f97316",
+  color: viz.gate.orange,
   description: "CPTP maps, Kraus operators, and noise models",
 };
 
@@ -45,7 +46,7 @@ export const terms: GlossaryTerm[] = [
     formalDefinition:
       "A noise channel that replaces the state with the maximally mixed state with probability p: ε(ρ) = (1−p)ρ + p·I/2. On the Bloch sphere, it uniformly contracts: r → (1−p)r. All three Bloch components shrink equally.",
     intuitiveExplanation:
-      "The 'fog machine' of quantum noise — it shrinks the Bloch sphere uniformly in all directions. At p=0 nothing happens; at p=1 everything becomes maximally mixed. In the visualizer, watch the sphere shrink to a point as you increase p.",
+      "It shrinks the Bloch sphere uniformly in all directions. At p=0 nothing happens; at p=1 everything becomes maximally mixed. In the visualizer, watch the sphere shrink to a point as you increase p.",
     symbol: "ε_dep(ρ)",
     keyEquation: "\\varepsilon(\\rho) = (1-p)\\rho + p\\frac{I}{2}",
     formulaExplanation:

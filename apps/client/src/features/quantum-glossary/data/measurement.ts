@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "measurement",
   name: "Measurement Theory",
   icon: "crosshairs",
-  color: "#06b6d4",
+  color: viz.cyanDeep,
   description: "Quantum measurement formalisms and their physical implications",
 };
 

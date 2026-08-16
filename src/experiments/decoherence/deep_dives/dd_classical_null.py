@@ -50,7 +50,7 @@ class ClassicalNullExperiment(BaseExperiment):
     """Deep Dive: Test whether classical distributions can fake quantum structure."""
 
     name = "dd_classical_null"
-    description = "Deep dive: Can classical noise fake quantum structured decoherence?"
+    description = "Deep dive: Can classically correlated noise mimic entangled error structure?"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -62,7 +62,7 @@ class ClassicalNullExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type="all",
         )
 

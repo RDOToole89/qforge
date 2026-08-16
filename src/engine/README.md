@@ -19,7 +19,7 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="structured_decoherence",
+    metrics="decoherence",
     shots=4096,
 ))
 print(f"Fidelity: {result.analysis.measurement_results.fidelity:.4f}")
@@ -70,7 +70,7 @@ ExperimentConfig
 (5) Typed ExperimentAnalysis assembly (metadata, circuit stats, measurements)
     |
     v
-(6) Optional: structured decoherence metrics (via analysis/registry)
+(6) Optional: analysis metrics (via analysis/registry)
     |
     v
 (7) Provenance + persist analysis JSON to disk
@@ -93,11 +93,11 @@ ExperimentResult (Pydantic-validated, fully typed)
 | `fidelity.py` | Simulation data extraction (statevector, density matrix, fidelity) |
 | `provenance.py` | Provenance building: software versions, git SHA, host info |
 | `viz_pipeline.py` | Visualization rendering orchestration |
-| `models/` | Pydantic models: config, metadata, circuit, measurement, provenance, quality, results, research, sweep, storage |
+| `models/` | Pydantic models: config, metadata, circuit, measurement, provenance, quality, results, analysis, sweep, storage |
 | `execution/` | Runners (qasm, statevector, density_matrix, hardware), context management, sweep driver |
 | `persistence/` | Result storage (`LocalStorage`) and config hashing (SHA1) |
 | `infrastructure/` | Event bus (`SimpleEventBus`), structured logging |
-| `analysis/` | Research metrics integration bridge: counts canonicalization, metrics bundle computation |
+| `analysis/` | Metrics integration bridge: counts canonicalization, metrics bundle computation |
 | `visualization/` | Renderers (histogram, density matrix, correlation, circuit), export, service |
 
 ---

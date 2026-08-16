@@ -1,10 +1,11 @@
 import type { GlossaryCategory, GlossaryTerm } from "../types";
+import { viz } from "@/src/design/tokens";
 
 export const category: GlossaryCategory = {
   id: "decoherence",
   name: "Decoherence & Open Systems",
   icon: "water",
-  color: "#ef4444",
+  color: viz.gate.red,
   description: "How quantum systems lose coherence through environmental interaction",
 };
 
@@ -16,7 +17,7 @@ export const terms: GlossaryTerm[] = [
       "The process by which a quantum system loses coherence (off-diagonal elements of the density matrix) through interaction with its environment. Transforms pure superpositions into classical-looking mixtures. The primary obstacle to quantum computation.",
     intuitiveExplanation:
       "Quantum information 'leaking' into the environment. The qubit doesn't disappear — it just becomes entangled with everything around it, making it look classical from the inside. This is what our framework studies: does decoherence follow structured pathways or happen randomly?",
-    relatedTerms: ["dephasing", "t1_time", "t2_time", "einselection", "structured_decoherence"],
+    relatedTerms: ["dephasing", "t1_time", "t2_time", "einselection", "structure_score"],
     categoryId: "decoherence",
   },
   {

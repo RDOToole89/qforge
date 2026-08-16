@@ -1,12 +1,11 @@
-# AGENTS.md — Structured Decoherence Metrics
+# AGENTS.md — Analysis Metrics
 
-Owner: Research Engineering (Roibín O'Toole)
-Last updated: 2025-12-02
+Owner: Roibín O'Toole
 Token budget: 400
 
 ## Purpose
 
-Research-grade metrics for detecting and quantifying structured decoherence patterns. Each metric follows rigorous mathematical definitions with educational documentation.
+Information-theoretic and statistical measures of measurement-outcome distributions. Each metric follows rigorous mathematical definitions with educational documentation.
 
 **Core Metrics**: AI, PCR, EEC, TPS, CES, SS, CI, TC (8 total)
 
@@ -109,14 +108,14 @@ schema_output = metrics_to_schema(results)  # v1.0 compliant
 metrics/
 ├── registry.py              # MetricResult, compute_all, register
 ├── schema_bridge.py         # v1.0 schema conversion
-├── profiles.py              # Metric profile presets (e.g. "default", "quick")
+├── profiles.py              # Metric profile presets ("decoherence", "quick", "information_theory")
 ├── asymmetry_index.py       # AI: TVD from uniform (canonical example)
 ├── pathway_concentration_ratio.py  # PCR
 ├── entanglement_error_correlation.py  # EEC (hardware caveat: uses logical topology)
 ├── temporal_pathway_stability.py  # TPS
 ├── complexity_emergence_score.py  # CES
 ├── structure_score.py       # SS
-├── concentration_index.py   # CI (Gini)
+├── concentration_index.py   # CI (alias of PCR quartile ratio)
 ├── total_correlation.py     # TC
 ├── pathway_persistence.py   # Additional temporal analysis
 └── noise_topology_correlation.py  # NTC: covariance-based noise-topology correlation

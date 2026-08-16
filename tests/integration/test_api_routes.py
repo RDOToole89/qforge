@@ -167,7 +167,7 @@ def test_run_experiment_with_metrics_profile() -> None:
     """Requesting a metrics profile populates the metrics bundle."""
     resp = client.post(
         "/api/experiments/run",
-        json=_tiny_run_config(metrics="structured_decoherence"),
+        json=_tiny_run_config(metrics="decoherence"),
     )
     assert resp.status_code == 200
     body = resp.json()

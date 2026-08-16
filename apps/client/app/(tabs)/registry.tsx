@@ -1,14 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, FlatList, View } from "react-native";
 import { router } from "expo-router";
 
+import { Text, chrome } from "@/src/design";
 import ExperimentCard from "@/src/components/ExperimentCard";
 import {
   getDefaultConfig,
@@ -63,22 +57,28 @@ export default function RegistryScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6366f1" />
+      <View className="flex-1 items-center justify-center bg-base">
+        <ActivityIndicator size="large" color={chrome.accent.base} />
       </View>
     );
   }
 
   return (
     <FlatList
-      style={styles.screen}
-      contentContainerStyle={styles.list}
+      className="flex-1 bg-base"
+      contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
       data={experiments}
       keyExtractor={(item) => item.name}
       onRefresh={refresh}
       refreshing={loading}
       ListHeaderComponent={
-        <Text style={styles.header}>
+        <Text
+          variant="bodyLg"
+          weight="semibold"
+          tone="secondary"
+          className="mb-md uppercase"
+          style={{ letterSpacing: 0.5 }}
+        >
           {experiments.length} Experiment{experiments.length !== 1 ? "s" : ""}
         </Text>
       }
@@ -92,9 +92,9 @@ export default function RegistryScreen() {
           />
           {running === item.name && (
             <ActivityIndicator
-              style={styles.spinner}
+              style={{ position: "absolute", right: 16, top: 16 }}
               size="small"
-              color="#6366f1"
+              color={chrome.accent.base}
             />
           )}
         </View>
@@ -102,23 +102,3 @@ export default function RegistryScreen() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#0f172a" },
-  list: { padding: 16, paddingBottom: 80 },
-  center: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    color: "#94a3b8",
-    fontSize: 13,
-    fontWeight: "600",
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  spinner: { position: "absolute", right: 16, top: 16 },
-});

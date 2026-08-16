@@ -1,23 +1,23 @@
-"""State Registry for Quantum Decoherence Research Framework.
+"""State class registry.
 
 # State Class Registry Pattern
-Centralized registry of all available quantum state preparation classes
-for structured decoherence pathway research. Implements the Registry Pattern
-to provide clean separation between state implementation and factory logic.
+Centralized registry of all available quantum state preparation classes.
+Implements the Registry Pattern to provide clean separation between state
+implementation and factory logic.
 
 # Educational Purpose
 This registry demonstrates the Registry Pattern in quantum computing applications,
 showing how to organize different quantum state types systematically while
 maintaining loose coupling between components.
 
-# Research Framework Integration
-Each registered state class implements different entanglement topologies:
-- GHZ: Global multipartite entanglement for pathway propagation studies
-- Bell: Fundamental bipartite entanglement for baseline measurements
-- W: Symmetric multipartite entanglement for robustness analysis
-- Cluster: Graph-based local correlations for network decoherence patterns
-- Superposition: Non-entangled product states for control experiments
-- Custom: Maximum flexibility for novel research and algorithm development
+# Registered State Types
+Each registered state class implements a different entanglement structure:
+- GHZ: Global multipartite entanglement
+- Bell: Fundamental bipartite entanglement
+- W: Symmetric multipartite entanglement
+- Cluster: Graph-based nearest-neighbor entanglement
+- Superposition: Non-entangled product states
+- Custom: Arbitrary user-defined circuits
 
 # Design Benefits
 - Extensibility: New state types can be added without modifying factory code
@@ -41,7 +41,7 @@ STATE_CLASSES: dict[str, type[BaseState]] = {
     "W": WState,  # Symmetric multipartite: |100⟩ + |010⟩ + |001⟩
     "CLUSTER": ClusterState,  # Graph-based network: local correlations
     "SUPERPOSITION": SuperpositionState,  # Product states: |+⟩^n (no entanglement)
-    "CUSTOM": CustomState,  # Advanced research: arbitrary circuits
+    "CUSTOM": CustomState,  # Arbitrary user-defined circuits
 }
 
 
@@ -111,42 +111,36 @@ def get_state_info() -> dict[str, dict[str, str]]:
             "description": "Global multipartite entanglement state",
             "formula": "|000⟩ + |111⟩ (normalized)",
             "entanglement_type": "maximal_multipartite",
-            "research_focus": "pathway_propagation_studies",
             "typical_qubits": "3-10",
         },
         "BELL": {
             "description": "Fundamental bipartite entanglement states",
             "formula": "Four Bell states: |Φ±⟩, |Ψ±⟩",
             "entanglement_type": "maximal_bipartite",
-            "research_focus": "baseline_entanglement_analysis",
             "typical_qubits": "2",
         },
         "W": {
             "description": "Symmetric multipartite entanglement state",
             "formula": "|100⟩ + |010⟩ + |001⟩ (normalized)",
             "entanglement_type": "symmetric_multipartite",
-            "research_focus": "robustness_vs_fragility_studies",
             "typical_qubits": "3-8",
         },
         "CLUSTER": {
             "description": "Graph-based quantum network states",
             "formula": "H⊗n followed by CZ on graph edges",
             "entanglement_type": "graph_state_network",
-            "research_focus": "topology_dependent_pathways",
             "typical_qubits": "4-20",
         },
         "SUPERPOSITION": {
             "description": "Product superposition states (no entanglement)",
             "formula": "|+⟩^n = (H⊗n)|0⟩^n",
             "entanglement_type": "none_separable",
-            "research_focus": "control_baseline_experiments",
             "typical_qubits": "1-10",
         },
         "CUSTOM": {
             "description": "User-defined arbitrary quantum circuits",
             "formula": "User-specified gate sequences",
             "entanglement_type": "user_defined",
-            "research_focus": "novel_experiments_and_algorithms",
             "typical_qubits": "1-20",
         },
     }
@@ -172,7 +166,7 @@ def validate_state_registry() -> bool:
             raise TypeError(f"State class {state_name} ({state_class}) must inherit from BaseState")
 
         # Check required methods exist
-        required_methods = ["create", "get_theoretical_properties", "get_research_context"]
+        required_methods = ["create", "get_theoretical_properties"]
         for method in required_methods:
             if not hasattr(state_class, method):
                 raise RuntimeError(f"State class {state_name} missing required method: {method}")

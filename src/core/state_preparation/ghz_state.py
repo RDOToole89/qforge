@@ -1,20 +1,13 @@
-"""GHZ State Preparation for Decoherence Pathway Research.
+"""GHZ state preparation.
 
 # The Greenberger-Horne-Zeilinger (GHZ) State
 The GHZ state represents maximal multipartite entanglement where all qubits
 are globally correlated: |GHZ⟩ = (|00...0⟩ + |11...1⟩)/√2
 
 # Physical Significance
-GHZ states exhibit the strongest possible quantum correlations for n qubits,
-making them ideal for studying how global entanglement affects decoherence
-pathway structure. Unlike Bell states (2-qubit) or W states (symmetric),
-GHZ states show all-or-nothing correlations.
-
-# Research Applications in Structured Decoherence
-- Pathway propagation: How does decoherence spread through global entanglement?
-- Measurement correlations: Which computational basis states remain correlated under noise?
-- Entanglement robustness: How quickly does global entanglement decay?
-- Symmetry breaking: Does noise break the |000⟩ ↔ |111⟩ symmetry?
+GHZ states exhibit the strongest possible quantum correlations for n qubits.
+Unlike Bell states (2-qubit) or W states (symmetric), GHZ states show
+all-or-nothing correlations: measuring any single qubit determines all others.
 """
 
 from typing import Any
@@ -26,14 +19,14 @@ from .base_state import BaseState
 
 
 class GHZState(BaseState):
-    """GHZ state preparation for quantum decoherence research.
+    """GHZ state preparation.
 
     # Quantum State Definition
     |GHZ_n⟩ = (|00...0⟩ + |11...1⟩)/√2
 
     This creates maximal multipartite entanglement where measuring any qubit
-    immediately determines all others. Perfect correlations make GHZ states
-    sensitive to decoherence but also excellent for studying pathway structure.
+    immediately determines all others. The perfect correlations make GHZ
+    states highly sensitive to decoherence.
 
     # Circuit Construction
     The standard GHZ preparation uses:
@@ -208,43 +201,6 @@ class GHZState(BaseState):
             "schmidt_rank": 2,  # Only 2 non-zero eigenvalues
             "robustness_to_decoherence": "fragile",
             "decoherence_sensitivity": "all_qubits_equally_critical",
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for structured decoherence pathway studies.
-
-        # Research Significance
-        GHZ states are particularly valuable for pathway research because:
-        1. Clear binary outcomes make pathway tracking easier
-        2. Global entanglement tests pathway propagation mechanisms
-        3. Symmetry properties reveal pathway structure
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Global entanglement → synchronized decoherence pathways",
-                "test_method": "Monitor correlation between |000⟩ and |111⟩ populations",
-                "expected_signature": "Correlated decay of both amplitudes",
-            },
-            "decoherence_pattern": {
-                "early_stage": "Slight amplitude reduction, coherence preserved",
-                "intermediate": "Asymmetric decay, mixed state emergence",
-                "late_stage": "Approach to maximally mixed state",
-            },
-            "research_metrics": {
-                "primary": ["AI (Asymmetry Index)", "PCR (Pathway Concentration Ratio)"],
-                "secondary": [
-                    "EEC (Entanglement-Error Correlation)",
-                    "TPS (Temporal Pathway Stability)",
-                ],
-            },
-            "control_comparisons": {
-                "vs_product_states": "Should show structured vs random decoherence",
-                "vs_w_states": "Different pathway topology effects",
-                "vs_bell_states": "Scaling behavior with system size",
-            },
         }
 
     def __str__(self) -> str:

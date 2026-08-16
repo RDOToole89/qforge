@@ -200,9 +200,10 @@ class TestRegistryIntegration:
         # because a single-outcome distribution is perfectly factorizable.
         assert abs(result["value"]) < 1e-2
 
-        # Deterministic case gives maximum asymmetry index (TVD vs uniform).
+        # Deterministic case gives near-maximal asymmetry index (TVD vs uniform):
+        # K=4, N=1000, alpha=0.5 -> (N+a)/(N+aK) - 1/K = 750/1002.
         ai_result = compute_metric("asymmetry_index", counts=counts)
-        assert abs(ai_result["value"] - 0.5) < 1e-10
+        assert abs(ai_result["value"] - 750.0 / 1002.0) < 1e-10
 
     def test_confidence_intervals(self):
         """Test confidence interval generation."""

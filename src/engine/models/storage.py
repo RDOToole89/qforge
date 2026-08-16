@@ -76,11 +76,6 @@ class ArtifactRef(BaseModel):
     # Access and permissions
     public: bool = Field(default=False, description="Whether artifact can be shared publicly")
 
-    publication_ready: bool = Field(
-        default=False,
-        description="Whether artifact meets publication quality standards",
-    )
-
     @classmethod
     def from_file(
         cls,
@@ -100,7 +95,6 @@ class ArtifactRef(BaseModel):
         title: str | None = None,
         description: str | None = None,
         public: bool = False,
-        publication_ready: bool = False,
         metadata: dict[str, Any] | None = None,
     ) -> ArtifactRef:
         """Create an ArtifactRef by inspecting an existing file on disk.
@@ -127,7 +121,6 @@ class ArtifactRef(BaseModel):
             title=title,
             description=description,
             public=public,
-            publication_ready=publication_ready,
         )
 
     @field_validator("path")
@@ -180,7 +173,7 @@ class StorageConfig(BaseModel):
 
     # File naming
     filename_template: str = Field(
-        default="{research_type}_{experiment_id}_{timestamp}",
+        default="{experiment_type}_{experiment_id}_{timestamp}",
         description="Template for generated filenames",
     )
 
@@ -229,13 +222,13 @@ class StorageConfig(BaseModel):
         self,
         *,
         experiment_id: str,
-        research_type: str | None,
+        experiment_type: str | None,
         timestamp: str,
     ) -> str:
         """Render a filename using the template (without extension)."""
-        safe_research = (research_type or "experiment").replace(" ", "_")
+        safe_type = (experiment_type or "experiment").replace(" ", "_")
         return self.filename_template.format(
-            research_type=safe_research,
+            experiment_type=safe_type,
             experiment_id=experiment_id,
             timestamp=timestamp.replace(":", "-"),
         )
@@ -256,15 +249,15 @@ class DirectoryStructure(BaseModel):
     # Main directories
     experiments: str = Field(default="experiments", description="Individual experiment results")
     sweeps: str = Field(default="sweeps", description="Parameter sweep results")
-    campaigns: str = Field(default="campaigns", description="Long-term research campaigns")
+    campaigns: str = Field(default="campaigns", description="Long-running experiment series")
     analysis: str = Field(default="analysis", description="Cross-experiment analysis")
     visualizations: str = Field(default="visualizations", description="Generated plots and figures")
     reports: str = Field(default="reports", description="Generated reports and summaries")
-    exports: str = Field(default="exports", description="Publication-ready exports")
+    exports: str = Field(default="exports", description="Exports for sharing")
 
     # Subdirectory organization
     by_date: bool = Field(default=True, description="Use date-based subdirectories")
-    by_research_type: bool = Field(default=True, description="Use research-type subdirectories")
+    by_experiment_type: bool = Field(default=True, description="Use experiment-type subdirectories")
     by_quantum_state: bool = Field(default=False, description="Use quantum-state subdirectories")
 
     def get_path(self, base: Path, category: str, **kwargs: Any) -> Path:
@@ -291,9 +284,9 @@ class DirectoryStructure(BaseModel):
                 dt = ts
             path = path / dt.strftime("%Y/%m/%d")
 
-        # Add research type organization if enabled
-        if self.by_research_type and "research_type" in kwargs and kwargs["research_type"]:
-            path = path / str(kwargs["research_type"]).replace(" ", "_")
+        # Add experiment-type organization if enabled
+        if self.by_experiment_type and "experiment_type" in kwargs and kwargs["experiment_type"]:
+            path = path / str(kwargs["experiment_type"]).replace(" ", "_")
 
         # Add quantum state organization if enabled
         if self.by_quantum_state and "state_type" in kwargs and kwargs["state_type"]:
@@ -309,7 +302,7 @@ class DirectoryStructure(BaseModel):
         category: Literal["experiments", "sweeps", "campaigns"] = "experiments",
         experiment_id: str,
         timestamp: str,
-        research_type: str | None = None,
+        experiment_type: str | None = None,
         state_type: str | None = None,
     ) -> Path:
         """Build and ensure the directory path for an experiment-like entity."""
@@ -318,7 +311,7 @@ class DirectoryStructure(BaseModel):
             base,
             category,
             timestamp=timestamp,
-            research_type=research_type,
+            experiment_type=experiment_type,
             state_type=state_type,
         )
         if storage.use_experiment_subdirs:
@@ -417,7 +410,7 @@ class ExperimentManifestEntry(BaseModel):
 
     experiment_id: str = Field(description="Unique experiment identifier")
     timestamp: str = Field(description="When experiment was performed")
-    research_type: str | None = Field(default=None, description="Type of research")
+    experiment_type: str | None = Field(default=None, description="Experiment category")
 
     # File references
     result_file: str = Field(description="Path to main result file")
@@ -431,12 +424,9 @@ class ExperimentManifestEntry(BaseModel):
     file_count: int = Field(ge=0, description="Number of files for this experiment")
     total_size_bytes: int = Field(ge=0, description="Total size of all files")
 
-    # Research metadata
-    has_research_metrics: bool = Field(
-        default=False, description="Whether structured decoherence metrics available"
-    )
-    publication_ready: bool = Field(
-        default=False, description="Whether results are publication ready"
+    # Analysis metadata
+    has_metrics: bool = Field(
+        default=False, description="Whether computed analysis metrics are available"
     )
 
     @field_validator("result_file")

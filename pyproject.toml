@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qforge"
 dynamic = ["version"]
-description = "A general-purpose quantum experiment engine built on Qiskit — for learning, research, and real hardware"
+description = "A general-purpose quantum experiment framework built on Qiskit — for learning, tinkering, and real hardware"
 readme = "README.md"
 license = {text = "Apache-2.0"}
-authors = [{name = "Quantum Research Team"}]
+authors = [{name = "Roibin O'Toole"}]
 requires-python = ">=3.11"
 dependencies = [
     # Quantum stack
@@ -149,7 +149,7 @@ include = [
     "src/core/*",
     "src/engine/fidelity.py",
     "src/engine/bloch_math.py",
-    "src/engine/analysis/research_integration.py",
+    "src/engine/analysis/metrics.py",
     "src/engine/models/measurement.py",
     "src/engine/execution/hardware_validation.py",
 ]

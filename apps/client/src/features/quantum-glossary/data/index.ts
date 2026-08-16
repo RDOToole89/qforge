@@ -12,10 +12,10 @@ import * as measurement from "./measurement";
 import * as information from "./information";
 import * as errorCorrection from "./error-correction";
 import * as linearAlgebra from "./linear-algebra";
-import * as structuredDecoherence from "./structured-decoherence";
+import * as distributionMetrics from "./distribution-metrics";
 import * as hardware from "./hardware";
 import * as algorithms from "./algorithms";
-import * as reconfigurationSpace from "./reconfiguration-space";
+import * as openQuantumSystems from "./open-quantum-systems";
 
 const modules = [
   fundamentals,
@@ -30,8 +30,8 @@ const modules = [
   information,
   errorCorrection,
   linearAlgebra,
-  structuredDecoherence,
-  reconfigurationSpace,
+  distributionMetrics,
+  openQuantumSystems,
   hardware,
   algorithms,
 ];

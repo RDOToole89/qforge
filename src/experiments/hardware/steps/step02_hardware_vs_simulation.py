@@ -28,8 +28,8 @@ CIRCUIT:
   Same GHZ-3 circuit in both modes. Only the execution backend differs.
 
 WHY THIS MATTERS:
-  Understanding where simulation breaks down is essential for research.
-  If you're studying structured decoherence on hardware, you need to know
+  Understanding where simulation breaks down is essential before trusting simulated results.
+  If you're comparing error distributions on hardware, you need to know
   which simulation results you can trust and which need real hardware validation.
 
 TRY IT:

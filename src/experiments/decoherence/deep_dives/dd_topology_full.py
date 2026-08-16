@@ -1,18 +1,13 @@
-"""Topology Comparison — Do different entanglement types decohere differently?
+"""Topology Comparison — do different entanglement types decohere differently?
 
-This is the foundational structured decoherence experiment. It tests four
-quantum states with different entanglement topologies under the same noise
-and compares their decoherence structure.
+Runs four quantum states with different entanglement topologies under the
+same noise and compares the shapes of their measured distributions.
 
 States tested:
-  - GHZ: All-to-all correlation → "Correlated River"
-  - W: Symmetric excitation sharing → "Distributed River"
-  - Cluster: Nearest-neighbor graph state → "Fog" (on current hardware)
-  - Product: No entanglement → "Fog" (negative control)
-
-Key finding (on IBM hardware):
-  GHZ and W show 12x higher Structure Score than Cluster and Product,
-  demonstrating that entanglement topology determines decoherence structure.
+  - GHZ: all-to-all correlation (ideal distribution: 2 peaks)
+  - W: symmetric excitation sharing (ideal distribution: N peaks)
+  - Cluster: nearest-neighbor graph state (ideal Z-basis distribution: uniform)
+  - Product: no entanglement (ideal distribution: uniform; negative control)
 
 Usage:
     from src.experiments.decoherence import topology_comparison
@@ -31,10 +26,10 @@ from src.experiments.base import BaseExperiment
 
 
 class TopologyComparison(BaseExperiment):
-    """Compare decoherence structure across entanglement topologies.
+    """Compare measured distribution shape across entanglement topologies.
 
-    Runs GHZ, W, Cluster, and Product states at 6 qubits to test
-    whether entanglement topology determines the shape of decoherence.
+    Runs GHZ, W, Cluster, and Product states at 6 qubits under the same
+    noise and compares their distribution metrics.
     """
 
     name = "topology_comparison"
@@ -49,7 +44,7 @@ class TopologyComparison(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             shots=8192,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type="all",
         )
 

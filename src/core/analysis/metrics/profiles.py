@@ -7,7 +7,7 @@ Profiles are resolved by name to a list of metric keys from the registry.
 from __future__ import annotations
 
 METRIC_PROFILES: dict[str, list[str]] = {
-    "structured_decoherence": [
+    "decoherence": [
         "structure_score",
         "entanglement_error_correlation",
         "concentration_index",

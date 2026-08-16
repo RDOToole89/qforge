@@ -1,25 +1,18 @@
-"""Base State Preparation Framework for Quantum Decoherence Research.
+"""Base state preparation framework.
 
 # Foundation of Quantum State Engineering
-This module provides the abstract foundation for creating quantum states in our
-decoherence pathway research framework. Each quantum state represents a different
-entanglement topology that we hypothesize will exhibit unique decoherence patterns.
+This module provides the abstract foundation for creating quantum states.
+Each state class prepares a specific entanglement structure (global, symmetric,
+graph-based, bipartite, or separable).
 
 # Educational Purpose
-This code serves as both a research tool and an educational resource. Every state
-preparation class demonstrates fundamental quantum mechanics principles while
-enabling systematic study of how entanglement structure affects information loss.
+Every state preparation class documents the quantum mechanics involved, so the
+code can serve both as an experiment tool and a learning resource.
 
-# Research Framework Integration
+# Framework Integration
 States created here feed into:
-1. Noise models (studying how different topologies respond to decoherence)
-2. Pathway analysis (measuring structured vs random decoherence patterns)
-3. Information theory metrics (quantifying entanglement and correlations)
-
-# The Entanglement-Decoherence Hypothesis
-Our central research question: Does quantum decoherence follow structured pathways
-determined by the underlying entanglement topology, rather than random patterns?
-Different states test different aspects of this hypothesis.
+1. Noise models (applying decoherence channels to the prepared circuits)
+2. Analysis metrics (quantifying the measured outcome distributions)
 """
 
 from __future__ import annotations
@@ -35,24 +28,23 @@ logger = logging.getLogger(__name__)
 
 
 class BaseState(ABC):
-    """Abstract base class for quantum state preparation in decoherence research.
+    """Abstract base class for quantum state preparation.
 
     # Quantum Computing Fundamentals
-    A quantum state is a complete description of a quantum system. In our research,
-    we prepare specific entangled states to study how their correlation structure
-    affects decoherence pathways when noise is applied.
+    A quantum state is a complete description of a quantum system. Each subclass
+    prepares a specific entangled (or separable) state whose behavior under
+    noise can then be simulated and measured.
 
     # Design Philosophy
     - Educational: Every method explains the quantum mechanics involved
-    - Research-focused: Optimized for decoherence pathway experiments
-    - Extensible: Easy to add new state types for future research
+    - Extensible: Easy to add new state types
     - Robust: Comprehensive validation with helpful error messages
 
-    # State Types and Research Applications
-    - GHZ: Global entanglement → study pathway propagation across all qubits
-    - W: Symmetric entanglement → study asymmetric pathway emergence
-    - Cluster: Local correlations → study network-like decoherence patterns
-    - Bell: Two-qubit entanglement → study fundamental pathway structures
+    # State Types
+    - GHZ: Global (all-or-nothing) multipartite entanglement
+    - W: Symmetric single-excitation entanglement
+    - Cluster: Graph states with nearest-neighbor entanglement
+    - Bell: Maximally entangled two-qubit states
 
     Attributes:
         num_qubits (int): Number of qubits in the quantum state
@@ -71,10 +63,10 @@ class BaseState(ABC):
 
         # Quantum System Size Considerations
         The number of qubits determines the Hilbert space dimension (2^n) and
-        computational complexity. For decoherence research:
-        - 2-4 qubits: Fundamental studies, clear theoretical predictions
-        - 5-10 qubits: Intermediate complexity, observable pathway structure
-        - 10+ qubits: Large systems, complex pathway networks
+        computational complexity:
+        - 2-4 qubits: Small systems with clear theoretical predictions
+        - 5-10 qubits: Intermediate complexity, still exactly simulable
+        - 10+ qubits: Large systems, simulation cost grows exponentially
 
         Args:
             num_qubits: Number of qubits (determines entanglement complexity)
@@ -89,7 +81,7 @@ class BaseState(ABC):
             raise ValueError(
                 f"Quantum states require at least 1 qubit. Got {num_qubits}. "
                 f"Note: Single qubits have no entanglement; use 2+ qubits for "
-                f"decoherence pathway studies."
+                f"entangled states."
             )
 
         if num_qubits > 25:
@@ -104,7 +96,7 @@ class BaseState(ABC):
         self.experiment_id = experiment_id
         self.balance = balance
 
-        # Research metadata for pathway analysis
+        # Internal state tracking
         self._state_prepared = False
         self._circuit_cache = None
 
@@ -120,11 +112,11 @@ class BaseState(ABC):
         - The correlation structure (topology)
         - Sensitivity to different types of noise
 
-        # Research Integration
-        The prepared circuit will be used in decoherence experiments where:
+        # Framework Integration
+        The prepared circuit is used in experiments where:
         1. State is prepared (this method)
         2. Noise is applied (noise models)
-        3. Measurements reveal pathway structure (analysis)
+        3. Measurement outcomes are analyzed (analysis metrics)
 
         Args:
             add_barrier: Add barrier after preparation (cleaner visualization)
@@ -145,9 +137,9 @@ class BaseState(ABC):
         representing all possible measurement outcomes and their amplitudes:
         |ψ⟩ = Σᵢ αᵢ|i⟩, where |αᵢ|² gives the probability of measuring state |i⟩
 
-        # Research Applications
+        # Uses
         - Validate circuit preparation against theoretical expectations
-        - Calculate entanglement measures for pathway prediction
+        - Calculate entanglement measures
         - Educational demonstrations of quantum superposition
 
         Returns:
@@ -166,7 +158,7 @@ class BaseState(ABC):
     def get_basic_properties(self) -> dict[str, Any]:
         """Get basic quantum state properties for engine coordination.
 
-        # State Properties for Research Framework
+        # State Properties for the Engine
         Provides essential information that the engine needs to coordinate
         with analysis modules, without mixing concerns.
 
@@ -441,15 +433,14 @@ class BaseState(ABC):
         logger.debug(f"Gate-count balancing: max={max_count}, padding={padding}")
         return circuit
 
-    def get_research_metadata(self) -> dict[str, Any]:
-        """Generate metadata for structured decoherence research experiments.
+    def get_experiment_metadata(self) -> dict[str, Any]:
+        """Generate metadata describing this state preparation.
 
-        # Research Reproducibility
-        Metadata ensures experiments can be reproduced and results properly
-        attributed to specific state preparations and parameter choices.
+        Metadata lets experiments be reproduced and results attributed to
+        specific state preparations and parameter choices.
 
         Returns:
-            Dict with basic metadata for research documentation
+            Dict with basic metadata about the prepared state.
         """
         return {
             "state_class": self.__class__.__name__,
@@ -458,17 +449,16 @@ class BaseState(ABC):
             "experiment_id": self.experiment_id,
             "hilbert_space_dimension": 2**self.num_qubits,
             "theoretical_state_computed": True,
-            "research_framework": "structured_decoherence_pathways",
         }
 
     def log_state_creation(self, state_type: str, extra_info: dict | None = None) -> None:
         """Log quantum state creation with educational context.
 
-        # Research Documentation
+        # Documentation
         Comprehensive logging enables:
         - Experiment reproducibility
         - Educational step-by-step explanations
-        - Research metadata collection
+        - Metadata collection
 
         Args:
             state_type: Human-readable state description

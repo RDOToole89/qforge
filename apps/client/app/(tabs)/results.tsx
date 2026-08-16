@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
 
+import { Button, Stack, Text, chrome } from "@/src/design";
 import { listResults } from "@/src/lib/api";
 import type { StoredResultEntry } from "@/src/lib/types";
 
@@ -35,28 +29,32 @@ export default function ResultsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#6366f1" />
+      <View className="flex-1 items-center justify-center bg-base p-2xl">
+        <ActivityIndicator size="large" color={chrome.accent.base} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Pressable style={styles.retryBtn} onPress={refresh}>
-          <Text style={styles.retryText}>Retry</Text>
-        </Pressable>
+      <View className="flex-1 items-center justify-center bg-base p-2xl">
+        <Text variant="label" tone="error" className="mb-md text-center">
+          {error}
+        </Text>
+        <Button variant="primary" size="md" onPress={refresh}>
+          Retry
+        </Button>
       </View>
     );
   }
 
   if (entries.length === 0) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>No results yet</Text>
-        <Text style={styles.emptySubtext}>
+      <View className="flex-1 items-center justify-center bg-base p-2xl">
+        <Text variant="headingSm" weight="semibold" tone="secondary">
+          No results yet
+        </Text>
+        <Text variant="bodyLg" tone="tertiary" className="mt-xs">
           Run an experiment from the Configure tab
         </Text>
       </View>
@@ -65,8 +63,8 @@ export default function ResultsScreen() {
 
   return (
     <FlatList
-      style={styles.screen}
-      contentContainerStyle={styles.list}
+      className="flex-1 bg-base"
+      contentContainerStyle={{ padding: 16 }}
       data={entries}
       keyExtractor={(item) => item.filename}
       onRefresh={refresh}
@@ -85,63 +83,31 @@ function ResultRow({ entry }: { entry: StoredResultEntry }) {
     : "";
 
   return (
-    <Pressable style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-      <View style={styles.rowMain}>
-        <Text style={styles.rowId} numberOfLines={1}>
+    <Pressable
+      className="flex-row justify-between rounded-lg border border-default bg-surface"
+      style={({ pressed }) => [
+        { padding: 14, marginBottom: 10 },
+        pressed && { opacity: 0.7 },
+      ]}
+    >
+      <Stack className="flex-1">
+        <Text variant="label" weight="semibold" mono numberOfLines={1}>
           {entry.experiment_id ?? entry.filename}
         </Text>
-        <Text style={styles.rowMeta}>
+        <Text variant="body" tone="secondary" className="mt-xs">
           {[entry.state_type, entry.num_qubits && `${entry.num_qubits}q`]
             .filter(Boolean)
             .join(" · ")}
         </Text>
-      </View>
-      <View style={styles.rowRight}>
-        <Text style={styles.rowDate}>{date}</Text>
-        <Text style={styles.rowSize}>{sizeKB}</Text>
-      </View>
+      </Stack>
+      <Stack align="end" className="ml-md">
+        <Text variant="bodySm" tone="tertiary">
+          {date}
+        </Text>
+        <Text variant="bodySm" tone="tertiary" style={{ marginTop: 2 }}>
+          {sizeKB}
+        </Text>
+      </Stack>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#0f172a" },
-  list: { padding: 16 },
-  center: {
-    flex: 1,
-    backgroundColor: "#0f172a",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-
-  row: {
-    backgroundColor: "#1e293b",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#334155",
-  },
-  pressed: { opacity: 0.7 },
-  rowMain: { flex: 1 },
-  rowId: { color: "#e2e8f0", fontSize: 14, fontWeight: "600", fontFamily: "SpaceMono" },
-  rowMeta: { color: "#94a3b8", fontSize: 12, marginTop: 4 },
-  rowRight: { alignItems: "flex-end", marginLeft: 12 },
-  rowDate: { color: "#64748b", fontSize: 11 },
-  rowSize: { color: "#475569", fontSize: 11, marginTop: 2 },
-
-  errorText: { color: "#f87171", fontSize: 14, textAlign: "center", marginBottom: 12 },
-  retryBtn: {
-    backgroundColor: "#6366f1",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-  },
-  retryText: { color: "#fff", fontWeight: "600" },
-
-  emptyText: { color: "#94a3b8", fontSize: 16, fontWeight: "600" },
-  emptySubtext: { color: "#64748b", fontSize: 13, marginTop: 4 },
-});

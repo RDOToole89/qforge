@@ -1,21 +1,19 @@
-# Decoherence — Structured Decoherence Research
+# Decoherence — Structure in Noisy Measurement Data
 
-This is the author's primary research interest and the reason this framework was built.
+These experiments explore a simple, testable question about noise and entanglement.
 
-## The Research Question
+## The Question
 
-> When a quantum state decoheres, do errors spread randomly (like fog diffusing in all directions) or follow structured pathways determined by the entanglement topology (like rain channeling into rivers)?
+> When a quantum state decoheres, do the resulting errors spread uniformly across measurement outcomes, or do they concentrate into patterns shaped by the state's entanglement topology?
 
-The answer, based on experiments on three IBM Quantum processors, appears to be: **it depends on the topology.** Some entangled states (GHZ, W) produce highly structured error patterns. Others (Cluster, Product) produce uniform noise. The structure grows with system size, survives deep circuits, and is consistent across hardware.
-
-This is an active research direction. The findings are exploratory and preliminary. The framework is designed to make it easy for others to reproduce, extend, and challenge these results.
+The experiments in this folder let you investigate this yourself: prepare different entangled states (GHZ, W, Cluster, Product), apply noise, and compare structure metrics (Structure Score, Total Correlation, Concentration Index) across topologies, system sizes, noise rates, and measurement bases. Nothing is assumed in advance — run the experiments and see what the data shows.
 
 ```
 decoherence/
-├── steps/              6-step guided research progression
+├── steps/              6-step guided progression
 │   ├── step01 → step06
 │   └── README.md
-└── deep_dives/         Full research experiments and validation
+└── deep_dives/         Extended experiments and validation
     ├── dd_topology_full, dd_scaling_full, dd_noise_sweep_full
     ├── dd_state_probe, dd_classical_null
     └── README.md
@@ -23,30 +21,28 @@ decoherence/
 
 ---
 
-## The Research Journey (6 Steps)
-
-This progression mirrors the actual research arc that produced the findings documented in `docs/research/2026-04-hardware-decoherence/`.
+## The Guided Progression (6 Steps)
 
 ### Observe (Steps 1-2)
 
-| Step | Run | What you'll discover |
+| Step | Run | What you'll explore |
 |------|-----|---------------------|
-| 1 | `python -m src.cli run dec_01_river_vs_fog` | The foundational observation — GHZ shows 12x more structure than Product |
-| 2 | `python -m src.cli run dec_02_topology_matters` | Four topologies, four behaviors — W surprises, Cluster is invisible |
+| 1 | `python -m src.cli run dec_01_structured_vs_uniform` | Structured vs uniform decoherence — compare structure metrics for GHZ and Product states under identical noise |
+| 2 | `python -m src.cli run dec_02_topology_matters` | Four topologies compared — how do GHZ, W, Cluster, and Product differ? |
 
 ### Measure (Steps 3-4)
 
-| Step | Run | What you'll discover |
+| Step | Run | What you'll explore |
 |------|-----|---------------------|
-| 3 | `python -m src.cli run dec_03_scaling` | Structure grows with qubit count — the River gets deeper |
-| 4 | `python -m src.cli run dec_04_noise_resilience` | Structure degrades smoothly under noise — no sharp collapse |
+| 3 | `python -m src.cli run dec_03_scaling` | How structure metrics change with qubit count |
+| 4 | `python -m src.cli run dec_04_noise_resilience` | How structure metrics respond to increasing noise |
 
 ### Understand (Steps 5-6)
 
-| Step | Run | What you'll discover |
+| Step | Run | What you'll explore |
 |------|-----|---------------------|
-| 5 | `python -m src.cli run dec_05_global_vs_local` | GHZ structure is global, W structure is local — fundamentally different |
-| 6 | `python -m src.cli run dec_06_simulation_vs_reality` | Depolarizing over-predicts GHZ, amplitude damping is closer for W |
+| 5 | `python -m src.cli run dec_05_global_vs_local` | Global vs local correlation structure — GHZ and W compared |
+| 6 | `python -m src.cli run dec_06_simulation_vs_reality` | Where noise models diverge from each other — compare noise models on the same state |
 
 ---
 
@@ -58,35 +54,25 @@ This progression mirrors the actual research arc that produced the findings docu
 | 3 | Use `dd_scaling_full` programmatically | Complete GHZ + W scaling ladder with comparison |
 | 4 | Use `dd_noise_sweep_full` programmatically | Comprehensive noise sweep with entropy analysis |
 | 5 | Use `dd_state_probe` programmatically | 47-condition sensitivity study across states, noise rates, and correlations |
-| 6 | `python -m src.cli run dd_classical_null` | Can classical distributions fake the quantum effect? |
+| 6 | `python -m src.cli run dd_classical_null` | Can classical (factorized) distributions produce the same metric values? A null-model check |
 
 ---
 
-## Key Findings (from real hardware)
+## Interpreting the Metrics
 
-These findings are documented in detail in `docs/research/2026-04-hardware-decoherence/`.
+- **Structure Score (SS)**: Jensen-Shannon divergence from a factorized null model — how far the joint outcome distribution is from what independent qubits would produce.
+- **Total Correlation (TC)**: Multi-information across all qubits.
+- **Concentration Index (CI)**: Gini-like measure of how concentrated the error mass is among outcomes.
 
-1. **River vs Fog**: GHZ and W show structured decoherence (SS > 0.7). Cluster and Product show uniform noise (SS ≈ 0.05). The separation is 12x.
-
-2. **Two kinds of River**: GHZ concentrates into 2 peaks (correlated). W distributes across N peaks (distributed). Both are structured, but differently.
-
-3. **Structure scales**: SS grows from 0.45 (2 qubits) to 0.80 (6 qubits) for GHZ, even as fidelity decreases.
-
-4. **Hardware-independent**: Structure Score is consistent across three IBM processors (CV = 5.7%).
-
-5. **Cluster is fog in both bases**: Tested Z and X measurement basis. Cluster structure is below detection threshold on current hardware.
-
-All findings are presented as preliminary observations. The author is not a physicist and welcomes review, reproduction, and critique from the community.
+These are general information-theoretic measures of measurement-outcome distributions. What they mean physically depends on the state, the noise model, and the measurement basis — which is exactly what these experiments are designed to probe. Always compare against control states (Product/Superposition) and null models (`dd_classical_null`) before drawing conclusions.
 
 ---
 
-## Contributing to This Research
+## Extending These Experiments
 
-If structured decoherence interests you:
-
-- **Reproduce**: Run the experiments yourself. Compare your results with ours.
-- **Extend**: Try different state types, qubit counts, noise models, or hardware platforms.
-- **Challenge**: Find alternative explanations. Test null hypotheses we haven't considered.
+- **Reproduce**: Run the experiments with different seeds and shot counts. Check that conclusions are stable.
+- **Extend**: Try different state types, qubit counts, noise models, measurement bases, or hardware platforms.
+- **Challenge**: Test alternative explanations and null hypotheses.
 - **Correct**: If the math or physics is wrong, please open an issue. Correctness matters more than novelty.
 
 The framework makes all of this straightforward. Pick an experiment, modify the config, run it, and analyze the results.

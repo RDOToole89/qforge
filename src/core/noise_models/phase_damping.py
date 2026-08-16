@@ -1,4 +1,4 @@
-"""Phase Damping Noise for Pure Dephasing Research.
+"""Phase damping noise (pure dephasing).
 
 # The Phase Damping Channel - Fundamental Pure Dephasing
 Phase damping represents pure dephasing processes where qubits lose phase
@@ -25,12 +25,6 @@ This matches Qiskit's ``phase_damping_error(λ)`` (coherence factor √(1-λ)).
 - Charge noise in semiconductor quantum dots
 - Johnson noise in classical control electronics
 - Nuclear spin baths in solid-state systems
-
-# Research Significance for Structured Pathways
-Phase damping creates coherence loss without energy transfer, potentially
-revealing pathway structure that depends on phase relationships rather than
-population dynamics. This may expose topological effects masked by energy
-relaxation in other noise types.
 
 # Educational Framework
 Phase damping channels demonstrate core concepts:
@@ -59,7 +53,7 @@ TYPICAL_CHARGE_NOISE = 1e-6  # eV RMS energy fluctuations
 
 
 class PhaseDampingNoise(BaseNoise):
-    """Phase damping noise model for pure dephasing research.
+    """Phase damping noise model (pure dephasing).
 
     # Quantum Pure Dephasing Definition
     The phase damping channel models pure dephasing: loss of quantum coherence
@@ -67,7 +61,7 @@ class PhaseDampingNoise(BaseNoise):
     while off-diagonal coherences ⟨0|ρ|1⟩ decay exponentially.
 
     This creates decoherence that is fundamentally different from energy
-    relaxation, making it ideal for studying coherence-based pathway effects.
+    relaxation (amplitude damping).
 
     # Physical Interpretation
     Phase damping models environmental coupling that is:
@@ -76,12 +70,6 @@ class PhaseDampingNoise(BaseNoise):
     - **Unital**: Preserves maximally mixed states
     - **Elastic**: No energy exchange with environment
 
-    # Research Applications in Pathway Studies
-    - **Coherence Pathways**: Test how phase relationships affect pathway structure
-    - **T2* Scaling**: Study pathway persistence vs dephasing timescales
-    - **Elastic Decoherence**: Compare with energy-exchanging processes
-    - **Topological Effects**: Investigate topology-dependent coherence protection
-
     # Educational Significance
     Phase damping illustrates fundamental concepts:
     - **T2* Processes**: Pure dephasing and inhomogeneous broadening
@@ -89,6 +77,16 @@ class PhaseDampingNoise(BaseNoise):
     - **Environmental Noise**: Classical noise effects on quantum systems
     - **Ramsey Interferometry**: Experimental measurement of phase coherence
     """
+
+    NOISE_TYPE = "PHASE_DAMPING"
+    IS_UNITAL = True
+    CATALOG = {
+        "description": "Pure dephasing without energy exchange",
+        "mechanism": "Environmental coupling preserving energy eigenstates",
+        "use_case": "Modeling T2*-limited coherence loss",
+        "typical_origin": "Charge noise, magnetic field fluctuations",
+        "educational_concepts": "T2* processes, elastic scattering, phase coherence",
+    }
 
     def __init__(
         self,
@@ -169,7 +167,6 @@ class PhaseDampingNoise(BaseNoise):
                 "temperature": temperature,
                 "decoherence_type": "pure_dephasing_elastic",
                 "channel_property": "unital",
-                "research_role": "coherence_pathway_investigation",
             },
         )
 
@@ -347,44 +344,6 @@ class PhaseDampingNoise(BaseNoise):
             "information_capacity": self._calculate_channel_capacity(),
         }
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for phase damping in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Coherence-dependent pathway structure with preserved population correlations",
-                "test_method": "Compare superposition vs computational basis state pathway behavior",
-                "expected_signature": "Phase-sensitive decoherence with population-independent pathways",
-            },
-            "decoherence_characteristics": {
-                "energy_conservation": "Perfect - no energy exchange with environment",
-                "topology_dependence": "Moderate - affects coherent superposition components selectively",
-                "pathway_asymmetry": "Phase-dependent - coherent pathways affected differently than incoherent",
-                "scaling_behavior": "Exponential coherence decay with preserved populations",
-            },
-            "experimental_role": {
-                "coherence_testing": "Primary model for pure dephasing pathway analysis",
-                "t2_star_studies": "Investigate pathway structure vs coherence timescales",
-                "elastic_scattering": "Study energy-preserving decoherence pathways",
-                "phase_sensitivity_mapping": "Test phase-dependent pathway preferences",
-            },
-            "research_predictions": {
-                "vs_amplitude_damping": "Should preserve populations unlike energy-exchanging amplitude damping",
-                "temperature_independence": "Minimal temperature dependence compared to thermal processes",
-                "coherence_scaling": "Coherent pathways decay faster than population-based pathways",
-                "phase_correlations": "Loss of phase correlations with preserved amplitude correlations",
-            },
-            "educational_applications": {
-                "pure_dephasing": "Demonstrate pure dephasing vs mixed decoherence processes",
-                "t2_star_physics": "Connect microscopic noise to macroscopic coherence measurements",
-                "ramsey_interferometry": "Show experimental techniques for measuring phase coherence",
-                "elastic_processes": "Illustrate energy-conserving environmental interactions",
-            },
-        }
-
     def _validate_phase_damping_params(
         self, error_rate: float, t2_star: float | None, gate_time: float, temperature: float
     ) -> None:
@@ -454,34 +413,6 @@ class PhaseDampingNoise(BaseNoise):
         else:
             # Approximate capacity for phase damping channel
             return max(0, 1 - λ)
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for phase damping noise.
-
-        Returns:
-            Phase damping specific pathway hypothesis prediction
-        """
-        return (
-            f"Phase damping should create coherence-dependent pathway structure "
-            f"with dephasing rate {self.error_rate:.4f}. Pathways should preserve "
-            f"population correlations while losing phase relationships."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess phase damping sensitivity to quantum state topology."""
-        return (
-            "Moderate topology sensitivity expected due to coherence-dependence. "
-            "States with more superposition components should show stronger "
-            "pathway sensitivity to dephasing."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze phase damping pathway preferences."""
-        return (
-            f"Coherence-dependent pathway preferences. Phase damping preferentially "
-            f"affects coherent superposition pathways while preserving computational "
-            f"basis pathways with thermal contribution {self._thermal_dephasing:.4f}."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

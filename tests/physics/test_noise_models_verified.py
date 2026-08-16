@@ -585,14 +585,12 @@ def test_base_large_qubit_count_warns() -> None:
     noise._validate_qubit_count(11)  # should not raise
 
 
-def test_base_properties_and_context_smoke() -> None:
+def test_base_properties_smoke() -> None:
     """Exercise shared informational methods across every channel."""
     for factory in KRAUS_CHANNEL_FACTORIES.values():
         noise = factory()
         props = noise.get_basic_properties()
         assert "noise_type" in props and "kraus_rank" in props
-        ctx = noise.get_research_context()
-        assert "pathway_interaction" in ctx or "pathway_hypothesis" in ctx
         assert isinstance(str(noise), str)
         assert isinstance(noise.get_physics_description(), dict)
 
@@ -845,7 +843,7 @@ def test_thermal_apply_virtual_and_physical_gates() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Informational / educational methods (theoretical properties, research context)
+# Informational / educational methods (theoretical properties)
 # --------------------------------------------------------------------------- #
 
 ALL_FACTORIES = [
@@ -865,26 +863,9 @@ def test_theoretical_properties_all_channels() -> None:
         assert "decoherence_type" in props
 
 
-def test_research_context_channel_specific() -> None:
-    for factory in ALL_FACTORIES:
-        ctx = factory().get_research_context()
-        assert "pathway_hypothesis" in ctx
-
-
-def test_pathway_helper_methods_all_channels() -> None:
-    """Cover the channel-specific pathway/topology helper strings."""
-    for factory in ALL_FACTORIES:
-        noise = factory()
-        assert isinstance(noise._get_pathway_prediction(), str)
-        assert isinstance(noise._assess_topology_sensitivity(), str)
-        assert isinstance(noise._analyze_pathway_preferences(), str)
-
-
-def test_correlated_uses_base_research_context() -> None:
+def test_correlated_uses_base_info_methods() -> None:
     """CorrelatedDepolarizing does not override base info methods → cover base."""
     noise = CorrelatedDepolarizingNoise(error_rate=0.05, num_qubits=3)
-    ctx = noise.get_research_context()  # base implementation
-    assert "pathway_interaction" in ctx
     props = noise.get_basic_properties()  # base; kraus_rank == 0 (delegated)
     assert props["kraus_rank"] == 0
     assert isinstance(str(noise), str)  # base __str__

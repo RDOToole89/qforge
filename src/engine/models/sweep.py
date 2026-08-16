@@ -1,17 +1,15 @@
 """Parameter Sweep Models.
 
 Purpose: Define models for parameter sweep configurations and results.
-Sweeps enable systematic exploration of quantum experiment parameter spaces
-for research studies and optimization.
+Sweeps enable systematic exploration of quantum experiment parameter spaces.
 
 Key Features:
 - Flexible parameter range specification
-- Research-optimized sweep configurations
 - Statistical aggregation support
 - Result correlation analysis
 
 Dependencies: Pydantic, config models
-Used by: Engine sweep API, research campaigns, parameter optimization
+Used by: Engine sweep API, parameter optimization
 """
 
 from __future__ import annotations
@@ -75,11 +73,6 @@ class SweepManifest(BaseModel):
     override: dict[str, Any] | None = Field(
         default=None,
         description="Parameters to override in base configuration for all sweep runs",
-    )
-
-    # ===== Research Configuration =====
-    research_metadata: SweepResearchMetadata | None = Field(
-        default=None, description="Research-specific metadata for parameter sweeps"
     )
 
     # ===== Execution Control =====
@@ -233,52 +226,6 @@ class SweepManifest(BaseModel):
                 yield ExperimentConfig(**cfg_data), r, combo
 
 
-class SweepResearchMetadata(BaseModel):
-    """Research-specific metadata for parameter sweeps."""
-
-    # Research context
-    hypothesis: str | None = Field(
-        default=None, description="Research hypothesis being tested by this sweep"
-    )
-
-    research_phase: str | None = Field(
-        default=None,
-        description="Phase of research (exploration, validation, optimization, etc.)",
-    )
-
-    expected_trends: list[str] | None = Field(
-        default=None,
-        description="Expected trends or relationships in the parameter space",
-    )
-
-    # Statistical requirements
-    significance_level: float = Field(
-        default=0.05,
-        ge=0.001,
-        le=0.1,
-        description="Required statistical significance level",
-    )
-
-    minimum_effect_size: float | None = Field(
-        default=None, ge=0.0, description="Minimum effect size of interest"
-    )
-
-    # Analysis preferences
-    correlation_analysis: bool = Field(
-        default=True,
-        description="Perform correlation analysis between parameters and metrics",
-    )
-
-    trend_analysis: bool = Field(
-        default=True, description="Perform trend analysis across parameter ranges"
-    )
-
-    statistical_tests: list[str] = Field(
-        default_factory=lambda: ["anova", "correlation"],
-        description="Statistical tests to perform on sweep results",
-    )
-
-
 class SweepResult(BaseModel):
     """Complete results from a parameter sweep.
 
@@ -305,11 +252,6 @@ class SweepResult(BaseModel):
         description="Statistical summary across all experiments"
     )
 
-    # ===== Research Analysis =====
-    research_insights: SweepResearchInsights | None = Field(
-        default=None, description="Research insights from sweep analysis"
-    )
-
     # ===== Execution Metadata =====
     execution_metadata: SweepExecutionMetadata = Field(
         description="Information about sweep execution"
@@ -329,7 +271,7 @@ class SweepResult(BaseModel):
         return len(self.successful_experiments) / len(self.experiment_results)
 
     @property
-    def has_research_metrics(self) -> bool:
+    def has_metrics(self) -> bool:
         """Check if any experiments have computed metrics."""
         return any(r.metrics_bundle is not None for r in self.experiment_results)
 
@@ -432,41 +374,6 @@ class OutcomeStatistics(BaseModel):
     # Confidence intervals
     ci_95_lower: float = Field(description="95% confidence interval lower bound")
     ci_95_upper: float = Field(description="95% confidence interval upper bound")
-
-
-class SweepResearchInsights(BaseModel):
-    """Research insights extracted from sweep analysis."""
-
-    # Key findings
-    key_findings: list[str] = Field(description="Main research findings from the sweep")
-
-    # Hypothesis validation
-    hypothesis_supported: bool | None = Field(
-        default=None,
-        description="Whether the research hypothesis is supported by results",
-    )
-
-    evidence_strength: str | None = Field(
-        default=None, description="Strength of evidence (weak, moderate, strong)"
-    )
-
-    # Recommendations
-    follow_up_experiments: list[str] = Field(
-        default_factory=list, description="Recommended follow-up experiments"
-    )
-
-    parameter_recommendations: dict[str, str] = Field(
-        default_factory=dict, description="Recommendations for parameter settings"
-    )
-
-    # Research impact
-    significance_assessment: str | None = Field(
-        default=None, description="Assessment of research significance"
-    )
-
-    publication_potential: str | None = Field(
-        default=None, description="Assessment of publication potential"
-    )
 
 
 class SweepExecutionMetadata(BaseModel):

@@ -1,11 +1,10 @@
 # AGENTS.md — QForge Repository-Wide AI Rules
 
 Owner: Roibín O'Toole
-Last updated: 2026-04-05
 
 ## What This Is
 
-QForge is a **general-purpose quantum experiment engine** built on Qiskit — for learning, research, and real hardware. The current research focus is structured decoherence, but the architecture is deliberately general. New experiment types (benchmarking, error correction, variational algorithms, etc.) are welcome.
+QForge is a **general-purpose quantum experiment engine** built on Qiskit — for learning, experimentation, and real hardware. The architecture is deliberately general: new experiment types (benchmarking, error correction, variational algorithms, etc.) are welcome. See `CLAUDE.md` for the full project overview, API examples, and the rules for working in this repo — this file summarizes the structural rules.
 
 ## Scientific Rigor
 
@@ -21,13 +20,13 @@ Physics laws are non-negotiable. Code that violates quantum mechanics will be re
 ```
 src/core/           Pure physics — metrics, noise models, state preparation, shared math primitives (src/core/math)
 src/engine/          Orchestration — run(), sweep(), models, visualization, provenance
-src/experiments/     Research programs — pluggable experiment definitions
+src/experiments/     Experiment programs — pluggable experiment definitions
 apps/api/            FastAPI REST endpoints
 apps/client/         React Native / Expo frontend (Bloch sphere, circuit builder, glossary)
 ```
 
 - `core` does NOT know about experiments or the engine
-- `engine` does NOT know about specific research questions
+- `engine` does NOT know about specific experiment topics
 - `experiments` calls into the engine, never the reverse
 - `apps` are thin layers over the engine API
 
@@ -39,7 +38,7 @@ Experiments are organized into 4 folders, each with `steps/` and `deep_dives/`:
 experiments/
 ├── basics/          11 steps + 10 deep dives    Learn quantum computing
 ├── advanced/         8 steps +  7 deep dives    Quantum algorithms
-├── decoherence/      6 steps +  2 deep dives    Structured decoherence research
+├── decoherence/      6 steps +  2 deep dives    Decoherence structure experiments
 └── hardware/         5 steps +  3 deep dives    Real IBM Quantum processors
 ```
 
@@ -64,7 +63,6 @@ These refine the rules above but may not contradict them.
 ## Never
 
 - Mix experiment logic into `src/core` or physics primitives into `src/engine`
-- Reference SST, SQM, or personal theory branding — use "structured decoherence"
 - Skip physics tests when modifying metrics or noise models
 - Add AI attribution (Co-Authored-By, Powered by, Generated with) to commits, code, or docs
 - Introduce dependencies with uncontrolled network access (framework must stay deterministic)

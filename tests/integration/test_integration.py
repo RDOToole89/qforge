@@ -1,5 +1,5 @@
 """
-End-to-end integration tests for structured decoherence analysis framework.
+End-to-end integration tests for the analysis framework.
 """
 
 import numpy as np
@@ -24,7 +24,7 @@ class TestEndToEndWorkflow:
     """Test complete end-to-end workflow."""
 
     def test_complete_analysis_workflow(self):
-        """Test complete structured decoherence analysis workflow."""
+        """Test complete analysis workflow."""
         # Simulate GHZ state with decoherence
         ghz_counts = {"000": 400, "111": 400, "001": 100, "110": 100}
 

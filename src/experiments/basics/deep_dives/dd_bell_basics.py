@@ -72,7 +72,7 @@ class BellExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.02,
             shots=4096,
-            metrics="structured_decoherence",
+            metrics="decoherence",
         )
 
     def run_noise_sweep(

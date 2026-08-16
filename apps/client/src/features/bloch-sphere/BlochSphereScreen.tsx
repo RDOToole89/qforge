@@ -1,6 +1,7 @@
 'use dom';
 
 import { useCallback } from "react";
+import { chrome, viz, fontFamily } from "@/src/design/tokens";
 import { useBuiltInMode } from "./hooks/useBuiltInMode";
 import { useExperimentMode } from "./hooks/useExperimentMode";
 import { useSweepMode } from "./hooks/useSweepMode";
@@ -46,8 +47,8 @@ export default function BlochSphereScreen() {
 
   return (
     <div style={{
-      width: "100vw", height: "100vh", background: "#08090e", color: "#c8d4e4",
-      fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+      width: "100vw", height: "100vh", background: chrome.bg.primary, color: chrome.text.primary,
+      fontFamily: fontFamily.sans,
       display: "flex", flexDirection: "column", overflow: "hidden", userSelect: "none",
     }}>
 
@@ -170,17 +171,17 @@ export default function BlochSphereScreen() {
           )}
 
           {/* Axis legend overlay */}
-          <div style={{ position: "absolute", top: "10px", right: "14px", fontSize: "10px", color: "#3a4a5a" }}>
+          <div style={{ position: "absolute", top: "10px", right: "14px", fontSize: "10px", color: chrome.text.tertiary }}>
             {builtin.tab === "multi"
-              ? <><span style={{ color: "#ff4466" }}>{"\u2501"}</span> {"\u27E8"}ZI{"\u27E9"} <span style={{ color: "#44ff88" }}>{"\u2501"}</span> {"\u27E8"}IZ{"\u27E9"} <span style={{ color: "#4488ff" }}>{"\u2501"}</span> {"\u27E8"}ZZ{"\u27E9"}</>
-              : <><span style={{ color: "#ff4466" }}>{"\u2501"}</span> X <span style={{ color: "#44ff88" }}>{"\u2501"}</span> Y <span style={{ color: "#4488ff" }}>{"\u2501"}</span> Z</>
+              ? <><span style={{ color: viz.rose }}>{"\u2501"}</span> {"\u27E8"}ZI{"\u27E9"} <span style={{ color: viz.green }}>{"\u2501"}</span> {"\u27E8"}IZ{"\u27E9"} <span style={{ color: viz.blue }}>{"\u2501"}</span> {"\u27E8"}ZZ{"\u27E9"}</>
+              : <><span style={{ color: viz.rose }}>{"\u2501"}</span> X <span style={{ color: viz.green }}>{"\u2501"}</span> Y <span style={{ color: viz.blue }}>{"\u2501"}</span> Z</>
             }
           </div>
 
           {/* State name overlay */}
           <div style={{
             position: "absolute", top: "10px", left: "14px",
-            fontSize: "11px", color: activeStateCfg.color ?? "#fff", fontWeight: 600,
+            fontSize: "11px", color: activeStateCfg.color ?? chrome.text.primary, fontWeight: 600,
           }}>
             {activeStateCfg.name}
             {activeStateCfg.uniform && !isExpMode && (
@@ -189,13 +190,13 @@ export default function BlochSphereScreen() {
               </span>
             )}
             {isExpMode && _activeBloch?.source_mode === "diagonal_estimate" && (
-              <span style={{ fontSize: "9px", color: "#dda030", fontWeight: 400, marginLeft: "6px" }}>
+              <span style={{ fontSize: "9px", color: chrome.status.warning, fontWeight: 400, marginLeft: "6px" }}>
                 Z-basis only
               </span>
             )}
           </div>
 
-          <div style={{ position: "absolute", bottom: "10px", left: "14px", fontSize: "9px", color: "#2a3a4a" }}>
+          <div style={{ position: "absolute", bottom: "10px", left: "14px", fontSize: "9px", color: chrome.text.tertiary }}>
             Drag to rotate
           </div>
         </div>

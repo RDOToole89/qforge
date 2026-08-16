@@ -1,4 +1,4 @@
-"""Quantum Noise Models Framework for Decoherence Pathway Research.
+"""Quantum noise model framework.
 
 # Quantum Decoherence Fundamentals
 Noise models represent the environmental coupling that destroys quantum coherence
@@ -12,24 +12,16 @@ Noise models are represented as completely positive trace-preserving (CPTP) maps
 that describe how quantum states evolve under environmental interaction:
 ρ → Σᵢ Kᵢ ρ Kᵢ† where Σᵢ Kᵢ† Kᵢ = I (Kraus representation)
 
-# Research Mission in Structured Decoherence
-Noise models create the decoherence channels used to test the structured pathway
-hypothesis. Different noise types probe different aspects of pathway emergence:
-- How does environmental coupling topology affect pathway structure?
-- Do different noise mechanisms create different pathway signatures?
-- Can we identify universal pathway patterns across noise types?
-
 # Educational Philosophy
-Every noise model serves dual purposes: advancing research understanding of
-quantum decoherence while teaching fundamental physics of open quantum systems.
-We bridge theory (master equations, Lindblad forms) with practice (real devices).
+Every noise model documents the physics of open quantum systems it implements,
+bridging theory (master equations, Lindblad forms) with practice (real devices).
 """
 
 from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from qiskit_aer.noise import NoiseModel
 
@@ -44,26 +36,22 @@ DEFAULT_TEMPERATURE = 0.015  # 15 mK typical dilution refrigerator
 
 
 class BaseNoise(ABC):
-    """Abstract base class for quantum noise models in decoherence pathway research.
+    """Abstract base class for quantum noise models.
 
     # Quantum Decoherence Foundation
     BaseNoise provides the foundational architecture for modeling environmental
-    interactions that destroy quantum coherence. Each subclass implements a specific
-    physical decoherence mechanism while maintaining educational clarity and
-    research-grade accuracy.
+    interactions that destroy quantum coherence. Each subclass implements a
+    specific physical decoherence mechanism.
 
     # Design Philosophy
     - **Physics-First**: Every noise model reflects real quantum decoherence mechanisms
-    - **Educational Excellence**: Clear explanations of underlying physics principles
-    - **Research Integration**: Designed for structured decoherence pathway studies
+    - **Educational Clarity**: Clear explanations of underlying physics principles
     - **Hardware Compatibility**: Validation against real quantum device constraints
     - **Framework Consistency**: Uniform interfaces matching state preparation patterns
 
-    # LEAN Architecture Principles
+    # Architecture Principles
     - **Single Responsibility**: Each noise class models one specific decoherence mechanism
-    - **Separation of Concerns**: Noise creation cleanly separated from pathway analysis
-    - **Educational Value**: Every component teaches quantum decoherence physics
-    - **Research Focus**: Optimized for pathway hypothesis testing
+    - **Separation of Concerns**: Noise creation cleanly separated from analysis
     - **Clean Interfaces**: Consistent patterns with state preparation framework
 
     # Framework Role
@@ -80,7 +68,6 @@ class BaseNoise(ABC):
     - Parameter validation with physics constraints
     - Hardware compatibility checking
     - Educational property access
-    - Research context integration
     - Logging with experimental metadata
 
     # Educational Notes
@@ -90,6 +77,19 @@ class BaseNoise(ABC):
     - Error correction schemes must be tailored to specific noise characteristics
     - Quantum advantage requires noise rates below critical thresholds
     """
+
+    # ------------------------------------------------------------------ #
+    # Per-channel metadata — declared here, overridden by each subclass.
+    # Single home for "what kind of channel is this": no hardcoded lists
+    # in the factory or base methods to drift out of sync.
+    # ------------------------------------------------------------------ #
+
+    #: Canonical registry key (matches ``noise_factory.NOISE_CLASSES``).
+    NOISE_TYPE: ClassVar[str] = ""
+    #: Whether the channel is unital (preserves the maximally mixed state I/d).
+    IS_UNITAL: ClassVar[bool] = False
+    #: Educational catalog entry, or ``None`` to omit from the intro catalog.
+    CATALOG: ClassVar[dict[str, str] | None] = None
 
     def __init__(
         self,
@@ -102,8 +102,8 @@ class BaseNoise(ABC):
 
         # Parameter Validation Philosophy
         All parameters undergo physics-based validation to ensure they represent
-        realistic quantum decoherence scenarios. This prevents unphysical configurations
-        that could lead to incorrect research conclusions.
+        realistic quantum decoherence scenarios. This prevents unphysical
+        configurations that could lead to incorrect results.
 
         Args:
             error_rate: Phenomenological error probability [0, 1]
@@ -124,8 +124,9 @@ class BaseNoise(ABC):
         self.experiment_id = experiment_id
         self.physics_params = physics_params
 
-        # Initialize derived properties
-        self._noise_type = self.__class__.__name__.replace("Noise", "").upper()
+        # Initialize derived properties. Prefer the explicit canonical NOISE_TYPE;
+        # fall back to a name-derived guess only if a subclass forgot to declare it.
+        self._noise_type = self.NOISE_TYPE or self.__class__.__name__.replace("Noise", "").upper()
 
         # Log initialization with physics context
         self._log_initialization()
@@ -276,39 +277,6 @@ class BaseNoise(ABC):
 
         return warnings
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for structured decoherence pathway studies.
-
-        # Research Integration
-        Provides context for how this noise type contributes to pathway hypothesis
-        testing. Mirrors state preparation research context for consistency.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_interaction": {
-                "mechanism": f"{self._noise_type} environmental coupling",
-                "prediction": self._get_pathway_prediction(),
-                "test_method": "Monitor pathway structure changes under this noise type",
-            },
-            "decoherence_signature": {
-                "time_scale": self._estimate_decoherence_timescale(),
-                "topology_dependence": self._assess_topology_sensitivity(),
-                "pathway_bias": self._analyze_pathway_preferences(),
-            },
-            "experimental_role": {
-                "hypothesis_testing": f"Test pathway sensitivity to {self._noise_type.lower()} decoherence",
-                "control_experiments": "Compare with other noise types for mechanism identification",
-                "scaling_studies": "Investigate pathway evolution with increasing noise strength",
-            },
-            "physics_education": {
-                "concepts": self._get_educational_concepts(),
-                "real_world_examples": self._get_real_world_examples(),
-                "quantum_principles": self._get_quantum_principles(),
-            },
-        }
-
     # Helper Methods (Following BaseState patterns)
 
     def _validate_error_rate(self, error_rate: float) -> None:
@@ -370,9 +338,11 @@ class BaseNoise(ABC):
         Unital channels satisfy E(I/d) = I/d where I is the identity matrix
         and d is the Hilbert space dimension. This is important for
         understanding which quantum states are preserved under noise.
+
+        Each channel declares its own ``IS_UNITAL`` — there is no central list to
+        keep in sync.
         """
-        # Default implementation - subclasses can override
-        return self._noise_type in ["DEPOLARIZING", "PHASE_DAMPING"]
+        return self.IS_UNITAL
 
     def _estimate_channel_capacity(self) -> float:
         """Estimate quantum channel capacity for information transmission.
@@ -400,52 +370,6 @@ class BaseNoise(ABC):
         # Default gates - subclasses can override
         return ["id", "u1", "u2", "u3", "cx"]
 
-    def _get_pathway_prediction(self) -> str:
-        """Get predicted effect on decoherence pathway structure.
-
-        Returns:
-            Pathway hypothesis prediction for this noise type
-        """
-        # Default prediction - subclasses should override with specific predictions
-        return f"{self._noise_type} decoherence may create pathway bias based on coupling mechanism"
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess how sensitive this noise type is to quantum state topology."""
-        # Default assessment - subclasses can provide specific analysis
-        return "Sensitivity depends on specific coupling mechanism and environmental structure"
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze whether this noise type has intrinsic pathway preferences."""
-        # Default analysis - subclasses can provide specific insights
-        return "Pathway preferences determined by physical coupling strength and symmetries"
-
-    def _get_educational_concepts(self) -> list[str]:
-        """Get key educational concepts demonstrated by this noise type."""
-        return [
-            "Quantum decoherence and environmental coupling",
-            "CPTP maps and Kraus operator representation",
-            "Physical limits of quantum information processing",
-            "Open quantum systems and master equations",
-        ]
-
-    def _get_real_world_examples(self) -> list[str]:
-        """Get real-world examples where this noise type occurs."""
-        return [
-            "Superconducting quantum processors in dilution refrigerators",
-            "Trapped ion systems with laser-driven gates",
-            "Photonic quantum systems with fiber optic transmission",
-            "Nuclear magnetic resonance quantum computers",
-        ]
-
-    def _get_quantum_principles(self) -> list[str]:
-        """Get quantum mechanics principles illustrated by this noise type."""
-        return [
-            "No-cloning theorem and information preservation limits",
-            "Quantum error correction threshold requirements",
-            "Decoherence and measurement-induced state collapse",
-            "Thermodynamic limits on quantum computation",
-        ]
-
     def log_noise_creation(self, noise_type: str, extra_info: dict | None = None) -> None:
         """Log noise model creation with comprehensive metadata.
 
@@ -456,7 +380,7 @@ class BaseNoise(ABC):
 
         Args:
             noise_type: Type of noise being created
-            extra_info: Additional context for research tracking
+            extra_info: Additional context for experiment tracking
         """
         base_info = {
             "noise_type": noise_type,

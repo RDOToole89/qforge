@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Pressable, TextInput, Switch, StyleSheet } from "react-native";
-import { colors, spacing, radii } from "@/src/theme";
+import { StyleSheet, TextInput, Switch, View } from "react-native";
+
+import { Chip, Row, Text, chrome } from "@/src/design";
 import { NOISE_TYPES } from "../constants";
 import { SectionHeader } from "./SectionHeader";
 import ConfigSlider from "@/src/components/ConfigSlider";
@@ -58,7 +59,7 @@ export function NoiseSection({
   };
 
   return (
-    <View style={styles.section}>
+    <View className="mb-lg">
       <SectionHeader
         title="Noise"
         switchValue={noiseEnabled}
@@ -69,33 +70,29 @@ export function NoiseSection({
 
       {/* Disabled reason banner */}
       {noiseDisabledReason !== null && (
-        <View style={styles.infoBanner}>
-          <View style={styles.infoBannerIcon}>
-            <Text style={styles.infoBannerIconText}>i</Text>
+        <Row align="center" className="mb-md rounded-md" style={styles.infoBanner}>
+          <View className="mr-sm items-center justify-center rounded-pill border border-info" style={styles.infoBannerIcon}>
+            <Text variant="caption" weight="bold" tone="accent">i</Text>
           </View>
-          <Text style={styles.infoBannerText}>{noiseDisabledReason}</Text>
-        </View>
+          <Text variant="body" className="flex-1">{noiseDisabledReason}</Text>
+        </Row>
       )}
 
       {/* Noise type + error rate (only when enabled) */}
       {noiseEnabled && (
         <>
-          <Text style={styles.label}>Noise Type</Text>
-          <View style={styles.chipRow}>
+          <Text variant="label" weight="semibold" className="mb-xs">Noise Type</Text>
+          <View className="mb-md flex-row flex-wrap" style={{ gap: 6 }}>
             {NOISE_TYPES.map((nt) => {
               const active = noiseType === nt.id;
               return (
-                <Pressable
+                <Chip
                   key={nt.id}
+                  label={nt.label}
+                  tone={active ? "accent" : "neutral"}
+                  selected={active}
                   onPress={() => setNoiseType(nt.id as NoiseType)}
-                  style={[styles.chip, active && styles.chipActive]}
-                >
-                  <Text
-                    style={[styles.chipText, active && styles.chipTextActive]}
-                  >
-                    {nt.label}
-                  </Text>
-                </Pressable>
+                />
               );
             })}
           </View>
@@ -113,37 +110,37 @@ export function NoiseSection({
           {/* Thermal relaxation T1/T2 params */}
           {showThermalParams && (
             <>
-              <View style={styles.thermalRow}>
-                <View style={styles.thermalField}>
-                  <Text style={styles.label}>T1</Text>
-                  <View style={styles.inputWithUnit}>
+              <Row className="mb-xs" style={{ gap: 12 }}>
+                <View className="flex-1">
+                  <Text variant="label" weight="semibold" className="mb-xs">T1</Text>
+                  <Row align="center" style={{ gap: 4 }}>
                     <TextInput
                       style={styles.textInput}
                       keyboardType="numeric"
                       placeholder="100"
-                      placeholderTextColor={colors.text.tertiary}
+                      placeholderTextColor={chrome.text.tertiary}
                       value={t1 !== null ? String(t1) : ""}
                       onChangeText={handleT1Change}
                     />
-                    <Text style={styles.unitLabel}>us</Text>
-                  </View>
+                    <Text variant="bodyLg" tone="secondary">us</Text>
+                  </Row>
                 </View>
-                <View style={styles.thermalField}>
-                  <Text style={styles.label}>T2</Text>
-                  <View style={styles.inputWithUnit}>
+                <View className="flex-1">
+                  <Text variant="label" weight="semibold" className="mb-xs">T2</Text>
+                  <Row align="center" style={{ gap: 4 }}>
                     <TextInput
                       style={styles.textInput}
                       keyboardType="numeric"
                       placeholder="80"
-                      placeholderTextColor={colors.text.tertiary}
+                      placeholderTextColor={chrome.text.tertiary}
                       value={t2 !== null ? String(t2) : ""}
                       onChangeText={handleT2Change}
                     />
-                    <Text style={styles.unitLabel}>us</Text>
-                  </View>
+                    <Text variant="bodyLg" tone="secondary">us</Text>
+                  </Row>
                 </View>
-              </View>
-              <Text style={styles.helperText}>
+              </Row>
+              <Text variant="bodySm" tone="tertiary" className="mb-md">
                 T2 must be &lt;= 2 x T1 (physics constraint)
               </Text>
             </>
@@ -152,10 +149,10 @@ export function NoiseSection({
       )}
 
       {/* Separator */}
-      <View style={styles.separator} />
+      <View className="my-md h-px bg-default" />
 
       {/* Readout error + balance circuit (always visible) */}
-      <Text style={styles.label}>Readout Error</Text>
+      <Text variant="label" weight="semibold" className="mb-xs">Readout Error</Text>
       <ConfigSlider
         label="Readout Error Rate"
         value={readoutErrorRate ?? 0}
@@ -166,135 +163,44 @@ export function NoiseSection({
         formatValue={(v) => v.toFixed(2)}
       />
 
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleLabel}>
-          <Text style={styles.label}>Balance Circuit</Text>
-          <Text style={styles.helperText}>
+      <Row align="center" justify="between" className="mb-md">
+        <View className="mr-md flex-1">
+          <Text variant="label" weight="semibold" className="mb-xs">Balance Circuit</Text>
+          <Text variant="bodySm" tone="tertiary">
             Pads with identity gates to equalize depth across state types
           </Text>
         </View>
         <Switch
           value={balanceCircuit}
           onValueChange={setBalanceCircuit}
-          trackColor={{ false: colors.text.tertiary, true: colors.accent.base }}
-          thumbColor={colors.text.primary}
+          trackColor={{ false: chrome.text.tertiary, true: chrome.accent.base }}
+          thumbColor={chrome.text.primary}
         />
-      </View>
+      </Row>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: spacing.lg,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    backgroundColor: "#1e293b",
+  textInput: {
+    flex: 1,
+    backgroundColor: chrome.bg.surface,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: chrome.border.default,
     borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  chipActive: {
-    backgroundColor: "#6366f1",
-    borderColor: "#6366f1",
-  },
-  chipText: {
+    padding: 10,
+    color: chrome.text.primary,
     fontSize: 13,
-    color: "#94a3b8",
-  },
-  chipTextActive: {
-    color: "#ffffff",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
   },
   infoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: "rgba(99, 102, 241, 0.08)",
     borderLeftWidth: 4,
-    borderLeftColor: colors.status.info,
-    borderRadius: radii.sm,
+    borderLeftColor: chrome.status.info,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    marginBottom: spacing.md,
   },
   infoBannerIcon: {
     width: 18,
     height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: colors.status.info,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
-  infoBannerIconText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: colors.status.info,
-  },
-  infoBannerText: {
-    fontSize: 12,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  thermalRow: {
-    flexDirection: "row",
-    gap: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  thermalField: {
-    flex: 1,
-  },
-  inputWithUnit: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  textInput: {
-    flex: 1,
-    backgroundColor: "#1e293b",
-    borderWidth: 1,
-    borderColor: "#334155",
-    borderRadius: 8,
-    padding: 10,
-    color: "#e2e8f0",
-    fontSize: 13,
-  },
-  unitLabel: {
-    fontSize: 13,
-    color: colors.text.secondary,
-  },
-  helperText: {
-    fontSize: 11,
-    color: colors.text.tertiary,
-    marginBottom: spacing.md,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#334155",
-    marginVertical: spacing.md,
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: spacing.md,
-  },
-  toggleLabel: {
-    flex: 1,
-    marginRight: spacing.md,
   },
 });

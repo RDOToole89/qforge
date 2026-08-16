@@ -14,7 +14,7 @@ Integration
 -----------
 - Directory choice uses DirectoryStructure.get_path(..., category="experiments", ...)
 - Filename policy uses StorageConfig.filename_template if provided, with fields:
-    {research_type} {experiment_id} {timestamp} {state_type} {num_qubits}
+    {experiment_type} {experiment_id} {timestamp} {state_type} {num_qubits}
     {shots} {noise_desc} {config_hash}
 - If config is not supplied, a descriptive fallback filename is used.
 
@@ -64,7 +64,7 @@ class Storage(ABC):
 
     @abstractmethod
     def save_analysis(self, analysis: dict[str, Any]) -> str:
-        """Persist a research analysis dict and return absolute path."""
+        """Persist an experiment analysis dict and return absolute path."""
         raise NotImplementedError
 
 
@@ -84,12 +84,12 @@ class LocalStorage(Storage):
     Filename Policy
     ---------------
     If StorageConfig.filename_template is provided, it is formatted with:
-        research_type, experiment_id, timestamp, state_type, num_qubits,
+        experiment_type, experiment_id, timestamp, state_type, num_qubits,
         shots, noise_desc, config_hash
     The result is sanitized and suffixed with .json or .json.gz
 
     Fallback filename (when no StorageConfig provided):
-        <HHMMSS>_<STATE>_<QUBITS>q_<NOISE>_<SHOTS>shots_<RESEARCH>_<HASH>.json[.gz]
+        <HHMMSS>_<STATE>_<QUBITS>q_<NOISE>_<SHOTS>shots_<TYPE>_<HASH>.json[.gz]
     """
 
     def __init__(
@@ -157,7 +157,7 @@ class LocalStorage(Storage):
         """Persist analysis with structure-aware directory and filename policy.
 
         Consumed keys (best-effort):
-        - experiment_metadata: {experiment_id, timestamp, research_type}
+        - experiment_metadata: {experiment_id, timestamp, experiment_type}
         - experiment_parameters: {state_type, num_qubits, shots,
           noise_enabled, noise_type, error_rate, t1, t2}
         - provenance: {config_hash}
@@ -168,8 +168,8 @@ class LocalStorage(Storage):
         params = analysis.get("experiment_parameters", {}) or {}
         prov = analysis.get("provenance", {}) or {}
 
-        research_type = (meta.get("research_type") or "baseline").lower()
-        research_type = "baseline" if research_type in {"none", "null"} else research_type
+        experiment_type = (meta.get("experiment_type") or "baseline").lower()
+        experiment_type = "baseline" if experiment_type in {"none", "null"} else experiment_type
 
         experiment_id = str(meta.get("experiment_id") or "exp")
         state_type = str(params.get("state_type") or "unknown").upper()
@@ -184,7 +184,7 @@ class LocalStorage(Storage):
                 base=self.base_dir,
                 category="experiments",
                 timestamp=dt,
-                research_type=research_type,
+                experiment_type=experiment_type,
                 state_type=state_type,
             )
         else:
@@ -197,7 +197,7 @@ class LocalStorage(Storage):
         if self.config is not None and self.config.filename_template:
             # Allow both '{timestamp}' (ISO) and '{timestr}' (HHMMSS)
             fmt_kwargs = {
-                "research_type": research_type,
+                "experiment_type": experiment_type,
                 "experiment_id": experiment_id,
                 "timestamp": dt.isoformat(),
                 "timestr": dt.strftime("%H%M%S"),
@@ -228,7 +228,7 @@ class LocalStorage(Storage):
                     kind="analysis",
                     path=str(abs_path),
                     metadata={
-                        "research_type": research_type,
+                        "experiment_type": experiment_type,
                         "state_type": state_type,
                         "num_qubits": num_qubits,
                         "shots": shots,
