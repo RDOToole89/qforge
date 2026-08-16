@@ -61,7 +61,7 @@ class BackendExplorationExperiment(BaseExperiment):
             sim_mode="hardware",
             shots=8192,
             optimization_level=1,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type="histogram",
         )
 

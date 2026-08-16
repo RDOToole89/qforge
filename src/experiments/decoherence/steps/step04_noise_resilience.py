@@ -1,29 +1,22 @@
 """Step 4: Noise Resilience — Does structure degrade smoothly or collapse?
 
 WHAT YOU'LL LEARN:
-  Steps 1-3 showed that structure exists and grows. But how ROBUST is it?
-  If you increase the noise level from 0% to 20%, does the River erode
-  gradually or suddenly flood into Fog?
-
-  This matters for practical applications: if structure survives moderate
-  noise, error correction could exploit it. If it collapses at a threshold,
-  there's a critical noise level to stay below.
+  Steps 1-3 looked at concentrated distributions at a fixed noise level.
+  This step asks how the concentration changes as noise increases:
+  does the Structure Score decay gradually with the error rate, or
+  drop off sharply at some level?
 
 THE EXPERIMENT:
   Sweep depolarizing noise from 0% to 20% on GHZ-6.
   Track Structure Score at each noise level.
 
 WHAT TO LOOK FOR:
-  - SS at 0% noise: ~0.97 (nearly perfect structure)
-  - SS at 5% noise: ~0.80 (most structure survives)
-  - SS at 10% noise: ~0.71 (still significant)
-  - SS at 20% noise: ~0.58 (reduced but still present)
-  - The decay is SMOOTH — no sharp phase transition
-  - GHZ structure is surprisingly robust to noise
-
-  Compare with W (in deep dive): W degrades FASTER despite surviving
-  deeper circuits. Circuit-depth resilience and noise-magnitude
-  resilience are independent properties.
+  - Structure Score is highest at 0% noise, where the distribution is
+    (up to shot noise) the ideal two-peak GHZ distribution.
+  - As the error rate rises, probability leaks into neighboring
+    outcomes and the Structure Score falls.
+  - Plot the curve and judge its shape for yourself — is the decay
+    smooth or does it have a knee?
 
 CIRCUIT:
   q0: ─H──●──●──●──●──●── [noise at p%] ── M
@@ -53,7 +46,7 @@ class NoiseResilienceExperiment(BaseExperiment):
     """Step 4: Sweep noise and observe structure degradation."""
 
     name = "dec_04_noise_resilience"
-    description = "Step 4: How robust is structure? Sweep noise from 0% to 20%"
+    description = "Step 4: Sweep noise from 0% to 20% and track distribution structure"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -65,7 +58,7 @@ class NoiseResilienceExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

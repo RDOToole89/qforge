@@ -1,18 +1,18 @@
-"""Deep Dive: GHZ Structure Metrics — Quantifying the River.
+"""Deep Dive: GHZ Structure Metrics — quantifying distribution shape.
 
 What you'll learn:
   - How GHZ states generalize Bell states to N qubits
-  - What "structured decoherence" looks like in measurement data
-  - How Structure Score quantifies deviation from random errors
+  - What a concentrated error distribution looks like in measurement data
+  - How Structure Score quantifies deviation from independent qubits
 
 A GHZ state is (|000...0⟩ + |111...1⟩) / √2 — all qubits are
-perfectly correlated. Under noise, errors don't spread uniformly.
-They concentrate in specific pathways (the "River" effect).
+perfectly correlated. Its ideal distribution has just two peaks, and
+under moderate noise the measured counts stay concentrated around them.
 
 Try it:
     from src.experiments.basics.ghz_exploration import ghz_exploration
 
-    # Run at different qubit counts to see structure grow
+    # Run at different qubit counts to see how the metrics change
     for n in [2, 3, 4, 5, 6]:
         result = ghz_exploration.run({"num_qubits": n})
         ss = result.metrics_bundle.metrics["structure_score"].value
@@ -28,7 +28,7 @@ CIRCUIT (GHZ-4):
   q2: ───────X──┼── M
   q3: ──────────X── M
 
-  Runs with metrics="structured_decoherence" to compute
+  Runs with metrics="decoherence" to compute
   Structure Score, Total Correlation, and Concentration Index.
 
 WHAT YOU'LL EXPLORE:
@@ -56,7 +56,7 @@ from src.experiments.base import BaseExperiment
 
 
 class GHZExploration(BaseExperiment):
-    """Explore GHZ states and structured decoherence metrics.
+    """Explore GHZ states and distribution-structure metrics.
 
     Start here to understand what Structure Score, Total Correlation,
     and Concentration Index measure.
@@ -74,7 +74,7 @@ class GHZExploration(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

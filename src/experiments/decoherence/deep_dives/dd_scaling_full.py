@@ -1,17 +1,12 @@
-"""Scaling Ladder — Does decoherence structure grow with system size?
+"""Scaling Ladder — how do distribution metrics change with system size?
 
-Tests the "River Scaling" hypothesis: as you add qubits to an entangled
-system, does the structure of the decoherence increase, decrease, or
-stay constant?
+Runs the same entangled state at increasing qubit counts and tracks how
+the Structure Score and related metrics of the measured distribution
+change: do they increase, decrease, or stay constant?
 
-Key finding (on IBM hardware):
-  GHZ: Structure Score grows monotonically (0.45 → 0.79 for 2→6 qubits).
-       Entropy stays flat — probability compresses into fewer peaks.
-       This is "amplification."
-
-  W: Structure Score also grows (0.40 → 0.73 for 2→6 qubits).
-     Entropy grows with N — each qubit adds a new pathway.
-     This is "redistribution."
+Compares GHZ (ideal support on 2 outcomes regardless of N) against W
+(ideal support on N single-excitation outcomes), which give the ladder
+two different shapes to follow.
 
 Usage:
     from src.experiments.decoherence import scaling_ladder
@@ -53,7 +48,7 @@ class ScalingLadder(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             shots=8192,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type="all",
         )
 

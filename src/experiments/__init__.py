@@ -3,7 +3,8 @@
 Experiments are organized into three levels:
 
   basics/       — Learning experiments for newcomers
-  decoherence/  — Core structured decoherence research
+  advanced/     — Classic quantum algorithms
+  decoherence/  — Noise and entanglement studies
   hardware/     — Real quantum hardware experiments
 
 Usage:
@@ -88,7 +89,7 @@ from src.experiments.decoherence.deep_dives.dd_state_probe import (
 )
 
 # Decoherence — steps
-from src.experiments.decoherence.steps.step01_river_vs_fog import river_vs_fog
+from src.experiments.decoherence.steps.step01_structured_vs_uniform import structured_vs_uniform
 from src.experiments.decoherence.steps.step02_topology_matters import topology_matters
 from src.experiments.decoherence.steps.step03_scaling import scaling as dec_scaling
 from src.experiments.decoherence.steps.step04_noise_resilience import noise_resilience
@@ -150,7 +151,7 @@ EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
     "vqe": vqe_experiment,
     "qaoa": qaoa_experiment,
     # Decoherence steps
-    "dec_01_river_vs_fog": river_vs_fog,
+    "dec_01_structured_vs_uniform": structured_vs_uniform,
     "dec_02_topology_matters": topology_matters,
     "dec_03_scaling": dec_scaling,
     "dec_04_noise_resilience": noise_resilience,

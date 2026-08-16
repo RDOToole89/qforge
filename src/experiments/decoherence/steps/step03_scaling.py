@@ -1,26 +1,23 @@
 """Step 3: Scaling — Does structure grow with system size?
 
 WHAT YOU'LL LEARN:
-  Adding qubits to an entangled system doubles the outcome space (2^N).
-  Naively, more outcomes should mean MORE randomness. But our hypothesis
-  is the opposite: MORE qubits = DEEPER river.
+  Adding qubits to an entangled system doubles the outcome space (2^N),
+  but the ideal GHZ distribution always has support on just 2 outcomes.
+  How does the Structure Score of the measured distribution change as
+  the outcome space grows around those 2 peaks?
 
-  This step tests whether Structure Score increases monotonically
-  with qubit count, and whether GHZ and W scale differently.
+  This step measures Structure Score and Total Correlation across a
+  ladder of system sizes so you can see the trend yourself.
 
 THE EXPERIMENT:
   Run GHZ from 2 to 6 qubits with depolarizing noise.
   Track Structure Score and Total Correlation at each size.
 
 WHAT TO LOOK FOR:
-  - SS increases: 2q (~0.45) → 3q (~0.67) → 4q (~0.75) → 5q (~0.80) → 6q (~0.80)
-  - TC increases linearly: ~+0.7 per qubit added
-  - Fidelity DECREASES (more qubits = more noise)
-  - But structure INCREASES — counterintuitive!
-
-  Two scaling modes (compare with W in the deep dive):
-  - GHZ: AMPLIFICATION — entropy stays flat, probability compresses into fewer peaks
-  - W: REDISTRIBUTION — entropy grows with N, each qubit adds a new pathway
+  - How Structure Score changes with qubit count
+  - How Total Correlation changes as qubits are added
+  - Fidelity decreases with size (more qubits, more noise exposure) —
+    compare that against what the distribution-shape metrics do
 
 CIRCUIT (GHZ at increasing sizes):
   2q: q0: ─H──●── M           4q: q0: ─H──●──●──●── M
@@ -28,7 +25,7 @@ CIRCUIT (GHZ at increasing sizes):
                                    q2: ───────X──┼── M
                                    q3: ──────────X── M
 
-  Same pattern, more qubits. Watch the metrics climb.
+  Same pattern, more qubits. Watch how the metrics change.
 
 TRY IT:
     from src.experiments.decoherence.steps.step03_scaling import scaling
@@ -48,7 +45,7 @@ class ScalingExperiment(BaseExperiment):
     """Step 3: GHZ scaling ladder with structure metrics."""
 
     name = "dec_03_scaling"
-    description = "Step 3: Does structure grow with qubits? Run the scaling ladder"
+    description = "Step 3: How distribution metrics change with system size"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -60,7 +57,7 @@ class ScalingExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

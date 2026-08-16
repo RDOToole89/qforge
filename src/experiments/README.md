@@ -8,7 +8,7 @@
 experiments/
 ├── basics/          11 steps + 10 deep dives    Learn quantum computing from scratch
 ├── advanced/         8 steps +  7 deep dives    Quantum algorithms → design your own
-├── decoherence/      6 steps +  2 deep dives    Structured decoherence research
+├── decoherence/      6 steps +  2 deep dives    Decoherence structure experiments
 └── hardware/         5 steps +  3 deep dives    Real IBM Quantum processors
 ```
 
@@ -17,11 +17,11 @@ experiments/
 ```
 Basics (11 steps)          Advanced (8 steps)         Decoherence (6 steps)     Hardware (5 steps)
 ─────────────────          ──────────────────         ─────────────────────     ─────────────────
-What is a qubit?     →     True randomness      →     River vs Fog         →   First hardware run
+What is a qubit?     →     True randomness      →     Structured vs uniform →  First hardware run
 Gates & measurement  →     Deutsch-Jozsa        →     Topology matters     →   HW vs simulation
 Entanglement         →     Grover's search      →     Scaling              →   Transpilation
 Noise & decoherence  →     Teleportation        →     Noise resilience     →   Backend comparison
-River vs Fog         →     Superdense coding    →     Global vs local      →   Real decoherence
+Noise & entanglement →     Superdense coding    →     Global vs local      →   Real decoherence
                      →     QFT                  →     Sim vs reality
                      →     Error correction
                      →     Design your own
@@ -39,8 +39,8 @@ python -m src.cli run 01_superposition
 # Jump to advanced
 python -m src.cli run adv_01_quantum_randomness
 
-# Start decoherence research
-python -m src.cli run dec_01_river_vs_fog
+# Start the decoherence experiments
+python -m src.cli run dec_01_structured_vs_uniform
 
 # Run on real hardware (requires IBM Quantum credentials)
 python -m src.cli run hw_01_first_hardware_run

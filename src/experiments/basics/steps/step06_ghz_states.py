@@ -18,7 +18,7 @@ WHAT TO LOOK FOR:
   - 3 qubits: 8 possible outcomes, only 000 and 111 appear
   - 6 qubits: 64 possible outcomes, only 000000 and 111111 appear
   - The concentration GROWS — this is the beginning of
-    "structured decoherence" (more in steps 12-14)
+    concentrated, correlated error distributions (more in later steps)
 
 WHY THIS MATTERS:
   GHZ states are the standard probe for studying multi-party

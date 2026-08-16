@@ -3,7 +3,7 @@
 This experiment tests quantum correlations in Bell states - the foundational
 demonstration that quantum mechanics violates classical correlation bounds.
 
-Research Question:
+Question:
     Do Bell states maintain quantum correlations under noise, and how do
     they compare to classical correlation bounds?
 

@@ -70,12 +70,12 @@ class DesignYourOwnExperiment(BaseExperiment):
     to investigate whatever interests you.
 
     Current hypothesis:
-      "GHZ states show more structured decoherence than product states
+      "GHZ states show more structured error distributions than product states
        under depolarizing noise at 5% error rate."
     """
 
     name = "adv_08_design_your_own"
-    description = "Step 8: Design your own experiment — the template for your research"
+    description = "Step 8: Design your own experiment — a template to build on"
 
     def default_config(self) -> ExperimentConfig:
         """YOUR DEFAULT CONFIG — modify this."""
@@ -87,7 +87,7 @@ class DesignYourOwnExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="structured_decoherence",
+            metrics="decoherence",
             visualization_type=["histogram", "circuit"],
         )
 

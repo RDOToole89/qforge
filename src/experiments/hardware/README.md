@@ -7,7 +7,7 @@ hardware/
 ├── steps/              5-step progression to real decoherence
 │   ├── step01 → step05
 │   └── README.md
-└── deep_dives/         Full research suites
+└── deep_dives/         Full study suites
     ├── dd_full_study
     ├── dd_readout_errors
     └── README.md
@@ -46,7 +46,7 @@ QiskitRuntimeService.save_account(
 
 | Step | Run | What you'll learn |
 |------|-----|-------------------|
-| 5 | `python -m src.cli run hw_05_real_decoherence` | River vs Fog on real hardware — the culmination of your journey |
+| 5 | `python -m src.cli run hw_05_real_decoherence` | Decoherence structure on real hardware — the culmination of your journey |
 
 ---
 
@@ -55,9 +55,9 @@ QiskitRuntimeService.save_account(
 | After step | Run | What you'll explore |
 |------------|-----|---------------------|
 | 2 | `python -m src.cli run dd_readout_errors` | Gate noise vs readout noise vs both — where errors come from |
-| 5 | Run `dd_full_study` programmatically | The complete 10-experiment structured decoherence study |
+| 5 | Run `dd_full_study` programmatically | The complete 10-experiment decoherence study |
 
-The full study is a documented research suite (not a single CLI command):
+The full study is a documented experiment suite (not a single CLI command):
 
 ```python
 from src.experiments.hardware.deep_dives.dd_full_study import run_all
@@ -74,15 +74,15 @@ Basics (11 steps)     Advanced (8 steps)     Hardware (5 steps)
 ────────────────      ────────────────       ─────────────────
 What is a qubit?  →   Quantum superpowers →  First hardware run
 Entanglement      →   Entanglement tools  →  HW vs simulation
-Noise & fog       →   QFT + error corr.  →  Transpilation
-River vs Fog      →   Design your own    →  Backend comparison
+What is noise?    →   QFT + error corr.  →  Transpilation
+Noise & entangle. →   Design your own    →  Backend comparison
                                           →  REAL DECOHERENCE
                                                    ↓
                                           Full 10-experiment
-                                          research study
+                                          study suite
 ```
 
-After Step 5, you've completed the full journey — from "what is a qubit?" to "structured decoherence confirmed on real quantum hardware." You're now equipped to design and run your own quantum experiments on real processors.
+After Step 5, you've completed the full journey — from "what is a qubit?" to measuring real decoherence on a physical quantum processor. You're now equipped to design and run your own quantum experiments on real hardware.
 
 ---
 
