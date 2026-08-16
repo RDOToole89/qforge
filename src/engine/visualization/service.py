@@ -1,4 +1,4 @@
-"""Clean, extensible visualization service for research.
+"""Clean, extensible visualization service.
 
 Plugin architecture allows adding new visualization types without
 modifying core engine code.
@@ -62,7 +62,7 @@ class RendererRegistryError(RuntimeError):
 
 
 class VisualizationService:
-    """Research-focused visualization service with plugin architecture.
+    """Visualization service with plugin architecture.
 
     - Thread-safe renderer registry
     - Priority-based renderer selection
@@ -189,7 +189,7 @@ class VisualizationService:
 
 
 def create_default_service() -> VisualizationService:
-    """Create a visualization service with default research renderers.
+    """Create a visualization service with the default renderers.
 
     Add new renderers here or register them at runtime in your pipeline.
     """

@@ -1,11 +1,10 @@
-"""Research Models — Generic Metrics Bundle.
+"""Analysis Models — Generic Metrics Bundle.
 
 Purpose: Define metric-agnostic models for the engine's analysis layer.
-A MetricsBundle holds an arbitrary set of MetricEntry values keyed by name,
-replacing the former SST-specific StructuredDecoherenceMetrics.
+A MetricsBundle holds an arbitrary set of MetricEntry values keyed by name.
 
 Dependencies: Pydantic only
-Used by: Engine analysis pipeline, research result storage
+Used by: Engine analysis pipeline, result storage
 """
 
 from __future__ import annotations
@@ -80,44 +79,7 @@ class AnalysisMetadata(BaseModel):
     )
 
 
-class ResearchMetadata(BaseModel):
-    """Metadata for research experiments and campaigns.
-
-    Purpose: Track research context, hypotheses, and experimental conditions.
-    """
-
-    hypothesis: str | None = Field(default=None, description="Research hypothesis being tested")
-
-    research_phase: str | None = Field(
-        default=None,
-        description="Phase of research (threshold, characterization, validation, etc.)",
-    )
-
-    campaign_id: str | None = Field(
-        default=None,
-        description="Research campaign identifier for grouping related experiments",
-    )
-
-    expected_outcomes: list[str] | None = Field(
-        default=None, description="Expected experimental outcomes or predictions"
-    )
-
-    control_experiment: bool = Field(
-        default=False, description="Whether this is a control experiment"
-    )
-
-    publication_ready: bool = Field(
-        default=False, description="Whether results meet publication quality standards"
-    )
-
-    figure_candidate: bool = Field(
-        default=False,
-        description="Whether results are suitable for publication figures",
-    )
-
-
 # Resolve forward references
 MetricEntry.model_rebuild()
 MetricsBundle.model_rebuild()
 AnalysisMetadata.model_rebuild()
-ResearchMetadata.model_rebuild()

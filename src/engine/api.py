@@ -9,7 +9,7 @@ It orchestrates:
     (2) circuit execution via the engine runner ➜
     (3) result canonicalization (counts) ➜
     (4) typed analysis assembly (ExperimentAnalysis) ➜
-    (5) optional research metrics computation ➜
+    (5) optional analysis metrics computation ➜
     (6) provenance + storage (persist analysis JSON) ➜
     (7) optional visualization (histogram) ➜
     (8) packaged ExperimentResult (and list thereof for sweeps)
@@ -17,7 +17,7 @@ It orchestrates:
 # Why it exists
 It provides a single, stable API surface decoupled from lower-level pieces
 (Qiskit runner, metrics registry, renderers, storage implementation).
-This keeps your research code, CLI, and future UI small and consistent.
+This keeps your experiment code, CLI, and future UI small and consistent.
 
 # Key functions
 - run(config, ctx=None) -> ExperimentResult
@@ -42,8 +42,8 @@ so you can attach logging, telemetry, or progress UIs without changing logic.
 # Invariants / Contracts
 - Always returns a typed ExperimentResult (Pydantic validated).
 - The `analysis` field is a fully-typed ExperimentAnalysis, not a loose dict.
-- The `structured_decoherence_metrics` field is only present if
-  `enable_research_metrics=True` in the config and counts were extracted.
+- The `metrics_bundle` field is only present if `config.metrics` requested
+  metrics and counts were extracted.
 
 """
 
@@ -60,7 +60,7 @@ from qiskit import QuantumCircuit
 # Version helper
 from src.engine._version_util import get_version
 
-# Research integration (counts canonicalization + metrics bundle)
+# Analysis integration (counts canonicalization + metrics bundle)
 from src.engine.analysis import compute_metrics_bundle, extract_counts_from_result
 
 # App plumbing
@@ -118,7 +118,7 @@ def run(
     2) Execute circuit (engine runner -> Qiskit backend).
     3) Extract canonical counts (MSB-left, fixed width).
     4) Assemble a *typed* ExperimentAnalysis (metadata, circuit stats, measurements).
-    5) Optionally compute structured-decoherence research metrics.
+    5) Optionally compute analysis metrics (per `config.metrics`).
     6) Build provenance and persist the analysis JSON to disk.
     7) Optionally render a histogram and attach as `ArtifactRef`.
     8) Package everything into an ExperimentResult (Pydantic-validated).
@@ -134,7 +134,7 @@ def run(
     -------
     ExperimentResult
         Complete, validated result object with typed `analysis`, optional
-        `structured_decoherence_metrics`, `provenance`, and `artifacts`.
+        `metrics_bundle`, `provenance`, and `artifacts`.
 
     Notes:
     -----
@@ -392,7 +392,7 @@ def _build_experiment_analysis(
     """Construct a strongly-typed `ExperimentAnalysis` from circuit + counts + config.
 
     This method fills:
-      - ExperimentMetadata: id, timestamp, engine version, research type
+      - ExperimentMetadata: id, timestamp, engine version, experiment type
       - CircuitStatistics: depth, gate counts, two-qubit counts
       - MeasurementResults: raw counts, total shots, unique outcomes, probabilities,
         plus optional density_matrix, statevector, fidelity from non-qasm modes.
@@ -406,7 +406,7 @@ def _build_experiment_analysis(
         experiment_id=f"{cfg.state_type}_{cfg.num_qubits}",
         timestamp=_now_iso(),
         framework_version=get_version(),
-        research_type=cfg.research_type,
+        experiment_type=cfg.experiment_type,
         experiment_description=None,
     )
 

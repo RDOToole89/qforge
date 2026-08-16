@@ -12,8 +12,8 @@ class ExperimentMetadata(BaseModel):
     timestamp: str = Field(description="When experiment was performed")
     framework_version: str = Field(description="Quantum experiment framework version")
 
-    research_type: str | None = Field(
-        default=None, description="Type of research analysis performed"
+    experiment_type: str | None = Field(
+        default=None, description="Experiment category used for grouping and storage"
     )
 
     experiment_description: str | None = Field(

@@ -1,4 +1,4 @@
-"""Research Integration Module.
+"""Metrics Integration Module.
 
 Bridge between engine API and core analysis metrics.
 Provides clean integration for computing a generic MetricsBundle.
@@ -12,12 +12,12 @@ from typing import Any
 
 from src.core.analysis.metrics.profiles import resolve_metrics
 from src.core.analysis.metrics.registry import compute_all
-from src.engine.models.config import ExperimentConfig
-from src.engine.models.research import (
+from src.engine.models.analysis import (
     AnalysisMetadata,
     MetricEntry,
     MetricsBundle,
 )
+from src.engine.models.config import ExperimentConfig
 
 logger = logging.getLogger(__name__)
 

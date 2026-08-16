@@ -1,12 +1,11 @@
 """Experiment Configuration Models.
 
-Purpose: Define the complete specification for quantum experiment configurations.
-Supports both basic experiments and advanced research configurations with
-structured decoherence analysis.
+Purpose: Define the complete specification for quantum experiment configurations,
+from basic circuits to noisy simulations with analysis metrics.
 
 Key Features:
 - Type-safe configuration with validation
-- Research parameter support
+- Analysis metric selection
 - Noise model specifications
 - Quantum state definitions
 - Simulation mode controls
@@ -33,7 +32,7 @@ class ExperimentConfig(BaseModel):
     """Complete quantum experiment configuration.
 
     This model defines all parameters needed to run a quantum experiment,
-    from basic circuit parameters to advanced research configurations.
+    from basic circuit parameters to advanced analysis configurations.
     """
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, validate_assignment=True)
@@ -115,15 +114,15 @@ class ExperimentConfig(BaseModel):
         ),
     )
 
-    # ===== Research Parameters =====
+    # ===== Analysis Parameters =====
     metrics: list[str] | str | None = Field(
         default=None,
         description="Profile name, explicit metric list, or None for no metrics",
     )
 
-    research_type: (
+    experiment_type: (
         Literal[
-            "structured_decoherence",
+            "decoherence",
             "parameter_sweep",
             "noise_comparison",
             "control",
@@ -132,7 +131,7 @@ class ExperimentConfig(BaseModel):
             "batch_sweep",
         ]
         | None
-    ) = Field(default=None, description="Type of research analysis to perform")
+    ) = Field(default=None, description="Experiment category used for grouping and storage")
 
     multiple_runs: int = Field(
         default=1,

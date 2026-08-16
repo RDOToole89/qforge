@@ -12,7 +12,7 @@ class Provenance(BaseModel):
     """Complete provenance information for experiment reproducibility.
 
     Captures all information needed to exactly reproduce an experiment,
-    following research best practices for computational reproducibility.
+    following standard practices for computational reproducibility.
     """
 
     schema_version: str = Field(default="1.0.0", description="Provenance schema version")

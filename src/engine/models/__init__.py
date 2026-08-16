@@ -16,7 +16,7 @@ Architecture:
     - provenance.py  : Reproducibility provenance tracking
     - quality.py     : Quality assessment metrics
     - results.py     : Top-level result composition (imports above)
-    - research.py    : Structured decoherence research models
+    - analysis.py    : Generic metrics bundle models
     - sweep.py       : Parameter sweep configuration and results
     - storage.py     : Storage, artifacts, and manifest models
 
@@ -28,6 +28,13 @@ Used by:
 """
 
 from __future__ import annotations
+
+# ===== Analysis Metrics =====
+from .analysis import (
+    AnalysisMetadata,
+    MetricEntry,
+    MetricsBundle,
+)
 
 # ===== Focused Model Submodules =====
 from .circuit import CircuitStatistics
@@ -41,14 +48,6 @@ from .measurement import MeasurementResults
 from .metadata import ExperimentMetadata
 from .provenance import Provenance
 from .quality import QualityMetrics, compute_quality_metrics
-
-# ===== Research Metrics =====
-from .research import (
-    AnalysisMetadata,
-    MetricEntry,
-    MetricsBundle,
-    ResearchMetadata,
-)
 
 # ===== Results (composes above) =====
 from .results import (
@@ -75,7 +74,6 @@ from .sweep import (
     StatisticalSummary,
     SweepExecutionMetadata,
     SweepManifest,
-    SweepResearchInsights,
     SweepResult,
 )
 
@@ -93,11 +91,10 @@ __all__ = [
     "Provenance",
     "ExperimentStatus",
     "compute_quality_metrics",
-    # Research Metrics
+    # Analysis Metrics
     "MetricEntry",
     "MetricsBundle",
     "AnalysisMetadata",
-    "ResearchMetadata",
     # Sweeps
     "SweepManifest",
     "SweepResult",
@@ -106,7 +103,6 @@ __all__ = [
     "InteractionEffect",
     "StatisticalSummary",
     "OutcomeStatistics",
-    "SweepResearchInsights",
     "SweepExecutionMetadata",
     # Storage & Artifacts
     "ArtifactRef",
