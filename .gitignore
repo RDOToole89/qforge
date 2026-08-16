@@ -22,8 +22,8 @@ src/_version.py
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Logs and results (optional, if you don't want to track generated logs/results)
-# logs/
+# Generated experiment output (never committed)
+logs/
 results/
 
 # Environment variables / secrets
@@ -63,11 +63,5 @@ htmlcov/
 # Private context (session notes, not for repo)
 .context/
 
-# Agent scratch workspace: track the skeleton (README, AGENTS.md, .gitkeep),
-# ignore the ephemeral content agents write into the subfolders.
-# (the !**/ line lets git descend into subdirs so the .gitkeep negation applies)
-.agent-workspace/**
-!.agent-workspace/**/
-!.agent-workspace/README.md
-!.agent-workspace/AGENTS.md
-!.agent-workspace/**/.gitkeep
+# Agent scratch workspace (local only)
+.agent-workspace/
