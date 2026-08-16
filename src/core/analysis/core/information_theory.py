@@ -1,8 +1,8 @@
-"""Information Theory Utilities for Quantum Decoherence Analysis.
+"""Information theory utilities for measurement analysis.
 
 # Information-Theoretic Foundations
-This module provides numerically stable, research-grade implementations of
-fundamental information theory measures used in quantum decoherence pathway analysis.
+This module provides numerically stable implementations of fundamental
+information theory measures used to analyze quantum measurement outcomes.
 
 # Mathematical Framework
 All entropy measures use base-2 logarithms (bits) and incorporate Jeffreys prior

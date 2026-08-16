@@ -1,14 +1,15 @@
 # src/analysis/__init__.py
 
-"""Structured Decoherence Analysis Module.
+"""Measurement-outcome analysis module.
 
-Research-grade analysis framework for quantum structured decoherence studies.
-Focuses on pathway detection, correlation analysis, and statistical validation.
+Analysis framework for quantifying structure in quantum measurement outcome
+distributions: distribution asymmetry, concentration, correlation analysis,
+and statistical validation.
 
 Core Components:
 - Metrics: Asymmetry Index, Pathway Concentration, Entanglement-Error Correlation
 - Core utilities: Information theory, bootstrap confidence, null models
-- Integration: Schema compliance and research-grade output
+- Integration: Schema-compliant output
 """
 
 # Core information theory functions
@@ -22,9 +23,9 @@ from .core import (
     total_correlation,
 )
 
-# Structured decoherence metrics
+# Distribution-structure metrics
 from .metrics import (
-    # Primary structured decoherence metrics
+    # Primary metrics
     compute_asymmetry_index,
     compute_complexity_emergence_score,
     compute_entanglement_error_correlation,
@@ -40,7 +41,7 @@ __all__ = [
     "mutual_information",
     "total_correlation",
     "jensen_shannon_divergence",
-    # Structured Decoherence Metrics
+    # Distribution-Structure Metrics
     "compute_asymmetry_index",
     "compute_pathway_concentration_ratio",
     "compute_entanglement_error_correlation",

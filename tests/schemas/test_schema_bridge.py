@@ -1,5 +1,5 @@
 """
-Test schema bridge compatibility for structured decoherence metrics.
+Test schema bridge compatibility for the analysis metrics.
 """
 
 import pytest

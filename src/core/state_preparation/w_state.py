@@ -1,4 +1,4 @@
-"""W State Preparation for Symmetric Entanglement Research.
+"""W state preparation.
 
 # The W State - Symmetric Multipartite Entanglement
 The W state represents symmetric multipartite entanglement where exactly one
@@ -9,12 +9,6 @@ Unlike GHZ states which exhibit all-or-nothing correlations, W states show
 robust partial entanglement. If one qubit is lost or measured, the remaining
 qubits still maintain some entanglement, making W states more robust to
 particle loss but less useful for certain quantum protocols.
-
-# Research Applications in Decoherence Studies
-- Asymmetric pathway emergence: How does symmetric entanglement break under noise?
-- Robustness vs fragility: Compare W state stability with GHZ states
-- Network effects: How does the "one excitation" structure affect pathways?
-- Measurement cascades: How does measuring one qubit affect the others?
 """
 
 from typing import Any
@@ -28,7 +22,7 @@ from .base_state import BaseState
 
 
 class WState(BaseState):
-    """W state preparation for symmetric entanglement research.
+    """W state preparation.
 
     # Quantum State Definition
     |W_n⟩ = (|100...0⟩ + |010...0⟩ + ... + |000...1⟩)/√n
@@ -235,43 +229,6 @@ class WState(BaseState):
             },
             "quantum_sensing_applications": "distributed_phase_estimation",
             "loss_tolerance": f"remains_entangled_with_{self.num_qubits - 1}_qubits",
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for W state decoherence studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Symmetric entanglement → asymmetric pathway emergence under noise",
-                "test_method": "Monitor asymmetry development in excitation distribution",
-                "expected_signature": "Gradual symmetry breaking with preferred pathways",
-            },
-            "decoherence_characteristics": {
-                "robustness_type": "Partial - survives single qubit loss",
-                "fragility_type": "Gradual degradation rather than sudden death",
-                "asymmetry_emergence": "Noise breaks permutation symmetry",
-                "pathway_structure": "Radial from each excitation state",
-            },
-            "experimental_advantages": {
-                "stability": "More robust than GHZ states to particle loss",
-                "measurement": "Clear single-excitation signatures",
-                "scaling": "Well-defined for arbitrary n qubits",
-                "comparison": "Direct contrast with GHZ pathway behavior",
-            },
-            "research_applications": {
-                "quantum_sensing": "Distributed parameter estimation",
-                "metrology": "Enhanced phase sensitivity",
-                "communication": "Quantum secret sharing protocols",
-                "computation": "Certain quantum algorithms",
-            },
-            "pathway_predictions": {
-                "early_stage": "Slight amplitude variations, symmetry preserved",
-                "symmetry_breaking": "Preferred excitation sites emerge",
-                "late_stage": "Classical mixture of single-excitation states",
-            },
         }
 
     def __str__(self) -> str:

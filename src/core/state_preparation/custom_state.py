@@ -1,22 +1,14 @@
-"""Custom State Preparation for Advanced Quantum Research.
+"""Custom state preparation from user-defined circuits.
 
 # Custom States - Flexible Circuit Definition
-Custom states provide maximum flexibility for advanced quantum experiments,
-allowing researchers to define arbitrary quantum circuits through multiple
-input methods. This bridges the gap between standard state preparation
-and cutting-edge research requirements.
+Custom states allow arbitrary quantum circuits to be supplied through
+multiple input methods: gate sequences, builder functions, OpenQASM files,
+or QuantumCircuit objects.
 
 # Mathematical Flexibility
 Custom states can represent any quantum state |ψ⟩ that can be prepared
 through a sequence of quantum gates, imported from external sources,
 or defined programmatically through builder functions.
-
-# Research Applications in Advanced Studies
-- Novel state topologies: Experiment with new entanglement structures
-- Algorithm development: Test custom initialization states
-- Hardware validation: Import real device characterization circuits
-- Collaborative research: Share and reproduce exact circuit definitions
-- OpenQASM integration: Compatibility with quantum software ecosystem
 """
 
 from __future__ import annotations
@@ -32,24 +24,16 @@ from .base_state import BaseState
 
 
 class CustomState(BaseState):
-    """Advanced custom state preparation for cutting-edge quantum research.
+    """Custom state preparation from user-defined circuits.
 
     # Quantum Circuit Flexibility
-    Custom states enable researchers to define arbitrary quantum circuits through
-    multiple input methods, providing maximum flexibility for novel experiments
-    while maintaining integration with the structured decoherence framework.
+    Custom states allow arbitrary quantum circuits to be defined through
+    multiple input methods while integrating with the rest of the framework.
 
     # Input Methods Supported
     1. **Gate Sequences**: Define circuits as lists of quantum gates with parameters
     2. **Builder Functions**: Use Python functions to generate circuits programmatically
     3. **OpenQASM Files**: Import circuits from the quantum assembly language standard
-
-    # Research Applications
-    - **Novel Topologies**: Test new entanglement structures not covered by standard states
-    - **Algorithm Development**: Create custom initialization states for quantum algorithms
-    - **Hardware Validation**: Import characterized circuits from real quantum devices
-    - **Reproducible Research**: Share exact circuit definitions with collaborators
-    - **Legacy Integration**: Bridge with existing quantum software and research
 
     # Custom Parameters Schema
     Required:
@@ -69,7 +53,7 @@ class CustomState(BaseState):
 
     Optional:
     - validate: bool (default True)
-    - metadata: Dict (research context)
+    - metadata: Dict (free-form user metadata)
 
     # Educational Notes
     Custom states demonstrate the flexibility of quantum circuit model,
@@ -81,7 +65,7 @@ class CustomState(BaseState):
         """Create quantum circuit from custom specification.
 
         # Custom Circuit Construction Strategy
-        Supports three distinct input methods for maximum research flexibility:
+        Supports three distinct input methods:
 
         1. **Gate Sequence Method**:
            - Define circuits as lists of quantum gates
@@ -96,7 +80,6 @@ class CustomState(BaseState):
         3. **OpenQASM Import Method**:
            - Load circuits from quantum assembly language files
            - Compatibility with quantum software ecosystem
-           - Research collaboration and legacy integration
 
         Args:
             add_barrier: Add quantum barrier for circuit visualization
@@ -224,7 +207,6 @@ class CustomState(BaseState):
                 "gate_types": list(qc.count_ops().keys()),
                 "num_qubits": qc.num_qubits,
                 "user_metadata": metadata,
-                "research_role": "advanced_custom_experiment",
                 "reproducibility": "full_specification_provided",
             },
         )
@@ -310,50 +292,7 @@ class CustomState(BaseState):
             "measurement_correlations": "depends_on_circuit_structure",
             "custom_metadata": metadata,
             "analysis_complexity": "high_arbitrary_circuit",
-            "research_flexibility": "maximum",
             "reproducibility": "exact_specification_provided",
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for custom state studies.
-
-        Returns:
-            Dict with research context and experimental considerations
-        """
-        params = self.custom_params or {}
-        source = params.get("source", "unknown")
-
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Pathway structure depends on circuit topology and gate sequence",
-                "test_method": "Analyze custom circuit structure for entanglement patterns",
-                "expected_signature": "Varies based on circuit design and gate connectivity",
-            },
-            "decoherence_characteristics": {
-                "circuit_dependence": "Highly dependent on specific gate sequence and topology",
-                "entanglement_structure": "Determined by user-defined circuit architecture",
-                "pathway_complexity": "Can range from trivial to maximally complex",
-                "noise_interaction": "Depends on gate types and circuit depth",
-            },
-            "experimental_role": {
-                "research_flexibility": "Maximum flexibility for novel experiments",
-                "hypothesis_testing": "Custom states for specific research questions",
-                "algorithm_development": "Test novel quantum algorithms and protocols",
-                "hardware_characterization": "Validate device performance with known circuits",
-            },
-            "research_predictions": {
-                "pathway_analysis": "Requires case-by-case analysis based on circuit structure",
-                "decoherence_patterns": "Depends on entanglement topology defined by gates",
-                "comparison_utility": "Ideal for testing specific hypotheses",
-                "reproducibility": "Exact circuit specification enables perfect reproduction",
-            },
-            "practical_applications": {
-                "algorithm_research": "Development and testing of quantum algorithms",
-                "device_validation": "Hardware characterization with known reference circuits",
-                "educational_examples": "Custom examples for teaching quantum mechanics",
-                "collaborative_research": "Share exact circuit definitions between researchers",
-                "legacy_integration": f"Import circuits from {source} sources",
-            },
         }
 
     def __str__(self) -> str:

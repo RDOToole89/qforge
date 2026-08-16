@@ -6,15 +6,13 @@ the most frequent pathways compared to the least frequent ones. It uses
 economic inequality measures adapted for quantum measurement analysis.
 
 # Physical Interpretation
-PCR measures error "inequality" - whether decoherence affects all pathways
-equally (low PCR) or concentrates in specific channels (high PCR). This
-reveals the degree of pathway preference in structured decoherence.
+PCR measures outcome "inequality" - whether measured errors are spread evenly
+across outcomes (low PCR) or concentrated in a few outcomes (high PCR).
 
-# Research Applications
-- Detecting pathway preferences and error concentration patterns
-- Complementary to Asymmetry Index for complete structure characterization
-- Identifying dominant vs rare error pathways in quantum systems
-- Statistical validation of pathway-based decoherence models
+# Applications
+- Quantifying error concentration in the outcome distribution
+- Complementary to Asymmetry Index for characterizing distribution shape
+- Identifying dominant vs rare error outcomes in quantum systems
 
 # Mathematical Definition
 PCR uses the ratio of top quartile to bottom quartile frequencies:
@@ -28,7 +26,7 @@ This implementation demonstrates:
 - Economic inequality measures applied to quantum physics
 - Robust statistical analysis with quartile-based metrics
 - Handling of discrete distributions with variable support
-- Research-grade edge case management and validation
+- Careful edge case management and validation
 
 References:
 - Palma (2011), "Homogeneous Middles vs. Heterogeneous Tails"
@@ -116,10 +114,10 @@ def compute_pathway_concentration_ratio(
     Physical Interpretation:
         - PCR = 1: Uniform distribution (no concentration)
         - PCR > 1: Errors concentrate in top pathways
-        - PCR >> 1: Highly concentrated (structured decoherence)
+        - PCR >> 1: Highly concentrated distribution
         - PCR → ∞: Extreme concentration (few dominant pathways)
 
-    Research Thresholds:
+    Interpretation Thresholds:
         - PCR ∈ [1.0, 2.0]: Uniform to slight concentration
         - PCR ∈ [2.0, 5.0]: Moderate concentration (emerging structure)
         - PCR ∈ [5.0, 20.0]: High concentration (clear structure)
@@ -165,7 +163,7 @@ def compute_pathway_concentration_ratio(
         - Complements other inequality measures like Gini coefficient
         - Provides intuitive interpretation as "concentration factor"
     """
-    # Input validation with research-grade error handling
+    # Input validation with strict error handling
     counts_clean = validate_counts_dict(counts, "pathway concentration ratio input")
 
     if not counts_clean:
@@ -267,7 +265,7 @@ def compute_concentration_with_gini(counts: Mapping[str, int]) -> tuple[float, f
     Returns:
         Tuple[float, float]: (PCR, Gini coefficient)
 
-    Research Applications:
+    Applications:
         - PCR for detecting extreme concentration (dominant pathways)
         - Gini for overall distribution inequality
         - Combined analysis for complete concentration characterization
@@ -407,8 +405,8 @@ def pathway_concentration_educational_demo() -> dict:
     Educational Value:
         - Shows PCR behavior across concentration levels
         - Demonstrates economic inequality concepts in quantum systems
-        - Provides intuition for interpreting PCR in research contexts
-        - Illustrates relationship between PCR and pathway structure
+        - Provides intuition for interpreting PCR values
+        - Illustrates relationship between PCR and distribution concentration
     """
     demo_results: dict[str, Any] = {}
 
@@ -453,14 +451,14 @@ def pathway_concentration_educational_demo() -> dict:
     demo_results["economic_interpretation"] = {
         "lorenz_curve": lorenz_analysis,
         "inequality_analogy": "PCR measures 'pathway inequality' like income inequality",
-        "quantum_insight": "High PCR indicates structured decoherence pathways",
+        "quantum_insight": "High PCR indicates a concentrated error-outcome distribution",
     }
 
     # Summary insights
     demo_results["summary"] = {
         "pcr_range_observed": [pcr_uniform, pcr_moderate, pcr_high, pcr_extreme],
         "concentration_progression": "uniform < moderate < high < extreme",
-        "research_insight": "PCR increases with pathway preference strength",
+        "insight": "PCR increases as errors concentrate in fewer outcomes",
         "economic_analogy": "Like measuring wealth concentration in quantum error pathways",
     }
 

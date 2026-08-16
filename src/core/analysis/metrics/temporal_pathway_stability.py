@@ -1,21 +1,20 @@
-"""Temporal Pathway Stability (TPS) - Dynamic Pathway Consistency Analysis.
+"""Temporal Pathway Stability (TPS) - Rank-correlation consistency across conditions.
 
 # Mathematical Foundation
-Temporal Pathway Stability quantifies how consistently error pathways maintain
+Temporal Pathway Stability quantifies how consistently error outcomes maintain
 their relative rankings across different experimental conditions (noise levels,
 time evolution, parameter sweeps). It combines time series analysis with
-rank correlation methods to detect persistent structured decoherence.
+rank correlation methods.
 
 # Physical Interpretation
-TPS tests whether decoherence pathway preferences remain stable or fluctuate
-randomly across experimental variations. High TPS indicates robust pathway
-structure that persists across conditions, while low TPS suggests random
-or highly sensitive pathway dynamics.
+TPS measures whether the ranking of error outcomes remains stable or
+fluctuates across experimental variations. High TPS indicates outcome
+rankings that persist across conditions, while low TPS indicates rankings
+that vary substantially.
 
-# Research Applications
-- Validating pathway stability across noise parameter sweeps
-- Characterizing robustness of structured decoherence patterns
-- Identifying critical points where pathway structure breaks down
+# Applications
+- Measuring outcome-ranking stability across noise parameter sweeps
+- Identifying conditions where outcome rankings change sharply
 - Temporal analysis of quantum error patterns in dynamic systems
 
 # Mathematical Definition
@@ -185,7 +184,7 @@ def compute_temporal_pathway_stability(
         - Coefficient of variation provides normalized stability measure
         - Temporal analysis reveals dynamic aspects of quantum decoherence
     """
-    # Input validation with research-grade error handling
+    # Input validation with strict error handling
     if not pathway_rankings or len(pathway_rankings) < PP_MIN_RUNS:
         logger.warning(
             "TPS requires "
@@ -288,7 +287,7 @@ def compute_pathway_persistence_scores(
 
         where rank_positions are the pathway's ranks across conditions.
 
-    Research Applications:
+    Applications:
         - Identifying which pathways are most robust to noise
         - Finding pathways that consistently dominate across conditions
         - Characterizing pathway-specific stability patterns
@@ -371,7 +370,7 @@ def compute_temporal_transition_matrix(
 
         Transition matrix captures rank mobility patterns and stability.
 
-    Research Applications:
+    Applications:
         - Analyzing rank mobility and stability patterns
         - Identifying absorbing states (persistent top ranks)
         - Characterizing pathway dynamics as Markov processes
@@ -676,7 +675,7 @@ def temporal_pathway_stability_educational_demo() -> dict:
     demo_results["summary"] = {
         "tps_range_observed": [tps_stable, tps_degrading, tps_random],
         "stability_progression": "stable > degrading > random",
-        "research_insight": "TPS captures temporal dynamics of quantum error patterns",
+        "insight": "TPS captures temporal dynamics of quantum error patterns",
         "applications": "Parameter sweeps, noise evolution, temporal stability",
     }
 

@@ -1,20 +1,20 @@
-"""Quantum Noise Model Factory for Research-Grade Decoherence Experiments.
+"""Quantum noise model factory.
 
 # Noise Model Factory
-Centralized factory for creating quantum decoherence channels used in structured
-pathway research. Provides clean interface between engine and noise classes
-while maintaining separation of concerns and physics compliance.
+Centralized factory for creating quantum decoherence channels. Provides a
+clean interface between the engine and the noise classes while maintaining
+separation of concerns and physics compliance.
 
 # Educational Purpose
 This factory demonstrates the Factory Pattern in quantum decoherence applications,
 showing how to manage different environmental coupling mechanisms systematically
-while keeping the interface simple and extensible for research use.
+while keeping the interface simple and extensible.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import Any
 
 from qiskit_aer.noise import NoiseModel
 
@@ -30,7 +30,7 @@ from .thermal_relaxation import ThermalRelaxationNoise
 logger = logging.getLogger(__name__)
 
 # Noise registry for available noise models
-NOISE_CLASSES = {
+NOISE_CLASSES: dict[str, type[BaseNoise]] = {
     "DEPOLARIZING": DepolarizingNoise,
     "AMPLITUDE_DAMPING": AmplitudeDampingNoise,
     "PHASE_DAMPING": PhaseDampingNoise,
@@ -49,18 +49,15 @@ def create_noise_model(
     experiment_id: str = "N/A",
     readout_error_rate: float | None = None,
 ) -> NoiseModel:
-    """Factory function to create noise models for decoherence pathway research.
+    """Factory function to create noise models.
 
     # Quantum Noise Factory Pattern
-    Creates specific decoherence channels (depolarizing, amplitude damping, etc.) using
-    a unified interface. Each noise type implements different environmental coupling
-    mechanisms for studying how decoherence pathways depend on physical origin.
-
-    # Research Applications in Pathway Studies
-    - Depolarizing noise: Random Pauli errors → uniform pathway degradation studies
-    - Amplitude damping: T1 processes → energy relaxation pathway analysis
-    - Phase damping: Pure dephasing → coherence loss pathway investigation
-    - Thermal relaxation: Finite temperature → realistic hardware pathway modeling
+    Creates specific decoherence channels using a unified interface. Each
+    noise type implements a different environmental coupling mechanism:
+    - Depolarizing noise: Random Pauli errors (isotropic decoherence)
+    - Amplitude damping: T1 energy relaxation
+    - Phase damping: Pure dephasing (T2* coherence loss)
+    - Thermal relaxation: Combined T1/T2 processes at finite temperature
 
     Args:
         noise_type: Type of decoherence channel to create
@@ -71,7 +68,7 @@ def create_noise_model(
         readout_error_rate: Optional measurement readout error probability.
 
     Returns:
-        NoiseModel: Configured quantum decoherence channel ready for pathway studies
+        NoiseModel: Configured quantum decoherence channel
 
     Raises:
         ValueError: If noise_type is invalid or parameters violate physics constraints
@@ -98,7 +95,7 @@ def create_noise_model(
         noise_class = NOISE_CLASSES[noise_type]
 
         # Prepare parameters for noise creation
-        init_params = {"num_qubits": num_qubits, "experiment_id": experiment_id}
+        init_params: dict[str, Any] = {"num_qubits": num_qubits, "experiment_id": experiment_id}
 
         # Add error rate if provided
         if error_rate is not None:
@@ -122,7 +119,7 @@ def create_noise_model(
         if readout_error_rate is not None and readout_error_rate > 0:
             _apply_readout_errors(noise_model, num_qubits, readout_error_rate)
 
-        # Log successful creation with research context
+        # Log successful creation
         logger.info(
             f"Created {noise_type} noise model: {num_qubits} qubits, "
             f"error_rate={noise.error_rate:.4f} (experiment: {experiment_id})"
@@ -178,7 +175,7 @@ def create_noise_instance(
     noise_class = NOISE_CLASSES[noise_type]
 
     # Prepare parameters
-    init_params = {"num_qubits": num_qubits, "experiment_id": experiment_id}
+    init_params: dict[str, Any] = {"num_qubits": num_qubits, "experiment_id": experiment_id}
 
     if error_rate is not None:
         init_params["error_rate"] = error_rate
@@ -186,7 +183,7 @@ def create_noise_instance(
     if custom_params:
         init_params.update(custom_params)
 
-    return cast(BaseNoise, noise_class(**init_params))
+    return noise_class(**init_params)
 
 
 def get_available_noise_types() -> list[str]:
@@ -450,9 +447,9 @@ def get_noise_info() -> dict[str, dict[str, str]]:
     """Get comprehensive information about all available noise types.
 
     # Educational Noise Catalog
-    Provides detailed descriptions of each noise mechanism for educational
-    purposes and research planning. Helps users understand which noise types
-    are appropriate for their specific pathway hypothesis testing.
+    Built from each noise class's ``CATALOG`` class attribute — a single source of
+    truth that cannot drift from ``NOISE_CLASSES``. Channels that set ``CATALOG = None``
+    (e.g. advanced variants like correlated depolarizing) are omitted.
 
     Returns:
         Dict mapping noise types to their descriptions and applications
@@ -460,49 +457,11 @@ def get_noise_info() -> dict[str, dict[str, str]]:
     Example:
         >>> info = get_noise_info()
         >>> print(info["DEPOLARIZING"]["description"])
-        >>> print(info["AMPLITUDE_DAMPING"]["research_application"])
+        >>> print(info["AMPLITUDE_DAMPING"]["use_case"])
     """
-    return {
-        "DEPOLARIZING": {
-            "description": "Uniform random Pauli errors creating isotropic decoherence",
-            "mechanism": "Random coupling to all environmental degrees of freedom",
-            "research_application": "Baseline uniform pathway degradation studies",
-            "typical_origin": "High-temperature environments, multiple error sources",
-            "educational_concepts": "Pauli channels, unital maps, worst-case noise",
-        },
-        "AMPLITUDE_DAMPING": {
-            "description": "Energy relaxation from excited to ground state",
-            "mechanism": "Spontaneous emission and thermal relaxation processes",
-            "research_application": "T1-limited pathway analysis and energy flow studies",
-            "typical_origin": "Electromagnetic coupling, finite temperature",
-            "educational_concepts": "T1 processes, non-unital channels, energy conservation",
-        },
-        "PHASE_DAMPING": {
-            "description": "Pure dephasing without energy exchange",
-            "mechanism": "Environmental coupling preserving energy eigenstates",
-            "research_application": "Coherence loss pathway investigation",
-            "typical_origin": "Charge noise, magnetic field fluctuations",
-            "educational_concepts": "T2* processes, elastic scattering, phase coherence",
-        },
-        "BIT_FLIP": {
-            "description": "Random X rotations flipping computational basis states",
-            "mechanism": "Transverse coupling causing bit-flip transitions",
-            "research_application": "Digital error pathway investigation",
-            "typical_origin": "Drive field noise, crosstalk between qubits",
-            "educational_concepts": "Classical bit errors, X-basis errors, digital noise",
-        },
-        "PHASE_FLIP": {
-            "description": "Random Z rotations preserving computational basis populations",
-            "mechanism": "Longitudinal coupling to environmental fields",
-            "research_application": "Classical measurement preservation pathway studies",
-            "typical_origin": "Magnetic field noise, charge fluctuations",
-            "educational_concepts": "Longitudinal coupling, classical information preservation, interference destruction",
-        },
-        "THERMAL_RELAXATION": {
-            "description": "Combined T1 and T2 processes at finite temperature",
-            "mechanism": "Coupling to thermal bath with energy exchange and dephasing",
-            "research_application": "Realistic hardware pathway modeling",
-            "typical_origin": "Dilution refrigerator environments, electromagnetic coupling",
-            "educational_concepts": "T1/T2 physics, thermal equilibrium, master equations, hardware reality",
-        },
-    }
+    catalog: dict[str, dict[str, str]] = {}
+    for noise_type, noise_class in NOISE_CLASSES.items():
+        entry = noise_class.CATALOG
+        if entry is not None:
+            catalog[noise_type] = entry
+    return catalog

@@ -1,9 +1,9 @@
-"""Quantum State Factory for Research-Grade Decoherence Experiments.
+"""Quantum state factory.
 
 # State Preparation Factory
-Centralized factory for creating quantum states used in structured decoherence
-pathway research. Provides clean interface between engine and state classes
-while maintaining separation of concerns.
+Centralized factory for creating quantum states. Provides a clean interface
+between the engine and the state classes while maintaining separation of
+concerns.
 
 # Educational Purpose
 This factory demonstrates the Factory Pattern in quantum computing applications,
@@ -32,18 +32,16 @@ def prepare_state(
     experiment_id: str = "N/A",
     balance: str | None = None,
 ) -> QuantumCircuit:
-    """Factory function to prepare quantum states for decoherence research.
+    """Factory function to prepare quantum states.
 
     # Quantum State Factory Pattern
-    Creates specific quantum states (GHZ, W, Bell, Cluster, etc.) using a unified
-    interface. Each state type implements different entanglement topologies for
-    studying how decoherence pathways depend on quantum correlation structure.
-
-    # Research Applications
-    - GHZ states: Global entanglement → pathway propagation studies
-    - W states: Symmetric entanglement → asymmetric pathway emergence
-    - Bell states: Two-qubit entanglement → fundamental pathway structures
-    - Cluster states: Local correlations → network decoherence patterns
+    Creates specific quantum states (GHZ, W, Bell, Cluster, etc.) using a
+    unified interface. Each state type implements a different entanglement
+    structure:
+    - GHZ states: Global multipartite entanglement
+    - W states: Symmetric single-excitation entanglement
+    - Bell states: Maximally entangled two-qubit states
+    - Cluster states: Graph states with nearest-neighbor entanglement
 
     Args:
         state_type: Type of quantum state to create

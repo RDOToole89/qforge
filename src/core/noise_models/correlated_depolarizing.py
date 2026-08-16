@@ -1,13 +1,10 @@
-"""Correlated Depolarizing Noise for Topology-Dependent Error Studies.
+"""Correlated depolarizing noise (topology-dependent pair correlations).
 
-Depolarizing noise with pair correlations along entanglement topology edges.
-This enables in-simulation tests of the structured decoherence hypothesis:
+Depolarizing noise with pair correlations along entanglement topology edges:
 
 - correlation_strength > 0: errors correlated along topology edges
 - correlation_strength = 0: standard independent depolarizing (baseline)
 - correlation_strength < 0: errors anti-correlated along topology edges
-
-Comparing NTC across these three conditions is the definitive simulation test.
 """
 
 import logging
@@ -25,6 +22,12 @@ logger = logging.getLogger(__name__)
 
 class CorrelatedDepolarizingNoise(BaseNoise):
     """Depolarizing noise with topology-dependent pair correlations."""
+
+    NOISE_TYPE = "CORRELATED_DEPOLARIZING"
+    IS_UNITAL = True  # Pauli (depolarizing-family) channel: preserves I/d.
+    # Advanced variant — intentionally omitted from the intro catalog
+    # (get_noise_info). Set to a dict if it should appear there.
+    CATALOG = None
 
     def __init__(
         self,
@@ -219,7 +222,7 @@ class CorrelatedDepolarizingNoise(BaseNoise):
                 "Errors on connected qubit pairs are biased toward correlated "
                 "Paulis (XX, YY, ZZ)."
             ),
-            "origin": "Simulation model for testing structured decoherence hypothesis",
+            "origin": "Simulation model for studying spatially correlated errors",
             "correlation_strength": str(self.correlation_strength),
             "topology": self.topology_name,
         }

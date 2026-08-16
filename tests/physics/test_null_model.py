@@ -254,7 +254,7 @@ class TestNullModelTC:
 
 
 class TestEffectSizes:
-    """Test that metrics provide sufficient effect sizes for research."""
+    """Test that metrics provide sufficient effect sizes to be usable."""
 
     def test_ai_effect_size_deterministic_vs_uniform(self):
         """

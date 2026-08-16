@@ -1,4 +1,4 @@
-"""Depolarizing Noise for Quantum Decoherence Pathway Research.
+"""Depolarizing noise (isotropic Pauli errors).
 
 # The Depolarizing Channel - Fundamental Quantum Decoherence
 Depolarizing noise represents the most fundamental quantum decoherence mechanism:
@@ -21,12 +21,6 @@ Kraus operators: √(1-3p/4)I, √(p/4)X, √(p/4)Y, √(p/4)Z (single qubit)
 - Multiple simultaneous error sources (electromagnetic, thermal, mechanical)
 - Poorly isolated qubits with broad-spectrum environmental coupling
 - Overdamped systems where coherent dynamics are completely suppressed
-
-# Research Significance for Structured Pathways
-Depolarizing noise provides the baseline "worst-case" decoherence against which
-all pathway structure hypotheses are tested. If pathways emerge even under
-isotropic depolarizing noise, this suggests fundamental topological origins
-rather than environmental asymmetries.
 
 # Educational Framework
 Depolarizing channels demonstrate fundamental quantum information concepts:
@@ -51,15 +45,15 @@ logger = logging.getLogger(__name__)
 
 
 class DepolarizingNoise(BaseNoise):
-    """Depolarizing noise model for fundamental quantum decoherence research.
+    """Depolarizing noise model (isotropic Pauli errors).
 
     # Quantum Decoherence Definition
     The depolarizing channel creates isotropic decoherence by applying random
     Pauli errors with equal probability. For n qubits:
     ρ → (1-p)ρ + p(I/2^n) where p ∈ [0, 1-1/4^n]
 
-    This represents the most symmetric possible decoherence, making it ideal
-    for establishing baseline expectations in structured pathway studies.
+    This is the most symmetric possible decoherence, often used as a
+    worst-case baseline noise model.
 
     # Physical Interpretation
     Depolarizing noise models environmental coupling that is:
@@ -68,12 +62,6 @@ class DepolarizingNoise(BaseNoise):
     - **Unital**: Preserves maximally mixed states
     - **Worst-case**: Destroys quantum information most efficiently
 
-    # Research Applications in Pathway Studies
-    - **Baseline Comparison**: Test whether pathways emerge even under isotropic noise
-    - **Isotropy Testing**: Compare with directional noise to identify anisotropies
-    - **Threshold Analysis**: Determine critical error rates for pathway persistence
-    - **Symmetry Investigation**: Study how entanglement topology affects uniform degradation
-
     # Educational Significance
     Depolarizing channels illustrate fundamental concepts:
     - **Pauli Error Model**: X, Y, Z errors and their measurement signatures
@@ -81,6 +69,16 @@ class DepolarizingNoise(BaseNoise):
     - **Unital Property**: Preservation of maximally mixed states
     - **Information Geometry**: Uniform contraction in quantum state space
     """
+
+    NOISE_TYPE = "DEPOLARIZING"
+    IS_UNITAL = True
+    CATALOG = {
+        "description": "Uniform random Pauli errors creating isotropic decoherence",
+        "mechanism": "Random coupling to all environmental degrees of freedom",
+        "use_case": "Baseline worst-case noise model",
+        "typical_origin": "High-temperature environments, multiple error sources",
+        "educational_concepts": "Pauli channels, unital maps, worst-case noise",
+    }
 
     def __init__(self, error_rate: float = 0.05, num_qubits: int = 1, experiment_id: str = "N/A"):
         """Initialize depolarizing noise with physics-compliant validation.
@@ -125,7 +123,6 @@ class DepolarizingNoise(BaseNoise):
                 "pauli_probabilities": self._pauli_probabilities,
                 "decoherence_type": "isotropic_uniform",
                 "channel_property": "unital",
-                "research_role": "baseline_worst_case_decoherence",
             },
         )
 
@@ -307,44 +304,6 @@ class DepolarizingNoise(BaseNoise):
             "unitality": True,
         }
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for depolarizing noise in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Uniform pathway degradation - no structural bias expected",
-                "test_method": "Compare with directional noise to identify pathway anisotropies",
-                "expected_signature": "Isotropic decoherence with equal pathway utilization",
-            },
-            "decoherence_characteristics": {
-                "symmetry": "Rotationally invariant - no preferred decoherence direction",
-                "topology_dependence": "Minimal - uniform degradation regardless of entanglement structure",
-                "pathway_bias": "None expected - serves as null hypothesis baseline",
-                "scaling_behavior": "Exponential fidelity decay with error rate",
-            },
-            "experimental_role": {
-                "baseline_comparison": "Gold standard for worst-case decoherence scenarios",
-                "isotropy_testing": "Control experiment for identifying directional pathway preferences",
-                "threshold_studies": "Critical error rate determination for quantum advantage",
-                "symmetry_breaking": "Test whether entanglement topology creates asymmetries",
-            },
-            "research_predictions": {
-                "vs_directional_noise": "Should show no pathway preferences unlike amplitude damping",
-                "scaling_with_qubits": "Exponentially fast quantum information loss",
-                "entanglement_robustness": "Fastest possible entanglement decay for given error rate",
-                "measurement_correlations": "Uniform loss of all computational basis correlations",
-            },
-            "educational_applications": {
-                "fundamental_concepts": "Pauli error model, channel bounds, information geometry",
-                "quantum_information": "Channel capacity, fidelity decay, entropy production",
-                "error_correction": "Threshold requirements, syndrome patterns, recovery protocols",
-                "pathway_hypothesis": "Null hypothesis for structured decoherence studies",
-            },
-        }
-
     def _validate_depolarizing_bounds(self, error_rate: float, num_qubits: int) -> None:
         """Validate error rate against depolarizing channel physical bounds.
 
@@ -397,34 +356,6 @@ class DepolarizingNoise(BaseNoise):
         else:
             # Approximate entropy increase for partial depolarization
             return self.error_rate * self.num_qubits
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for depolarizing noise.
-
-        Returns:
-            Depolarizing-specific pathway hypothesis prediction
-        """
-        return (
-            "Depolarizing noise should create uniform pathway degradation with no "
-            "structural bias. Any observed pathway structure suggests non-isotropic "
-            "environmental coupling or fundamental entanglement topology effects."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess depolarizing noise sensitivity to quantum state topology."""
-        return (
-            "Minimal topology sensitivity expected due to isotropic Pauli errors. "
-            "Depolarizing noise treats all entanglement structures equivalently, "
-            "making it ideal for testing intrinsic topological pathway effects."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze depolarizing noise pathway preferences."""
-        return (
-            "No intrinsic pathway preferences - depolarizing channels are designed "
-            "to be maximally symmetric. Any observed preferences indicate either "
-            "measurement artifacts or fundamental quantum geometry effects."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

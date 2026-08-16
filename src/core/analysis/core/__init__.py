@@ -1,9 +1,9 @@
-"""Core analysis utilities for structured decoherence research.
+"""Core analysis utilities.
 
 This module provides essential functions for quantum measurement analysis:
 - Information theory metrics (Shannon entropy, mutual information, etc.)
 - Bootstrap confidence intervals and statistical validation
-- Null model framework for hypothesis testing
+- Null model framework for baseline comparisons
 """
 
 from .bootstrap import (

@@ -1,6 +1,6 @@
-# Structured Decoherence Analysis Framework
+# Analysis Framework
 
-Research-grade analysis for structured decoherence pathways in quantum systems. Provides 8 core metrics with bootstrap confidence intervals, v1.0 schema compliance, and publication-ready output.
+Information-theoretic and statistical analysis of quantum measurement outcomes. Provides 8 core metrics with bootstrap confidence intervals and v1.0 schema-compliant output.
 
 This is pure analysis code with no experiment-specific logic. Feed it measurement counts from any source -- the engine, a Jupyter notebook, or an external dataset -- and get back standardized metrics.
 
@@ -46,7 +46,7 @@ for name, result in results.items():
 
 ---
 
-## The 8 Research Metrics
+## The 8 Metrics
 
 | Abbrev | Name | What It Measures | Range |
 |--------|------|-----------------|-------|
@@ -56,10 +56,10 @@ for name, result in results.items():
 | **TPS** | Temporal Pathway Stability | Spearman correlation consistency across conditions | [0, 1] |
 | **CES** | Complexity Emergence Score | Logistic emergence threshold detection | [0, 1] |
 | **SS** | Structure Score | Jensen-Shannon divergence from factorized null model | [0, 1] |
-| **CI** | Concentration Index | Gini-like pathway concentration measure | [0, 1] |
+| **CI** | Concentration Index | Top-vs-bottom quartile probability ratio (alias of PCR) | [1, ∞) |
 | **TC** | Total Correlation | Multi-information across all qubits | [0, inf) |
 
-All metrics include 95% bootstrap confidence intervals and research quality status (validated / experimental / unstable).
+All metrics include 95% bootstrap confidence intervals and a quality status (validated / experimental / unstable). They are general measures of measurement-outcome distributions — interpretation is left to the experiment programs that use them.
 
 ---
 
@@ -77,12 +77,12 @@ analysis/
     entanglement_error_correlation.py  EEC: multi-topology Pearson correlation
     temporal_pathway_stability.py  TPS: Spearman consistency + transition matrices
     pathway_concentration_ratio.py  PCR: adaptive quartile concentration
-    concentration_index.py    CI: Gini-like concentration
+    concentration_index.py    CI: alias of the PCR quartile ratio
     pathway_persistence.py    Pathway persistence wrapper
     total_correlation.py      TC: multi-information
     noise_topology_correlation.py  NTC: permutation test for noise-topology
     structure_score.py        SS: JSD from factorized (independent-marginals) null model
-    profiles.py               Metric selection profiles (structured_decoherence, minimal, full)
+    profiles.py               Metric selection profiles (decoherence, quick, information_theory)
 
   core/                     Mathematical foundations
     information_theory.py     Entropy, MI, JSD with Jeffreys smoothing (alpha=0.5, K=2^n)

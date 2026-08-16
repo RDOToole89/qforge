@@ -14,7 +14,7 @@ Target States:
 Analytical Baselines (Phase 1 Scientific Rigor):
 - Entropy: H(deterministic) ≈ 0, H(uniform d) = log₂(d)
 - Total Correlation: TC(Bell) = 1.0 bit, TC(3Q GHZ) = 2.0 bits
-- Asymmetry Index: AI(uniform) = 0, AI(deterministic) = 0.5
+- Asymmetry Index: AI(uniform) = 0, AI(deterministic) = 1 - 1/K (up to smoothing)
 - PCR: PCR(uniform) = 1.0
 - EEC: Always ∈ [-1, 1]
 """
@@ -39,23 +39,16 @@ TOLERANCE = 1e-9
 class TestAnalyticalBaselines:
     def test_separable_state_metrics(self):
         """
-        Theory: A separable state (e.g., |00...0>) has:
-        - Entropy = 0 (if pure)
-        - Mutual Information = 0
-        - Asymmetry Index = 0.5 (Deterministic)
+        Theory: A deterministic outcome (e.g., |00...0>) gives a delta
+        distribution, whose TVD from uniform is 1 - 1/K up to smoothing.
+        With K=8, N=1000, alpha=0.5: AI = (N+a)/(N+aK) - 1/K = 875/1004.
         """
         # |000>
         counts = {"000": 1000}
 
-        # Entropy should be exactly 0
-        # Note: We need to convert counts to probs for the core entropy function
-        # or use a helper if available. For now, we assume the core function handles it
-        # or we prep the input. The integration tests showed we need to be careful.
-        # Let's use the high-level metrics which handle counts.
-
-        # Asymmetry Index for deterministic state is exactly 0.5
         ai = compute_asymmetry_index(counts)
-        assert abs(ai - 0.5) < TOLERANCE, f"Expected AI=0.5 for separable state, got {ai}"
+        expected = 875.0 / 1004.0
+        assert abs(ai - expected) < TOLERANCE, f"Expected AI={expected}, got {ai}"
 
     def test_maximally_mixed_state(self):
         """
@@ -260,9 +253,9 @@ class TestAIBaselines:
     """
     Asymmetry Index Analytical Baselines.
 
-    AI = JS divergence from uniform, normalized to [0, 1].
+    AI = total variation distance from the uniform distribution over 2^n outcomes.
     - AI = 0 for uniform distribution
-    - AI = 0.5 for deterministic (single outcome)
+    - AI = 1 - 1/K (up to smoothing) for deterministic (single outcome)
     """
 
     def test_ai_uniform_is_zero(self):
@@ -276,16 +269,17 @@ class TestAIBaselines:
 
         assert abs(ai - 0.0) < 0.01, f"Expected AI≈0 for uniform, got {ai}"
 
-    def test_ai_deterministic_is_half(self):
+    def test_ai_deterministic_near_max(self):
         """
         Theory: AI(deterministic) = 0.5.
 
-        Maximum JS divergence from uniform occurs at delta distribution.
+        Maximum TVD from uniform occurs at a delta distribution:
+        K=16, N=1000, alpha=0.5 -> AI = (N+a)/(N+aK) - 1/K = 937.5/1008.
         """
         counts = {"0000": 1000}
         ai = compute_asymmetry_index(counts)
 
-        assert abs(ai - 0.5) < 0.05, f"Expected AI≈0.5 for deterministic, got {ai}"
+        assert abs(ai - 937.5 / 1008.0) < 1e-10, f"Expected AI=937.5/1008, got {ai}"
 
     def test_ai_in_unit_interval(self):
         """AI must always be in [0, 1]."""

@@ -26,11 +26,6 @@ The thermal relaxation channel combines amplitude damping and pure dephasing:
 - Phonon coupling in solid-state systems
 - Nuclear spin baths in semiconductors
 
-# Research Significance for Structured Pathways
-Thermal relaxation creates the most realistic decoherence environment for studying
-pathway emergence, combining energy flow and dephasing in ways that may reveal
-the full complexity of structured decoherence patterns.
-
 # Educational Framework
 Thermal relaxation demonstrates advanced concepts:
 - Combined T1/T2 physics and their relationship
@@ -58,12 +53,12 @@ TYPICAL_QUBIT_FREQ = 5.5e9  # 5.5 GHz typical superconducting qubit
 
 
 class ThermalRelaxationNoise(BaseNoise):
-    """Thermal relaxation noise model for realistic hardware decoherence research.
+    """Thermal relaxation noise model combining T1 and T2 processes.
 
     # Combined T1/T2 Decoherence Definition
     The thermal relaxation channel models the combined effects of energy relaxation
-    (T1) and pure dephasing (T2*) in a finite temperature environment. This represents
-    the most comprehensive and realistic decoherence model for quantum hardware.
+    (T1) and pure dephasing (T2*) in a finite temperature environment. This is the
+    most comprehensive of the noise models here for describing real hardware.
 
     # Physical Interpretation
     Thermal relaxation models environmental coupling that includes:
@@ -72,12 +67,6 @@ class ThermalRelaxationNoise(BaseNoise):
     - **Thermal Equilibration**: Approach to Boltzmann distribution at bath temperature
     - **Combined Dynamics**: Realistic T2_eff = 1/(1/T2* + 1/2T1) relationship
 
-    # Research Applications in Pathway Studies
-    - **Realistic Modeling**: Most accurate representation of hardware decoherence
-    - **Combined Mechanisms**: Study pathway behavior under multiple decoherence types
-    - **Temperature Effects**: Investigate thermal population effects on pathways
-    - **Hardware Validation**: Compare theoretical predictions with real device behavior
-
     # Educational Significance
     Thermal relaxation illustrates advanced concepts:
     - **T1/T2 Physics**: Comprehensive understanding of relaxation timescales
@@ -85,6 +74,16 @@ class ThermalRelaxationNoise(BaseNoise):
     - **Master Equations**: Lindblad dynamics and open quantum systems
     - **Hardware Reality**: Connection between theory and experimental constraints
     """
+
+    NOISE_TYPE = "THERMAL_RELAXATION"
+    IS_UNITAL = False
+    CATALOG = {
+        "description": "Combined T1 and T2 processes at finite temperature",
+        "mechanism": "Coupling to thermal bath with energy exchange and dephasing",
+        "use_case": "Modeling realistic hardware decoherence with T1/T2 times",
+        "typical_origin": "Dilution refrigerator environments, electromagnetic coupling",
+        "educational_concepts": "T1/T2 physics, thermal equilibrium, master equations, hardware reality",
+    }
 
     def __init__(
         self,
@@ -180,7 +179,6 @@ class ThermalRelaxationNoise(BaseNoise):
                 "combined_error_rate": self._combined_error_rate,
                 "decoherence_type": "combined_t1_t2_thermal",
                 "channel_property": "non_unital_thermal",
-                "research_role": "realistic_hardware_pathway_modeling",
             },
         )
 
@@ -331,44 +329,6 @@ class ThermalRelaxationNoise(BaseNoise):
             "unitality": False,  # Thermal channels are non-unital
             "reversibility": False,  # Information loss is irreversible
             "information_capacity": self._calculate_channel_capacity(),
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for thermal relaxation in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Comprehensive pathway structure combining energy flow and dephasing effects",
-                "test_method": "Compare realistic hardware behavior with idealized noise models",
-                "expected_signature": "Complex pathway patterns reflecting combined T1/T2 dynamics",
-            },
-            "decoherence_characteristics": {
-                "mechanism_combination": "Simultaneous energy relaxation and pure dephasing",
-                "topology_dependence": "High - affects both energy and coherence simultaneously",
-                "pathway_asymmetry": "Moderate - thermal effects create equilibrium bias",
-                "scaling_behavior": "Complex scaling with both T1 and T2 contributions",
-            },
-            "experimental_role": {
-                "hardware_validation": "Primary model for real quantum device behavior",
-                "combined_mechanism_testing": "Study pathway behavior under multiple decoherence types",
-                "temperature_effects": "Investigate thermal population effects on pathway structure",
-                "realistic_benchmarking": "Benchmark theoretical predictions against hardware reality",
-            },
-            "research_predictions": {
-                "vs_individual_channels": "Should show complex behavior combining individual channel effects",
-                "temperature_dependence": "Pathway structure should vary with thermal population",
-                "hardware_correlation": "Should correlate strongly with real device measurements",
-                "pathway_complexity": "Most complex pathway patterns due to combined mechanisms",
-            },
-            "educational_applications": {
-                "realistic_modeling": "Demonstrate most accurate decoherence representation",
-                "t1_t2_physics": "Teach comprehensive relaxation and dephasing physics",
-                "thermal_effects": "Illustrate finite temperature quantum mechanics",
-                "open_systems": "Show master equation dynamics and Lindblad evolution",
-            },
         }
 
     def _validate_thermal_params(
@@ -550,34 +510,6 @@ class ThermalRelaxationNoise(BaseNoise):
         # Simplified capacity estimate based on combined error rate
         combined_rate = self._combined_error_rate
         return max(0, 1 - combined_rate)
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for thermal relaxation noise.
-
-        Returns:
-            Thermal relaxation specific pathway hypothesis prediction
-        """
-        return (
-            f"Thermal relaxation should create complex pathway structure combining "
-            f"T1 ({self.t1:.2e}s) and T2 ({self.t2:.2e}s) processes. Pathways should "
-            f"reflect both energy flow and dephasing with thermal population {self._thermal_population:.4f}."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess thermal relaxation sensitivity to quantum state topology."""
-        return (
-            "High topology sensitivity expected due to combined T1/T2 mechanisms. "
-            "States with different energy and coherence characteristics should show "
-            "distinct pathway behavior under realistic decoherence."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze thermal relaxation pathway preferences."""
-        return (
-            f"Complex pathway preferences combining energy flow (T1) and dephasing (T2). "
-            f"Thermal effects at {self.temperature}K create equilibrium bias with "
-            f"effective T2 = {self._effective_t2:.2e}s."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

@@ -1,4 +1,4 @@
-"""Bit Flip Noise for Classical Digital Error Research.
+"""Bit flip noise (random Pauli-X errors).
 
 # The Bit Flip Channel - Classical Computational Basis Errors
 Bit flip noise represents classical digital errors where computational basis states
@@ -24,11 +24,6 @@ Kraus operators: K₀ = √(1-p)I, K₁ = √p X
 - Control field amplitude noise and drift
 - AC Stark shifts from imperfect pulse shaping
 
-# Research Significance for Structured Pathways
-Bit flip noise creates computational basis transitions that may reveal
-structural biases in how classical error patterns propagate through
-quantum networks, distinct from phase-based or energy-based decoherence.
-
 # Educational Framework
 Bit flip channels demonstrate fundamental concepts:
 - Classical error models and their quantum generalizations
@@ -51,15 +46,14 @@ logger = logging.getLogger(__name__)
 
 
 class BitFlipNoise(BaseNoise):
-    """Bit flip noise model for classical digital error research.
+    """Bit flip noise model (random Pauli-X errors).
 
     # Quantum Bit Flip Definition
     The bit flip channel models classical computational errors by applying
     random X (NOT) operations with probability p. This preserves the
     computational basis structure while corrupting stored information.
 
-    This represents the quantum generalization of classical bit errors,
-    making it ideal for studying digital error propagation patterns.
+    This is the quantum generalization of the classical bit error.
 
     # Physical Interpretation
     Bit flip noise models environmental coupling that is:
@@ -68,12 +62,6 @@ class BitFlipNoise(BaseNoise):
     - **Transverse**: Couples in X direction of Bloch sphere
     - **Coherent**: Can arise from coherent drive field errors
 
-    # Research Applications in Pathway Studies
-    - **Digital Pathways**: Test how classical errors propagate through quantum networks
-    - **Basis Structure**: Study pathway dependence on computational basis preservation
-    - **Classical Comparison**: Compare with quantum-specific decoherence mechanisms
-    - **Error Correction**: Investigate pathway structure for classical error correction
-
     # Educational Significance
     Bit flip channels illustrate fundamental concepts:
     - **Classical Error Models**: Quantum generalization of digital bit errors
@@ -81,6 +69,16 @@ class BitFlipNoise(BaseNoise):
     - **Drive Field Errors**: How control field imperfections create bit flips
     - **Computational Basis**: Preservation of |0⟩, |1⟩ structure with content errors
     """
+
+    NOISE_TYPE = "BIT_FLIP"
+    IS_UNITAL = True
+    CATALOG = {
+        "description": "Random X rotations flipping computational basis states",
+        "mechanism": "Transverse coupling causing bit-flip transitions",
+        "use_case": "Modeling classical bit errors on quantum hardware",
+        "typical_origin": "Drive field noise, crosstalk between qubits",
+        "educational_concepts": "Classical bit errors, X-basis errors, digital noise",
+    }
 
     def __init__(
         self,
@@ -157,7 +155,6 @@ class BitFlipNoise(BaseNoise):
                 "pulse_amplitude_error": pulse_amplitude_error,
                 "decoherence_type": "computational_basis_transverse",
                 "channel_property": "unital",
-                "research_role": "classical_digital_error_investigation",
             },
         )
 
@@ -291,44 +288,6 @@ class BitFlipNoise(BaseNoise):
             "information_capacity": self._calculate_channel_capacity(),
         }
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for bit flip noise in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Classical error propagation patterns with computational basis preservation",
-                "test_method": "Compare digital vs quantum-specific error pathway structures",
-                "expected_signature": "Pathway structure preserving |0⟩, |1⟩ while corrupting superposition content",
-            },
-            "decoherence_characteristics": {
-                "error_type": "Classical digital errors with quantum generalization",
-                "topology_dependence": "Moderate - affects computational basis correlations uniformly",
-                "pathway_asymmetry": "Minimal - symmetric bit flip transitions",
-                "scaling_behavior": "Linear scaling with computational basis population",
-            },
-            "experimental_role": {
-                "classical_comparison": "Baseline for classical vs quantum error pathway differences",
-                "digital_error_testing": "Test pathway behavior under pure computational errors",
-                "basis_preservation_studies": "Investigate pathway structure with preserved basis",
-                "error_correction_relevance": "Model errors addressable by classical error correction",
-            },
-            "research_predictions": {
-                "vs_depolarizing": "Should show computational basis preservation unlike uniform depolarizing",
-                "vs_phase_errors": "Should corrupt information content unlike phase-only errors",
-                "coherent_effects": "Coherent bit flips may show different pathway structure than incoherent",
-                "measurement_correlations": "Preserve measurement correlations while corrupting state content",
-            },
-            "educational_applications": {
-                "classical_errors": "Demonstrate quantum generalization of classical bit errors",
-                "pauli_channels": "Illustrate single Pauli operator error mechanisms",
-                "computational_basis": "Show preservation of computational structure with content corruption",
-                "error_correction": "Model errors correctable by classical error correction codes",
-            },
-        }
-
     def _validate_bit_flip_params(
         self, error_rate: float, pulse_amplitude_error: float | None
     ) -> None:
@@ -380,34 +339,6 @@ class BitFlipNoise(BaseNoise):
             # Binary symmetric channel capacity
             h_p = -p * np.log2(p) - (1 - p) * np.log2(1 - p) if p > 0 and p < 1 else 0
             return max(0, 1 - h_p)
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for bit flip noise.
-
-        Returns:
-            Bit flip specific pathway hypothesis prediction
-        """
-        return (
-            f"Bit flip noise should create computational basis pathway structure "
-            f"with flip rate {self.error_rate:.4f}. Pathways should preserve "
-            f"computational basis correlations while corrupting information content."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess bit flip noise sensitivity to quantum state topology."""
-        return (
-            "Moderate topology sensitivity expected due to computational basis preservation. "
-            "States with more computational basis components should show different "
-            "pathway behavior than pure superposition states."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze bit flip noise pathway preferences."""
-        return (
-            f"Computational basis pathway preferences. Bit flip errors preferentially "
-            f"affect stored information while preserving |0⟩, |1⟩ structure with "
-            f"coherent mode: {self.coherent_error}."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

@@ -1,4 +1,4 @@
-"""Amplitude Damping Noise for T1 Energy Relaxation Research.
+"""Amplitude damping noise (T1 energy relaxation).
 
 # The Amplitude Damping Channel - Fundamental Energy Relaxation
 Amplitude damping represents one of the most fundamental quantum decoherence
@@ -22,12 +22,6 @@ K₁ = √γ|0⟩⟨1|                  (decay amplitude)
 - Coupling to lossy transmission lines and resonator modes
 - Purcell effect enhancing radiative decay rates
 - Finite temperature effects causing thermal excitation/relaxation
-
-# Research Significance for Structured Pathways
-Amplitude damping creates directional bias in decoherence pathways by preferentially
-affecting excited computational basis states. This asymmetry may reveal how
-energy flow patterns interact with entanglement topology to create structured
-pathway signatures distinct from isotropic noise.
 
 # Educational Framework
 Amplitude damping channels demonstrate core quantum mechanics concepts:
@@ -56,14 +50,14 @@ TYPICAL_QUBIT_FREQUENCY = 5.5e9  # Hz (superconducting transmon)
 
 
 class AmplitudeDampingNoise(BaseNoise):
-    """Amplitude damping noise model for T1 energy relaxation research.
+    """Amplitude damping noise model (T1 energy relaxation).
 
     # Quantum Energy Relaxation Definition
     The amplitude damping channel models spontaneous emission: |1⟩ → |0⟩
     with probability γ = 1 - exp(-t/T1) over time t.
 
-    This creates asymmetric decoherence that preferentially affects excited states,
-    making it ideal for studying directional pathway biases in quantum decoherence.
+    This creates asymmetric decoherence that preferentially affects excited
+    states, in contrast to symmetric channels such as depolarizing noise.
 
     # Physical Interpretation
     Amplitude damping models environmental coupling that is:
@@ -72,12 +66,6 @@ class AmplitudeDampingNoise(BaseNoise):
     - **Non-unital**: Does not preserve maximally mixed states
     - **Temperature-dependent**: Finite temperature enables reverse excitation
 
-    # Research Applications in Pathway Studies
-    - **Directional Bias**: Test how energy flow creates pathway asymmetries
-    - **T1 Scaling**: Study pathway structure vs relaxation timescales
-    - **Thermal Effects**: Investigate finite temperature pathway modifications
-    - **State Asymmetry**: Compare excited vs ground state pathway preferences
-
     # Educational Significance
     Amplitude damping illustrates fundamental concepts:
     - **T1 Processes**: Energy relaxation and spontaneous emission physics
@@ -85,6 +73,16 @@ class AmplitudeDampingNoise(BaseNoise):
     - **Thermal Equilibrium**: Temperature effects on quantum decoherence
     - **Energy Conservation**: How conservation laws constrain quantum channels
     """
+
+    NOISE_TYPE = "AMPLITUDE_DAMPING"
+    IS_UNITAL = False
+    CATALOG = {
+        "description": "Energy relaxation from excited to ground state",
+        "mechanism": "Spontaneous emission and thermal relaxation processes",
+        "use_case": "Modeling T1 energy relaxation",
+        "typical_origin": "Electromagnetic coupling, finite temperature",
+        "educational_concepts": "T1 processes, non-unital channels, energy conservation",
+    }
 
     def __init__(
         self,
@@ -165,7 +163,6 @@ class AmplitudeDampingNoise(BaseNoise):
                 "temperature": temperature,
                 "decoherence_type": "energy_relaxation_directional",
                 "channel_property": "non_unital",
-                "research_role": "directional_pathway_bias_investigation",
             },
         )
 
@@ -334,44 +331,6 @@ class AmplitudeDampingNoise(BaseNoise):
             "information_capacity": self._calculate_channel_capacity(),
         }
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for amplitude damping in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Directional pathway bias favoring |1⟩ → |0⟩ transitions",
-                "test_method": "Compare excited vs ground state pathway utilization patterns",
-                "expected_signature": "Asymmetric decoherence with |1⟩-state pathway dominance",
-            },
-            "decoherence_characteristics": {
-                "energy_bias": "Preferential decay of excited computational basis states",
-                "topology_dependence": "Strong - affects entangled states with |1⟩ components asymmetrically",
-                "pathway_asymmetry": "Expected - energy flow creates directional pathway preferences",
-                "thermal_scaling": "Finite temperature reduces asymmetry through excitation processes",
-            },
-            "experimental_role": {
-                "directional_testing": "Primary model for non-isotropic decoherence pathway analysis",
-                "t1_scaling_studies": "Investigate pathway structure vs energy relaxation timescales",
-                "thermal_pathway_effects": "Study temperature-dependent pathway modifications",
-                "energy_flow_mapping": "Trace energy dissipation pathways through quantum networks",
-            },
-            "research_predictions": {
-                "vs_depolarizing": "Should show strong |1⟩-state pathway bias unlike isotropic depolarizing",
-                "temperature_dependence": "Pathway asymmetry decreases with increasing temperature",
-                "entanglement_scaling": "Asymmetric entanglement decay with |1⟩-rich states more fragile",
-                "measurement_bias": "Preferential loss of |1⟩-component correlations in measurements",
-            },
-            "educational_applications": {
-                "energy_conservation": "Demonstrate energy conservation constraints in quantum channels",
-                "t1_physics": "Connect microscopic relaxation to macroscopic T1 measurements",
-                "thermal_equilibrium": "Show approach to thermal equilibrium in open quantum systems",
-                "non_unital_channels": "Illustrate channels that break detailed balance symmetry",
-            },
-        }
-
     def _validate_amplitude_damping_params(
         self, error_rate: float, t1: float | None, gate_time: float, temperature: float
     ) -> None:
@@ -442,34 +401,6 @@ class AmplitudeDampingNoise(BaseNoise):
         else:
             # Approximate capacity (exact calculation is complex)
             return max(0, 1 - γ)
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for amplitude damping noise.
-
-        Returns:
-            Amplitude damping specific pathway hypothesis prediction
-        """
-        return (
-            f"Amplitude damping should create directional pathway bias favoring "
-            f"|1⟩ → |0⟩ transitions with damping rate {self.error_rate:.4f}. "
-            f"Pathway asymmetry reflects energy conservation and T1 physics."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess amplitude damping sensitivity to quantum state topology."""
-        return (
-            "High topology sensitivity expected due to |1⟩-state bias. "
-            "Entangled states with more |1⟩ components should show stronger "
-            "pathway utilization and faster decoherence rates."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze amplitude damping pathway preferences."""
-        return (
-            f"Strong intrinsic pathway preference for |1⟩ → |0⟩ transitions. "
-            f"Energy conservation creates directional bias with thermal "
-            f"population {self._thermal_population:.4f} providing weak reverse process."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

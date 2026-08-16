@@ -1,7 +1,6 @@
 # AGENTS.md — Core Physics Primitives
 
-Owner: Research Engineering (Roibín O'Toole)
-Last updated: 2025-12-02
+Owner: Roibín O'Toole
 Token budget: 400
 
 ## Purpose
@@ -38,7 +37,7 @@ src/core/
 │                       #    canonical qubit/bit indexing). Import, don't re-derive.
 ├── analysis/
 │   ├── core/           # Information theory (entropy, mutual info)
-│   ├── metrics/        # Research metrics (EEC, PCR, Structure Score)
+│   ├── metrics/        # Statistical metrics over measurement distributions (EEC, PCR, Structure Score)
 │   └── pipelines/      # Analysis workflows (pure functions)
 ├── noise_models/       # Physics-compliant noise channels
 └── state_preparation/  # Quantum state factory
@@ -146,7 +145,7 @@ These tests validate analytical correctness:
 
 See canonical implementations:
 
-- `src/core/state_preparation/factory.py` — State factory pattern
-- `src/core/noise_models/factory.py` — Noise validation pattern
-- `src/core/analysis/metrics/eec.py` — Pure metric computation
+- `src/core/state_preparation/state_factory.py` — State factory pattern
+- `src/core/noise_models/noise_factory.py` — Noise validation pattern
+- `src/core/analysis/metrics/entanglement_error_correlation.py` — Pure metric computation
 - `tests/physics/test_analytical.py` — Physics validation examples

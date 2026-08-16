@@ -1,7 +1,7 @@
 """Pathway Analysis Pipeline - Orchestration and Convenience Functions.
 
-This module provides high-level orchestration for structured decoherence analysis,
-keeping the core modules focused and avoiding tight coupling.
+This module provides high-level orchestration for the distribution-structure
+metrics, keeping the core modules focused and avoiding tight coupling.
 
 Usage:
     from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
@@ -51,10 +51,11 @@ def compute_all_pathway_metrics(
     historical_data: list[dict[str, int]] | None = None,
     multi_qubit_data: dict[int, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
-    """Compute all 5 structured decoherence pathway metrics.
+    """Compute all 5 pathway metrics.
 
-    This is the main function for structured decoherence analysis, computing
-    all metrics needed for detecting non-random decoherence patterns.
+    This is the main function for outcome-distribution analysis, computing
+    all metrics that characterize non-uniformity, concentration, and
+    correlation structure in the measurement data.
 
     Args:
         counts: Current measurement outcomes (bitstring -> count)
@@ -86,9 +87,7 @@ def compute_all_pathway_metrics(
         first_bitstring = next(iter(counts.keys()))
         num_qubits = len(first_bitstring)
 
-    logger.info(
-        f"Computing structured decoherence metrics for {num_qubits}-qubit {state_type} state"
-    )
+    logger.info(f"Computing pathway metrics for {num_qubits}-qubit {state_type} state")
 
     # Compute core metrics (return_analysis defaults to False -> plain floats)
     ai = compute_asymmetry_index(counts)
@@ -299,7 +298,7 @@ def _generate_interpretation(
 ) -> str:
     """Generate natural language interpretation of results."""
     if is_structured:
-        interpretation = "Analysis indicates STRUCTURED decoherence patterns. "
+        interpretation = "Analysis indicates a STRUCTURED (non-uniform) error distribution. "
 
         if "high_asymmetry" in indicators:
             interpretation += (
@@ -312,7 +311,7 @@ def _generate_interpretation(
         if "topology_correlation" in indicators:
             interpretation += "Error patterns correlate with entanglement topology. "
 
-        interpretation += "This supports the hypothesis of non-random decoherence pathways."
+        interpretation += "The error distribution deviates measurably from a random baseline."
     else:
         interpretation = "Analysis indicates RANDOM decoherence patterns. "
         interpretation += "Error distribution appears consistent with stochastic decoherence. "

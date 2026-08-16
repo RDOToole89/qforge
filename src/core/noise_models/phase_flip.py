@@ -1,4 +1,4 @@
-"""Phase Flip Noise for Longitudinal Environmental Coupling Research.
+"""Phase flip noise (random Pauli-Z errors).
 
 # The Phase Flip Channel - Longitudinal Decoherence
 Phase flip noise represents longitudinal environmental coupling where computational
@@ -24,11 +24,6 @@ Kraus operators: K₀ = √(1-p)I, K₁ = √p Z
 - Charge fluctuations in semiconductor devices
 - Nuclear spin bath decoherence in solid-state qubits
 
-# Research Significance for Structured Pathways
-Phase flip noise creates measurement-preserving decoherence that may reveal
-structural pathway effects based on phase relationships rather than population
-dynamics, complementing amplitude damping studies.
-
 # Educational Framework
 Phase flip channels demonstrate core concepts:
 - Longitudinal vs transverse environmental coupling
@@ -51,14 +46,14 @@ logger = logging.getLogger(__name__)
 
 
 class PhaseFlipNoise(BaseNoise):
-    """Phase flip noise model for longitudinal environmental coupling research.
+    """Phase flip noise model (random Pauli-Z errors).
 
     # Quantum Phase Flip Definition
     The phase flip channel models longitudinal decoherence by applying random
     Z (phase flip) operations with probability p. This preserves computational
     basis populations while corrupting quantum interference.
 
-    This represents measurement-preserving decoherence that affects quantum
+    This is measurement-preserving decoherence that affects quantum
     coherence without changing classical measurement statistics.
 
     # Physical Interpretation
@@ -68,12 +63,6 @@ class PhaseFlipNoise(BaseNoise):
     - **Interference-destroying**: Eliminates quantum superposition effects
     - **Classical-preserving**: Maintains classical measurement correlations
 
-    # Research Applications in Pathway Studies
-    - **Longitudinal Pathways**: Test how Z-axis coupling creates pathway structure
-    - **Population Conservation**: Study pathway behavior with preserved measurements
-    - **Classical Comparison**: Compare with bit flip for directional coupling effects
-    - **Interference Effects**: Investigate pathway dependence on quantum interference
-
     # Educational Significance
     Phase flip channels illustrate fundamental concepts:
     - **Longitudinal Coupling**: Environmental interaction along measurement axis
@@ -81,6 +70,16 @@ class PhaseFlipNoise(BaseNoise):
     - **Quantum Interference**: Destruction of quantum coherence effects
     - **Dephasing Mechanisms**: Alternative to pure dephasing channels
     """
+
+    NOISE_TYPE = "PHASE_FLIP"
+    IS_UNITAL = True
+    CATALOG = {
+        "description": "Random Z rotations preserving computational basis populations",
+        "mechanism": "Longitudinal coupling to environmental fields",
+        "use_case": "Modeling dephasing that preserves measurement statistics",
+        "typical_origin": "Magnetic field noise, charge fluctuations",
+        "educational_concepts": "Longitudinal coupling, classical information preservation, interference destruction",
+    }
 
     def __init__(
         self,
@@ -157,7 +156,6 @@ class PhaseFlipNoise(BaseNoise):
                 "charge_noise": charge_noise,
                 "decoherence_type": "longitudinal_population_preserving",
                 "channel_property": "unital",
-                "research_role": "longitudinal_pathway_investigation",
             },
         )
 
@@ -293,44 +291,6 @@ class PhaseFlipNoise(BaseNoise):
             "information_capacity": self._calculate_channel_capacity(),
         }
 
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for phase flip noise in pathway studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Longitudinal pathway structure with preserved measurement correlations",
-                "test_method": "Compare population-preserving vs energy-exchanging pathway behavior",
-                "expected_signature": "Classical measurement preservation with quantum interference loss",
-            },
-            "decoherence_characteristics": {
-                "coupling_direction": "Longitudinal Z-axis environmental interaction",
-                "topology_dependence": "Moderate - affects quantum interference selectively",
-                "pathway_asymmetry": "Minimal - symmetric Z-axis coupling",
-                "scaling_behavior": "Interference-dependent scaling with superposition content",
-            },
-            "experimental_role": {
-                "longitudinal_testing": "Primary model for Z-axis environmental coupling analysis",
-                "classical_preservation": "Study pathway behavior with preserved classical information",
-                "interference_effects": "Test pathway dependence on quantum interference",
-                "measurement_invariance": "Investigate pathways with measurement-invariant decoherence",
-            },
-            "research_predictions": {
-                "vs_bit_flip": "Should preserve populations unlike bit flip which corrupts stored information",
-                "vs_phase_damping": "Should affect superposition coherence similarly to pure dephasing",
-                "measurement_independence": "Pathways should be independent of measurement basis choice",
-                "interference_correlations": "Loss of interference with preserved amplitude correlations",
-            },
-            "educational_applications": {
-                "longitudinal_coupling": "Demonstrate Z-axis environmental interaction mechanisms",
-                "classical_information": "Show preservation of classical information during decoherence",
-                "interference_physics": "Illustrate quantum interference destruction without population change",
-                "measurement_theory": "Connect measurement statistics to environmental coupling direction",
-            },
-        }
-
     def _validate_phase_flip_params(
         self, error_rate: float, magnetic_field_noise: float | None, charge_noise: float | None
     ) -> None:
@@ -411,35 +371,6 @@ class PhaseFlipNoise(BaseNoise):
         else:
             # Classical information preserved, quantum coherence lost
             return max(0, 1 - p)  # Simplified capacity estimate
-
-    def _get_pathway_prediction(self) -> str:
-        """Get specific pathway prediction for phase flip noise.
-
-        Returns:
-            Phase flip specific pathway hypothesis prediction
-        """
-        return (
-            f"Phase flip noise should create longitudinal pathway structure "
-            f"with flip rate {self.error_rate:.4f}. Pathways should preserve "
-            f"measurement statistics while losing quantum interference."
-        )
-
-    def _assess_topology_sensitivity(self) -> str:
-        """Assess phase flip noise sensitivity to quantum state topology."""
-        return (
-            "Moderate topology sensitivity expected due to interference dependence. "
-            "States with more superposition content should show stronger "
-            "pathway sensitivity while computational basis states are preserved."
-        )
-
-    def _analyze_pathway_preferences(self) -> str:
-        """Analyze phase flip noise pathway preferences."""
-        return (
-            f"Longitudinal pathway preferences. Phase flip errors affect "
-            f"quantum interference while preserving computational basis "
-            f"structure with environmental coupling: magnetic={self.magnetic_field_noise}, "
-            f"charge={self.charge_noise}."
-        )
 
     def __str__(self) -> str:
         """Human-readable description for educational purposes."""

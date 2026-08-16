@@ -1,6 +1,6 @@
-"""Structured Decoherence Analysis Pipelines.
+"""Analysis pipelines.
 
-High-level orchestration functions for quantum decoherence pathway analysis.
+High-level orchestration functions for measurement-outcome analysis.
 """
 
 from .pathway_analysis import (

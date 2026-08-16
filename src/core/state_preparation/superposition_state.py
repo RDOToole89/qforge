@@ -1,19 +1,13 @@
-"""Product Superposition States for Quantum Control and Baseline Research.
+"""Product superposition state preparation.
 
 # Product Superposition States (Non-Entangled)
 Product superposition states consist of multiple qubits each in superposition
-but with NO entanglement between them. These states serve as crucial control
-cases for studying how entanglement affects decoherence pathways.
+but with NO entanglement between them. They are useful as non-entangled
+baselines and as starting states for quantum algorithms.
 
 # Mathematical Definition
 Product superposition: |ψ⟩ = |ψ₁⟩ ⊗ |ψ₂⟩ ⊗ ... ⊗ |ψₙ⟩
 where each |ψᵢ⟩ = cos(θᵢ/2)|0⟩ + e^(iφᵢ)sin(θᵢ/2)|1⟩
-
-# Research Applications in Decoherence Studies
-- Control experiments: Compare non-entangled vs entangled decoherence
-- Baseline measurements: Establish what "random" decoherence looks like
-- Algorithm preparation: Starting states for quantum algorithms
-- Phase noise isolation: Study decoherence without entanglement complications
 """
 
 from __future__ import annotations
@@ -27,7 +21,7 @@ from .base_state import BaseState
 
 
 class SuperpositionState(BaseState):
-    """Product superposition state preparation for control experiments.
+    """Product superposition state preparation.
 
     # Quantum State Definition
     Creates separable (non-entangled) multi-qubit states where each qubit
@@ -39,12 +33,6 @@ class SuperpositionState(BaseState):
     - **No entanglement**: Measuring one qubit doesn't affect others
     - **Independent decoherence**: Each qubit decoheres independently
     - **Classical correlations only**: No quantum correlations between qubits
-
-    # Research Significance
-    These states are essential controls for entanglement research because they
-    show what happens when quantum correlations are absent. Any structured
-    decoherence patterns in entangled states can be compared against the
-    random patterns expected from product states.
 
     # State Variants
     1. **Uniform superposition**: |+⟩^n = (H⊗H⊗...⊗H)|00...0⟩
@@ -130,7 +118,6 @@ class SuperpositionState(BaseState):
                 "addressed_qubits": target_qubits,
                 "variant": variant,
                 "construction_method": construction_method,
-                "research_role": "control_baseline",
                 "separability": "fully_separable",
             },
         )
@@ -346,44 +333,6 @@ class SuperpositionState(BaseState):
             "superposition_type": "parametric" if angles_by_qubit else "uniform",
             "quantum_parallelism": f"2^{len(target_qubits)}_computational_paths",
             "algorithmic_utility": "quantum_algorithm_initialization",
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for product superposition studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        return {
-            "pathway_hypothesis": {
-                "prediction": "No structured pathways → random independent decoherence",
-                "test_method": "Compare with entangled state pathway signatures",
-                "expected_signature": "Exponential decay without correlations",
-            },
-            "decoherence_characteristics": {
-                "entanglement_role": "None - pure separable state control",
-                "correlation_structure": "Classical correlations only",
-                "pathway_structure": "Independent per-qubit random walk",
-                "decay_pattern": "Exponential without quantum correlations",
-            },
-            "experimental_role": {
-                "control_type": "Non-entangled baseline for comparison",
-                "hypothesis_testing": "Null hypothesis for structured decoherence",
-                "algorithm_preparation": "Starting states for quantum algorithms",
-                "noise_characterization": "Isolate single-qubit noise effects",
-            },
-            "research_predictions": {
-                "vs_entangled_states": "Should show random vs structured decoherence",
-                "pathway_metrics": "All pathway metrics should be minimal/random",
-                "measurement_correlations": "Classical correlations only",
-                "noise_response": "Independent qubit-by-qubit decoherence",
-            },
-            "practical_applications": {
-                "quantum_algorithms": "Preparation states for Grover, Shor, etc.",
-                "benchmarking": "Baseline for entanglement-enhanced protocols",
-                "noise_studies": "Separate entanglement effects from superposition effects",
-                "hardware_testing": "Test single-qubit gate fidelity",
-            },
         }
 
     def __str__(self) -> str:

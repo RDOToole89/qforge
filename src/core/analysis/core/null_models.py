@@ -1,22 +1,21 @@
-"""Null Models for Structured Decoherence Hypothesis Testing.
+"""Null models for baseline comparisons.
 
 # Statistical Null Model Framework
-This module provides baseline null models for testing the structured decoherence
-hypothesis. Null models represent the expectation under "no structured pathways" -
-purely random decoherence without preferential error channels.
+This module provides baseline null models representing the expectation under
+statistically independent qubit outcomes — no correlations between qubits.
 
 # Mathematical Foundation
 The primary null model is the factorized (independent) model:
 Q(x₁,...,xₙ) = ∏ᵢ q(xᵢ)
 
 where q(xᵢ) are marginal probabilities estimated from data with Jeffreys smoothing.
-This models the case where all qubits decohere independently.
+This models the case where all qubit outcomes are independent.
 
-# Research Applications
-Null models enable hypothesis testing:
+# Applications
+Null models enable baseline comparisons:
 - Structure Score: JSD(Observed || Factorized Null)
-- Parametric Bootstrap: Generate synthetic data under null
-- P-value Calculation: Compare observed metrics to null distribution
+- Parametric Bootstrap: Generate synthetic data under the null model
+- P-value Calculation: Compare observed metrics to the null distribution
 
 # Advanced Features (Optional)
 - Readout Confusion: Account for measurement errors
@@ -72,11 +71,11 @@ def factorized_null_model(counts: Counts, alpha: float = ALPHA) -> Probs:
         q(xᵢ = 1) = (count(xᵢ=1) + α) / (N + 2α)
 
     Physical Interpretation:
-        This null model assumes all qubits decohere independently, with no
-        correlations or structured pathways. Any deviation from this model
-        suggests structured decoherence.
+        This null model assumes all qubit outcomes are statistically
+        independent. Any deviation from this model indicates correlations
+        between qubits.
 
-    Research Usage:
+    Usage:
         Primary null model for Structure Score calculation:
         SS = JSD(Observed || Factorized_Null)
 
@@ -195,11 +194,11 @@ def parametric_bootstrap_null(
         3. Generate B synthetic datasets from Q
         4. Return list of synthetic count dictionaries
 
-    Research Application:
+    Application:
         This provides the synthetic data needed for:
         - Null distribution of Structure Score
         - P-value calculation: P(SS_null ≥ SS_observed)
-        - Confidence intervals under null hypothesis
+        - Confidence intervals under the null model
 
     Note:
         Re-fitting the null model per bootstrap replicate (Q^(b)) for
@@ -264,7 +263,7 @@ def readout_confusion_model(
         gives the probability of measuring outcome j when the true state is i.
         This correction attempts to recover the ideal distribution.
 
-    Research Usage:
+    Usage:
         Optional enhancement for null models when readout calibration data
         is available. Can improve accuracy of Structure Score calculations.
 
@@ -277,7 +276,7 @@ def readout_confusion_model(
         Dict[str, float]: Corrected probability distribution
 
     Notes:
-        This is an advanced feature. Most research can use the simpler
+        This is an advanced feature. Most analyses can use the simpler
         factorized null model without readout correction.
 
     Raises:
@@ -376,18 +375,19 @@ def readout_confusion_model(
 def ghz_aware_null_model(
     counts: Mapping[str, int], n_qubits: int | None = None, alpha: float = ALPHA
 ) -> dict[str, float]:
-    """Create GHZ-state-aware null model for specialized hypothesis testing.
+    """Create GHZ-state-aware null model.
 
     Mathematical Motivation:
-        For GHZ states, we expect enhanced probability on |00...0⟩ and |11...1⟩
-        even under decoherence. A uniform null model might be too conservative.
+        For GHZ states, the ideal distribution concentrates probability on
+        |00...0⟩ and |11...1⟩, and this remains partially true under
+        decoherence. A uniform null model might be too conservative.
 
         This null model enforces equal probability for |00...0⟩ and |11...1⟩
         while distributing remaining mass uniformly over other outcomes.
 
-    Research Usage:
-        Alternative null model for GHZ state experiments. Provides more
-        conservative baseline that accounts for expected GHZ structure.
+    Usage:
+        Alternative null model for GHZ state experiments. Provides a more
+        conservative baseline that accounts for the ideal GHZ distribution.
 
     Args:
         counts: Observed measurement counts
@@ -399,7 +399,7 @@ def ghz_aware_null_model(
 
     Notes:
         This is an experimental feature. The standard factorized null
-        model is recommended for most research applications.
+        model is recommended for most analyses.
     """
     counts_clean = validate_counts_dict(counts)
 

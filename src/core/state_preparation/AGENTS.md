@@ -1,12 +1,11 @@
 # AGENTS.md — Quantum State Preparation
 
-Owner: Research Engineering (Roibín O'Toole)
-Last updated: 2026-04-05
+Owner: Roibín O'Toole
 Token budget: 350
 
 ## Purpose
 
-Educational quantum state factory for decoherence pathway research. States are pure circuits (no noise) with comprehensive physics documentation.
+Educational quantum state factory. States are pure circuits (no noise) with comprehensive physics documentation.
 
 **Supported States**: GHZ, W, Bell, Cluster, Superposition, Custom (6 types)
 
@@ -24,7 +23,7 @@ class MyState(BaseState):
     Docstring with:
     - Quantum state definition (|ψ⟩ = ...)
     - Physical significance
-    - Research applications
+    - Typical use cases
     """
 
     def create(self, add_barrier: bool = False) -> QuantumCircuit:
@@ -40,7 +39,7 @@ class MyState(BaseState):
 
 ```python
 """
-GHZ State Preparation for Decoherence Pathway Research
+GHZ State Preparation
 
 # The Greenberger-Horne-Zeilinger (GHZ) State
 |GHZ⟩ = (|00...0⟩ + |11...1⟩)/√2
@@ -48,8 +47,8 @@ GHZ State Preparation for Decoherence Pathway Research
 # Physical Significance
 GHZ states exhibit maximal multipartite entanglement...
 
-# Research Applications in Structured Decoherence
-- Pathway propagation: How does decoherence spread?
+# What Experiments Can Explore
+- Noise sensitivity: How does decoherence affect the state?
 - Measurement correlations: Which basis states remain correlated?
 """
 ```
@@ -170,9 +169,9 @@ config = ExperimentConfig(
 4. Register in `state_constants.py` STATE_CLASSES dict
 5. Export in `__init__.py`
 6. Add tests in `tests/core/state_preparation/`
-7. Document research applications for structured decoherence
+7. Document the educational context and typical use cases
 
-## State Properties for Research
+## State Properties
 
 Each state has unique decoherence signatures:
 

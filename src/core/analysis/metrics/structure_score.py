@@ -1,7 +1,7 @@
-"""Core Implementation of Structured Decoherence Pathway Metrics.
+"""Core implementation of the distribution-structure metrics.
 
-This module implements the 5 quantitative metrics for detecting structured
-decoherence patterns in quantum measurement data.
+This module implements the 5 quantitative metrics for characterizing
+structure in quantum measurement outcome distributions.
 
 Mathematical Definitions (project-standard):
 
@@ -25,8 +25,6 @@ Mathematical Definitions (project-standard):
     CES (Complexity Emergence Score)
         Score derived from fitting emergence vs. qubit count (e.g., logistic),
         combining sharpness and amplitude to quantify a critical threshold.
-
-Author: Structured Decoherence Research
 """
 
 from __future__ import annotations

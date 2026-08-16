@@ -1,19 +1,13 @@
-"""Cluster State Preparation for Graph-State Network Research.
+"""Cluster (graph) state preparation.
 
-# Cluster States - Graph-Based Quantum Networks
+# Cluster States - Graph-Based Quantum States
 Cluster states are a class of highly entangled quantum states that form the basis
-of measurement-based quantum computing. They represent quantum networks where
-qubits are arranged in graph structures with nearest-neighbor entanglement.
+of measurement-based quantum computing. Qubits are arranged in graph structures
+with nearest-neighbor entanglement.
 
 # Mathematical Definition
 |Cluster⟩ = ∏ᵢⱼ CZ(i,j) (H⊗H⊗...⊗H) |00...0⟩
 where CZ(i,j) are controlled-Z gates applied between connected qubits in the graph.
-
-# Research Applications in Decoherence Studies
-- Network topology effects: How does graph structure affect pathway propagation?
-- Local vs distributed entanglement: Compare with global states like GHZ
-- Measurement cascades: How do measurements propagate through the network?
-- Quantum error correction: Foundation for topological quantum codes
 """
 
 from typing import Any
@@ -25,7 +19,7 @@ from .base_state import BaseState
 
 
 class ClusterState(BaseState):
-    """Cluster state preparation for graph-based network research.
+    """Cluster (graph) state preparation.
 
     # Quantum Graph State Definition
     Cluster states are graph states where qubits correspond to vertices and
@@ -38,11 +32,6 @@ class ClusterState(BaseState):
     - **1D Ring**: Circular chain with periodic boundary conditions
     - **2D Grid**: Rectangular lattice with nearest-neighbor connections
     - **2D Torus**: Grid with periodic boundaries in both dimensions
-
-    # Research Significance
-    Cluster states bridge quantum computing and network science, showing how
-    local connectivity creates global entanglement. They're essential for
-    studying how network topology affects decoherence pathway structure.
 
     # Educational Notes
     - Foundation of measurement-based quantum computing (one-way quantum computer)
@@ -321,47 +310,6 @@ class ClusterState(BaseState):
             "error_correction_potential": "topological_codes" if lattice == "2d" else "limited",
             "network_connectivity": "nearest_neighbor",
             "entanglement_distribution": "local_correlations_global_state",
-        }
-
-    def get_research_context(self) -> dict[str, Any]:
-        """Get research context for cluster state decoherence studies.
-
-        Returns:
-            Dict with research context and experimental predictions
-        """
-        params = self.custom_params or {}
-        lattice = params.get("lattice", "1d")
-
-        return {
-            "pathway_hypothesis": {
-                "prediction": "Network topology → structured pathway propagation",
-                "test_method": "Monitor how decoherence spreads through graph edges",
-                "expected_signature": "Pathway propagation follows graph connectivity",
-            },
-            "decoherence_characteristics": {
-                "propagation_pattern": "Along graph edges",
-                "dimensionality_effects": "1D: linear propagation, 2D: area spreading",
-                "boundary_effects": "Different behavior at graph boundaries vs interior",
-                "network_robustness": "Fault tolerance depends on graph connectivity",
-            },
-            "research_applications": {
-                "measurement_based_computing": "Foundation for one-way quantum computer",
-                "quantum_networks": "Model for distributed quantum systems",
-                "error_correction": "Basis for topological quantum codes",
-                "network_science": "Quantum analog of classical network phenomena",
-            },
-            "experimental_predictions": {
-                "vs_ghz_states": "Local vs global entanglement structure differences",
-                "topology_dependence": "1D chain vs 2D grid pathway differences",
-                "scaling_behavior": "How pathway structure scales with network size",
-                "fault_tolerance": "Error correction capabilities of different topologies",
-            },
-            "pathway_predictions": {
-                "early_stage": "Local decoherence near initial error sites",
-                "propagation_phase": "Decoherence spreads along graph edges",
-                "late_stage": "Global network decoherence patterns",
-                f"{lattice}_specific": f"Dimensional effects of {lattice} topology",
-            },
         }
 
     def __str__(self) -> str:

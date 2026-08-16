@@ -1,11 +1,10 @@
 # AGENTS.md — Test Suite Guidelines
 
 Owner: Roibín O'Toole
-Last updated: 2026-04-05
 
 ## Purpose
 
-~1,100 tests (1104 passing) validating both **software correctness** and **scientific validity**, including ~700 verified-value tests that assert outputs against analytical/closed-form calculations. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
+~1,100 tests validating both **software correctness** and **scientific validity**, including verified-value tests that assert outputs against analytical/closed-form calculations. Physics tests are non-negotiable — if they fail, the code violates quantum mechanics.
 
 ## Structure
 
@@ -99,6 +98,6 @@ IBM_QUANTUM_TOKEN=1 pytest tests/integration/test_hardware_integration.py -v
 
 ## Coverage
 
-- `src/core/`: ~97% now, 95% gate enforced in pytest.ini (verified against analytical values; remaining lines are unreachable defensive guards)
+- `src/core/`: 95% gate enforced in pytest.ini (verified against analytical values; remaining uncovered lines are unreachable defensive guards)
 - `src/engine/`: 80%+ target
 - `src/experiments/`: tested via integration, not unit coverage

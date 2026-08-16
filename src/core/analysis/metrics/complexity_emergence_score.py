@@ -1,22 +1,20 @@
-"""Complexity Emergence Score (CES) - Critical Threshold Detection for Structured Decoherence.
+"""Complexity Emergence Score (CES) - Threshold detection in metric-vs-size data.
 
 # Mathematical Foundation
-The Complexity Emergence Score quantifies at what system complexity level
-(number of qubits) structured decoherence patterns emerge above noise background.
-It uses logistic regression and critical point analysis to detect phase
-transitions in quantum error structure as system size increases.
+The Complexity Emergence Score quantifies at what system size (number of
+qubits) a structure metric rises sharply above its background level. It uses
+logistic curve fitting and critical point analysis to detect threshold-like
+behavior in a metric as system size increases.
 
 # Physical Interpretation
-CES tests the hypothesis that structured decoherence only becomes detectable
-above a critical system complexity threshold. Below this threshold, quantum
-systems are too simple to exhibit clear pathway structure; above it,
-entanglement networks become complex enough to guide decoherence patterns.
+CES detects whether a metric grows gradually with system size or exhibits a
+sharp, threshold-like rise around a critical size n₀. A sharp rise resembles
+phase-transition-like behavior; a flat or gradual trend does not.
 
-# Research Applications
-- Detecting critical complexity thresholds for quantum error structure
-- Characterizing scaling behavior of structured decoherence
-- Identifying minimum system sizes for pathway-based error correction
-- Understanding emergence phenomena in quantum many-body systems
+# Applications
+- Detecting thresholds where a metric rises sharply with system size
+- Characterizing the scaling behavior of distribution-structure metrics
+- Comparing emergence behavior across state types and noise conditions
 
 # Mathematical Definition
 CES fits a logistic emergence curve to structure metrics vs system size:
@@ -163,7 +161,7 @@ def compute_complexity_emergence_score(
     Raises:
         ValueError: If insufficient data or invalid parameters
     """
-    # Input validation with research-grade error handling
+    # Input validation with strict error handling
     if not multi_qubit_data or len(multi_qubit_data) < CES_MIN_POINTS:
         logger.warning(
             "CES requires ≥%d data points, got %d",
@@ -698,7 +696,7 @@ def complexity_emergence_educational_demo() -> dict:
         ],
         "emergence_progression": "sharp > gradual > flat",
         "critical_phenomena": "Sharp emergence indicates phase-transition-like behavior",
-        "research_applications": "Detecting minimum complexity for structured decoherence",
+        "applications": "Detecting thresholds where a metric rises sharply with system size",
     }
 
     logger.info("CES educational demonstration completed")
