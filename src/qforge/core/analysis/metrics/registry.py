@@ -71,6 +71,11 @@ def register(
     return decorator
 
 
+def unregister(name: str) -> None:
+    """Remove a metric from the registry. Intended for tests and user teardown."""
+    _METRIC_REGISTRY.pop(name, None)
+
+
 def compute_metric(name: str, **kwargs: Any) -> MetricResult:
     """Compute a single metric by name.
 

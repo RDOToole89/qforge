@@ -76,7 +76,10 @@ class DesignYourOwnExperiment(BaseExperiment):
 
     name = "adv_08_design_your_own"
     description = "Step 8: Design your own experiment — a template to build on"
-
+    metrics_hint = (
+        "Start with Structure Score. Add more metrics when you know what "
+        "question they answer."
+    )
     def default_config(self) -> ExperimentConfig:
         """YOUR DEFAULT CONFIG — modify this."""
         return ExperimentConfig(
@@ -87,7 +90,7 @@ class DesignYourOwnExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="decoherence",
+            metrics=["structure_score"],
             visualization_type=["histogram", "circuit"],
         )
 

@@ -52,6 +52,7 @@ src/qforge/core/
 - **Embed orchestration logic** — This layer defines "what" not "how" or "when"
 - **Use global mutable state** — Pass context explicitly via function parameters
 - **Create hardware-specific code** — Keep physics generic; engine handles backends
+- **Name metric profiles after a research topic** — built-in profiles stay topic-free (`structure`, `quick`, `information_theory`)
 
 ## Always
 

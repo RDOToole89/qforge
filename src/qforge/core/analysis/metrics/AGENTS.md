@@ -108,7 +108,7 @@ schema_output = metrics_to_schema(results)  # v1.0 compliant
 metrics/
 ├── registry.py              # MetricResult, compute_all, register
 ├── schema_bridge.py         # v1.0 schema conversion
-├── profiles.py              # Metric profile presets ("decoherence", "quick", "information_theory")
+├── profiles.py              # Topic-free profiles ("structure", "quick", "information_theory") + register_profile()
 ├── asymmetry_index.py       # AI: TVD from uniform (canonical example)
 ├── pathway_concentration_ratio.py  # PCR
 ├── entanglement_error_correlation.py  # EEC (hardware caveat: uses logical topology)
@@ -123,13 +123,27 @@ metrics/
 
 ## Adding a New Metric
 
+User modules and experiment packages can add metrics without editing core:
+
+```python
+from qforge.core.analysis.metrics import register, register_profile, MetricResult
+
+@register("my_metric")
+def compute_my_metric(**kwargs) -> MetricResult: ...
+
+register_profile("my_profile", ["my_metric"])
+# then: ExperimentConfig(..., metrics="my_profile")
+```
+
+To add a metric **in core** (shared with the engine by default):
+
 1. Create `my_metric.py` following asymmetry_index.py pattern
 2. Implement `compute_my_metric()` returning MetricResult
 3. Add `validate_my_metric_properties()` function
 4. Register in `registry.py`
 5. Add schema mapping in `schema_bridge.py`
 6. Export in `__init__.py`
-7. Add tests in `tests/core/analysis/`
+7. Add tests in `tests/core/`
 
 ## Constants Reference
 

@@ -99,7 +99,10 @@ class ErrorCorrectionExperiment(BaseExperiment):
 
     name = "adv_07_error_correction"
     description = "Step 7: Error correction — protect quantum information with the 3-qubit code"
-
+    metrics_hint = (
+        "After correction the encoded bit should dominate — Concentration "
+        "Index tracks that peak."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         circuit = _bit_flip_code_circuit(error_qubit=1)
@@ -110,6 +113,7 @@ class ErrorCorrectionExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
             visualization_type=["histogram", "circuit"],
+            metrics=["concentration_index", "asymmetry_index"],
         )
 
     def run_error_positions(self) -> list[ExperimentResult]:

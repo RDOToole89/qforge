@@ -54,7 +54,10 @@ class StructureScalingExperiment(BaseExperiment):
 
     name = "dd_structure_scaling"
     description = "Deep dive: Watch Structure Score grow with qubit count"
-
+    metrics_hint = (
+        "Sweep num_qubits — Structure Score typically grows as GHZ "
+        "correlations involve more bits."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -65,7 +68,7 @@ class StructureScalingExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="decoherence",
+            metrics=["structure_score", "concentration_index"],
             visualization_type=["histogram", "metrics_summary"],
         )
 

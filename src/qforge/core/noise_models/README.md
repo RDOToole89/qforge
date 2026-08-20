@@ -309,7 +309,7 @@ config = ExperimentConfig(
     noise_enabled=True,
     noise_type="amplitude_damping",
     noise_params={"t1": 100e-6, "temperature": 0.015},
-    metrics="decoherence",
+    metrics="structure",
 )
 
 # Run and access the metrics bundle

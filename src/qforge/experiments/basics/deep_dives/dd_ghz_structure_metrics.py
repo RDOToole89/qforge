@@ -10,7 +10,7 @@ perfectly correlated. Its ideal distribution has just two peaks, and
 under moderate noise the measured counts stay concentrated around them.
 
 Try it:
-    from qforge.experiments.basics.ghz_exploration import ghz_exploration
+    from qforge.experiments.basics.deep_dives.dd_ghz_structure_metrics import ghz_exploration
 
     # Run at different qubit counts to see how the metrics change
     for n in [2, 3, 4, 5, 6]:
@@ -28,8 +28,7 @@ CIRCUIT (GHZ-4):
   q2: ───────X──┼── M
   q3: ──────────X── M
 
-  Runs with metrics="decoherence" to compute
-  Structure Score, Total Correlation, and Concentration Index.
+  Runs with Structure Score, Total Correlation, and Concentration Index.
 
 WHAT YOU'LL EXPLORE:
   - Structure Score: how far the error distribution is from independent qubits
@@ -64,6 +63,7 @@ class GHZExploration(BaseExperiment):
 
     name = "ghz_exploration"
     description = "Explore multi-qubit GHZ states and decoherence structure metrics"
+    metrics_hint = "Structure Score, Total Correlation, and Concentration Index on noisy GHZ."
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -74,7 +74,7 @@ class GHZExploration(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            metrics="decoherence",
+            metrics=["structure_score", "total_correlation", "concentration_index"],
             visualization_type=["histogram", "metrics_summary"],
         )
 

@@ -27,6 +27,16 @@ from pydantic import (
     model_validator,
 )
 
+# Suggested labels for grouping/storage. Not a closed taxonomy — any string is valid.
+EXPERIMENT_TYPE_EXAMPLES: tuple[str, ...] = (
+    "control",
+    "scaling",
+    "parameter_sweep",
+    "noise_comparison",
+    "convergence",
+    "batch_sweep",
+)
+
 
 class ExperimentConfig(BaseModel):
     """Complete quantum experiment configuration.
@@ -117,21 +127,23 @@ class ExperimentConfig(BaseModel):
     # ===== Analysis Parameters =====
     metrics: list[str] | str | None = Field(
         default=None,
-        description="Profile name, explicit metric list, or None for no metrics",
+        description=(
+            "Profile name, explicit metric list, or None. "
+            "Built-in profiles: 'structure', 'quick', 'information_theory'. "
+            "Register more with register_profile()."
+        ),
     )
 
-    experiment_type: (
-        Literal[
-            "decoherence",
-            "parameter_sweep",
-            "noise_comparison",
-            "control",
-            "scaling",
-            "convergence",
-            "batch_sweep",
-        ]
-        | None
-    ) = Field(default=None, description="Experiment category used for grouping and storage")
+    experiment_type: str | None = Field(
+        default=None,
+        description=(
+            "Optional label for grouping and storage — not a closed taxonomy. "
+            "Use any string (for example your research track). "
+            "Suggested: control, scaling, parameter_sweep, noise_comparison, "
+            "convergence, batch_sweep."
+        ),
+        max_length=64,
+    )
 
     multiple_runs: int = Field(
         default=1,

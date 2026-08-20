@@ -59,6 +59,7 @@ class HardwareVsSimulationExperiment(BaseExperiment):
             shots=8192,
             optimization_level=1,
             visualization_type="histogram",
+            metrics=["structure_score", "concentration_index"],
         )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:

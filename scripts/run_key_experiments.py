@@ -73,7 +73,7 @@ experiments.append(("GHZ 6q Clean (ideal reference)", ExperimentConfig(
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -90,7 +90,7 @@ experiments.append(("GHZ 6q Correlated Noise (p=0.2, cs=0.6, chain)", Experiment
     noise_type="correlated_depolarizing",
     error_rate=0.2,
     custom_params={"correlation_strength": 0.6, "topology": "chain"},
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -107,7 +107,7 @@ experiments.append(("GHZ 6q Heavy Noise (p=0.3, cs=0.8, chain)", ExperimentConfi
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -121,7 +121,7 @@ experiments.append(("W 6q Clean (ideal reference)", ExperimentConfig(
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -138,7 +138,7 @@ experiments.append(("W 6q Heavy Noise (p=0.3, cs=0.8, chain)", ExperimentConfig(
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -152,7 +152,7 @@ experiments.append(("Cluster 6q Clean (uniform Z-basis reference)", ExperimentCo
     shots=SHOTS,
     rng_seed=SEED,
     noise_enabled=False,
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -169,7 +169,7 @@ experiments.append(("Cluster 6q Heavy Noise (p=0.3, cs=0.8) - Pauli invariant?",
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -186,7 +186,7 @@ experiments.append(("Superposition 6q Heavy Noise (p=0.3, cs=0.8) - control", Ex
     noise_type="correlated_depolarizing",
     error_rate=0.3,
     custom_params={"correlation_strength": 0.8, "topology": "chain"},
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -203,7 +203,7 @@ experiments.append(("GHZ 6q Density Matrix (p=0.2 depolarizing)", ExperimentConf
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.2,
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))
@@ -220,7 +220,7 @@ experiments.append(("W 6q Density Matrix (p=0.2 depolarizing)", ExperimentConfig
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.2,
-    metrics="decoherence",
+    metrics="structure",
     visualization_type=VIZ,
     export_formats=FORMATS,
 )))

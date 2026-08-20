@@ -121,6 +121,35 @@ print(f"Critical Threshold: {ces.critical_threshold:.1f} qubits")
 print(f"Emergence Quality: {ces.emergence_quality}")
 ```
 
+### Custom metrics and profiles
+
+You do not need to edit `src/qforge/core` to add a metric. Import your module
+(an experiment program can do this on import) so `@register` runs, then point
+`metrics=` at a profile you registered — or at an explicit list of names.
+
+```python
+from qforge import ExperimentConfig, run
+from qforge.core.analysis.metrics import MetricResult, register, register_profile
+
+@register("my_metric")
+def compute_my_metric(**kwargs) -> MetricResult:
+    counts = kwargs["counts"]
+    return MetricResult(value=float(len(counts)), ci95=(0.0, 0.0), status="experimental")
+
+register_profile("my_profile", ["my_metric"])
+
+result = run(ExperimentConfig(num_qubits=2, state_type="BELL", metrics="my_profile"))
+print(result.metrics_bundle.metrics["my_metric"].value)
+```
+
+Built-in profiles: `structure`, `quick`, `information_theory`. Registered
+experiment programs already pick an explicit teaching list (not a kitchen-sink
+profile) so `qforge run 05_bell_states` prints Structure Score without extra
+flags. Leave `metrics=None` when the lesson is a protocol, not a histogram
+shape. The named `structure` profile includes `pathway_persistence` and
+`complexity_emergence_score`, which need extra inputs and print empty on a
+single run.
+
 ## Mathematical Foundations
 
 ### Total Variation Distance

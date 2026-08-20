@@ -67,6 +67,7 @@ class TranspilationExperiment(BaseExperiment):
             shots=4096,
             optimization_level=1,
             visualization_type="histogram",
+            metrics=["structure_score", "concentration_index"],
         )
 
     def run_optimization_sweep(self) -> list[ExperimentResult]:

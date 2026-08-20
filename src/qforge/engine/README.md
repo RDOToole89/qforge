@@ -19,7 +19,7 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",
+    metrics="structure",
     shots=4096,
 ))
 print(f"Fidelity: {result.analysis.measurement_results.fidelity:.4f}")

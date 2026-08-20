@@ -50,7 +50,10 @@ class RealDecoherenceExperiment(BaseExperiment):
 
     name = "hw_05_real_decoherence"
     description = "Step 5: Compare state decoherence on real hardware — the culmination"
-
+    metrics_hint = (
+        "Distribution-structure metrics on real noise — compare with the "
+        "simulated decoherence track."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -59,7 +62,13 @@ class RealDecoherenceExperiment(BaseExperiment):
             sim_mode="hardware",
             shots=8192,
             optimization_level=1,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "entanglement_error_correlation",
+                "concentration_index",
+                "total_correlation",
+            ],
+            experiment_type="decoherence",
             visualization_type="histogram",
         )
 

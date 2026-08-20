@@ -27,6 +27,10 @@ Noise & entanglement →     Superdense coding    →     Global vs local      �
                      →     Design your own
 ```
 
+Each experiment requests the metrics that match its question. `qforge run`
+prints those numbers plus a one-line hint. Teleportation and superdense coding
+leave metrics off — the lesson is the protocol, not histogram shape.
+
 ## Quick Start
 
 ```bash
@@ -69,10 +73,31 @@ results = get_experiment("dec_04_noise_resilience").sweep(
 
 ## Adding New Experiments
 
-1. Create a module in the appropriate `steps/` or `deep_dives/` folder
-2. Subclass `BaseExperiment` with `name`, `description`, `default_config()`
-3. Include **WHAT YOU'LL LEARN**, **CIRCUIT** diagram, and **TRY IT** in the docstring
-4. Register in four places: folder `__init__.py`, root `__init__.py`, folder `README.md`, `AGENTS.md`
-5. Test via CLI: `qforge run your_experiment`
+**In this repo:** subclass `BaseExperiment`, pick `metrics=` for the question, and register in four places (folder `__init__.py`, root `__init__.py`, folder `README.md`, `AGENTS.md`).
 
-See `basics/steps/step01_superposition.py` for a minimal example, or `advanced/steps/step08_design_your_own.py` for the experiment design template.
+**In your own package:** do not fork the registry.
+
+```python
+from qforge.engine.models import ExperimentConfig
+from qforge.experiments import register_experiment
+from qforge.experiments.base import BaseExperiment
+
+class MyExperiment(BaseExperiment):
+    name = "my_ghz_probe"
+    description = "GHZ under depolarizing noise"
+    metrics_hint = "Structure Score stays high while stray outcomes appear."
+
+    def default_config(self) -> ExperimentConfig:
+        return ExperimentConfig(
+            num_qubits=3,
+            state_type="GHZ",
+            shots=1024,
+            metrics=["structure_score", "total_correlation"],
+        )
+
+register_experiment(MyExperiment())
+```
+
+Then `qforge list` and `qforge run my_ghz_probe` see it in that process. Combine with `register()` / `register_profile()` if you also ship a metric.
+
+See `basics/steps/step01_superposition.py` for a minimal in-tree example, or `advanced/steps/step08_design_your_own.py` for the experiment design template.

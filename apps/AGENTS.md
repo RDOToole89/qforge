@@ -3,9 +3,10 @@
 Owner: Roibín O'Toole
 
 The Python engine is the product. `apps/` is a consumer. The 15-minute path is
-`docs/guides/getting-started/first-run.md`. Freeze new visual-lab scope until
-the Python identity work is done or the owner unfreezes it. This file is the
-pickup document for the engine–frontend connection and the parked gaps.
+`docs/guides/getting-started/first-run.md`. Identity lives in the Python surface
+(`metrics="structure"`, `register_profile()`, free `experiment_type`). Freeze new
+visual-lab scope until the owner unfreezes it. This file is the pickup document
+for the engine–frontend connection and the parked gaps.
 
 ## What This Layer Is
 
@@ -73,7 +74,7 @@ uv run uvicorn apps.api.main:app --port 8000   # then GET /api/health
 Generated catalogs must be **byte-identical** if no physics changed. If they
 drift, stop — that is a real contract break, not a formatting nit.
 
-## Freeze (until the Python package is the documented API)
+## Freeze (visual lab parked)
 
 Do not:
 
@@ -85,9 +86,9 @@ Do not:
 Local feature rules still apply: `apps/client/src/features/bloch-sphere/AGENTS.md`,
 `apps/client/src/features/circuit-builder/AGENTS.md`.
 
-## Parked gaps (pick up after `from qforge import run`)
+## Parked gaps (pick up after the owner unfreezes)
 
-Resume from here. Do not start these during the rename PR.
+Resume from here. Do not start these while the freeze is in effect.
 
 ### FE-1 — Two simulators
 The circuit builder simulates in TypeScript (`useSimulator.ts`). The engine

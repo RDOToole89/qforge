@@ -6,6 +6,8 @@
 
 **A general-purpose quantum experiment engine built on Qiskit — for learning, tinkering, and real hardware.**
 
+QForge hides Qiskit plumbing so you can set up experiments, learn quantum mechanics, and run real research — with an analysis layer configured for the question you are asking.
+
 ## Table of Contents
 
 - [What Makes This Different](#what-makes-this-different)
@@ -164,10 +166,10 @@ uv sync   # creates .venv and installs everything from uv.lock
 # List available experiments
 uv run qforge list
 
-# Superposition → Bell → noisy GHZ
+# Superposition → Bell → noisy GHZ (each step already picks its metrics)
 uv run qforge run 01_superposition
 uv run qforge run 05_bell_states
-uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05 -s metrics=quick
+uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05
 ```
 
 > **Why `uv`?** It manages the Python interpreter (pinned to 3.12 via `.python-version`)
@@ -187,7 +189,7 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",
+    metrics="structure",
 ))
 
 # Results are typed Pydantic models
@@ -204,7 +206,7 @@ result = run(ExperimentConfig(
     state_type="GHZ",
     sim_mode="hardware",      # Send to IBM Quantum
     shots=8192,
-    metrics="decoherence",
+    metrics="structure",
 ))
 
 print(f"Backend: {result.provenance.simulator_info['backend_name']}")
@@ -250,7 +252,7 @@ Start here                      Go deeper                        Study noise
                                                              └──────────────┘
 ```
 
-**New to quantum?** Take the [first 15 minutes](docs/guides/getting-started/first-run.md), then continue through the 11 `basics/` steps. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement.
+**New to quantum?** Take the [first 15 minutes](docs/guides/getting-started/first-run.md), then continue through the 11 `basics/` steps. Each experiment prints the metrics that match its question, plus a one-line hint. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement.
 
 **Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/qforge/experiments/AGENTS.md) for the full guide.
 

@@ -20,37 +20,37 @@ advanced/
 
 What can quantum do that classical can't?
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 1 | `qforge run adv_01_quantum_randomness` | True randomness from physics — better than any algorithm |
-| 2 | `qforge run adv_02_deutsch_jozsa` | Your first speedup — classify a function in one query |
-| 3 | `qforge run adv_03_grover_search` | Search with √N speedup — amplitude amplification |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 1 | `qforge run adv_01_quantum_randomness` | True randomness from physics — better than any algorithm | Structure Score, Total Correlation (~0) |
+| 2 | `qforge run adv_02_deutsch_jozsa` | Your first speedup — classify a function in one query | Concentration, Asymmetry Index |
+| 3 | `qforge run adv_03_grover_search` | Search with √N speedup — amplitude amplification | Concentration, Asymmetry Index |
 
 ### Act 2: Entanglement as a Resource (Steps 4-5)
 
 Entanglement isn't just a phenomenon — it's a tool.
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 4 | `qforge run adv_04_teleportation` | Transfer a quantum state using entanglement + classical bits |
-| 5 | `qforge run adv_05_superdense_coding` | Send 2 classical bits using 1 qubit + entanglement |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 4 | `qforge run adv_04_teleportation` | Transfer a quantum state using entanglement + classical bits | none (protocol success, not histogram shape) |
+| 5 | `qforge run adv_05_superdense_coding` | Send 2 classical bits using 1 qubit + entanglement | none (protocol success) |
 
 ### Act 3: The Key Subroutines (Steps 6-7)
 
 The building blocks of real quantum algorithms.
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 6 | `qforge run adv_06_qft` | Quantum Fourier Transform — the engine inside Shor's |
-| 7 | `qforge run adv_07_error_correction` | 3-qubit bit-flip code — protecting quantum information |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 6 | `qforge run adv_06_qft` | Quantum Fourier Transform — the engine inside Shor's | Asymmetry Index, Concentration |
+| 7 | `qforge run adv_07_error_correction` | 3-qubit bit-flip code — protecting quantum information | Concentration, Asymmetry Index |
 
 ### Act 4: Design Your Own (Step 8)
 
 Put it all together. Design, configure, run, and analyze your own experiment.
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 8 | `qforge run adv_08_design_your_own` | The experiment design pattern — hypothesis → config → run → analyze |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 8 | `qforge run adv_08_design_your_own` | The experiment design pattern — hypothesis → config → run → analyze | Structure Score (add more as you go) |
 
 After Step 8, you're ready to create experiments in `decoherence/`, `hardware/`, or an entirely new direction.
 

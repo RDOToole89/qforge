@@ -56,7 +56,10 @@ class NoiseIntroExperiment(BaseExperiment):
 
     name = "09_noise_intro"
     description = "Step 9: Watch noise gradually destroy a quantum state"
-
+    metrics_hint = (
+        "Depolarizing on |+⟩ stays near-uniform, so Asymmetry Index stays near "
+        "0. Noise is not always 'more peaked'."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -67,6 +70,7 @@ class NoiseIntroExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             visualization_type=["histogram", "metrics_summary"],
+            metrics=["asymmetry_index"],
         )
 
     def run_noise_sweep(self, steps: int = 8, **overrides: Any) -> list[ExperimentResult]:

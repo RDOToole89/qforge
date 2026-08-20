@@ -8,15 +8,18 @@ Experiments are organized into three levels:
   hardware/     — Real quantum hardware experiments
 
 Usage:
-    from qforge.experiments import get_experiment, list_experiments
+    from qforge.experiments import get_experiment, list_experiments, register_experiment
 
     # List available experiments
     for name, description in list_experiments():
         print(f"{name}: {description}")
 
     # Get and run an experiment
-    exp = get_experiment("bell_state")
+    exp = get_experiment("01_superposition")
     result = exp.run()
+
+    # Out-of-tree: register without editing this module
+    register_experiment(MyExperiment())
 
     # Run with config overrides
     result = exp.run({"num_qubits": 3, "error_rate": 0.1})
@@ -173,11 +176,54 @@ EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
 }
 
 
+def register_experiment(
+    experiment: ExperimentProgram,
+    *,
+    name: str | None = None,
+    replace: bool = False,
+) -> None:
+    """Register an experiment program on the live registry.
+
+    Call this from a user module or third-party package. ``qforge list``,
+    ``qforge run``, and ``get_experiment`` resolve against this table. In-tree
+    teaching tracks still belong in ``EXPERIMENT_REGISTRY`` above; this is the
+    path that does not require editing this file.
+
+    Args:
+        experiment: Instance implementing ``ExperimentProgram``.
+        name: Registry key. Defaults to ``experiment.name``.
+        replace: If True, overwrite an existing experiment of the same name.
+
+    Raises:
+        TypeError: If ``experiment`` does not implement ``ExperimentProgram``.
+        ValueError: If the resolved name is empty.
+        KeyError: If ``name`` is already registered and ``replace`` is False.
+    """
+    if not isinstance(experiment, ExperimentProgram):
+        raise TypeError(
+            "register_experiment() expects an ExperimentProgram instance "
+            "(subclass BaseExperiment or implement the protocol)."
+        )
+    key = (name if name is not None else experiment.name).strip()
+    if not key:
+        raise ValueError("Experiment name must be a non-empty string")
+    if key in EXPERIMENT_REGISTRY and not replace:
+        raise KeyError(
+            f"Experiment '{key}' is already registered. Pass replace=True to overwrite."
+        )
+    EXPERIMENT_REGISTRY[key] = experiment
+
+
+def unregister_experiment(name: str) -> None:
+    """Remove an experiment. Intended for tests and plugin teardown."""
+    EXPERIMENT_REGISTRY.pop(name, None)
+
+
 def get_experiment(name: str) -> ExperimentProgram:
     """Get experiment by name.
 
     Args:
-        name: The experiment name (e.g., "bell_state", "topology_comparison")
+        name: The experiment name (e.g., "01_superposition", "dec_01_structured_vs_uniform")
 
     Returns:
         The experiment instance
@@ -208,6 +254,8 @@ __all__ = [
     "EXPERIMENT_REGISTRY",
     "get_experiment",
     "list_experiments",
+    "register_experiment",
+    "unregister_experiment",
     # Basics
     "BellExperiment",
     "bell_experiment",

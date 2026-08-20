@@ -67,7 +67,10 @@ class NoiseTypesExperiment(BaseExperiment):
     description = (
         "Step 10: Compare depolarizing, amplitude damping, phase damping, bit flip, phase flip"
     )
-
+    metrics_hint = (
+        "Same GHZ, different channels — compare how Structure Score and "
+        "concentration shift."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -78,6 +81,7 @@ class NoiseTypesExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             visualization_type=["histogram", "metrics_summary"],
+            metrics=["structure_score", "concentration_index"],
         )
 
     def run_all_types(self) -> list[ExperimentResult]:

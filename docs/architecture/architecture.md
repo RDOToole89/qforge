@@ -36,8 +36,8 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",          # profile name or explicit metric list
-    experiment_type="decoherence",  # category tag for the result
+    metrics="structure",          # profile name or explicit metric list
+    experiment_type="decoherence",  # optional label — your research track, not an engine enum
 ))
 ```
 
@@ -53,8 +53,8 @@ result = run(ExperimentConfig(
 | `sim_mode` | `qasm`, `statevector`, `density_matrix`, or `hardware` (IBM Quantum) |
 | `noise_enabled`, `noise_type`, `error_rate` | Noise channel selection and strength |
 | `shots`, `rng_seed` | Sampling and reproducibility |
-| `metrics` | Metric profile name (`"decoherence"`, `"quick"`, `"information_theory"`) or an explicit list of metric names |
-| `experiment_type` | Category tag: `"decoherence"`, `"parameter_sweep"`, `"noise_comparison"`, `"control"`, `"scaling"`, `"convergence"`, `"batch_sweep"` |
+| `metrics` | Metric profile name (`"structure"`, `"quick"`, `"information_theory"`) or an explicit list of metric names |
+| `experiment_type` | Optional free-string label for grouping and storage (not a closed taxonomy) |
 
 ### Results
 
@@ -111,16 +111,18 @@ All metrics are general-purpose information-theoretic and statistical measures o
 | `complexity_emergence_score` | Logistic fit locating a threshold in a metric-vs-size curve |
 | `total_correlation` | Multi-information across all qubits |
 
-Metrics are registered declaratively via `MetricSpec` in `src/qforge/core/analysis/metrics/registry.py`, with bootstrap 95% confidence intervals and per-metric status. Profiles in `profiles.py` group them into named selections (`decoherence`, `quick`, `information_theory`).
+Metrics are registered via `@register` / `MetricSpec` in `src/qforge/core/analysis/metrics/registry.py`, with bootstrap 95% confidence intervals and per-metric status. Built-in profiles in `profiles.py` are topic-free (`structure`, `quick`, `information_theory`). User code and experiment packages add more with `register_profile()`.
 
 ## Experiments Layer
 
-Experiment programs follow a pluggable pattern (`src/qforge/experiments/base.py`): each program has a name, a description, a default `ExperimentConfig`, and a `run(overrides)` method. Programs register in a central registry and are grouped into:
+Experiment programs follow a pluggable pattern (`src/qforge/experiments/base.py`): each program has a name, a description, a default `ExperimentConfig`, and a `run(overrides)` method. In-tree programs live in a central registry grouped into:
 
 - `basics/` — an 11-step learning path plus deep dives
 - `advanced/` — classic algorithms (Shor, Grover, teleportation, VQE, QAOA)
 - `decoherence/` — a 6-step noise study path plus deep dives
 - `hardware/` — a 5-step path to real IBM Quantum processors
+
+Out-of-tree programs call `register_experiment()` so they appear in `qforge list` / `qforge run` without editing `EXPERIMENT_REGISTRY`. Metrics have the same pattern: `register()` / `register_profile()`.
 
 ## Frontends
 

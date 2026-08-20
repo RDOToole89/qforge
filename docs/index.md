@@ -18,7 +18,7 @@ QForge abstracts away the plumbing of quantum experimentation. You pick a quantu
 
 ## Analysis Metrics
 
-All metrics are general-purpose information-theoretic and statistical measures over measurement outcome distributions:
+All metrics are general-purpose information-theoretic and statistical measures over measurement outcome distributions. Registered experiments already pick a teaching list for the question they ask — `qforge run 01_superposition` prints Asymmetry Index; `qforge run 05_bell_states` prints Structure Score and Total Correlation. Request a named profile (`structure`, `quick`, `information_theory`) or an explicit list when you call `run()` yourself.
 
 ### Distribution Structure
 
@@ -66,7 +66,7 @@ config = ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",
+    metrics="structure",
 )
 
 result = run(config)
@@ -78,7 +78,7 @@ See the [Quick Start](guides/getting-started/quickstart.md) for more usage examp
 
 ## Use Cases
 
-- **Learning quantum mechanics**: Preset experiments with step-by-step explanations, from superposition to entanglement
+- **Learning quantum mechanics**: Preset experiments with step-by-step explanations; each step prints the metrics that match its question
 - **Noise characterization**: Compare noise channels and their effect on different entangled states
 - **Entanglement studies**: See how different topologies (GHZ, W, Cluster) respond to noise
 - **Hardware experiments**: Run the same experiments on real IBM Quantum processors with full provenance

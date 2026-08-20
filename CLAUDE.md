@@ -23,7 +23,7 @@ from qforge import run, ExperimentConfig
 config = ExperimentConfig(
     num_qubits=3,
     state_type="GHZ",
-    metrics="decoherence",          # profile string, or list of metric names
+    metrics="structure",          # profile string, or list of metric names
     shots=1024,
     noise_enabled=True,
     noise_type="depolarizing",
@@ -74,7 +74,7 @@ print(f"Structure Score: {results['structure_score']['value']:.4f}")
 
 `src/qforge/core/analysis/metrics/` provides general **information-theoretic and statistical measures of measurement-outcome distributions** — e.g. `structure_score` (Jensen-Shannon divergence from a factorized null model), `asymmetry_index` (TVD from uniform), `total_correlation` (multi-information), `concentration_index` (top-vs-bottom quartile probability ratio), `entanglement_error_correlation` (topology/MI correlation), and temporal-stability measures. All support bootstrap confidence intervals, deterministic ordering, and full-support Jeffreys smoothing.
 
-Metric selection uses profiles (`metrics="decoherence" | "quick" | "information_theory"`) or an explicit list of metric names. `ExperimentConfig.experiment_type` labels the experiment kind ("decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep").
+Metric selection uses profiles (`metrics="structure" | "quick" | "information_theory"`) or an explicit list of metric names. Register more with `register_profile()`. `ExperimentConfig.experiment_type` is an optional free-string label for grouping and storage — not a closed taxonomy.
 
 ## Development Commands
 
@@ -145,7 +145,7 @@ class ExperimentProgram(Protocol):
     def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult: ...
 ```
 
-All experiments are registered in `EXPERIMENT_REGISTRY` (`src/qforge/experiments/__init__.py`) across `basics/`, `advanced/`, `decoherence/`, and `hardware/`.
+All in-tree experiments are registered in `EXPERIMENT_REGISTRY` (`src/qforge/experiments/__init__.py`) across `basics/`, `advanced/`, `decoherence/`, and `hardware/`. Out-of-tree programs call `register_experiment()` instead of editing that dict.
 
 ### CLI Principles
 

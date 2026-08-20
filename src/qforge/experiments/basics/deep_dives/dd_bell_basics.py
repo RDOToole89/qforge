@@ -62,6 +62,7 @@ class BellExperiment(BaseExperiment):
 
     name = "bell_state"
     description = "Two-qubit Bell state — see quantum correlations in action"
+    metrics_hint = "Noisy Bell: Structure Score stays high while stray 01/10 outcomes appear."
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -72,7 +73,7 @@ class BellExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.02,
             shots=4096,
-            metrics="decoherence",
+            metrics=["structure_score", "total_correlation"],
         )
 
     def run_noise_sweep(

@@ -53,6 +53,8 @@ def test_run_prints_saved_histogram(tmp_path: Path) -> None:
     assert "Saved" in result.stdout
     assert "histogram" in result.stdout
     assert "analysis" in result.stdout
+    assert "asymmetry_index" in result.stdout
+    assert "fair coin" in result.stdout
     pngs = list(tmp_path.rglob("histogram.png"))
     assert len(pngs) == 1
 

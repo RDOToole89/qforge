@@ -283,7 +283,7 @@ class TestCorrelationRenderer:
                 noise_type="depolarizing",
                 error_rate=0.05,
                 visualization_type="correlation",
-                metrics="decoherence",
+                metrics="structure",
                 shots=1000,
                 rng_seed=42,
             )
@@ -402,7 +402,7 @@ class TestVizTypeAll:
                 noise_type="depolarizing",
                 error_rate=0.05,
                 visualization_type="all",
-                metrics="decoherence",
+                metrics="structure",
                 shots=500,
                 rng_seed=42,
             )

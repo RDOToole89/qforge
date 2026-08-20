@@ -46,7 +46,10 @@ class MeasurementExperiment(BaseExperiment):
 
     name = "02_measurement"
     description = "Step 2: How measurement probability depends on quantum state angle"
-
+    metrics_hint = (
+        "Asymmetry Index: distance from a fair coin. This default is |+⟩ "
+        "(Ry(π/2)), so expect near 0."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
@@ -58,6 +61,7 @@ class MeasurementExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": qc},
+            metrics=["asymmetry_index"],
         )
 
     def run_angle_sweep(self, steps: int = 9) -> list[ExperimentResult]:

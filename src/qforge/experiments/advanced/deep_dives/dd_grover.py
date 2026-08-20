@@ -115,7 +115,10 @@ class GroverExperiment(BaseExperiment):
 
     name = "grover"
     description = "Grover's search — find a marked item with quadratic speedup"
-
+    metrics_hint = (
+        "The target bitstring should dominate. Concentration Index is the "
+        "search-success meter."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         target = "1010"
@@ -126,6 +129,7 @@ class GroverExperiment(BaseExperiment):
             state_type="CUSTOM",
             shots=4096,
             noise_enabled=False,
+            metrics=["concentration_index", "asymmetry_index"],
             custom_params={
                 "source": "circuit",
                 "circuit": circuit,

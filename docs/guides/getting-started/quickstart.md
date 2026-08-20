@@ -50,7 +50,7 @@ print(f"Top outcomes: {dict(list(meas.outcome_probabilities.items())[:3])}")
 
 ## 3. Analysis Metrics
 
-Request a metric profile (or an explicit list of metric names) via `metrics=` to compute information-theoretic analysis metrics with bootstrap confidence intervals:
+Request a metric profile (or an explicit list of metric names) via `metrics=` to compute information-theoretic analysis metrics with bootstrap confidence intervals. Registered experiments already pick a default list — `qforge run 05_bell_states` prints Structure Score without extra flags.
 
 ```python
 result = run(ExperimentConfig(
@@ -60,17 +60,16 @@ result = run(ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",  # profile name, or a list like ["asymmetry_index"]
+    metrics="structure",  # profile name, or a list like ["asymmetry_index"]
 ))
 
 bundle = result.metrics_bundle
-print(f"Asymmetry Index: {bundle.metrics['asymmetry_index'].value:.4f}")
 print(f"Structure Score: {bundle.metrics['structure_score'].value:.4f}")
 for name, entry in bundle.metrics.items():
     print(f"  {name}: {entry.value:.4f} (CI95: {entry.ci95})")
 ```
 
-Available profiles: `"decoherence"` (the full 8-metric suite), `"quick"`, and `"information_theory"`.
+Available profiles: `"structure"` (distribution-structure suite), `"quick"`, and `"information_theory"`. Register more with `register_profile()`.
 
 ## 4. Direct Analysis Pipeline
 
@@ -96,8 +95,7 @@ Explore how a parameter affects your experiment across a range of values.
 qforge sweep 06_ghz_states \
   -p error_rate=0.01,0.05,0.1 \
   -s noise_enabled=true \
-  -s noise_type=depolarizing \
-  -s metrics=quick
+  -s noise_type=depolarizing
 ```
 
 **Python:**

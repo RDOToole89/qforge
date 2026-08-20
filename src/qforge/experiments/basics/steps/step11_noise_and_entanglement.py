@@ -56,7 +56,10 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
 
     name = "11_noise_and_entanglement"
     description = "Step 11: How entanglement changes the shape of error distributions"
-
+    metrics_hint = (
+        "Noisy GHZ stays structured. Run again with state_type=SUPERPOSITION "
+        "for the unstructured control."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -66,7 +69,12 @@ class NoiseAndEntanglementExperiment(BaseExperiment):
             noise_enabled=True,
             noise_type="depolarizing",
             error_rate=0.05,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "total_correlation",
+                "concentration_index",
+                "entanglement_error_correlation",
+            ],
             visualization_type=["histogram", "metrics_summary"],
         )
 

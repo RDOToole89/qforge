@@ -56,7 +56,10 @@ class WStatesExperiment(BaseExperiment):
 
     name = "07_w_states"
     description = "Step 7: W states — shared excitation, a different entanglement topology"
-
+    metrics_hint = (
+        "W spreads one excitation across n peaks — still structured, less "
+        "concentrated than GHZ."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -64,6 +67,7 @@ class WStatesExperiment(BaseExperiment):
             state_type="W",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "total_correlation", "concentration_index"],
         )
 
     def run_scaling(

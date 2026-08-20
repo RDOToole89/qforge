@@ -56,7 +56,10 @@ class FirstHardwareRunExperiment(BaseExperiment):
 
     name = "hw_01_first_hardware_run"
     description = "Step 1: Your first real quantum computer — Bell state on IBM hardware"
-
+    metrics_hint = (
+        "Same story as Bell in simulation: high Structure Score, plus real "
+        "01/10 leakage."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -66,6 +69,7 @@ class FirstHardwareRunExperiment(BaseExperiment):
             shots=4096,
             optimization_level=1,
             visualization_type="histogram",
+            metrics=["structure_score", "total_correlation"],
         )
 
 

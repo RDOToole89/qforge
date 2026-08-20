@@ -89,7 +89,10 @@ class GroverSearchExperiment(BaseExperiment):
 
     name = "adv_03_grover_search"
     description = "Step 3: Grover's search — quadratic speedup via amplitude amplification"
-
+    metrics_hint = (
+        "The marked item should dominate. Concentration Index tracks how "
+        "peaked the search became."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         circuit = _grover_circuit(4, "1010")
@@ -100,6 +103,7 @@ class GroverSearchExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
             visualization_type=["histogram", "circuit"],
+            metrics=["concentration_index", "asymmetry_index"],
         )
 
     def run_iteration_sweep(self) -> list[ExperimentResult]:

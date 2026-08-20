@@ -30,23 +30,23 @@ QiskitRuntimeService.save_account(
 
 ### Connect and Compare (Steps 1-2)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 1 | `qforge run hw_01_first_hardware_run` | Your first real quantum computer — see real physical noise |
-| 2 | `qforge run hw_02_hardware_vs_simulation` | Same circuit on hardware vs simulation — where do models break down? |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 1 | `qforge run hw_01_first_hardware_run` | Your first real quantum computer — see real physical noise | Structure Score, Total Correlation |
+| 2 | `qforge run hw_02_hardware_vs_simulation` | Same circuit on hardware vs simulation — where do models break down? | Structure Score, Concentration |
 
 ### Understand the Machine (Steps 3-4)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 3 | `qforge run hw_03_transpilation` | See your logical circuit become physical gates — SWAP insertion, depth changes |
-| 4 | `qforge run hw_04_backend_exploration` | Try different processors — is your result chip-independent? |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 3 | `qforge run hw_03_transpilation` | See your logical circuit become physical gates — SWAP insertion, depth changes | Structure Score, Concentration |
+| 4 | `qforge run hw_04_backend_exploration` | Try different processors — is your result chip-independent? | Structure Score, EEC, Concentration, Total Correlation |
 
 ### Real Decoherence (Step 5)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 5 | `qforge run hw_05_real_decoherence` | Decoherence structure on real hardware — the culmination of your journey |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 5 | `qforge run hw_05_real_decoherence` | Decoherence structure on real hardware — the culmination of your journey | Structure Score, EEC, Concentration, Total Correlation |
 
 ---
 

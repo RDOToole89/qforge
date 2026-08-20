@@ -69,6 +69,7 @@ class MeasurementBasisExperiment(BaseExperiment):
             shots=4096,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": qc},
+            metrics=["asymmetry_index"],
         )
 
     def run_basis_comparison(self) -> list[ExperimentResult]:

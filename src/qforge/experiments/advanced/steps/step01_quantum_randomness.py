@@ -55,6 +55,7 @@ class QuantumRandomnessExperiment(BaseExperiment):
 
     name = "adv_01_quantum_randomness"
     description = "Step 1: True randomness — generate provably random bits from quantum measurement"
+    metrics_hint = "Near 0 is the point: independent coins, no hidden pattern in the bits."
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -69,6 +70,7 @@ class QuantumRandomnessExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": qc},
             visualization_type=["histogram", "circuit"],
+            metrics=["structure_score", "total_correlation"],
         )
 
     def run_bit_independence_test(self) -> list[ExperimentResult]:

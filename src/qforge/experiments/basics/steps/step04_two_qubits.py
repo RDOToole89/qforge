@@ -59,7 +59,10 @@ class TwoQubitsExperiment(BaseExperiment):
 
     name = "04_two_qubits"
     description = "Step 4: Independent vs entangled — see how CNOT creates correlations"
-
+    metrics_hint = (
+        "Default is entangled. Structure Score and Total Correlation ~0 would "
+        "mean independent coins."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         # Default: Bell state (entangled)
@@ -68,6 +71,7 @@ class TwoQubitsExperiment(BaseExperiment):
             state_type="GHZ",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "total_correlation"],
         )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult]:

@@ -52,7 +52,10 @@ class BackendExplorationExperiment(BaseExperiment):
 
     name = "hw_04_backend_exploration"
     description = "Step 4: Compare quantum processors — is your result hardware-independent?"
-
+    metrics_hint = (
+        "Structure Score should be similar across chips if the pattern comes "
+        "from the state, not the device."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -61,7 +64,12 @@ class BackendExplorationExperiment(BaseExperiment):
             sim_mode="hardware",
             shots=8192,
             optimization_level=1,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "entanglement_error_correlation",
+                "concentration_index",
+                "total_correlation",
+            ],
             visualization_type="histogram",
         )
 

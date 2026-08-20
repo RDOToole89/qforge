@@ -55,7 +55,13 @@ from qforge.core.analysis.metrics.pathway_persistence import (
     compute_pathway_persistence_scores,
     compute_temporal_transition_matrix,
 )
-from qforge.core.analysis.metrics.profiles import METRIC_PROFILES, resolve_metrics
+from qforge.core.analysis.metrics.profiles import (
+    METRIC_PROFILES,
+    list_profiles,
+    register_profile,
+    resolve_metrics,
+    unregister_profile,
+)
 from qforge.core.analysis.metrics.registry import (
     compute_all,
     compute_metric,
@@ -855,8 +861,44 @@ class TestProfiles:
         assert resolve_metrics(None) is None
 
     def test_resolve_profile_name(self):
-        out = resolve_metrics("decoherence")
-        assert out == METRIC_PROFILES["decoherence"]
+        out = resolve_metrics("structure")
+        assert out == METRIC_PROFILES["structure"]
+        assert "structure_score" in out
+
+    def test_resolve_legacy_decoherence_profile_removed(self):
+        with pytest.raises(KeyError, match="decoherence"):
+            resolve_metrics("decoherence")
+
+    def test_register_and_unregister_profile(self):
+        register_profile("tmp_profile", ["structure_score"])
+        try:
+            assert resolve_metrics("tmp_profile") == ["structure_score"]
+        finally:
+            unregister_profile("tmp_profile")
+        with pytest.raises(KeyError):
+            resolve_metrics("tmp_profile")
+
+    def test_register_profile_rejects_duplicate(self):
+        with pytest.raises(KeyError, match="already registered"):
+            register_profile("structure", ["structure_score"])
+
+    def test_register_profile_rejects_empty(self):
+        with pytest.raises(ValueError):
+            register_profile("empty_profile", [])
+
+    def test_register_profile_replace(self):
+        register_profile("tmp_replace", ["structure_score"])
+        try:
+            register_profile("tmp_replace", ["total_correlation"], replace=True)
+            assert resolve_metrics("tmp_replace") == ["total_correlation"]
+        finally:
+            unregister_profile("tmp_replace")
+
+    def test_list_profiles_returns_a_copy(self):
+        listed = list_profiles()
+        assert "structure" in listed
+        listed["structure"].append("injected")
+        assert "injected" not in METRIC_PROFILES["structure"]
 
     def test_resolve_list_passthrough(self):
         out = resolve_metrics(["structure_score", "total_correlation"])

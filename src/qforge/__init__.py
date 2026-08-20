@@ -13,7 +13,12 @@ from qforge.engine.api import iter_experiment_configs, run, sweep
 from qforge.engine.models import ExperimentConfig, ExperimentResult, SweepManifest
 
 if TYPE_CHECKING:
-    from qforge.experiments import get_experiment, list_experiments
+    from qforge.experiments import (
+        get_experiment,
+        list_experiments,
+        register_experiment,
+        unregister_experiment,
+    )
 
 __all__ = [
     "ExperimentConfig",
@@ -23,19 +28,36 @@ __all__ = [
     "get_experiment",
     "iter_experiment_configs",
     "list_experiments",
+    "register_experiment",
     "run",
     "sweep",
+    "unregister_experiment",
 ]
+
+
+_EXPERIMENT_EXPORTS = {
+    "get_experiment",
+    "list_experiments",
+    "register_experiment",
+    "unregister_experiment",
+}
 
 
 def __getattr__(name: str) -> Any:
     """Lazily expose the experiment registry so `from qforge import run` stays lean."""
-    if name in {"get_experiment", "list_experiments"}:
-        from qforge.experiments import get_experiment, list_experiments
+    if name in _EXPERIMENT_EXPORTS:
+        from qforge.experiments import (
+            get_experiment,
+            list_experiments,
+            register_experiment,
+            unregister_experiment,
+        )
 
         exports = {
             "get_experiment": get_experiment,
             "list_experiments": list_experiments,
+            "register_experiment": register_experiment,
+            "unregister_experiment": unregister_experiment,
         }
         return exports[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

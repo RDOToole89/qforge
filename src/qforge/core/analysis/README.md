@@ -82,7 +82,7 @@ analysis/
     total_correlation.py      TC: multi-information
     noise_topology_correlation.py  NTC: permutation test for noise-topology
     structure_score.py        SS: JSD from factorized (independent-marginals) null model
-    profiles.py               Metric selection profiles (decoherence, quick, information_theory)
+    profiles.py               Metric selection profiles (structure, quick, information_theory)
 
   core/                     Mathematical foundations
     information_theory.py     Entropy, MI, JSD with Jeffreys smoothing (alpha=0.5, K=2^n)
@@ -117,6 +117,7 @@ Public API:
 - `compute_metric(name, **kwargs)` -- Compute a single metric by name
 - `compute_all(metric_names, **kwargs)` -- Compute multiple metrics with shared parameters
 - `@register(name)` -- Decorator to register new metrics
+- `register_profile(name, metrics)` -- Register a named metric list for `metrics=`
 
 `structure_score` (JSD from the factorized null model) and `asymmetry_index`
 (TVD from uniform) are distinct, separately registered metrics.

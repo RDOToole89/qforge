@@ -85,7 +85,10 @@ class DeutschJozsaExperiment(BaseExperiment):
 
     name = "adv_02_deutsch_jozsa"
     description = "Step 2: Deutsch-Jozsa — exponential speedup for function classification"
-
+    metrics_hint = (
+        "Balanced oracle should concentrate away from all-zeros. Constant "
+        "would spike on the zero string."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         circuit = _dj_circuit(4, "balanced")
@@ -96,6 +99,7 @@ class DeutschJozsaExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
             visualization_type=["histogram", "circuit"],
+            metrics=["concentration_index", "asymmetry_index"],
         )
 
     def run_both_oracles(self) -> tuple[ExperimentResult, ExperimentResult]:

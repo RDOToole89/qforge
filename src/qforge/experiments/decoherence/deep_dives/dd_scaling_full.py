@@ -48,7 +48,13 @@ class ScalingLadder(BaseExperiment):
             noise_type="amplitude_damping",
             error_rate=0.1,
             shots=8192,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "entanglement_error_correlation",
+                "concentration_index",
+                "total_correlation",
+            ],
+            experiment_type="decoherence",
             visualization_type="all",
         )
 

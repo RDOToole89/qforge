@@ -25,6 +25,7 @@ class ExperimentProgram(Protocol):
     Attributes:
         name: Short identifier for the experiment (used in registry/CLI)
         description: Human-readable description of what the experiment tests
+        metrics_hint: Optional one-liner the CLI prints under computed metrics
 
     Methods:
         default_config: Returns the default ExperimentConfig for this experiment
@@ -79,6 +80,7 @@ class BaseExperiment:
 
     name: str
     description: str
+    metrics_hint: str | None = None
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""

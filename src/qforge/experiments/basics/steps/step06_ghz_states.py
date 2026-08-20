@@ -57,7 +57,10 @@ class GHZStatesExperiment(BaseExperiment):
 
     name = "06_ghz_states"
     description = "Step 6: 3-qubit GHZ — all zeros or all ones. Sweep num_qubits to scale"
-
+    metrics_hint = (
+        "Two peaks (000/111) score high. A product of |+⟩ states stays near 0 "
+        "on Structure Score."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -65,6 +68,7 @@ class GHZStatesExperiment(BaseExperiment):
             state_type="GHZ",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "total_correlation", "concentration_index"],
         )
 
     def run_scaling(

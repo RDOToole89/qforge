@@ -8,6 +8,8 @@ Pluggable experiment programs built on a **general-purpose quantum experiment en
 
 Every folder follows the same pattern: `steps/` for guided progressions and `deep_dives/` for extended explorations. New experiment types and directions are welcome.
 
+The `decoherence/` folder is a research track on this engine, not the engine's identity. Those programs request an explicit single-run structure list (Structure Score, EEC, concentration, total correlation) and may set `experiment_type="decoherence"` as a storage label. Do not bake a research topic into core profile names. Do not default the named `structure` profile on a single `qforge run` — `pathway_persistence` and `complexity_emergence_score` need extra inputs and print as empty/zero.
+
 ## Structure
 
 ```
@@ -184,15 +186,28 @@ Every experiment file MUST have in its docstring:
 - **CIRCUIT** — ASCII circuit diagram showing the quantum circuit
 - **TRY IT** — code example with import and run
 
+Pick `metrics=` for the question that experiment asks (explicit list, not a kitchen-sink profile). Set `metrics_hint` so the CLI can tell the learner what a high/low value means. Leave `metrics=None` when the lesson is a protocol (teleportation, superdense coding), not a histogram shape.
+
 Follow the template in `advanced/steps/step08_design_your_own.py`.
 
 ### 3. Register it
 
-Add to **four** places:
+**In this repo** (teaching and research tracks), add to **four** places:
 1. The folder's `__init__.py`
 2. `src/qforge/experiments/__init__.py` — import and add to `EXPERIMENT_REGISTRY`
 3. The folder's `README.md`
 4. **This file** — update the registry table
+
+**Out of tree** (a user package), do not edit those files:
+
+```python
+from qforge.experiments import register_experiment
+
+register_experiment(MyExperiment())
+# qforge list / qforge run my_name now see it
+```
+
+Pass `replace=True` to overwrite a name. Tests should call `unregister_experiment(name)` in teardown.
 
 ### 4. Test it
 
@@ -205,7 +220,7 @@ qforge run my_experiment_name
 ### DO
 
 - Subclass `BaseExperiment`
-- Define `name`, `description`, and `default_config()`
+- Define `name`, `description`, `default_config()`, and a `metrics_hint` when metrics are on
 - Include CIRCUIT diagrams and educational docstrings
 - Add convenience methods (`run_comparison()`, `run_sweep()`, etc.)
 - Keep experiments self-contained
@@ -218,6 +233,6 @@ qforge run my_experiment_name
 
 ### ALWAYS
 
-- Update ALL four places when adding/removing experiments (see step 3 above)
+- Update ALL four places when adding/removing **in-tree** experiments (see step 3 above). Out-of-tree programs use `register_experiment()`.
 - Test via CLI before committing
 - Include WHAT YOU'LL LEARN, CIRCUIT, and TRY IT in every docstring

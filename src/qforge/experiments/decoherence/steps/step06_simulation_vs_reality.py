@@ -59,7 +59,13 @@ class SimVsRealityExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.02,
             rng_seed=42,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "entanglement_error_correlation",
+                "concentration_index",
+                "total_correlation",
+            ],
+            experiment_type="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

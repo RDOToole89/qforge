@@ -62,7 +62,10 @@ class SingleGatesExperiment(BaseExperiment):
 
     name = "03_single_gates"
     description = "Step 3: See what X, H, Z, Y, S, T gates do to a qubit"
-
+    metrics_hint = (
+        "Default is H then measure (fair coin, AI ~0). X on |0⟩ would be "
+        "peaked (AI near 1)."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         qc = QuantumCircuit(1, 1)
@@ -74,6 +77,7 @@ class SingleGatesExperiment(BaseExperiment):
             shots=1024,
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": qc},
+            metrics=["asymmetry_index"],
         )
 
     def run_all_gates(self) -> list[ExperimentResult]:

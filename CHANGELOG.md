@@ -11,12 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public import is `qforge`, not `src`: `from qforge import run` and
   `qforge run 01_superposition`. The installable package lives at
   `src/qforge/` (src-layout). There is no `src.*` compatibility shim.
-- `ExperimentConfig.research_type` renamed to `experiment_type` (values:
-  "decoherence", "parameter_sweep", "noise_comparison", "control", "scaling",
-  "convergence", "batch_sweep")
-- Metric profile `structured_decoherence` renamed to `decoherence`; metrics are
-  requested via `metrics=` (profile name or explicit list) and results are
-  exposed as `result.metrics_bundle` (dict of name → entry with value/ci95/status)
+- Metric profile `decoherence` renamed to `structure` (same metric list).
+  No core alias remains. Single-run teaching experiments (including the
+  decoherence track) request an explicit metric list — not the named
+  `structure` profile, whose extra-input metrics print empty on one run.
+  They may set `experiment_type="decoherence"` as a free-string label.
+- `ExperimentConfig.experiment_type` is an optional free string, not a closed
+  Literal taxonomy.
+- `ExperimentConfig.research_type` renamed to `experiment_type`
+- Metric profile `structured_decoherence` renamed to `decoherence` (then to
+  `structure`); metrics are requested via `metrics=` (profile name or explicit
+  list) and results are exposed as `result.metrics_bundle` (dict of name →
+  entry with value/ci95/status)
 - `src/qforge/engine/models/research.py` renamed to `src/qforge/engine/models/analysis.py`;
   `src/qforge/engine/analysis/research_integration.py` renamed to
   `src/qforge/engine/analysis/metrics.py`
@@ -40,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   analysis metrics, and the engine
 - ~700 new exact-value tests asserting calculations against analytical/closed-form
   results; suite now ~1,100 tests
-- Coverage gate now spans the whole physics/math core (all of `src/core` plus the
+- Coverage gate now spans the whole physics/math core (all of `src/qforge/core` plus the
   engine math modules `fidelity`, `bloch_math`, `analysis/metrics`,
   `models/measurement`) at ~97% behind a 95% gate
 - Deployment configs: Dockerfile, railway.json, vercel.json
@@ -50,6 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub issue and PR templates
 - Docker build smoke test in CI
 - Dynamic version injection via `importlib.metadata`
+- `register()` / `register_profile()` as the public path to add metrics and
+  named profiles without editing core specs
+- `register_experiment()` / `unregister_experiment()` as the public path to
+  add experiment programs without editing `EXPERIMENT_REGISTRY`
+- Learning-path experiments choose default metrics for the question they ask
+  (with a CLI `metrics_hint`); protocol experiments leave metrics off
 
 ### Changed
 - Migrated Python tooling to `uv` (pyproject.toml + uv.lock; `uv sync` / `uv run`);

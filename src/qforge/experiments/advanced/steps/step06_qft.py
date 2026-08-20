@@ -84,7 +84,10 @@ class QFTExperiment(BaseExperiment):
 
     name = "adv_06_qft"
     description = "Step 6: QFT — the engine inside Shor's and phase estimation"
-
+    metrics_hint = (
+        "QFT on |0000⟩ is close to uniform (Asymmetry Index ~0). A "
+        "computational-basis spike Fourier-spreads."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         circuit = _qft_circuit(4, "0000")
@@ -95,6 +98,7 @@ class QFTExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
             visualization_type=["histogram", "circuit"],
+            metrics=["asymmetry_index", "concentration_index"],
         )
 
     def run_input_comparison(self) -> list[ExperimentResult]:

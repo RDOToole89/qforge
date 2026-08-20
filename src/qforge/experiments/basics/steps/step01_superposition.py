@@ -55,7 +55,10 @@ class SuperpositionExperiment(BaseExperiment):
     description = (
         "Step 1: Superposition — measure |+⟩ (~50/50). Use run_all_states() for |0⟩/|1⟩/|+⟩"
     )
-
+    metrics_hint = (
+        "Asymmetry Index near 0 means the histogram looks like a fair coin. "
+        "|0⟩ or |1⟩ would be near 1."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -63,6 +66,7 @@ class SuperpositionExperiment(BaseExperiment):
             state_type="SUPERPOSITION",
             shots=1024,
             noise_enabled=False,
+            metrics=["asymmetry_index"],
         )
 
     def run_all_states(self) -> list[ExperimentResult]:

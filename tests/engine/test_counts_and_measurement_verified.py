@@ -389,16 +389,16 @@ def test_compute_metrics_bundle_none_when_metrics_disabled():
 
 
 def test_compute_metrics_bundle_none_on_empty_counts():
-    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="decoherence")
+    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="structure")
     assert compute_metrics_bundle({}, cfg) is None
 
 
 def test_compute_metrics_bundle_metadata_and_entries():
-    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="decoherence")
+    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="structure")
     counts = {"000": 400, "111": 400, "001": 100, "110": 100}
     bundle = compute_metrics_bundle(counts, cfg)
     assert bundle is not None
-    assert bundle.profile == "decoherence"
+    assert bundle.profile == "structure"
     assert bundle.metadata.total_shots == 1000
     assert bundle.metadata.unique_outcomes == 4
     assert bundle.metadata.num_qubits == 3
@@ -413,7 +413,7 @@ def test_compute_metrics_bundle_includes_noise_conditions():
     cfg = ExperimentConfig(
         num_qubits=2,
         state_type="GHZ",
-        metrics="decoherence",
+        metrics="structure",
         noise_enabled=True,
         noise_type="phase_flip",
         error_rate=0.05,
@@ -438,7 +438,7 @@ def test_compute_metrics_bundle_no_noise_conditions_when_disabled():
     cfg = ExperimentConfig(
         num_qubits=2,
         state_type="GHZ",
-        metrics="decoherence",
+        metrics="structure",
         noise_enabled=False,
     )
     bundle = compute_metrics_bundle({"00": 1, "11": 1}, cfg)

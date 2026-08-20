@@ -21,34 +21,34 @@ basics/
 
 ### Single Qubit (Steps 1-3)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 1 | `qforge run 01_superposition` | Superposition: CLI measures `|+⟩`; `run_all_states()` adds `|0⟩`/`|1⟩` |
-| 2 | `qforge run 02_measurement` | Probability, collapse, Born rule |
-| 3 | `qforge run 03_single_gates` | X, H, Z, Y, S, T — what each gate does |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 1 | `qforge run 01_superposition` | Superposition: CLI measures `|+⟩`; `run_all_states()` adds `|0⟩`/`|1⟩` | Asymmetry Index (~0 = fair coin) |
+| 2 | `qforge run 02_measurement` | Probability, collapse, Born rule | Asymmetry Index |
+| 3 | `qforge run 03_single_gates` | X, H, Z, Y, S, T — what each gate does | Asymmetry Index |
 
 ### Two Qubits and Entanglement (Steps 4-5)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 4 | `qforge run 04_two_qubits` | Independent vs entangled — the CNOT gate |
-| 5 | `qforge run 05_bell_states` | Bell Φ+: `00` and `11` only (`run_all_variants()` for all four) |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 4 | `qforge run 04_two_qubits` | Independent vs entangled — the CNOT gate | Structure Score, Total Correlation |
+| 5 | `qforge run 05_bell_states` | Bell Φ+: `00` and `11` only (`run_all_variants()` for all four) | Structure Score, Total Correlation |
 
 ### Multi-Qubit Entanglement (Steps 6-8)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 6 | `qforge run 06_ghz_states` | 3-qubit GHZ; `qforge sweep … -p num_qubits=2,3,4` to scale |
-| 7 | `qforge run 07_w_states` | Distributed excitation — a different topology |
-| 8 | `qforge run 08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 6 | `qforge run 06_ghz_states` | 3-qubit GHZ; `qforge sweep … -p num_qubits=2,3,4` to scale | Structure Score, Total Correlation, Concentration |
+| 7 | `qforge run 07_w_states` | Distributed excitation — a different topology | Structure Score, Total Correlation, Concentration |
+| 8 | `qforge run 08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis | Structure Score (low in Z), Concentration |
 
 ### Noise and Decoherence (Steps 9-11)
 
-| Step | Run | What you'll learn |
-|------|-----|-------------------|
-| 9 | `qforge run 09_noise_intro` | What noise does to a qubit |
-| 10 | `qforge run 10_noise_types` | Five noise models on the same state |
-| 11 | `qforge run 11_noise_and_entanglement` | Structured vs uniform decoherence — the capstone |
+| Step | Run | What you'll learn | Default metrics |
+|------|-----|-------------------|-----------------|
+| 9 | `qforge run 09_noise_intro` | What noise does to a qubit | Asymmetry Index |
+| 10 | `qforge run 10_noise_types` | Five noise models on the same state | Structure Score, Concentration |
+| 11 | `qforge run 11_noise_and_entanglement` | Structured vs uniform decoherence — the capstone | Structure Score, TC, CI, EEC |
 
 ---
 

@@ -1,6 +1,7 @@
 # First 15 minutes
 
-Three experiments. One metric. No visual lab — the engine is enough.
+Three experiments. The metric that matches each question. No visual lab — the
+engine is enough.
 
 By the end you will have measured a qubit, seen two-qubit entanglement, and used
 **Structure Score** to tell a noisy GHZ state apart from a product state that
@@ -38,14 +39,19 @@ Top outcomes:
   1: 526 (51.4%)
   0: 498 (48.6%)
 
+Metrics
+  asymmetry_index   0.0273
+Asymmetry Index near 0 means the histogram looks like a fair coin. |0⟩ or |1⟩ would be near 1.
+
 Saved:
   histogram: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/histogram.png
   analysis: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/analysis.json
 ```
 
 That 50/50 split is not measurement error. The qubit did not have a hidden bit
-value waiting to be read. For contrast: \(|0\rangle\) always measures `0`, and
-\(|1\rangle\) always measures `1`.
+value waiting to be read. Asymmetry Index near **0** is the same statement in
+one number: the histogram looks like a fair coin. For contrast: `|0⟩` always
+measures `0` (Asymmetry Index near 1), and `|1⟩` always measures `1`.
 
 The CLI run above is only \(|+\rangle\). To see all three, open a REPL with
 `uv run python` and:
@@ -66,19 +72,23 @@ agrees: both 0, or both 1 — never `01` or `10`. `qforge run 05_bell_states`
 prepares this one state (not all four Bell states).
 
 ```bash
-uv run qforge run 05_bell_states
+uv run qforge run 05_bell_states -s rng_seed=42
 ```
 
 ```text
-Measurements: 4096 shots
-Top outcomes:
-  11: 2068 (50.5%)
-  00: 2028 (49.5%)
+Outcomes  4096 shots
+11 ███████████░░░░░░░░░░░  51.0%
+00 ███████████░░░░░░░░░░░  49.0%
+
+Metrics
+structure_score    0.3097
+total_correlation  0.9965
+High Structure Score / Total Correlation: only 00 and 11. Independent 50/50 coins would be ~0.
 ```
 
 If each qubit were an independent 50/50 coin, `01` and `10` would appear about
-as often as `00` and `11`. They do not. That is entanglement in the
-measurement record.
+as often as `00` and `11`. They do not. Structure Score is high for the same
+reason.
 
 A GHZ state is the same idea for \(N\) qubits:
 \(|\mathrm{GHZ}\rangle = (|00\ldots0\rangle + |11\ldots1\rangle)/\sqrt{2}\).
@@ -89,7 +99,7 @@ all-agree outcomes should appear. To scale qubit count:
 uv run qforge sweep 06_ghz_states -p num_qubits=2,3,4 -s shots=1024
 ```
 
-## 3. Noise, and one metric (~7 min)
+## 3. Noise, and Structure Score (~7 min)
 
 Turn on a little depolarizing noise. The histogram is no longer two perfect
 peaks — stray bitstrings appear. The question is whether those strays are
@@ -100,28 +110,30 @@ uv run qforge run 06_ghz_states \
   -s noise_enabled=true \
   -s noise_type=depolarizing \
   -s error_rate=0.05 \
-  -s metrics=quick \
   -s rng_seed=42
 ```
 
 On Windows PowerShell, put the overrides on one line (no `\`):
 
 ```bash
-uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05 -s metrics=quick -s rng_seed=42
+uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05 -s rng_seed=42
 ```
 
-With that seed you should see something like:
+The experiment already asks for Structure Score, Total Correlation, and
+Concentration Index. With that seed you should see something like:
 
 ```text
-Metrics (quick):
-  concentration_index   86.8636
-  structure_score        0.4010
+Outcomes  4096 shots
+111 ██████████░░░░░░░░░░░░  47.1%
+000 ██████████░░░░░░░░░░░░  46.2%
+110 █░░░░░░░░░░░░░░░░░░░░░   2.4%
+001 ░░░░░░░░░░░░░░░░░░░░░░   1.9%
 
-Top outcomes:
-  111: 1931 (47.1%)
-  000: 1891 (46.2%)
-  110:   99 ( 2.4%)
-  001:   79 ( 1.9%)
+Metrics
+concentration_index  86.8636
+structure_score       0.4010
+total_correlation     1.5563
+Two peaks (000/111) score high. A product of |+⟩ states stays near 0 on Structure Score.
 ```
 
 The two GHZ peaks still dominate. Structure Score is about **0.40**.
@@ -180,13 +192,14 @@ Noise made both histograms messy. Only GHZ stayed correlated. That is the
 metric's job: it is not "how noisy was the run", it is "how far is this
 distribution from independent qubits".
 
-`metrics="quick"` is the profile that computes Structure Score plus
-Concentration Index. `metrics=["structure_score"]` computes only this one.
+`06_ghz_states` already computes those three. `metrics=["structure_score"]`
+computes only this one; `metrics="quick"` is Structure Score plus
+Concentration Index.
 
 ## What to do next
 
 - Continue the basics path: `uv run qforge list`, then steps `02`–`11`.
-- Sweep a parameter: `uv run qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1 -s noise_enabled=true -s noise_type=depolarizing -s metrics=quick`
+- Sweep a parameter: `uv run qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1 -s noise_enabled=true -s noise_type=depolarizing`
 - Use the engine directly: [Quick Start](quickstart.md).
 - Read the rest of the metrics: [Metrics](../api/metrics.md).
 

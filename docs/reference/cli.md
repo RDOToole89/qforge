@@ -68,36 +68,23 @@ qforge run 01_superposition -s noise_enabled=false
 **Output:**
 
 ```
-Running experiment: 01_superposition
-Overrides: {'num_qubits': 3, 'error_rate': 0.1}
+01_superposition
+1 qubit  ·  SUPERPOSITION
 
-Status: completed
-Timestamp: 2025-12-02T17:51:18.395984
+Outcomes  1024 shots
+1 ████████████░░░░░░░░░░  51.4%
+0 ███████████░░░░░░░░░░░  48.6%
 
-Analysis Metrics:
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
-┃ Metric                               ┃   Value ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
-│ Asymmetry Index (AI)                 │  0.6761 │
-│ Pathway Concentration (PCR)          │ 95.1000 │
-│ Entanglement-Error Correlation (EEC) │  0.0000 │
-│ Structure Score (SS)                 │  0.6761 │
-│ Concentration Index (CI)             │ 95.1000 │
-│ Total Correlation (TC)               │  1.5197 │
-└──────────────────────────────────────┴─────────┘
+Metrics
+asymmetry_index  0.0273
+Asymmetry Index near 0 means the histogram looks like a fair coin. |0⟩ or |1⟩ would be near 1.
 
-Saved:
-  histogram: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/histogram.png
-  analysis: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/analysis.json
-
-Measurements: 1024 shots
-Top outcomes:
-  111: 496 (48.4%)
-  000: 455 (44.4%)
-  001: 23 (2.2%)
+Saved
+  histogram  results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/histogram.png
+  analysis   results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/analysis.json
 ```
 
-`qforge run` executes the experiment's **default config**, not every variant in the docstring. Extra methods (`run_all_states`, `run_scaling`) and `qforge sweep` cover those.
+`qforge run` executes the experiment's **default config**, not every variant in the docstring. Registered experiments already pick the metrics that match the question they ask, and the CLI prints a one-line hint under the numbers. Extra methods (`run_all_states`, `run_scaling`) and `qforge sweep` cover the rest.
 
 ### `qforge sweep <name>`
 
@@ -125,8 +112,7 @@ qforge sweep 06_ghz_states -p num_qubits=2,3,4 -s shots=1024
 qforge sweep 06_ghz_states \
   -p error_rate=0.01,0.05,0.1 \
   -s noise_enabled=true \
-  -s noise_type=depolarizing \
-  -s metrics=quick
+  -s noise_type=depolarizing
 
 # Two-parameter grid
 qforge sweep 06_ghz_states -p num_qubits=2,3 -p error_rate=0.01,0.05 \
@@ -157,7 +143,7 @@ qforge run-config <config_path> [OPTIONS]
   "noise_type": "depolarizing",
   "error_rate": 0.05,
   "shots": 4096,
-  "metrics": "decoherence"
+  "metrics": "structure"
 }
 ```
 
@@ -188,8 +174,8 @@ When using `-s` overrides or JSON config files, these parameters are available:
 | `noise_type` | str | "depolarizing" | Noise model: "depolarizing", "amplitude_damping" |
 | `error_rate` | float | 0.05 | Noise strength (0.0 to 1.0) |
 | `shots` | int | 4096 | Number of measurement shots |
-| `metrics` | str \| list | None | Metric profile name ("decoherence", "quick", "information_theory") or explicit list of metric names |
-| `experiment_type` | str | "decoherence" | Experiment category tag ("decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep") |
+| `metrics` | str \| list | experiment default | Metric profile (`"structure"`, `"quick"`, `"information_theory"`) or an explicit list. Registered experiments already set a teaching list. |
+| `experiment_type` | str | None | Optional free-string label for grouping and storage |
 
 ## Scripting Examples
 
@@ -199,7 +185,7 @@ Prefer `qforge sweep` over a shell loop — one command, one table:
 
 ```bash
 qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1,0.2 \
-  -s noise_enabled=true -s noise_type=depolarizing -s metrics=quick
+  -s noise_enabled=true -s noise_type=depolarizing
 ```
 
 A loop still works when you want separate CLI invocations:

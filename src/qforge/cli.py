@@ -180,7 +180,10 @@ def run_experiment(
         console.print(f"[red]Failed:[/red] {e}")
         raise typer.Exit(code=1) from None
 
-    _print_result(result, json_output, title=name)
+    from qforge.experiments import get_experiment
+
+    hint = getattr(get_experiment(name), "metrics_hint", None)
+    _print_result(result, json_output, title=name, metrics_hint=hint)
 
 
 @app.command("sweep")
@@ -495,7 +498,7 @@ def _print_counts(result: ExperimentResult) -> None:
         console.print(f"[dim]  … {extra} more in the histogram[/dim]")
 
 
-def _print_metrics(result: ExperimentResult) -> None:
+def _print_metrics(result: ExperimentResult, hint: str | None = None) -> None:
     if not result.metrics_bundle:
         return
     bundle = result.metrics_bundle
@@ -508,12 +511,15 @@ def _print_metrics(result: ExperimentResult) -> None:
     for name, entry in sorted(bundle.metrics.items()):
         table.add_row(name, f"{entry.value:.4f}")
     console.print(table)
+    if hint:
+        console.print(f"[dim]{hint}[/dim]")
 
 
 def _print_result(
     result: ExperimentResult,
     json_output: bool,
     title: str | None = None,
+    metrics_hint: str | None = None,
 ) -> None:
     """Print experiment result in the requested format."""
     if json_output:
@@ -531,7 +537,7 @@ def _print_result(
         console.print(f"[dim]{bits}  ·  {state}[/dim]")
 
     _print_counts(result)
-    _print_metrics(result)
+    _print_metrics(result, hint=metrics_hint)
     _print_artifacts(result)
 
 

@@ -63,7 +63,10 @@ class EntanglementFragilityExperiment(BaseExperiment):
 
     name = "dd_entanglement_fragility"
     description = "Deep dive: GHZ is fragile, W is robust — what survives qubit loss?"
-
+    metrics_hint = (
+        "Compare GHZ vs W Structure Score after dropping a qubit — GHZ "
+        "correlation collapses, W degrades."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -71,6 +74,7 @@ class EntanglementFragilityExperiment(BaseExperiment):
             state_type="GHZ",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "total_correlation"],
         )
 
     def run_comparison(

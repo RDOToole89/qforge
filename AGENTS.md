@@ -4,7 +4,7 @@ Owner: Roibín O'Toole
 
 ## What This Is
 
-QForge is a **general-purpose quantum experiment engine** built on Qiskit — for learning, experimentation, and real hardware. The architecture is deliberately general: new experiment types (benchmarking, error correction, variational algorithms, etc.) are welcome. See `CLAUDE.md` for the full project overview, API examples, and the rules for working in this repo — this file summarizes the structural rules.
+QForge is a **general-purpose quantum experiment engine** built on Qiskit — for learning, experimentation, and real hardware. It hides Qiskit plumbing so you can set up experiments, learn quantum mechanics, and run real research — with an analysis layer configured for the question you are asking. The architecture is deliberately general: new experiment types (benchmarking, error correction, variational algorithms, etc.) are welcome. See `CLAUDE.md` for the full project overview, API examples, and the rules for working in this repo — this file summarizes the structural rules.
 
 ## Scientific Rigor
 
@@ -33,8 +33,7 @@ apps/client/         React Native / Expo visual lab (talks to apps/api only)
 
 The engine runs without the visual lab. The 15-minute path is
 `docs/guides/getting-started/first-run.md`. Keep visual-lab freeze (parked
-FE-1…FE-6 in `apps/AGENTS.md`) until the Python identity work is done or the
-owner unfreezes it.
+FE-1…FE-6 in `apps/AGENTS.md`) until the owner unfreezes it.
 
 ## Experiments Structure
 
@@ -73,7 +72,7 @@ These refine the rules above but may not contradict them.
 
 - Mix experiment logic into `src/core` or physics primitives into `src/engine`
 - Skip physics tests when modifying metrics or noise models
-- Add visual-lab features, presets, or native-app work while the Python first-run / identity work is still open — freeze is in `apps/AGENTS.md`
+- Add visual-lab features, presets, or native-app work while the visual-lab freeze is in `apps/AGENTS.md`
 - Add AI attribution (Co-Authored-By, Powered by, Generated with) to commits, code, or docs
 - Introduce dependencies with uncontrolled network access (framework must stay deterministic)
 
@@ -82,7 +81,7 @@ These refine the rules above but may not contradict them.
 - Follow the `steps/` + `deep_dives/` pattern when adding experiments
 - Include WHAT YOU'LL LEARN, CIRCUIT diagram, and TRY IT in every experiment docstring
 - Update the nearest `AGENTS.md` when adding structural concepts
-- Register new experiments in 4 places (folder init, root init, folder README, experiments AGENTS.md)
+- Register in-tree experiments in 4 places (folder init, root init, folder README, experiments AGENTS.md). Out-of-tree programs use `register_experiment()` — do not require a core or registry edit.
 - Run `pytest` and verify via CLI before submitting changes
 - Use `src/core` utilities instead of duplicating physics/math helpers — `src/qforge/core/math/` is the single source of truth for Pauli matrices, relaxation probabilities, TVD/Gini, and the canonical qubit/bit indexing convention
 - When changing engine models, metric profiles, state preparation, or `bloch_math`, regenerate frontend catalogs and goldens (`scripts/gen_frontend_constants.py`, `scripts/gen_quantum_golden.py`) and keep `git diff` clean on `apps/client/src/generated` and the golden fixtures — see `apps/AGENTS.md`

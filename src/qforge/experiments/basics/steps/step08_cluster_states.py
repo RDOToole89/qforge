@@ -53,7 +53,10 @@ class ClusterStatesExperiment(BaseExperiment):
 
     name = "08_cluster_states"
     description = "Step 8: Cluster states — entangled but 'invisible' in Z-basis measurement"
-
+    metrics_hint = (
+        "Cluster looks nearly uniform in Z, so Structure Score stays low. "
+        "Change basis in dd_measurement_basis."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -61,6 +64,7 @@ class ClusterStatesExperiment(BaseExperiment):
             state_type="CLUSTER",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "concentration_index"],
         )
 
     def run_comparison(self) -> tuple[ExperimentResult, ExperimentResult, ExperimentResult]:

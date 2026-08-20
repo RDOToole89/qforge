@@ -64,7 +64,10 @@ class BernsteinVaziraniExperiment(BaseExperiment):
 
     name = "dd_bernstein_vazirani"
     description = "Deep dive: Bernstein-Vazirani — find a hidden string in one query"
-
+    metrics_hint = (
+        "The hidden string should appear as a single dominant outcome. "
+        "Concentration Index near the max means you found it."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         circuit = _bv_circuit("1011")
@@ -75,6 +78,7 @@ class BernsteinVaziraniExperiment(BaseExperiment):
             noise_enabled=False,
             custom_params={"source": "circuit", "circuit": circuit},
             visualization_type=["histogram", "circuit"],
+            metrics=["concentration_index", "asymmetry_index"],
         )
 
     def run_hidden_strings(self) -> list[ExperimentResult]:

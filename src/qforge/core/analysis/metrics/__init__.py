@@ -37,6 +37,7 @@ from .pathway_persistence import (
     compute_pathway_persistence_scores,
     compute_temporal_transition_matrix,
 )
+from .profiles import list_profiles, register_profile, resolve_metrics, unregister_profile
 from .registry import (
     MetricResult,
     Status,
@@ -44,6 +45,7 @@ from .registry import (
     compute_metric,
     determine_status,
     register,
+    unregister,
 )
 from .schema_bridge import (
     get_schema_field_mapping,
@@ -104,6 +106,11 @@ __all__: tuple[str, ...] = (
     "MetricResult",
     "Status",
     "register",
+    "unregister",
+    "register_profile",
+    "unregister_profile",
+    "resolve_metrics",
+    "list_profiles",
     "compute_metric",
     "compute_all",
     "metrics_to_schema",

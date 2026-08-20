@@ -52,7 +52,10 @@ class StructuredVsUniformExperiment(BaseExperiment):
 
     name = "dec_01_structured_vs_uniform"
     description = "Step 1: Structured vs uniform — errors with and without entanglement"
-
+    metrics_hint = (
+        "GHZ should score high on Structure Score; a product of |+⟩ states "
+        "stays near 0."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -63,7 +66,13 @@ class StructuredVsUniformExperiment(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             rng_seed=42,
-            metrics="decoherence",
+            metrics=[
+                "structure_score",
+                "entanglement_error_correlation",
+                "concentration_index",
+                "total_correlation",
+            ],
+            experiment_type="decoherence",
             visualization_type=["histogram", "metrics_summary"],
         )
 

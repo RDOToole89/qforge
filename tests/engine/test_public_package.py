@@ -42,6 +42,13 @@ def test_lazy_experiment_registry() -> None:
     assert exp.name == "01_superposition"
 
 
+def test_register_experiment_is_public() -> None:
+    from qforge import register_experiment, unregister_experiment
+
+    assert callable(register_experiment)
+    assert callable(unregister_experiment)
+
+
 def test_unknown_root_export_raises() -> None:
     with pytest.raises(AttributeError):
         qforge.__getattr__("not_a_public_export")

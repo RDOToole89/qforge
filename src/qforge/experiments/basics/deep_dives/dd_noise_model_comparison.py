@@ -55,6 +55,7 @@ class NoiseComparison(BaseExperiment):
 
     name = "noise_comparison"
     description = "Compare depolarizing vs amplitude damping on the same state"
+    metrics_hint = "Same GHZ, two channels — Structure Score vs concentration is the fingerprint."
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
@@ -65,7 +66,7 @@ class NoiseComparison(BaseExperiment):
             noise_type="depolarizing",
             error_rate=0.05,
             shots=4096,
-            metrics="decoherence",
+            metrics=["structure_score", "concentration_index"],
             visualization_type=["histogram", "metrics_summary"],
         )
 

@@ -56,7 +56,10 @@ class BellStatesExperiment(BaseExperiment):
 
     name = "05_bell_states"
     description = "Step 5: Bell Φ+ — only |00⟩ and |11⟩. Use run_all_variants() for all four"
-
+    metrics_hint = (
+        "High Structure Score / Total Correlation: only 00 and 11. Independent "
+        "50/50 coins would be ~0."
+    )
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
         return ExperimentConfig(
@@ -64,6 +67,7 @@ class BellStatesExperiment(BaseExperiment):
             state_type="GHZ",
             shots=4096,
             noise_enabled=False,
+            metrics=["structure_score", "total_correlation"],
         )
 
     def run_all_variants(self) -> list[ExperimentResult]:
