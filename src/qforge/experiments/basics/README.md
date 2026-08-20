@@ -23,7 +23,7 @@ basics/
 
 | Step | Run | What you'll learn |
 |------|-----|-------------------|
-| 1 | `qforge run 01_superposition` | What IS a qubit? \|0⟩, \|1⟩, and \|+⟩ |
+| 1 | `qforge run 01_superposition` | Superposition: CLI measures `|+⟩`; `run_all_states()` adds `|0⟩`/`|1⟩` |
 | 2 | `qforge run 02_measurement` | Probability, collapse, Born rule |
 | 3 | `qforge run 03_single_gates` | X, H, Z, Y, S, T — what each gate does |
 
@@ -32,13 +32,13 @@ basics/
 | Step | Run | What you'll learn |
 |------|-----|-------------------|
 | 4 | `qforge run 04_two_qubits` | Independent vs entangled — the CNOT gate |
-| 5 | `qforge run 05_bell_states` | All four Bell states and hidden phase |
+| 5 | `qforge run 05_bell_states` | Bell Φ+: `00` and `11` only (`run_all_variants()` for all four) |
 
 ### Multi-Qubit Entanglement (Steps 6-8)
 
 | Step | Run | What you'll learn |
 |------|-----|-------------------|
-| 6 | `qforge run 06_ghz_states` | Scale entanglement: 2 to 6 qubits |
+| 6 | `qforge run 06_ghz_states` | 3-qubit GHZ; `qforge sweep … -p num_qubits=2,3,4` to scale |
 | 7 | `qforge run 07_w_states` | Distributed excitation — a different topology |
 | 8 | `qforge run 08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis |
 

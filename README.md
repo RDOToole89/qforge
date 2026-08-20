@@ -148,7 +148,11 @@ The frontend isn't just a dashboard — it's an **interactive quantum laboratory
 
 ## Quick Start
 
-### Run an Experiment (Python)
+The 15-minute path is superposition → Bell → noisy GHZ, then one metric in
+plain language. You do not need the Expo app. Walkthrough:
+[docs/guides/getting-started/first-run.md](docs/guides/getting-started/first-run.md).
+
+### Run an Experiment (CLI)
 
 ```bash
 git clone https://github.com/RDOToole89/qforge.git
@@ -160,12 +164,10 @@ uv sync   # creates .venv and installs everything from uv.lock
 # List available experiments
 uv run qforge list
 
-# Run your first experiment
-uv run qforge run 01_superposition
-
 # Superposition → Bell → noisy GHZ
+uv run qforge run 01_superposition
 uv run qforge run 05_bell_states
-uv run qforge run 06_ghz_states -s noise_enabled=true -s error_rate=0.05
+uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05 -s metrics=quick
 ```
 
 > **Why `uv`?** It manages the Python interpreter (pinned to 3.12 via `.python-version`)
@@ -248,7 +250,7 @@ Start here                      Go deeper                        Study noise
                                                              └──────────────┘
 ```
 
-**New to quantum?** Start with `01_superposition` and work through all 11 steps in order. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement. Then open the Circuit Builder and play with the 22 presets.
+**New to quantum?** Take the [first 15 minutes](docs/guides/getting-started/first-run.md), then continue through the 11 `basics/` steps. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement.
 
 **Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/qforge/experiments/AGENTS.md) for the full guide.
 
@@ -262,12 +264,12 @@ Start here                      Go deeper                        Study noise
 
 | Step | Experiment | What it teaches |
 |------|-----------|----------------|
-| 1 | `01_superposition` | What IS a qubit? |0⟩, |1⟩, and |+⟩ |
+| 1 | `01_superposition` | Superposition: `qforge run` measures `|+⟩` (~50/50) |
 | 2 | `02_measurement` | Probability, collapse, and the Born rule |
 | 3 | `03_single_gates` | X, H, Z, Y, S, T — what each gate does |
 | 4 | `04_two_qubits` | Independent vs entangled — the CNOT gate |
-| 5 | `05_bell_states` | All four Bell states and hidden phase |
-| 6 | `06_ghz_states` | Scale entanglement from 2 to 6 qubits |
+| 5 | `05_bell_states` | Bell Φ+: only `00` and `11` |
+| 6 | `06_ghz_states` | 3-qubit GHZ; sweep `num_qubits` to scale |
 | 7 | `07_w_states` | Distributed excitation — a different topology |
 | 8 | `08_cluster_states` | Nearest-neighbor entanglement, invisible in Z-basis |
 | 9 | `09_noise_intro` | What noise does to a qubit |

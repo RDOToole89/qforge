@@ -31,7 +31,10 @@ apps/client/         React Native / Expo visual lab (talks to apps/api only)
 - `apps` are thin layers over the engine API — they do not own physics
 - The documented public import is `qforge` (`from qforge import run`). `apps/` stays a consumer; HTTP JSON and codegen are the bridge, not Python import paths.
 
-The engine runs without the visual lab. Freeze new frontend scope until the 15-minute Python path is documented. Connection map and parked FE gaps: `apps/AGENTS.md`.
+The engine runs without the visual lab. The 15-minute path is
+`docs/guides/getting-started/first-run.md`. Keep visual-lab freeze (parked
+FE-1…FE-6 in `apps/AGENTS.md`) until the Python identity work is done or the
+owner unfreezes it.
 
 ## Experiments Structure
 
@@ -70,7 +73,7 @@ These refine the rules above but may not contradict them.
 
 - Mix experiment logic into `src/core` or physics primitives into `src/engine`
 - Skip physics tests when modifying metrics or noise models
-- Add visual-lab features, presets, or native-app work while the Python public API is still `src.*` — freeze is in `apps/AGENTS.md`
+- Add visual-lab features, presets, or native-app work while the Python first-run / identity work is still open — freeze is in `apps/AGENTS.md`
 - Add AI attribution (Co-Authored-By, Powered by, Generated with) to commits, code, or docs
 - Introduce dependencies with uncontrolled network access (framework must stay deterministic)
 

@@ -53,6 +53,7 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation: guides/getting-started/installation.md
+    - First 15 minutes: guides/getting-started/first-run.md
     - Quick Start: guides/getting-started/quickstart.md
   - Guides:
     - Hardware Setup: guides/hardware-setup.md

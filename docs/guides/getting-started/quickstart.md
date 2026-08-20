@@ -1,6 +1,10 @@
 # Quick Start
 
-This guide gets you from zero to running your first quantum experiment in under 5 minutes. It assumes you've already completed the [Installation](installation.md).
+This is the engine API tour. If you have not run an experiment yet, start with
+the [First 15 minutes](first-run.md) path (superposition → Bell → noisy GHZ)
+instead — you do not need the visual lab.
+
+This page assumes you have already completed the [Installation](installation.md).
 
 ## 1. Run a Preset Experiment (CLI)
 
@@ -15,9 +19,12 @@ qforge run 01_superposition
 
 # Customize parameters
 qforge run 01_superposition -s num_qubits=4 -s error_rate=0.05
+
+# Sweep a parameter (cartesian product of -p ranges)
+qforge sweep 06_ghz_states -p num_qubits=2,3,4 -s shots=1024
 ```
 
-Results are saved as JSON in the `results/` directory with full provenance.
+Each run prints a histogram path under `results/` (plus `analysis.json`).
 
 ## 2. Run an Experiment (Python)
 
@@ -81,7 +88,19 @@ print(f"Structure Score: {results['structure_score']['value']:.4f}")
 
 ## 5. Parameter Sweeps
 
-Explore how a parameter affects your experiment across a range of values:
+Explore how a parameter affects your experiment across a range of values.
+
+**CLI** (uses the experiment's default config as the base):
+
+```bash
+qforge sweep 06_ghz_states \
+  -p error_rate=0.01,0.05,0.1 \
+  -s noise_enabled=true \
+  -s noise_type=depolarizing \
+  -s metrics=quick
+```
+
+**Python:**
 
 ```python
 from qforge import ExperimentConfig, SweepManifest, sweep
@@ -122,6 +141,7 @@ Open [http://localhost:8081](http://localhost:8081) in your browser.
 
 ## What's Next
 
+- **[First 15 minutes](first-run.md)** — superposition → Bell → noisy GHZ, Structure Score in plain language
 - **[CLI Reference](../../reference/cli.md)** — Full command documentation
 - **[Metrics Guide](../api/metrics.md)** — Deep dive into the 8 analysis metrics
 - **[Hardware Setup](../hardware-setup.md)** — Run experiments on IBM Quantum hardware

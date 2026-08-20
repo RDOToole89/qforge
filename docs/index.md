@@ -52,7 +52,7 @@ uv run qforge run 01_superposition
 uv run qforge run 01_superposition -s error_rate=0.1 -s num_qubits=3
 ```
 
-See [CLI Reference](reference/cli.md) for full documentation.
+See the [First 15 minutes](guides/getting-started/first-run.md) path for superposition → Bell → noisy GHZ. See [CLI Reference](reference/cli.md) for full documentation.
 
 **Using the Engine API:**
 
@@ -97,11 +97,11 @@ See [Architecture](architecture/architecture.md) for the detailed design.
 ## Documentation Structure
 
 - **[CLI Reference](reference/cli.md)**: Command-line tool usage and examples
-- **Getting Started**: [Installation](guides/getting-started/installation.md) and [Quick Start](guides/getting-started/quickstart.md)
+- **Getting Started**: [Installation](guides/getting-started/installation.md), [First 15 minutes](guides/getting-started/first-run.md), and [Quick Start](guides/getting-started/quickstart.md)
 - **API Reference**: [Metrics](guides/api/metrics.md) and [Constants](guides/api/constants.md)
 - **[Hardware Setup](guides/hardware-setup.md)**: Running on IBM Quantum
 - **[Architecture](architecture/architecture.md)**: System design and integration patterns
 
 ## Getting Started
 
-Continue to the [Installation Guide](guides/getting-started/installation.md) to set up the framework, or jump to the [Quick Start](guides/getting-started/quickstart.md) for immediate usage examples.
+Continue to the [Installation Guide](guides/getting-started/installation.md) to set up the framework, then take the [First 15 minutes](guides/getting-started/first-run.md) path. The [Quick Start](guides/getting-started/quickstart.md) is the broader engine API tour.

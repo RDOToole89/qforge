@@ -84,11 +84,17 @@ class BaseExperiment:
         """Return the default configuration for this experiment."""
         raise NotImplementedError("Subclasses must implement default_config()")
 
-    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
+    def run(
+        self,
+        overrides: Mapping[str, Any] | None = None,
+        *,
+        ctx: Any | None = None,
+    ) -> ExperimentResult:
         """Run experiment using the engine API.
 
         Args:
             overrides: Optional dict of config fields to override
+            ctx: Optional engine AppContext (results directory, etc.)
 
         Returns:
             ExperimentResult with full analysis and metrics
@@ -103,11 +109,13 @@ class BaseExperiment:
             config_dict.update(overrides)
             config = ExperimentConfig(**config_dict)
 
-        return run(config)
+        return run(config, ctx)
 
     def sweep(
         self,
         parameter_ranges: dict[str, list[Any]],
+        *,
+        ctx: Any | None = None,
         **base_overrides: Any,
     ) -> list[ExperimentResult]:
         """Run parameter sweep using the engine API.
@@ -115,6 +123,7 @@ class BaseExperiment:
         Args:
             parameter_ranges: Dict mapping parameter names to lists of values
                              e.g., {"error_rate": [0.01, 0.05, 0.1]}
+            ctx: Optional engine AppContext (results directory, etc.)
             **base_overrides: Additional overrides applied to base config
 
         Returns:
@@ -135,4 +144,4 @@ class BaseExperiment:
             parameter_ranges=parameter_ranges,
         )
 
-        return sweep(manifest)
+        return sweep(manifest, ctx)

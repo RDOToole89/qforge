@@ -86,11 +86,51 @@ Analysis Metrics:
 │ Total Correlation (TC)               │  1.5197 │
 └──────────────────────────────────────┴─────────┘
 
+Saved:
+  histogram: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/histogram.png
+  analysis: results/2026-08-20/SUPERPOSITION_1q_clean_1024shots_00000000/analysis.json
+
 Measurements: 1024 shots
 Top outcomes:
   111: 496 (48.4%)
   000: 455 (44.4%)
   001: 23 (2.2%)
+```
+
+`qforge run` executes the experiment's **default config**, not every variant in the docstring. Extra methods (`run_all_states`, `run_scaling`) and `qforge sweep` cover those.
+
+### `qforge sweep <name>`
+
+Sweep a registered experiment over one or more parameter ranges. The base is the experiment's default config; `-s` overrides apply to every point; `-p` ranges take a cartesian product.
+
+```bash
+qforge sweep <experiment_name> -p KEY=v1,v2,v3 [OPTIONS]
+```
+
+**Arguments:**
+- `name` - Experiment name from registry
+
+**Options:**
+- `-p, --param KEY=v1,v2,v3` - Sweep range (repeatable). JSON lists also work: `-p 'num_qubits=[2,3,4]'`
+- `-s, --set KEY=VALUE` - Base-config override applied to every sweep point
+- `-j, --json` - Output the list of results as JSON
+
+**Examples:**
+
+```bash
+# Scale GHZ from 2 to 4 qubits
+qforge sweep 06_ghz_states -p num_qubits=2,3,4 -s shots=1024
+
+# Noise strength on a 3-qubit GHZ
+qforge sweep 06_ghz_states \
+  -p error_rate=0.01,0.05,0.1 \
+  -s noise_enabled=true \
+  -s noise_type=depolarizing \
+  -s metrics=quick
+
+# Two-parameter grid
+qforge sweep 06_ghz_states -p num_qubits=2,3 -p error_rate=0.01,0.05 \
+  -s noise_enabled=true -s noise_type=depolarizing
 ```
 
 ### `qforge run-config <path>`
@@ -128,6 +168,14 @@ qforge run-config my_experiment.json
 qforge run-config my_experiment.json --json > results.json
 ```
 
+### `qforge sweep-config <path>`
+
+Same as `sweep`, but the spec is a JSON [SweepManifest](../guides/getting-started/quickstart.md): `base_config` plus `parameter_ranges`.
+
+```bash
+qforge sweep-config my_sweep.json
+```
+
 ## Configuration Options
 
 When using `-s` overrides or JSON config files, these parameters are available:
@@ -147,10 +195,20 @@ When using `-s` overrides or JSON config files, these parameters are available:
 
 ### Batch experiments
 
+Prefer `qforge sweep` over a shell loop — one command, one table:
+
+```bash
+qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1,0.2 \
+  -s noise_enabled=true -s noise_type=depolarizing -s metrics=quick
+```
+
+A loop still works when you want separate CLI invocations:
+
 ```bash
 #!/bin/bash
 for rate in 0.01 0.05 0.1 0.2; do
-  qforge run 01_superposition -s error_rate=$rate --json >> sweep_results.jsonl
+  qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing \
+    -s error_rate=$rate --json >> sweep_results.jsonl
 done
 ```
 
@@ -186,6 +244,8 @@ Each command has built-in help:
 ```bash
 qforge --help
 qforge run --help
+qforge sweep --help
 qforge run-config --help
+qforge sweep-config --help
 qforge list --help
 ```

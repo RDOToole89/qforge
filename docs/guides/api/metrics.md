@@ -2,6 +2,22 @@
 
 Information-theoretic and statistical metrics over quantum measurement outcome distributions.
 
+If you have not seen a metric on real counts yet, start with
+[First 15 minutes](../getting-started/first-run.md) — it explains Structure
+Score against a noisy GHZ histogram.
+
+## Structure Score
+
+Jensen-Shannon divergence between the observed outcome distribution and its
+**factorized null**: the product of the per-qubit marginals. Independent qubits
+score near 0; correlated outcomes (Bell, GHZ, and those states under moderate
+noise) score higher. Bounded to \([0, 1]\) (bits).
+
+This is not a noise-magnitude meter. A product of \(|+\rangle\) states under the
+same depolarizing channel stays near 0; a GHZ state does not.
+
+::: qforge.core.analysis.metrics.structure_score.compute_structure_score
+
 ## Asymmetry Index
 
 Total variation distance between the observed outcome distribution and the uniform distribution over all 2^n outcomes.

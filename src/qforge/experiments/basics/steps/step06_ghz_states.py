@@ -36,9 +36,12 @@ CIRCUIT (4-qubit GHZ):
   Result: (|0000⟩ + |1111⟩) / √2
 
 TRY IT:
-    from qforge.experiments.basics.step06_ghz_states import ghz_states
+    from qforge import get_experiment
 
-    results = ghz_states.run_scaling()
+    exp = get_experiment("06_ghz_states")
+    result = exp.run()                       # default: 3-qubit GHZ
+    results = exp.run_scaling()              # 2 to 6 qubits
+    # CLI: qforge sweep 06_ghz_states -p num_qubits=2,3,4
 """
 
 from __future__ import annotations
@@ -53,7 +56,7 @@ class GHZStatesExperiment(BaseExperiment):
     """Step 6: GHZ states from 2 to 6 qubits."""
 
     name = "06_ghz_states"
-    description = "Step 6: GHZ states — scale entanglement from 2 to 6 qubits"
+    description = "Step 6: 3-qubit GHZ — all zeros or all ones. Sweep num_qubits to scale"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""

@@ -36,9 +36,11 @@ CIRCUITS:
                                 (Z on q0)        (X on q1)       (X+Z)
 
 TRY IT:
-    from qforge.experiments.basics.step05_bell_states import bell_states
+    from qforge import get_experiment
 
-    results = bell_states.run_all_variants()
+    exp = get_experiment("05_bell_states")
+    result = exp.run()                 # default: Φ+  (00 and 11)
+    results = exp.run_all_variants()   # all four Bell states
 """
 
 from __future__ import annotations
@@ -53,7 +55,7 @@ class BellStatesExperiment(BaseExperiment):
     """Step 5: Prepare and measure all four Bell states."""
 
     name = "05_bell_states"
-    description = "Step 5: The four Bell states — foundation of quantum entanglement"
+    description = "Step 5: Bell Φ+ — only |00⟩ and |11⟩. Use run_all_variants() for all four"
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""

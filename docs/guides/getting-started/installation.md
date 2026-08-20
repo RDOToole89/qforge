@@ -179,6 +179,7 @@ sudo apt-get install python3-dev
 
 After successful installation:
 
-1. Continue to the [Quick Start](quickstart.md) for immediate usage
-2. Explore the [Metrics Reference](../api/metrics.md) for the analysis API
-3. Set up [Hardware Access](../hardware-setup.md) for IBM Quantum experiments
+1. Take the [First 15 minutes](first-run.md) path — superposition, Bell, noisy GHZ, one metric
+2. Continue to the [Quick Start](quickstart.md) for the engine API
+3. Explore the [Metrics Reference](../api/metrics.md) for the analysis API
+4. Set up [Hardware Access](../hardware-setup.md) for IBM Quantum experiments

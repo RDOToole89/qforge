@@ -2,9 +2,10 @@
 
 Owner: Roibín O'Toole
 
-The Python engine is the product. `apps/` is a consumer. Freeze visual-lab
-scope until `from qforge import run` ships. This file is the pickup document
-for the engine–frontend connection and the parked gaps.
+The Python engine is the product. `apps/` is a consumer. The 15-minute path is
+`docs/guides/getting-started/first-run.md`. Freeze new visual-lab scope until
+the Python identity work is done or the owner unfreezes it. This file is the
+pickup document for the engine–frontend connection and the parked gaps.
 
 ## What This Layer Is
 
@@ -127,7 +128,6 @@ insight copy so experiment-mode users do not read it as a chip-topology plot.
 
 These live on the 90-day Python list, not in `apps/`:
 
-- 15-minute first-run path (README / docs)
 - Identity: general engine, decoherence-structure specialist
 - Algorithm vs decoherence metric profiles
 - Public physics-review issue for Structure Score, EEC, PCR

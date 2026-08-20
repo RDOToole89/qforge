@@ -35,10 +35,11 @@ CIRCUITS:
   |+⟩ state:  q: ─H─ M ───        (H gate creates superposition, 50/50)
 
 TRY IT:
-    from qforge.experiments.basics.step01_superposition import superposition
+    from qforge import get_experiment
 
-    # Run all three states and compare
-    results = superposition.run_all_states()
+    exp = get_experiment("01_superposition")
+    result = exp.run()              # default: |+⟩  (~50/50)
+    results = exp.run_all_states()  # |0⟩, |1⟩, and |+⟩
 """
 
 from __future__ import annotations
@@ -51,7 +52,9 @@ class SuperpositionExperiment(BaseExperiment):
     """Step 1: Explore superposition with a single qubit."""
 
     name = "01_superposition"
-    description = "Step 1: What is superposition? Measure a qubit in |0⟩, |1⟩, and |+⟩"
+    description = (
+        "Step 1: Superposition — measure |+⟩ (~50/50). Use run_all_states() for |0⟩/|1⟩/|+⟩"
+    )
 
     def default_config(self) -> ExperimentConfig:
         """Return the default configuration for this experiment."""
