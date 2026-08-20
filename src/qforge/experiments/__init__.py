@@ -28,6 +28,11 @@ Usage:
     results = exp.sweep({"error_rate": [0.01, 0.05, 0.1, 0.2]})
 """
 
+from __future__ import annotations
+
+import logging
+from importlib.metadata import entry_points
+
 from qforge.experiments.advanced.deep_dives.dd_bb84 import bb84
 
 # Advanced — deep dives
@@ -113,6 +118,11 @@ from qforge.experiments.hardware.steps.step05_real_decoherence import real_decoh
 
 # Alias for state probe
 state_probe = state_probe_sensitivity
+
+logger = logging.getLogger(__name__)
+
+EXPERIMENT_ENTRY_POINT_GROUP = "qforge.experiments"
+_ENTRY_POINTS_LOADED = False
 
 # Registry of available experiments
 EXPERIMENT_REGISTRY: dict[str, ExperimentProgram] = {
@@ -208,15 +218,62 @@ def register_experiment(
     if not key:
         raise ValueError("Experiment name must be a non-empty string")
     if key in EXPERIMENT_REGISTRY and not replace:
-        raise KeyError(
-            f"Experiment '{key}' is already registered. Pass replace=True to overwrite."
-        )
+        raise KeyError(f"Experiment '{key}' is already registered. Pass replace=True to overwrite.")
     EXPERIMENT_REGISTRY[key] = experiment
 
 
 def unregister_experiment(name: str) -> None:
     """Remove an experiment. Intended for tests and plugin teardown."""
     EXPERIMENT_REGISTRY.pop(name, None)
+
+
+def load_experiment_entry_points(*, force: bool = False) -> int:
+    """Load ``qforge.experiments`` setuptools entry points. Idempotent.
+
+    Each entry point may be an ``ExperimentProgram`` instance or a zero-arg
+    callable that calls ``register_experiment``. This is discovery, not a
+    plugin framework: failed entries are logged and skipped.
+
+    Args:
+        force: Reload even if this process already loaded the group.
+
+    Returns:
+        Number of entry points that loaded without error.
+    """
+    global _ENTRY_POINTS_LOADED
+    if _ENTRY_POINTS_LOADED and not force:
+        return 0
+    _ENTRY_POINTS_LOADED = True
+    loaded = 0
+    try:
+        discovered = entry_points().select(group=EXPERIMENT_ENTRY_POINT_GROUP)
+    except Exception:  # pragma: no cover - metadata API edge on odd installs
+        logger.warning("Could not read experiment entry points", exc_info=True)
+        return 0
+    for ep in discovered:
+        try:
+            obj = ep.load()
+            if isinstance(obj, ExperimentProgram):
+                try:
+                    register_experiment(obj)
+                except KeyError:
+                    logger.info(
+                        "Entry point %s skipped; experiment already registered",
+                        ep.name,
+                    )
+                    continue
+            elif callable(obj):
+                obj()
+            else:
+                raise TypeError(
+                    f"Entry point {ep.name!r} must be an ExperimentProgram "
+                    "instance or a zero-arg callable"
+                )
+        except Exception:
+            logger.warning("Failed to load experiment entry point %s", ep.name, exc_info=True)
+            continue
+        loaded += 1
+    return loaded
 
 
 def get_experiment(name: str) -> ExperimentProgram:
@@ -256,6 +313,8 @@ __all__ = [
     "list_experiments",
     "register_experiment",
     "unregister_experiment",
+    "load_experiment_entry_points",
+    "EXPERIMENT_ENTRY_POINT_GROUP",
     # Basics
     "BellExperiment",
     "bell_experiment",
@@ -288,3 +347,5 @@ __all__ = [
     "StateProbeStudy",
     "state_probe",
 ]
+
+load_experiment_entry_points()

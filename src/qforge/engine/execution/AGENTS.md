@@ -54,6 +54,7 @@ execution/
 
 - Return raw Qiskit objects or plain dicts — let api.py do the typing
 - Propagate `rng_seed` to the backend for reproducibility (simulation only)
+- Keep `execute_circuit()` a thin replay of the last backend/noise/shots/seed (extra Pauli circuits are built in `engine/observables.py`)
 - Log backend method, noise model status, and hardware job IDs
 - Capture transpilation and calibration metadata for hardware provenance
 

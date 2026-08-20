@@ -100,4 +100,14 @@ register_experiment(MyExperiment())
 
 Then `qforge list` and `qforge run my_ghz_probe` see it in that process. Combine with `register()` / `register_profile()` if you also ship a metric.
 
+Installed packages can also declare the setuptools group `qforge.experiments`
+(an `ExperimentProgram` instance, or a zero-arg callable that calls
+`register_experiment`). QForge loads that group at import. Names already in
+the registry are skipped — entry points never overwrite builtins.
+
+```toml
+[project.entry-points."qforge.experiments"]
+my_ghz = "mypkg.plugin:register"
+```
+
 See `basics/steps/step01_superposition.py` for a minimal in-tree example, or `advanced/steps/step08_design_your_own.py` for the experiment design template.

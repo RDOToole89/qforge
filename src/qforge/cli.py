@@ -515,6 +515,23 @@ def _print_metrics(result: ExperimentResult, hint: str | None = None) -> None:
         console.print(f"[dim]{hint}[/dim]")
 
 
+def _print_observables(result: ExperimentResult) -> None:
+    measurements = result.analysis.measurement_results if result.analysis else None
+    estimates = measurements.observables if measurements is not None else None
+    if not estimates:
+        return
+    console.print()
+    console.print("[bold]Observables[/bold]")
+    table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 2, 0, 0))
+    table.add_column("pauli", style="cyan")
+    table.add_column("value", justify="right")
+    table.add_column("stderr", justify="right", style="dim")
+    for pauli, entry in estimates.items():
+        stderr = f"±{entry.stderr:.4f}" if entry.stderr is not None else "exact"
+        table.add_row(pauli, f"{entry.value:.4f}", stderr)
+    console.print(table)
+
+
 def _print_result(
     result: ExperimentResult,
     json_output: bool,
@@ -538,6 +555,7 @@ def _print_result(
 
     _print_counts(result)
     _print_metrics(result, hint=metrics_hint)
+    _print_observables(result)
     _print_artifacts(result)
 
 

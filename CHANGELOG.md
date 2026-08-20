@@ -60,6 +60,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   named profiles without editing core specs
 - `register_experiment()` / `unregister_experiment()` as the public path to
   add experiment programs without editing `EXPERIMENT_REGISTRY`
+- Setuptools entry points in group `qforge.experiments` (an
+  `ExperimentProgram` instance or a zero-arg callable). Discovery only —
+  not a plugin framework. Failed entries are logged and skipped.
+- `ExperimentConfig.observables`: Pauli strings in MSB-left (bitstring)
+  order. Estimates land on `MeasurementResults.observables`. Statevector /
+  density-matrix modes are exact; qasm/hardware reuse Z-basis shots for
+  I/Z and run extra circuits for X/Y. Not a VQE energy — programs interpret
+  ⟨P⟩.
 - Learning-path experiments choose default metrics for the question they ask
   (with a CLI `metrics_hint`); protocol experiments leave metrics off
 

@@ -209,6 +209,8 @@ register_experiment(MyExperiment())
 
 Pass `replace=True` to overwrite a name. Tests should call `unregister_experiment(name)` in teardown.
 
+Installed packages may declare setuptools entry points in group `qforge.experiments` (`ExperimentProgram` instance or a zero-arg callable). That is discovery, not a plugin framework: failed entries are skipped, and names already in `EXPERIMENT_REGISTRY` are not replaced.
+
 ### 4. Test it
 
 ```bash

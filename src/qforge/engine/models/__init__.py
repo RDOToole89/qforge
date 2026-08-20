@@ -44,7 +44,7 @@ from .config import (
     AdvancedNoiseConfig,
     ExperimentConfig,
 )
-from .measurement import MeasurementResults
+from .measurement import MeasurementResults, ObservableEstimate
 from .metadata import ExperimentMetadata
 from .provenance import Provenance
 from .quality import QualityMetrics, compute_quality_metrics
@@ -87,6 +87,7 @@ __all__ = [
     "ExperimentMetadata",
     "CircuitStatistics",
     "MeasurementResults",
+    "ObservableEstimate",
     "QualityMetrics",
     "Provenance",
     "ExperimentStatus",

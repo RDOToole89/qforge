@@ -134,6 +134,18 @@ class ExperimentConfig(BaseModel):
         ),
     )
 
+    observables: list[str] | None = Field(
+        default=None,
+        description=(
+            "Optional Pauli strings to estimate (e.g. ['ZZ', 'XX']). "
+            "Same MSB-left order as bitstrings: leftmost character is logical "
+            "index 0. I/Z-only strings reuse the Z-basis shots; X/Y require "
+            "extra circuits (qasm/hardware) or are exact in statevector/"
+            "density_matrix modes. Not a VQE energy — experiment programs "
+            "interpret these values."
+        ),
+    )
+
     experiment_type: str | None = Field(
         default=None,
         description=(
@@ -259,6 +271,14 @@ class ExperimentConfig(BaseModel):
                 raise ValueError(f"T2 ({v}) must be ≤ 2*T1 ({2 * t1}) for physical validity")
         return v
 
+    @field_validator("observables")
+    @classmethod
+    def _normalize_observables(cls, v: list[str] | None) -> list[str] | None:
+        """Uppercase Pauli labels; length is checked against num_qubits below."""
+        if v is None:
+            return None
+        return [label.strip().upper() for label in v]
+
     @field_validator("noise_type")
     @classmethod
     def validate_noise_type_with_enabled(cls, v: str | None, info: ValidationInfo) -> str | None:
@@ -304,6 +324,12 @@ class ExperimentConfig(BaseModel):
         # IBM hardware shot limit
         if self.sim_mode == "hardware" and self.shots > 100_000:
             raise ValueError(f"shots={self.shots} exceeds IBM Quantum hardware limit (100,000).")
+
+        if self.observables:
+            from qforge.core.math.observables import parse_pauli_string
+
+            for label in self.observables:
+                parse_pauli_string(label, self.num_qubits)
 
         return self
 

@@ -40,6 +40,12 @@ class EngineExperimentRunner:
         self.experiment_id = experiment_id
         self.logger = logging.getLogger(f"{__name__}.{experiment_id}")
         self.noise_model: NoiseModel | None = None  # Will be set if noise is enabled
+        self._sim_mode = "qasm"
+        self._shots = 1024
+        self._rng_seed: int | None = None
+        self._backend_name: str | None = None
+        self._optimization_level = 1
+        self._hardware_session: Any = None
 
     def run_experiment(
         self,
@@ -110,7 +116,14 @@ class EngineExperimentRunner:
             # Readout errors can be applied independently of gate noise
             self._apply_readout_only(circuit.num_qubits, readout_error_rate)
 
-        # Execute simulation (or hardware)
+        # Remember backend settings so extra Pauli circuits reuse them
+        self._sim_mode = sim_mode
+        self._shots = shots
+        self._rng_seed = rng_seed
+        self._backend_name = backend_name
+        self._optimization_level = optimization_level
+        self._hardware_session = hardware_session
+
         result = self._execute_simulation(
             circuit,
             sim_mode,
@@ -123,6 +136,22 @@ class EngineExperimentRunner:
 
         self.logger.info(f"Completed experiment: {self.experiment_id}")
         return circuit, result
+
+    def execute_circuit(self, circuit: QuantumCircuit) -> Any:
+        """Execute ``circuit`` with the same backend, noise, shots, and seed.
+
+        Used for extra Pauli-basis measurements after the prepared-state run.
+        The circuit is not rebuilt; callers rotate and measure it themselves.
+        """
+        return self._execute_simulation(
+            circuit,
+            self._sim_mode,
+            self._shots,
+            self._rng_seed,
+            backend_name=self._backend_name,
+            optimization_level=self._optimization_level,
+            hardware_session=self._hardware_session,
+        )
 
     # ---------- Circuit / noise / simulation internals ----------
 
@@ -475,13 +504,13 @@ class EngineExperimentRunner:
         return counts
 
 
-def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
+def run_raw(config: dict[str, Any]) -> tuple[Any, Any, EngineExperimentRunner]:
     """Execute experiment using engine-native runner.
 
     Args:
         config: experiment config dict
     Returns:
-        (QuantumCircuit, qiskit result payload)
+        (QuantumCircuit, qiskit result payload, runner)
     """
     runner = EngineExperimentRunner(experiment_id=config.get("experiment_id", "engine-run"))
 
@@ -505,4 +534,4 @@ def run_raw(config: dict[str, Any]) -> tuple[Any, Any]:
         optimization_level=int(config.get("optimization_level", 1)),
         hardware_session=config.get("_hardware_session"),
     )
-    return circuit, raw
+    return circuit, raw, runner

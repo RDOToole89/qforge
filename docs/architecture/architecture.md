@@ -54,13 +54,14 @@ result = run(ExperimentConfig(
 | `noise_enabled`, `noise_type`, `error_rate` | Noise channel selection and strength |
 | `shots`, `rng_seed` | Sampling and reproducibility |
 | `metrics` | Metric profile name (`"structure"`, `"quick"`, `"information_theory"`) or an explicit list of metric names |
+| `observables` | Optional Pauli strings (MSB-left, same order as bitstrings). Estimates are ⟨P⟩ ∈ [-1, 1], not a VQE energy |
 | `experiment_type` | Optional free-string label for grouping and storage (not a closed taxonomy) |
 
 ### Results
 
 `run()` returns an `ExperimentResult` composed of focused submodels (`src/qforge/engine/models/`):
 
-- `analysis` — circuit statistics and measurement results (counts, probabilities, fidelity, statevector or density matrix depending on `sim_mode`)
+- `analysis` — circuit statistics and measurement results (counts, probabilities, fidelity, optional Pauli `observables`, statevector or density matrix depending on `sim_mode`)
 - `metrics_bundle` — a `MetricsBundle`: dict of metric name → entry with `value`, `ci95` (bootstrap confidence interval), `status`, and `extras`
 - `provenance` — git SHA, software versions, host info, backend/job identifiers for hardware runs
 - `quality` — quality assessment of the run
@@ -70,6 +71,7 @@ result = run(ExperimentConfig(
 ```
 src/qforge/engine/
 ├── api.py               # run(), sweep(), iter_experiment_configs()
+├── observables.py       # Pauli ⟨P⟩ estimates (extra X/Y circuits; math is core)
 ├── bloch_math.py        # Bloch sphere coordinate math for visualization
 ├── fidelity.py          # Statevector / density matrix / fidelity extraction
 ├── provenance.py        # Provenance building (versions, git SHA, host info)
@@ -88,7 +90,7 @@ src/qforge/engine/
 src/qforge/core/
 ├── state_preparation/   # 6 state types, factory + registry pattern
 ├── noise_models/        # 8 physics-based channels with Kraus operators
-├── math/                # Shared primitives: Pauli matrices, rates, distances, indexing
+├── math/                # Shared primitives: Pauli matrices, Pauli-string ⟨P⟩, rates, distances, indexing
 └── analysis/
     ├── core/            # Information theory, null models, correlations, bootstrap, topology
     ├── metrics/         # Individual metric implementations + declarative registry
@@ -122,7 +124,7 @@ Experiment programs follow a pluggable pattern (`src/qforge/experiments/base.py`
 - `decoherence/` — a 6-step noise study path plus deep dives
 - `hardware/` — a 5-step path to real IBM Quantum processors
 
-Out-of-tree programs call `register_experiment()` so they appear in `qforge list` / `qforge run` without editing `EXPERIMENT_REGISTRY`. Metrics have the same pattern: `register()` / `register_profile()`.
+Out-of-tree programs call `register_experiment()` so they appear in `qforge list` / `qforge run` without editing `EXPERIMENT_REGISTRY`. Installed packages can also declare setuptools entry points in group `qforge.experiments`. Metrics have the same pattern: `register()` / `register_profile()`.
 
 ## Frontends
 

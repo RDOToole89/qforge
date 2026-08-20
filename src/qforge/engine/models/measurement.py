@@ -11,6 +11,22 @@ from pydantic import BaseModel, Field, model_validator
 logger = logging.getLogger(__name__)
 
 
+class ObservableEstimate(BaseModel):
+    """Expectation value of one Pauli string."""
+
+    pauli: str = Field(description="Pauli string in MSB-left (bitstring) order")
+    value: float = Field(description="⟨P⟩ in [-1, 1]")
+    stderr: float | None = Field(
+        default=None,
+        description="Shot-noise standard error; None when the value is exact",
+    )
+    shots: int | None = Field(
+        default=None,
+        ge=1,
+        description="Shots used for a sampled estimate; None when exact",
+    )
+
+
 class MeasurementResults(BaseModel):
     """Raw measurement data and basic statistics."""
 
@@ -50,6 +66,14 @@ class MeasurementResults(BaseModel):
         le=1.0,
         description=(
             "Fidelity with ideal state (auto-computed for statevector/density_matrix modes)"
+        ),
+    )
+
+    observables: dict[str, ObservableEstimate] | None = Field(
+        default=None,
+        description=(
+            "Pauli expectation values requested via ExperimentConfig.observables. "
+            "Keys are Pauli strings in MSB-left (bitstring) order."
         ),
     )
 

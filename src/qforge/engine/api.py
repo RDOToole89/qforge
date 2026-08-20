@@ -89,8 +89,10 @@ from qforge.engine.models import (
     ExperimentMetadata,
     ExperimentResult,
     MeasurementResults,
+    ObservableEstimate,
     SweepManifest,
 )
+from qforge.engine.observables import estimate_observables
 from qforge.engine.persistence.hashing import sha1_of
 
 # Storage adapter
@@ -158,8 +160,7 @@ def run(
     raw_config = cfg_model.model_dump()
     if _hardware_session is not None:
         raw_config["_hardware_session"] = _hardware_session
-    circuit, raw = run_raw(raw_config)
-    _exec_seconds = _time.monotonic() - _t0
+    circuit, raw, runner = run_raw(raw_config)
 
     # 2) Canonicalize counts (MSB-left, fixed bit-width)
     counts = extract_counts_from_result(raw, num_qubits=cfg_model.num_qubits)
@@ -169,6 +170,21 @@ def run(
         raw, cfg_model.sim_mode, cfg_model.state_type, cfg_model.num_qubits
     )
 
+    observable_estimates = None
+    if cfg_model.observables:
+        observable_estimates = estimate_observables(
+            labels=cfg_model.observables,
+            counts=counts,
+            n_qubits=cfg_model.num_qubits,
+            shots=cfg_model.shots,
+            sim_mode=cfg_model.sim_mode,
+            circuit=circuit,
+            runner=runner,
+            statevector=sim_statevector,
+            density_matrix=sim_density_matrix,
+        )
+    _exec_seconds = _time.monotonic() - _t0
+
     # 3) Assemble typed analysis block
     analysis = _build_experiment_analysis(
         circuit=circuit,
@@ -177,6 +193,7 @@ def run(
         density_matrix=sim_density_matrix,
         statevector=sim_statevector,
         fidelity=sim_fidelity,
+        observables=observable_estimates,
     )
 
     # 4) Optional: compute analysis metrics
@@ -388,6 +405,7 @@ def _build_experiment_analysis(
     density_matrix: list[list[list[float]]] | None = None,
     statevector: list[list[float]] | None = None,
     fidelity: float | None = None,
+    observables: dict[str, ObservableEstimate] | None = None,
 ) -> ExperimentAnalysis:
     """Construct a strongly-typed `ExperimentAnalysis` from circuit + counts + config.
 
@@ -395,7 +413,7 @@ def _build_experiment_analysis(
       - ExperimentMetadata: id, timestamp, engine version, experiment type
       - CircuitStatistics: depth, gate counts, two-qubit counts
       - MeasurementResults: raw counts, total shots, unique outcomes, probabilities,
-        plus optional density_matrix, statevector, fidelity from non-qasm modes.
+        plus optional density_matrix, statevector, fidelity, and Pauli observables.
 
     It intentionally leaves optional advanced sections (IT metrics, correlations,
     validation) as None to keep responsibilities separated (other subsystems can
@@ -451,6 +469,7 @@ def _build_experiment_analysis(
         density_matrix=density_matrix,
         statevector=statevector,
         fidelity=fidelity,
+        observables=observables,
     )
 
     return ExperimentAnalysis(
