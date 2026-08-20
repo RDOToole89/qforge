@@ -8,15 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed (breaking)
+- Public import is `qforge`, not `src`: `from qforge import run` and
+  `qforge run 01_superposition`. The installable package lives at
+  `src/qforge/` (src-layout). There is no `src.*` compatibility shim.
 - `ExperimentConfig.research_type` renamed to `experiment_type` (values:
   "decoherence", "parameter_sweep", "noise_comparison", "control", "scaling",
   "convergence", "batch_sweep")
 - Metric profile `structured_decoherence` renamed to `decoherence`; metrics are
   requested via `metrics=` (profile name or explicit list) and results are
   exposed as `result.metrics_bundle` (dict of name → entry with value/ci95/status)
-- `src/engine/models/research.py` renamed to `src/engine/models/analysis.py`;
-  `src/engine/analysis/research_integration.py` renamed to
-  `src/engine/analysis/metrics.py`
+- `src/qforge/engine/models/research.py` renamed to `src/qforge/engine/models/analysis.py`;
+  `src/qforge/engine/analysis/research_integration.py` renamed to
+  `src/qforge/engine/analysis/metrics.py`
 - Noise catalog key `research_application` renamed to `use_case`
 - Experiment `dec_01_river_vs_fog` renamed to `dec_01_structured_vs_uniform`
 
@@ -31,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   framework only
 
 ### Added
-- `src/core/math/` shared math primitives — single source of truth for Pauli
+- `src/qforge/core/math/` shared math primitives — single source of truth for Pauli
   matrices, `relaxation_probability`, total-variation-distance / Gini, and the
   canonical qubit/bit indexing convention; imported across noise models,
   analysis metrics, and the engine

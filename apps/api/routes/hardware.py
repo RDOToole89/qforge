@@ -16,12 +16,12 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from src.core.state_preparation.state_factory import prepare_state
-from src.engine.execution.hardware_validation import (
+from qforge.core.state_preparation.state_factory import prepare_state
+from qforge.engine.execution.hardware_validation import (
     extract_backend_capabilities,
     validate_circuit_for_backend,
 )
-from src.engine.models import ExperimentConfig
+from qforge.engine.models import ExperimentConfig
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ def validate_config(config: ExperimentConfig) -> dict[str, Any]:
     circuit.measure_all()
 
     try:
-        from src.engine.execution.hardware import resolve_backend
+        from qforge.engine.execution.hardware import resolve_backend
     except Exception as exc:  # pragma: no cover - import guard
         return {
             "available": False,

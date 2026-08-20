@@ -2,7 +2,7 @@
 
 This is the anti-drift guarantee for the client's consolidated quantum math
 (``apps/client/src/lib/quantum``). For a fixed set of states it computes, using
-``src/engine/bloch_math.py`` (the verified backend), the per-qubit Bloch
+``src/qforge/engine/bloch_math.py`` (the verified backend), the per-qubit Bloch
 vectors, per-qubit purity Tr(rho^2), and two-qubit Pauli correlators, then
 writes them to JSON. The frontend golden test loads these and asserts the TS
 module reproduces the same numbers to ~1e-6, proving FE math == BE math.
@@ -39,8 +39,8 @@ import numpy as np
 from numpy.typing import NDArray
 from qiskit.quantum_info import Statevector
 
-from src.core.state_preparation.state_factory import prepare_state
-from src.engine.bloch_math import (
+from qforge.core.state_preparation.state_factory import prepare_state
+from qforge.engine.bloch_math import (
     density_matrix_to_bloch,
     partial_trace_single_qubit,
     partial_trace_two_qubit,
@@ -184,7 +184,7 @@ def main() -> None:
     doc = {
         "schema_version": SCHEMA_VERSION,
         "generated_by": "scripts/gen_quantum_golden.py",
-        "source": "src/engine/bloch_math.py",
+        "source": "src/qforge/engine/bloch_math.py",
         "convention": (
             "qubit 0 = MSB = leftmost bitstring char; statevector amplitudes are "
             "[real, imag] pairs of length 2^n. Backend partial_trace_single_qubit "

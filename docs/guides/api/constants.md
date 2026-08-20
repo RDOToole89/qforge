@@ -2,14 +2,14 @@
 
 Core constants and validation functions for the analysis framework.
 
-::: src.core.analysis.constants
+::: qforge.core.analysis.constants
 
 ## Usage Examples
 
 ### Validating Measurement Data
 
 ```python
-from src.core.analysis.constants import validate_counts_dict
+from qforge.core.analysis.constants import validate_counts_dict
 
 # Valid measurement counts
 counts = {"00": 100, "01": 200, "10": 150, "11": 50}
@@ -27,7 +27,7 @@ except ValueError as e:
 ### Working with Bitstrings
 
 ```python
-from src.core.analysis.constants import n_qubits_from_counts, all_bitstrings
+from qforge.core.analysis.constants import n_qubits_from_counts, all_bitstrings
 
 # Detect number of qubits
 counts = {"000": 100, "111": 200, "001": 50}
@@ -43,7 +43,7 @@ print(f"All possible outcomes: {all_outcomes}")
 ### Using Framework Constants
 
 ```python
-from src.core.analysis.constants import (
+from qforge.core.analysis.constants import (
     ALPHA, CONF_INT_DEFAULT, MAX_TOP_K, TOPK_MASS_TARGET
 )
 

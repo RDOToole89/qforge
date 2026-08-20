@@ -19,9 +19,9 @@ import pytest
 from pydantic import ValidationError
 from qiskit import QuantumCircuit
 
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
-from src.engine.visualization import (
+from qforge.engine.api import run
+from qforge.engine.models import ExperimentConfig
+from qforge.engine.visualization import (
     CircuitDiagramRenderer,
     CorrelationRenderer,
     DensityMatrixRenderer,

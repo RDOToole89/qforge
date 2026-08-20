@@ -34,12 +34,16 @@ uv sync --all-groups        # everything
 uv sync --group docs        # add the docs group
 ```
 
-### Production Installation
+### From this repository
 
-For production use:
+Until QForge is published to PyPI, install from a clone:
 
 ```bash
-pip install qforge
+git clone https://github.com/RDOToole89/qforge.git
+cd qforge
+uv sync
+uv run python -c "from qforge import run"
+uv run qforge list
 ```
 
 ## Verification
@@ -51,7 +55,7 @@ Verify the installation by running the test suite:
 uv run pytest
 
 # Run with coverage
-uv run pytest --cov=src/core/analysis --cov-report=html
+uv run pytest --cov=src/qforge/core/analysis --cov-report=html
 
 # Run specific test modules
 uv run pytest tests/core/test_metrics.py -v
@@ -116,7 +120,7 @@ After installation, your project structure should look like:
 
 ```
 qforge/
-├── src/
+├── src/qforge/
 │   ├── engine/              # Engine API: run(), sweep()
 │   ├── core/                # Pure physics: circuits, noise, metrics
 │   └── experiments/         # Experiment programs
@@ -134,12 +138,12 @@ qforge/
 
 ### Common Issues
 
-**ImportError: No module named 'qiskit'** / **No module named 'src'**
+**ImportError: No module named 'qiskit'** / **No module named 'qforge'**
 
 ```bash
 # Re-sync the environment from the lockfile, then prefix commands with `uv run`
 uv sync
-uv run python -c "import qiskit; from src.engine.api import run"
+uv run python -c "import qiskit; from qforge import run"
 ```
 
 **Lockfile out of date after editing pyproject.toml**

@@ -17,8 +17,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from apps.api.main import app
-from src.engine.api import run as engine_run
-from src.engine.models import ExperimentConfig
+from qforge.engine.api import run as engine_run
+from qforge.engine.models import ExperimentConfig
 
 client = TestClient(app)
 

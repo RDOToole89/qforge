@@ -19,7 +19,7 @@ from numpy.typing import NDArray
 from qiskit.quantum_info import Choi, Kraus
 
 # Single source of truth for the Pauli matrices: the real codebase definition.
-from src.core.math import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z
+from qforge.core.math import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z
 
 # Conventional short aliases used throughout the physics tests.
 I2 = PAULI_I

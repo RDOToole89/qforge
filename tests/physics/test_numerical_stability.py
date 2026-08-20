@@ -21,17 +21,17 @@ import math
 import numpy as np
 import pytest
 
-from src.core.analysis.core.information_theory import (
+from qforge.core.analysis.core.information_theory import (
     counts_to_probabilities,
     entropy,
     mutual_information,
     total_correlation,
 )
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.entanglement_error_correlation import (
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
+from qforge.core.analysis.metrics.pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
 )
 

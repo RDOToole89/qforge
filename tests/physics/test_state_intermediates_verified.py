@@ -13,11 +13,11 @@ from __future__ import annotations
 
 import pytest
 
-from src.core.state_preparation.bell_state import BellState
-from src.core.state_preparation.cluster_state import ClusterState
-from src.core.state_preparation.ghz_state import GHZState
-from src.core.state_preparation.superposition_state import SuperpositionState
-from src.core.state_preparation.w_state import WState
+from qforge.core.state_preparation.bell_state import BellState
+from qforge.core.state_preparation.cluster_state import ClusterState
+from qforge.core.state_preparation.ghz_state import GHZState
+from qforge.core.state_preparation.superposition_state import SuperpositionState
+from qforge.core.state_preparation.w_state import WState
 
 # --------------------------------------------------------------------------- #
 # GHZ states

@@ -101,7 +101,7 @@ graph LR
     VIZ & CB & GL & CFG --> API
 ```
 
-**Key principle**: `src/core/` is pure physics and statistics. `src/engine/` orchestrates without domain knowledge. Only `src/experiments/` carries opinionated experiment programs. This means you can build completely new experiment suites on top of the same engine.
+**Key principle**: `src/qforge/core/` is pure physics and statistics. `src/qforge/engine/` orchestrates without domain knowledge. Only `src/qforge/experiments/` carries opinionated experiment programs. This means you can build completely new experiment suites on top of the same engine.
 
 ---
 
@@ -118,9 +118,9 @@ graph LR
 | **Experiments** | 49 pre-built programs: basics (11 steps + 10 deep dives) → advanced (8 steps + 7 deep dives) → decoherence (6 steps + 2 deep dives) → hardware (5 steps + 3 deep dives) |
 | **Hardware** | IBM Quantum via SamplerV2, auto-backend selection, transpilation capture, calibration snapshots |
 | **Provenance** | Git SHA, software versions, host info, execution time, full reproducibility |
-| **CLI** | `python -m src.cli list` / `run <experiment>` / `run-config <file>` |
+| **CLI** | `qforge list` / `qforge run <experiment>` / `qforge run-config <file>` |
 | **API** | 11 FastAPI endpoints for experiments, results, and Bloch visualization |
-| **Tests** | ~1,100 tests, ~97% coverage on the physics/math core (all of `src/core` plus the engine math modules) behind a 95% gate |
+| **Tests** | ~1,100 tests, ~97% coverage on the physics/math core (all of `src/qforge/core` plus the engine math modules) behind a 95% gate |
 
 ### Visual Quantum Laboratory (React Native / Expo)
 
@@ -158,13 +158,14 @@ cd qforge
 uv sync   # creates .venv and installs everything from uv.lock
 
 # List available experiments
-uv run python -m src.cli list
+uv run qforge list
 
 # Run your first experiment
-uv run python -m src.cli run bell_state
+uv run qforge run 01_superposition
 
-# Run with overrides
-uv run python -m src.cli run ghz_exploration -s num_qubits=5 -s error_rate=0.1
+# Superposition → Bell → noisy GHZ
+uv run qforge run 05_bell_states
+uv run qforge run 06_ghz_states -s noise_enabled=true -s error_rate=0.05
 ```
 
 > **Why `uv`?** It manages the Python interpreter (pinned to 3.12 via `.python-version`)
@@ -174,8 +175,7 @@ uv run python -m src.cli run ghz_exploration -s num_qubits=5 -s error_rate=0.1
 ### Use the Engine API
 
 ```python
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge import run, ExperimentConfig
 
 # Simple experiment
 result = run(ExperimentConfig(
@@ -250,7 +250,7 @@ Start here                      Go deeper                        Study noise
 
 **New to quantum?** Start with `01_superposition` and work through all 11 steps in order. By step 11 you'll understand superposition, entanglement, noise, and how noise interacts with entanglement. Then open the Circuit Builder and play with the 22 presets.
 
-**Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/experiments/AGENTS.md) for the full guide.
+**Know quantum, want to experiment?** Jump to `decoherence/` or build your own experiment. Subclass `BaseExperiment`, define a config, register it. See [experiments/AGENTS.md](src/qforge/experiments/AGENTS.md) for the full guide.
 
 **Want to run on real hardware?** See [hardware setup](docs/guides/hardware-setup.md). One config change: `sim_mode="hardware"`.
 

@@ -14,7 +14,7 @@ Covers:
 import numpy as np
 import pytest
 
-from src.engine.bloch_math import (
+from qforge.engine.bloch_math import (
     compute_bloch_data,
     counts_to_diagonal_density_matrix,
     density_matrix_to_bloch,

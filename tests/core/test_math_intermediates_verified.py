@@ -1,4 +1,4 @@
-"""Exact-value tests for INTERMEDIARY math helpers in ``src/core/analysis/core``.
+"""Exact-value tests for INTERMEDIARY math helpers in ``src/qforge/core/analysis/core``.
 
 These helpers are exercised by higher-level code but their numeric outputs were
 never directly asserted. Every value below was confirmed by running the code and
@@ -14,12 +14,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.analysis.core.bootstrap import (
+from qforge.core.analysis.core.bootstrap import (
     _compute_bca_interval,
     _compute_bias_correction,
     bootstrap_confidence_interval,
 )
-from src.core.analysis.core.null_models import ghz_aware_null_model
+from qforge.core.analysis.core.null_models import ghz_aware_null_model
 from tests._qhelpers import fraction_ones_q0 as _fraction_ones_q0
 
 # ---------------------------------------------------------------------------

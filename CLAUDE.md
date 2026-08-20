@@ -8,18 +8,17 @@ QForge is a **general-purpose quantum experiment framework** built on Qiskit —
 
 ## Engine-First Architecture
 
-- **Engine API** (`src/engine/api.py`) — Entry points: `run()`, `sweep()`, `iter_experiment_configs()`
-- **Pydantic Models** (`src/engine/models/`) — Type-safe configuration and results
-- **Core Logic** (`src/core/`) — Pure quantum mechanics and analysis
-- **Experiment Programs** (`src/experiments/`) — Pluggable, self-contained experiments
+- **Engine API** (`src/qforge/engine/api.py`) — Entry points: `run()`, `sweep()`, `iter_experiment_configs()`
+- **Pydantic Models** (`src/qforge/engine/models/`) — Type-safe configuration and results
+- **Core Logic** (`src/qforge/core/`) — Pure quantum mechanics and analysis
+- **Experiment Programs** (`src/qforge/experiments/`) — Pluggable, self-contained experiments
 
 ### Usage Examples
 
 **Basic experiment with metrics:**
 
 ```python
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge import run, ExperimentConfig
 
 config = ExperimentConfig(
     num_qubits=3,
@@ -64,7 +63,7 @@ print(f"Fidelity: {result.analysis.measurement_results.fidelity:.4f}")  # < 1.0
 **Direct analysis pipeline (no engine needed):**
 
 ```python
-from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
+from qforge.core.analysis.pipelines.pathway_analysis import run_all_to_schema
 
 counts = {"000": 400, "111": 400, "001": 100, "110": 100}
 results = run_all_to_schema(counts)   # v1.0 schema output, all metrics
@@ -73,7 +72,7 @@ print(f"Structure Score: {results['structure_score']['value']:.4f}")
 
 ## Analysis Metrics
 
-`src/core/analysis/metrics/` provides general **information-theoretic and statistical measures of measurement-outcome distributions** — e.g. `structure_score` (Jensen-Shannon divergence from a factorized null model), `asymmetry_index` (TVD from uniform), `total_correlation` (multi-information), `concentration_index` (top-vs-bottom quartile probability ratio), `entanglement_error_correlation` (topology/MI correlation), and temporal-stability measures. All support bootstrap confidence intervals, deterministic ordering, and full-support Jeffreys smoothing.
+`src/qforge/core/analysis/metrics/` provides general **information-theoretic and statistical measures of measurement-outcome distributions** — e.g. `structure_score` (Jensen-Shannon divergence from a factorized null model), `asymmetry_index` (TVD from uniform), `total_correlation` (multi-information), `concentration_index` (top-vs-bottom quartile probability ratio), `entanglement_error_correlation` (topology/MI correlation), and temporal-stability measures. All support bootstrap confidence intervals, deterministic ordering, and full-support Jeffreys smoothing.
 
 Metric selection uses profiles (`metrics="decoherence" | "quick" | "information_theory"`) or an explicit list of metric names. `ExperimentConfig.experiment_type` labels the experiment kind ("decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep").
 
@@ -88,7 +87,7 @@ Metric selection uses profiles (`metrics="decoherence" | "quick" | "information_
 ```bash
 # Quick metric check
 uv run python -c "
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
 print(compute_asymmetry_index({'000': 400, '111': 400, '001': 100, '110': 100}))
 "
 
@@ -98,18 +97,18 @@ uv run pytest
 
 ## File Organization
 
-- `src/core/analysis/metrics/` — Individual metric implementations, `registry.py` (declarative MetricSpec pattern), `profiles.py` (metric selection profiles), `schema_bridge.py` (v1.0 schema output)
-- `src/core/analysis/core/` — Information theory, null models, correlations, bootstrap, topology builders
-- `src/core/analysis/pipelines/` — High-level orchestration (`run_all_to_schema`)
-- `src/core/analysis/constants.py` — Centralized thresholds and parameters
-- `src/core/math/` — **Single source of truth for low-level math** (Pauli matrices, `relaxation_probability`, TVD/Gini, canonical qubit/bit indexing)
-- `src/core/noise_models/` — Physics-compliant noise channels (each declares `NOISE_TYPE`, `IS_UNITAL`, `CATALOG` class attributes)
-- `src/core/state_preparation/` — Quantum state factory (GHZ, Bell, W, Cluster, Superposition, Custom)
-- `src/engine/api.py` — `run()`, `sweep()`, `iter_experiment_configs()`
-- `src/engine/models/` — Pydantic submodules: `config`, `metadata`, `circuit`, `measurement`, `provenance`, `quality`, `results`, `analysis` (MetricsBundle/MetricEntry/AnalysisMetadata), `sweep`, `storage`
-- `src/engine/analysis/metrics.py` — Counts canonicalization + metrics bundle computation
-- `src/engine/` — Also: `bloch_math.py`, `provenance.py`, `fidelity.py`, `viz_pipeline.py`, `execution/`, `visualization/`
-- `src/experiments/` — Experiment programs across `basics/`, `advanced/`, `decoherence/`, `hardware/`
+- `src/qforge/core/analysis/metrics/` — Individual metric implementations, `registry.py` (declarative MetricSpec pattern), `profiles.py` (metric selection profiles), `schema_bridge.py` (v1.0 schema output)
+- `src/qforge/core/analysis/core/` — Information theory, null models, correlations, bootstrap, topology builders
+- `src/qforge/core/analysis/pipelines/` — High-level orchestration (`run_all_to_schema`)
+- `src/qforge/core/analysis/constants.py` — Centralized thresholds and parameters
+- `src/qforge/core/math/` — **Single source of truth for low-level math** (Pauli matrices, `relaxation_probability`, TVD/Gini, canonical qubit/bit indexing)
+- `src/qforge/core/noise_models/` — Physics-compliant noise channels (each declares `NOISE_TYPE`, `IS_UNITAL`, `CATALOG` class attributes)
+- `src/qforge/core/state_preparation/` — Quantum state factory (GHZ, Bell, W, Cluster, Superposition, Custom)
+- `src/qforge/engine/api.py` — `run()`, `sweep()`, `iter_experiment_configs()`
+- `src/qforge/engine/models/` — Pydantic submodules: `config`, `metadata`, `circuit`, `measurement`, `provenance`, `quality`, `results`, `analysis` (MetricsBundle/MetricEntry/AnalysisMetadata), `sweep`, `storage`
+- `src/qforge/engine/analysis/metrics.py` — Counts canonicalization + metrics bundle computation
+- `src/qforge/engine/` — Also: `bloch_math.py`, `provenance.py`, `fidelity.py`, `viz_pipeline.py`, `execution/`, `visualization/`
+- `src/qforge/experiments/` — Experiment programs across `basics/`, `advanced/`, `decoherence/`, `hardware/`
 - `apps/api/` — FastAPI REST endpoints; `apps/client/` — React Native / Expo frontend
 
 ## Code Quality
@@ -123,18 +122,18 @@ uv run pytest
 
 The architecture is **deliberately general**:
 
-- `src/core/` is not tied to any specific experiment — it's pure physics + metrics
-- `src/engine/` just orchestrates; it doesn't know what any experiment means
-- Only `src/experiments/` carries experiment-specific semantics
+- `src/qforge/core/` is not tied to any specific experiment — it's pure physics + metrics
+- `src/qforge/engine/` just orchestrates; it doesn't know what any experiment means
+- Only `src/qforge/experiments/` carries experiment-specific semantics
 
 ### ExperimentProgram Abstraction
 
 Experiments follow a pluggable protocol:
 
 ```python
-# src/experiments/base.py
+# src/qforge/experiments/base.py
 from typing import Protocol, Mapping, Any
-from src.engine.models import ExperimentConfig, ExperimentResult
+from qforge.engine.models import ExperimentConfig, ExperimentResult
 
 class ExperimentProgram(Protocol):
     """A pluggable experiment program."""
@@ -146,7 +145,7 @@ class ExperimentProgram(Protocol):
     def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult: ...
 ```
 
-All experiments are registered in `EXPERIMENT_REGISTRY` (`src/experiments/__init__.py`) across `basics/`, `advanced/`, `decoherence/`, and `hardware/`.
+All experiments are registered in `EXPERIMENT_REGISTRY` (`src/qforge/experiments/__init__.py`) across `basics/`, `advanced/`, `decoherence/`, and `hardware/`.
 
 ### CLI Principles
 
@@ -154,7 +153,7 @@ The CLI is **thin and boring**: parse args → call `run()` / `ExperimentProgram
 
 ### Metrics Stay General, Interpretation Specializes
 
-- `src/core/analysis/metrics/` — strictly general information-theoretic/statistical measures
+- `src/qforge/core/analysis/metrics/` — strictly general information-theoretic/statistical measures
 - Experiment programs may *interpret* metric values in their own domain context
 - The engine routes metric selection via `metrics=` (profile or list), and labels runs via `experiment_type`
 

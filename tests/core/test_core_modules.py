@@ -4,15 +4,15 @@ Test core analysis modules: null models, bootstrap, and correlations.
 
 import numpy as np
 
-from src.core.analysis.core.bootstrap import (
+from qforge.core.analysis.core.bootstrap import (
     bootstrap_confidence_interval,
     compute_metric_with_confidence,
 )
-from src.core.analysis.core.correlations import (
+from qforge.core.analysis.core.correlations import (
     get_topology_adjacency,
     mi_matrix,
 )
-from src.core.analysis.core.null_models import (
+from qforge.core.analysis.core.null_models import (
     factorized_null_model,
     generate_null_samples,
     sample_multinomial_counts,

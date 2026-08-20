@@ -99,5 +99,5 @@ Custom markers from `pytest.ini`:
 
 - **Gate**: 95% on `src/core`, enforced by `--cov-fail-under=95` (remaining uncovered lines are unreachable defensive guards)
 - **Report**: HTML report generated at `htmlcov/`
-- **Scope**: Coverage is measured on `src/core/analysis` only; other modules are tested but not coverage-gated
+- **Scope**: Coverage is measured on `src/qforge/core/analysis` only; other modules are tested but not coverage-gated
 - **CI**: `make test` runs the full suite with coverage enforcement

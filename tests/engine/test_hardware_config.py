@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.engine.models import ExperimentConfig
+from qforge.engine.models import ExperimentConfig
 
 
 class TestHardwareSimMode:

@@ -6,39 +6,39 @@ Information-theoretic and statistical metrics over quantum measurement outcome d
 
 Total variation distance between the observed outcome distribution and the uniform distribution over all 2^n outcomes.
 
-::: src.core.analysis.metrics.asymmetry_index
+::: qforge.core.analysis.metrics.asymmetry_index
 
 ## Pathway Concentration Ratio
 
 Ratio of probability mass in the top outcome quartile versus the bottom quartile.
 
-::: src.core.analysis.metrics.pathway_concentration_ratio
+::: qforge.core.analysis.metrics.pathway_concentration_ratio
 
 ## Entanglement-Error Correlation
 
 Pearson correlation between an entanglement topology adjacency matrix and the pairwise mutual-information matrix computed from measurement counts.
 
-::: src.core.analysis.metrics.entanglement_error_correlation
+::: qforge.core.analysis.metrics.entanglement_error_correlation
 
 ## Temporal Pathway Stability
 
 Spearman rank correlation of outcome orderings across experimental conditions.
 
-::: src.core.analysis.metrics.temporal_pathway_stability
+::: qforge.core.analysis.metrics.temporal_pathway_stability
 
 ## Complexity Emergence Score
 
 Logistic fit locating a threshold in a metric-versus-system-size curve.
 
-::: src.core.analysis.metrics.complexity_emergence_score
+::: qforge.core.analysis.metrics.complexity_emergence_score
 
 ## Usage Examples
 
 ### Basic Metric Computation
 
 ```python
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
 
 # Quantum measurement data
 counts = {"000": 400, "111": 350, "001": 150, "110": 100}
@@ -54,8 +54,8 @@ print(f"Pathway Concentration: {pcr:.2f}x")
 ### Comprehensive Analysis
 
 ```python
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.entanglement_error_correlation import compute_entanglement_error_correlation
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.entanglement_error_correlation import compute_entanglement_error_correlation
 
 # GHZ state decoherence analysis
 ghz_counts = {"000": 450, "111": 450, "001": 50, "110": 50}
@@ -72,7 +72,7 @@ print(f"Topology Correlation: {eec:.4f}")
 ### Temporal Analysis
 
 ```python
-from src.core.analysis.metrics.temporal_pathway_stability import compute_temporal_pathway_stability
+from qforge.core.analysis.metrics.temporal_pathway_stability import compute_temporal_pathway_stability
 
 # Pathway rankings across different noise levels
 rankings = [
@@ -90,7 +90,7 @@ print(f"Persistent Pathways: {tps.persistent_pathways}")
 ### Emergence Analysis
 
 ```python
-from src.core.analysis.metrics.complexity_emergence_score import compute_complexity_emergence_score
+from qforge.core.analysis.metrics.complexity_emergence_score import compute_complexity_emergence_score
 
 # Multi-qubit system data
 multi_qubit_data = {

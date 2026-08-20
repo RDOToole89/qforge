@@ -22,12 +22,12 @@ Analytical Baselines (Phase 1 Scientific Rigor):
 import numpy as np
 
 # Use core total_correlation directly (avoids MetricResult wrapper)
-from src.core.analysis.core.information_theory import entropy, total_correlation
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.entanglement_error_correlation import (
+from qforge.core.analysis.core.information_theory import entropy, total_correlation
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
+from qforge.core.analysis.metrics.pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
 )
 
@@ -88,7 +88,7 @@ class TestAnalyticalBaselines:
         counts_min = {"000": 10000}
         # We need to use the core entropy function carefully.
         # Assuming we have a helper or use the one from integration tests pattern.
-        from src.core.analysis.core.information_theory import counts_to_probabilities
+        from qforge.core.analysis.core.information_theory import counts_to_probabilities
 
         probs_min = np.array(list(counts_to_probabilities(counts_min).values()))
         h_min = entropy(probs_min)

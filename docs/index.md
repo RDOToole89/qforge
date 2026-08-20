@@ -43,13 +43,13 @@ All metrics are general-purpose information-theoretic and statistical measures o
 
 ```bash
 # List available experiments
-uv run python -m src.cli list
+uv run qforge list
 
 # Run an experiment
-uv run python -m src.cli run 01_superposition
+uv run qforge run 01_superposition
 
 # With custom parameters
-uv run python -m src.cli run 01_superposition -s error_rate=0.1 -s num_qubits=3
+uv run qforge run 01_superposition -s error_rate=0.1 -s num_qubits=3
 ```
 
 See [CLI Reference](reference/cli.md) for full documentation.
@@ -57,8 +57,7 @@ See [CLI Reference](reference/cli.md) for full documentation.
 **Using the Engine API:**
 
 ```python
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge import run, ExperimentConfig
 
 config = ExperimentConfig(
     num_qubits=3,

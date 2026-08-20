@@ -79,7 +79,7 @@ All three must pass before a PR can be merged.
 uv run pytest
 
 # Run with coverage report
-uv run pytest --cov=src/core/analysis --cov-report=term-missing
+uv run pytest --cov=src/qforge/core/analysis --cov-report=term-missing
 
 # Run a specific test file
 uv run pytest tests/core/test_metrics.py
@@ -88,20 +88,20 @@ uv run pytest tests/core/test_metrics.py
 uv run pytest -n auto
 ```
 
-Coverage is tracked for `src/core/analysis/`. When adding new metrics or analysis code, include tests that cover the core computation paths.
+Coverage is tracked for `src/qforge/core/analysis/`. When adding new metrics or analysis code, include tests that cover the core computation paths.
 
 ## Architecture
 
 The framework follows a strict three-layer architecture:
 
 ```
-src/experiments/    Opinionated experiment programs
+src/qforge/experiments/    Opinionated experiment programs
        |
        v
-src/engine/         Orchestration: run(), sweep(), Pydantic models, storage
+src/qforge/engine/         Orchestration: run(), sweep(), Pydantic models, storage
        |
        v
-src/core/           Pure physics: circuits, noise, state prep, metrics
+src/qforge/core/           Pure physics: circuits, noise, state prep, metrics
 ```
 
 **Rules:**
@@ -114,25 +114,25 @@ For the full architectural description, see [CLAUDE.md](CLAUDE.md).
 
 ## Adding a New Metric
 
-All analysis metrics live in `src/core/analysis/metrics/`. To add a new one:
+All analysis metrics live in `src/qforge/core/analysis/metrics/`. To add a new one:
 
-1. **Create the metric module** in `src/core/analysis/metrics/your_metric.py`. Implement a function that takes measurement counts (a `dict[str, int]`) and returns a `float`.
+1. **Create the metric module** in `src/qforge/core/analysis/metrics/your_metric.py`. Implement a function that takes measurement counts (a `dict[str, int]`) and returns a `float`.
 
-2. **Register it** using `MetricSpec` in `src/core/analysis/metrics/registry.py`:
+2. **Register it** using `MetricSpec` in `src/qforge/core/analysis/metrics/registry.py`:
 
 ```python
-from src.core.analysis.metrics.registry import MetricSpec
+from qforge.core.analysis.metrics.registry import MetricSpec
 
 # In the METRIC_SPECS list or equivalent registration block:
 MetricSpec(
     name="your_metric_name",
-    module="src.core.analysis.metrics.your_metric",
+    module="qforge.core.analysis.metrics.your_metric",
     function="compute_your_metric",
     description="Brief description of what this metric measures.",
 )
 ```
 
-3. **Add schema support** in `src/core/analysis/metrics/schema_bridge.py` so the metric appears in the v1.0 schema output.
+3. **Add schema support** in `src/qforge/core/analysis/metrics/schema_bridge.py` so the metric appears in the v1.0 schema output.
 
 4. **Write tests** covering at minimum:
    - A known-answer test with a simple distribution.

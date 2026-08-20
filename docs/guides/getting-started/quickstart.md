@@ -24,8 +24,7 @@ Results are saved as JSON in the `results/` directory with full provenance.
 For more control, use the engine API directly:
 
 ```python
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge import run, ExperimentConfig
 
 result = run(ExperimentConfig(
     num_qubits=3,
@@ -71,7 +70,7 @@ Available profiles: `"decoherence"` (the full 8-metric suite), `"quick"`, and `"
 You can also run the analysis pipeline on raw measurement data without the engine:
 
 ```python
-from src.core.analysis.pipelines.pathway_analysis import run_all_to_schema
+from qforge.core.analysis.pipelines.pathway_analysis import run_all_to_schema
 
 counts = {"000": 400, "111": 400, "001": 100, "110": 100}
 results = run_all_to_schema(counts)
@@ -85,9 +84,7 @@ print(f"Structure Score: {results['structure_score']['value']:.4f}")
 Explore how a parameter affects your experiment across a range of values:
 
 ```python
-from src.engine.api import sweep
-from src.engine.models import ExperimentConfig
-from src.engine.models.sweep import SweepManifest
+from qforge import ExperimentConfig, SweepManifest, sweep
 
 manifest = SweepManifest(
     base_config=ExperimentConfig(

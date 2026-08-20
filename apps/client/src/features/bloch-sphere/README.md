@@ -196,7 +196,7 @@ The `fingerprint` array contains the flattened upper-triangular delta-covariance
 
 ```python
 # In the Python framework
-from src.core.analysis.core.correlations import compute_fingerprint_vector
+from qforge.core.analysis.core.correlations import compute_fingerprint_vector
 
 # From experiment results
 fingerprint = compute_fingerprint_vector(

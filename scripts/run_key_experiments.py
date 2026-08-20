@@ -16,8 +16,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge.engine.api import run
+from qforge.engine.models import ExperimentConfig
 
 
 def print_result_summary(label: str, result):

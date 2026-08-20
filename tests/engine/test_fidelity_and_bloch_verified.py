@@ -1,6 +1,6 @@
 """Exact-value verification tests for quantum math in the engine layer.
 
-Covers ``src/engine/fidelity.py`` and ``src/engine/bloch_math.py``.
+Covers ``src/qforge/engine/fidelity.py`` and ``src/qforge/engine/bloch_math.py``.
 
 Every assertion below is checked against the closed-form definition of the
 quantity, not against whatever the implementation happens to return. The goal
@@ -22,8 +22,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.state_preparation import create_state_instance
-from src.engine.bloch_math import (
+from qforge.core.state_preparation import create_state_instance
+from qforge.engine.bloch_math import (
     compute_bloch_data,
     counts_to_diagonal_density_matrix,
     density_matrix_to_bloch,
@@ -34,7 +34,7 @@ from src.engine.bloch_math import (
     statevector_to_density_matrix,
     two_qubit_correlators,
 )
-from src.engine.fidelity import (
+from qforge.engine.fidelity import (
     _compute_fidelity_density_matrix,
     _compute_fidelity_from_counts,
     _compute_fidelity_statevector,

@@ -2,7 +2,7 @@
 Test pipeline integration for the analysis framework.
 """
 
-from src.core.analysis.pipelines.pathway_analysis import (
+from qforge.core.analysis.pipelines.pathway_analysis import (
     analyze_decoherence_structure,
     compute_all_pathway_metrics,
 )

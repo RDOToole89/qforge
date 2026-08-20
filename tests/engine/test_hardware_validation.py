@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.engine.execution.hardware_validation import (
+from qforge.engine.execution.hardware_validation import (
     HardwareFeasibility,
     extract_backend_capabilities,
     validate_circuit_for_backend,

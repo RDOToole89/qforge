@@ -5,7 +5,7 @@ Test metric registry system for dynamic metric computation and management.
 import numpy as np
 import pytest
 
-from src.core.analysis.metrics.registry import (
+from qforge.core.analysis.metrics.registry import (
     _METRIC_REGISTRY,
     MetricResult,
     compute_all,
@@ -163,11 +163,11 @@ class TestRegistryIntegration:
         registry_results = compute_all(counts=counts)
 
         # Compare with direct calls
-        from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-        from src.core.analysis.metrics.pathway_concentration_ratio import (
+        from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+        from qforge.core.analysis.metrics.pathway_concentration_ratio import (
             compute_pathway_concentration_ratio,
         )
-        from src.core.analysis.metrics.structure_score import compute_structure_score
+        from qforge.core.analysis.metrics.structure_score import compute_structure_score
 
         direct_ai = compute_asymmetry_index(counts)
         direct_pcr = compute_pathway_concentration_ratio(counts)

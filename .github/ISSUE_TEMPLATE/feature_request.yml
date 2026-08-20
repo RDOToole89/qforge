@@ -31,10 +31,10 @@ body:
     attributes:
       label: Area
       options:
-        - Engine (src/engine/)
-        - Analysis / Metrics (src/core/analysis/)
-        - State Preparation (src/core/state_preparation/)
-        - Experiments (src/experiments/)
+        - Engine (src/qforge/engine/)
+        - Analysis / Metrics (src/qforge/core/analysis/)
+        - State Preparation (src/qforge/core/state_preparation/)
+        - Experiments (src/qforge/experiments/)
         - API Server (apps/api/)
         - Web Client (apps/client/)
         - CLI

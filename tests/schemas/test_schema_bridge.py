@@ -4,7 +4,7 @@ Test schema bridge compatibility for the analysis metrics.
 
 import pytest
 
-from src.core.analysis.metrics.schema_bridge import (
+from qforge.core.analysis.metrics.schema_bridge import (
     get_schema_field_mapping,
 )
 

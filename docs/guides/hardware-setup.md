@@ -61,7 +61,7 @@ uv sync  # qiskit-ibm-runtime is already declared in pyproject.toml
 ### Run a Single Hardware Experiment
 
 ```python
-from src.engine.api import run
+from qforge.engine.api import run
 
 result = run({
     "num_qubits": 3,
@@ -96,7 +96,7 @@ result = run({
 Sessions keep the backend reserved across multiple experiments, avoiding re-queuing:
 
 ```python
-from src.engine.api import sweep
+from qforge.engine.api import sweep
 
 results = sweep({
     "base_config": {

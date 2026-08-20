@@ -4,13 +4,13 @@ This script makes the Python backend the single source of truth for the static
 catalogs that the React Native client would otherwise hardcode. It introspects:
 
 - State types / sim modes / noise types / experiment types / qubit range:
-  the ``ExperimentConfig`` Pydantic model (``src/engine/models/config.py``).
+  the ``ExperimentConfig`` Pydantic model (``src/qforge/engine/models/config.py``).
 - Metric profiles + individual metric names:
-  ``src/core/analysis/metrics/profiles.py`` and the metric registry.
+  ``src/qforge/core/analysis/metrics/profiles.py`` and the metric registry.
 - Named statevectors:
-  built with ``src/core/state_preparation`` + Qiskit ``Statevector``.
+  built with ``src/qforge/core/state_preparation`` + Qiskit ``Statevector``.
 - Per-state two-qubit correlator signatures:
-  ``src/engine/bloch_math.two_qubit_correlators`` on the prepared states.
+  ``src/qforge/engine/bloch_math.two_qubit_correlators`` on the prepared states.
 
 It emits ``apps/client/src/generated/catalog.ts``.
 
@@ -41,10 +41,10 @@ import numpy as np
 from numpy.typing import NDArray
 from qiskit.quantum_info import DensityMatrix, Statevector, partial_trace
 
-from src.core.analysis.metrics.profiles import METRIC_PROFILES
-from src.core.state_preparation.state_factory import prepare_state
-from src.engine.bloch_math import two_qubit_correlators
-from src.engine.models.config import ExperimentConfig
+from qforge.core.analysis.metrics.profiles import METRIC_PROFILES
+from qforge.core.state_preparation.state_factory import prepare_state
+from qforge.engine.bloch_math import two_qubit_correlators
+from qforge.engine.models.config import ExperimentConfig
 
 # Tolerances for cleaning floating-point dust before emission.
 _ZERO_TOL = 1e-12

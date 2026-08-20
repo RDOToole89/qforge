@@ -5,13 +5,13 @@ QForge is built around a decoupled quantum experiment engine that can serve any 
 ## The Three Layers
 
 ```
-src/experiments/    Opinionated experiment programs (basics, advanced, decoherence, hardware)
+src/qforge/experiments/    Opinionated experiment programs (basics, advanced, decoherence, hardware)
        |
        v
-src/engine/         Orchestration: run(), sweep(), Pydantic models, provenance, storage
+src/qforge/engine/         Orchestration: run(), sweep(), Pydantic models, provenance, storage
        |
        v
-src/core/           Pure physics and statistics: state prep, noise models, analysis metrics, math
+src/qforge/core/           Pure physics and statistics: state prep, noise models, analysis metrics, math
 ```
 
 **Dependency rules:**
@@ -20,15 +20,14 @@ src/core/           Pure physics and statistics: state prep, noise models, analy
 - `engine/` must not import from `experiments/`
 - `experiments/` may import from both
 
-**Key principle**: `src/core/` is pure physics and statistics — it knows nothing about experiment programs. `src/engine/` orchestrates without domain knowledge. Only `src/experiments/` carries opinionated experiment programs. New experiment suites can be built on the same engine without touching the lower layers.
+**Key principle**: `src/qforge/core/` is pure physics and statistics — it knows nothing about experiment programs. `src/qforge/engine/` orchestrates without domain knowledge. Only `src/qforge/experiments/` carries opinionated experiment programs. New experiment suites can be built on the same engine without touching the lower layers.
 
 ## Engine API
 
 The engine exposes two entry points:
 
 ```python
-from src.engine.api import run, sweep
-from src.engine.models import ExperimentConfig
+from qforge import ExperimentConfig, run, sweep
 
 result = run(ExperimentConfig(
     num_qubits=3,
@@ -44,7 +43,7 @@ result = run(ExperimentConfig(
 
 `run()` executes a single configuration; `sweep()` expands a `SweepManifest` (base config + parameter ranges, Cartesian product) into many runs.
 
-### Configuration (`src/engine/models/config.py`)
+### Configuration (`src/qforge/engine/models/config.py`)
 
 `ExperimentConfig` is a typed Pydantic model. Highlights:
 
@@ -59,7 +58,7 @@ result = run(ExperimentConfig(
 
 ### Results
 
-`run()` returns an `ExperimentResult` composed of focused submodels (`src/engine/models/`):
+`run()` returns an `ExperimentResult` composed of focused submodels (`src/qforge/engine/models/`):
 
 - `analysis` — circuit statistics and measurement results (counts, probabilities, fidelity, statevector or density matrix depending on `sim_mode`)
 - `metrics_bundle` — a `MetricsBundle`: dict of metric name → entry with `value`, `ci95` (bootstrap confidence interval), `status`, and `extras`
@@ -69,7 +68,7 @@ result = run(ExperimentConfig(
 ### Engine modules
 
 ```
-src/engine/
+src/qforge/engine/
 ├── api.py               # run(), sweep(), iter_experiment_configs()
 ├── bloch_math.py        # Bloch sphere coordinate math for visualization
 ├── fidelity.py          # Statevector / density matrix / fidelity extraction
@@ -86,7 +85,7 @@ src/engine/
 ## Core Layer
 
 ```
-src/core/
+src/qforge/core/
 ├── state_preparation/   # 6 state types, factory + registry pattern
 ├── noise_models/        # 8 physics-based channels with Kraus operators
 ├── math/                # Shared primitives: Pauli matrices, rates, distances, indexing
@@ -112,11 +111,11 @@ All metrics are general-purpose information-theoretic and statistical measures o
 | `complexity_emergence_score` | Logistic fit locating a threshold in a metric-vs-size curve |
 | `total_correlation` | Multi-information across all qubits |
 
-Metrics are registered declaratively via `MetricSpec` in `src/core/analysis/metrics/registry.py`, with bootstrap 95% confidence intervals and per-metric status. Profiles in `profiles.py` group them into named selections (`decoherence`, `quick`, `information_theory`).
+Metrics are registered declaratively via `MetricSpec` in `src/qforge/core/analysis/metrics/registry.py`, with bootstrap 95% confidence intervals and per-metric status. Profiles in `profiles.py` group them into named selections (`decoherence`, `quick`, `information_theory`).
 
 ## Experiments Layer
 
-Experiment programs follow a pluggable pattern (`src/experiments/base.py`): each program has a name, a description, a default `ExperimentConfig`, and a `run(overrides)` method. Programs register in a central registry and are grouped into:
+Experiment programs follow a pluggable pattern (`src/qforge/experiments/base.py`): each program has a name, a description, a default `ExperimentConfig`, and a `run(overrides)` method. Programs register in a central registry and are grouped into:
 
 - `basics/` — an 11-step learning path plus deep dives
 - `advanced/` — classic algorithms (Shor, Grover, teleportation, VQE, QAOA)
@@ -127,7 +126,7 @@ Experiment programs follow a pluggable pattern (`src/experiments/base.py`): each
 
 All frontends are thin — they call the engine, never the reverse:
 
-- **CLI** (`src/cli.py`): parse args → look up the experiment program → `run()` → print. No orchestration logic.
+- **CLI** (`src/qforge/cli.py`): parse args → look up the experiment program → `run()` → print. No orchestration logic.
 - **FastAPI server** (`apps/api/`): HTTP endpoints for experiments, results, and Bloch visualization data.
 - **React Native / Expo client** (`apps/client/`): Bloch sphere visualizer, circuit builder with playback, experiment configurator, glossary.
 

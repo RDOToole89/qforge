@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_by": "scripts/gen_quantum_golden.py",
-  "source": "src/engine/bloch_math.py",
+  "source": "src/qforge/engine/bloch_math.py",
   "convention": "qubit 0 = MSB = leftmost bitstring char; statevector amplitudes are [real, imag] pairs of length 2^n. Backend partial_trace_single_qubit uses the same MSB ordering, so qubit index q matches FE qubit index q.",
   "states": [
     {
