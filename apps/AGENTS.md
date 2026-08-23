@@ -114,10 +114,10 @@ navigation chrome in the meantime.
 Parked from the Bloch visualizer: X/Y basis on the 2-qubit view so Cluster
 states show non-zero correlators. Still valid; not next.
 
-### FE-5 — FastAPI as a library dependency
-`fastapi` / `uvicorn` are required deps of the Python package even though the
-engine runs without HTTP. When you resume: `qforge[api]` extra, keep Docker
-installing that extra. Do not fold `apps.api` into the `qforge` package.
+### FE-5 — FastAPI as a library dependency (done)
+`fastapi` / `uvicorn` live in the `qforge[api]` extra. `pip install qforge`
+is engine + CLI. Docker and CI install `--extra api`. Do not fold `apps.api`
+into the `qforge` package.
 
 ### FE-6 — EEC on hardware is logical topology
 `entanglement_error_correlation` correlates a **logical** entanglement graph

@@ -31,7 +31,8 @@ same dependency set.
 If you want to run both the Python API and the web frontend:
 
 ```bash
-# Terminal 1: Start the API server (fastapi/uvicorn are part of the default sync)
+# Terminal 1: Start the API server
+uv sync --extra api
 uv run uvicorn apps.api.main:app --reload --port 8000
 
 # Terminal 2: Start the web client

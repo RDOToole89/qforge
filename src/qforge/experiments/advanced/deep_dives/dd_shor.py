@@ -233,13 +233,18 @@ class ShorExperiment(BaseExperiment):
             visualization_type=["histogram", "circuit"],
         )
 
-    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
+    def run(
+        self,
+        overrides: Mapping[str, Any] | None = None,
+        *,
+        ctx: Any | None = None,
+    ) -> ExperimentResult:
         """Run Shor's algorithm and report factoring results.
 
         The result includes standard framework output plus extras
         with factoring-specific information (success rate, factors found).
         """
-        result = super().run(overrides)
+        result = super().run(overrides, ctx=ctx)
 
         # Post-process: try to extract factors from measurement outcomes
         cfg = self.default_config()

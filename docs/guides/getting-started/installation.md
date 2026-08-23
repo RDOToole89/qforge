@@ -22,10 +22,14 @@ cd qforge
 # Create the .venv and install runtime + dev + test deps from uv.lock.
 # uv reads .python-version and installs Python 3.12 if needed.
 uv sync
+
+# HTTP server (apps/api) is an extra — not required for the engine or CLI
+uv sync --extra api
 ```
 
 That's it — `uv sync` creates `.venv/`, resolves the pinned interpreter, and installs
-everything. Run commands inside the environment with `uv run <command>`.
+the engine. Add `--extra api` for FastAPI / uvicorn. Run commands inside the
+environment with `uv run <command>`.
 
 To include the documentation or security tool groups as well:
 
@@ -62,6 +66,16 @@ uv run pytest tests/core/test_metrics.py -v
 ```
 
 ## Optional Dependencies
+
+### HTTP API (`qforge[api]`)
+
+The engine and CLI do not need FastAPI. The visual-lab server does:
+
+```bash
+uv sync --extra api
+# or, once published: pip install 'qforge[api]'
+uv run uvicorn apps.api.main:app --reload --port 8000
+```
 
 ### Documentation
 

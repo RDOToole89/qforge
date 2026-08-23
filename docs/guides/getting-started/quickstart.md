@@ -126,7 +126,8 @@ for r in results:
 To explore experiments visually with the Bloch sphere, circuit builder, and glossary:
 
 ```bash
-# Terminal 1: Start the API server (fastapi/uvicorn are installed by `uv sync`)
+# Terminal 1: Start the API server (needs the api extra)
+uv sync --extra api
 uv run uvicorn apps.api.main:app --reload --port 8000
 
 # Terminal 2: Start the web client

@@ -20,7 +20,7 @@ src/qforge/core/           Pure physics and statistics: state prep, noise models
 - `engine/` must not import from `experiments/`
 - `experiments/` may import from both
 
-**Key principle**: `src/qforge/core/` is pure physics and statistics — it knows nothing about experiment programs. `src/qforge/engine/` orchestrates without domain knowledge. Only `src/qforge/experiments/` carries opinionated experiment programs. New experiment suites can be built on the same engine without touching the lower layers.
+**Key principle**: `src/qforge/core/` is pure physics and statistics — it knows nothing about experiment programs. It has no chemistry, no Hamiltonian type, and no energy metric: Pauli strings and ⟨P⟩ live here; weighted sums and domain names live in programs. `src/qforge/engine/` orchestrates without domain knowledge. Only `src/qforge/experiments/` carries opinionated experiment programs. New experiment suites can be built on the same engine without touching the lower layers.
 
 ## Engine API
 
@@ -54,7 +54,8 @@ result = run(ExperimentConfig(
 | `noise_enabled`, `noise_type`, `error_rate` | Noise channel selection and strength |
 | `shots`, `rng_seed` | Sampling and reproducibility |
 | `metrics` | Metric profile name (`"structure"`, `"quick"`, `"information_theory"`) or an explicit list of metric names |
-| `observables` | Optional Pauli strings (MSB-left, same order as bitstrings). Estimates are ⟨P⟩ ∈ [-1, 1], not a VQE energy |
+| `observables` | Optional Pauli strings (MSB-left, same order as bitstrings). Estimates are ⟨P⟩ ∈ [-1, 1], not a VQE energy or QAOA cost |
+| `visualization_type` | Plot(s) to save. `'circuit'` is Qiskit's `circuit.draw` plus unique-gate explainers; omit it or use `'none'` to skip |
 | `experiment_type` | Optional free-string label for grouping and storage (not a closed taxonomy) |
 
 ### Results
@@ -62,6 +63,9 @@ result = run(ExperimentConfig(
 `run()` returns an `ExperimentResult` composed of focused submodels (`src/qforge/engine/models/`):
 
 - `analysis` — circuit statistics and measurement results (counts, probabilities, fidelity, optional Pauli `observables`, statevector or density matrix depending on `sim_mode`)
+- Experiment programs may attach interpretation extras on the result
+  (VQE reports `h2_energy` / `h2_fci`; QAOA reports `maxcut_cost` /
+  `maxcut_optimal` from those ⟨P⟩). That is not a core metric.
 - `metrics_bundle` — a `MetricsBundle`: dict of metric name → entry with `value`, `ci95` (bootstrap confidence interval), `status`, and `extras`
 - `provenance` — git SHA, software versions, host info, backend/job identifiers for hardware runs
 - `quality` — quality assessment of the run
@@ -130,8 +134,8 @@ Out-of-tree programs call `register_experiment()` so they appear in `qforge list
 
 All frontends are thin — they call the engine, never the reverse:
 
-- **CLI** (`src/qforge/cli.py`): parse args → look up the experiment program → `run()` → print. No orchestration logic.
-- **FastAPI server** (`apps/api/`): HTTP endpoints for experiments, results, and Bloch visualization data.
+- **CLI** (`src/qforge/cli.py`): parse args → `ExperimentProgram.run()` / engine `sweep()` → print. No domain decisions.
+- **FastAPI server** (`apps/api/`): HTTP consumer. Install via `qforge[api]` / `uv sync --extra api`. Not part of the engine install.
 - **React Native / Expo client** (`apps/client/`): Bloch sphere visualizer, circuit builder with playback, experiment configurator, glossary.
 
 ## Execution Backends

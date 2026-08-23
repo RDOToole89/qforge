@@ -156,6 +156,7 @@ The CLI is **thin and boring**: parse args → call `run()` / `ExperimentProgram
 - `src/qforge/core/analysis/metrics/` — strictly general information-theoretic/statistical measures
 - Experiment programs may *interpret* metric values in their own domain context
 - The engine routes metric selection via `metrics=` (profile or list), and labels runs via `experiment_type`
+- Core has no chemistry, no Hamiltonian type, and no energy metric. `observables=` returns ⟨P⟩; VQE turns those into an energy and QAOA into a MaxCut cost
 
 ## Rules for Claude in This Repo
 

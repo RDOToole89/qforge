@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   They may set `experiment_type="decoherence"` as a free-string label.
 - `ExperimentConfig.experiment_type` is an optional free string, not a closed
   Literal taxonomy.
+- FastAPI / uvicorn are no longer required runtime deps. Install
+  `qforge[api]` (or `uv sync --extra api`) for the HTTP server. Docker
+  installs that extra.
 - `ExperimentConfig.research_type` renamed to `experiment_type`
 - Metric profile `structured_decoherence` renamed to `decoherence` (then to
   `structure`); metrics are requested via `metrics=` (profile name or explicit
@@ -70,6 +73,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ⟨P⟩.
 - Learning-path experiments choose default metrics for the question they ask
   (with a CLI `metrics_hint`); protocol experiments leave metrics off
+- VQE deep dive estimates the 2-qubit H2 Pauli terms via `observables=`
+  and reports ⟨H⟩ / FCI on the result. Energy is experiment interpretation,
+  not a core metric. `qforge run` calls `ExperimentProgram.run()` so
+  programs can attach that interpretation.
+- QAOA deep dive estimates one ⟨ZZ⟩ per MaxCut edge via `observables=`
+  and reports ⟨C⟩ / exact MaxCut on the result. Same pattern as VQE —
+  a cost, not a core metric.
+- Circuit visualization uses Qiskit's `circuit.draw(output='mpl')`. The
+  live circuit is passed into the renderer. Unique-gate explainers appear
+  on the figure and in the CLI when `visualization_type` includes
+  `circuit`. Omit `circuit` or set `none` to skip.
 
 ### Changed
 - Migrated Python tooling to `uv` (pyproject.toml + uv.lock; `uv sync` / `uv run`);

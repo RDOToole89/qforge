@@ -2511,7 +2511,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
@@ -3269,7 +3269,6 @@ name = "qforge"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "fastapi" },
     { name = "fastjsonschema" },
     { name = "hypernetx" },
     { name = "jsonschema" },
@@ -3286,6 +3285,11 @@ dependencies = [
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tqdm" },
     { name = "typer" },
+]
+
+[package.optional-dependencies]
+api = [
+    { name = "fastapi" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -3317,7 +3321,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.1" },
-    { name = "fastapi", specifier = ">=0.115" },
+    { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.115" },
     { name = "fastjsonschema", specifier = ">=2.16" },
     { name = "hypernetx", specifier = ">=2.3" },
     { name = "jsonschema", specifier = ">=4.20" },
@@ -3333,8 +3337,9 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.13" },
     { name = "tqdm", specifier = ">=4.66" },
     { name = "typer", specifier = ">=0.12" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
+    { name = "uvicorn", extras = ["standard"], marker = "extra == 'api'", specifier = ">=0.30" },
 ]
+provides-extras = ["api"]
 
 [package.metadata.requires-dev]
 dev = [

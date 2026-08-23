@@ -175,6 +175,8 @@ class ExperimentConfig(BaseModel):
         description=(
             "Visualization type(s) to generate. "
             "String for single type, list for multiple. "
+            "'circuit' uses Qiskit's circuit.draw (mpl) plus gate explainers; "
+            "omit it or set 'none' to skip. "
             "Valid: 'histogram', 'density_matrix', 'correlation', 'circuit', "
             "'metrics_summary', 'bloch_sphere', 'all', 'none'"
         ),

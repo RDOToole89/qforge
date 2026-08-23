@@ -59,7 +59,7 @@ experiments/
 │       ├── dd_grover.py                    # Extended Grover's
 │       ├── dd_teleportation.py             # Extended teleportation
 │       ├── dd_vqe.py                       # Variational Eigensolver
-│       ├── dd_qaoa.py                      # QAOA optimization
+│       ├── dd_qaoa.py                      # QAOA MaxCut from ⟨ZZ⟩
 │       ├── dd_bernstein_vazirani.py        # Hidden string
 │       └── dd_bb84.py                      # Quantum key distribution
 │
@@ -136,8 +136,8 @@ All experiments registered in `__init__.py` under `EXPERIMENT_REGISTRY` (49 tota
 | `dd_bb84` | advanced/deep_dives/ | BB84 QKD |
 | `shor` | advanced/deep_dives/ | Shor's factoring |
 | `grover` | advanced/deep_dives/ | Extended Grover's |
-| `vqe` | advanced/deep_dives/ | VQE for H2 |
-| `qaoa` | advanced/deep_dives/ | QAOA MaxCut |
+| `vqe` | advanced/deep_dives/ | VQE for H2 (⟨H⟩ from Pauli estimates) |
+| `qaoa` | advanced/deep_dives/ | QAOA MaxCut (⟨C⟩ from ⟨ZZ⟩ per edge) |
 
 ### Decoherence (8)
 
@@ -229,9 +229,10 @@ qforge run my_experiment_name
 
 ### DO NOT
 
-- Put analysis logic in experiments (belongs in `src/qforge/core/analysis/`)
+- Put histogram analysis logic in experiments (belongs in `src/qforge/core/analysis/`)
 - Put visualization logic here (handled by the engine)
 - Hardcode hardware-specific logic in basics/ or advanced/ experiments
+- Register VQE energy, QAOA MaxCut cost, or Grover success as a core metric, or add a Hamiltonian type to core — interpret `observables=` (⟨P⟩) in the program. VQE and QAOA are the in-tree examples.
 
 ### ALWAYS
 

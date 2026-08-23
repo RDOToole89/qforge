@@ -27,6 +27,7 @@ from qforge.engine.visualization import (
     DensityMatrixRenderer,
     HistogramRenderer,
     create_default_service,
+    explain_circuit_gates,
     save_figure,
 )
 
@@ -301,6 +302,16 @@ class TestCorrelationRenderer:
 class TestCircuitDiagramRenderer:
     """Test circuit diagram rendering."""
 
+    def test_explain_circuit_gates_unique_first_seen(self):
+        qc = QuantumCircuit(2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.h(1)
+        rows = explain_circuit_gates(qc)
+        assert [row["name"] for row in rows] == ["h", "cx"]
+        assert "superposition" in rows[0]["explainer"]
+        assert rows[0]["label"] == "H"
+
     def test_can_render_with_circuit(self):
         renderer = CircuitDiagramRenderer()
         qc = QuantumCircuit(2)
@@ -331,6 +342,9 @@ class TestCircuitDiagramRenderer:
         assert os.path.isfile(artifact.path)
         assert artifact.metadata["renderer"] == "CircuitDiagramRenderer"
         assert artifact.metadata["num_qubits"] == 2
+        labels = [row["label"] for row in artifact.metadata["gate_explainers"]]
+        assert "H" in labels
+        assert "CX" in labels
 
     @pytest.mark.skipif(not _has_pylatexenc(), reason="pylatexenc not installed")
     def test_integration_circuit_viz(self):
@@ -347,6 +361,20 @@ class TestCircuitDiagramRenderer:
         circuit_arts = [a for a in result.artifacts if a.kind == "circuit"]
         assert len(circuit_arts) >= 1
         assert os.path.isfile(circuit_arts[0].path)
+        explainers = circuit_arts[0].metadata["gate_explainers"]
+        assert any(row["name"] == "h" for row in explainers)
+
+    def test_visualization_none_skips_circuit(self):
+        result = run(
+            ExperimentConfig(
+                num_qubits=2,
+                state_type="GHZ",
+                visualization_type="none",
+                shots=32,
+                rng_seed=0,
+            )
+        )
+        assert not any(a.kind == "circuit" for a in result.artifacts)
 
 
 # ---------------------------------------------------------------------------

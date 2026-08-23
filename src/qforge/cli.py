@@ -163,11 +163,9 @@ def run_experiment(
     results_dir: ResultsDirOpt = None,
 ) -> None:
     """Run one experiment (its default setup, unless you pass -s)."""
-    from qforge.engine.api import run
-
     _maybe_results_dir(results_dir)
     overrides = _parse_overrides(override) if override else None
-    config = _config_from_experiment(name, overrides)
+    experiment = _experiment_or_exit(name)
 
     if not json_output:
         console.print(f"[bold]{name}[/bold]")
@@ -175,14 +173,12 @@ def run_experiment(
             console.print(f"[dim]{_format_pairs(overrides)}[/dim]")
 
     try:
-        result = run(config, _app_context())
+        result = experiment.run(overrides, ctx=_app_context())
     except Exception as e:
         console.print(f"[red]Failed:[/red] {e}")
         raise typer.Exit(code=1) from None
 
-    from qforge.experiments import get_experiment
-
-    hint = getattr(get_experiment(name), "metrics_hint", None)
+    hint = getattr(experiment, "metrics_hint", None)
     _print_result(result, json_output, title=name, metrics_hint=hint)
 
 
@@ -340,17 +336,13 @@ def _app_context() -> AppContext | None:
     return AppContext(base_results_dir=str(results_dir))
 
 
-def _config_from_experiment(
-    name: str,
-    overrides: dict[str, Any] | None,
-) -> ExperimentConfig:
-    """Load a registered experiment's default config and apply CLI overrides."""
-    from qforge.engine.models import ExperimentConfig
+def _experiment_or_exit(name: str) -> Any:
+    """Load a registered experiment or print a hint and exit."""
     from qforge.experiments import get_experiment
     from qforge.experiments import list_experiments as registry_list
 
     try:
-        experiment = get_experiment(name)
+        return get_experiment(name)
     except KeyError:
         names = [item[0] for item in registry_list()]
         hint = get_close_matches(name, names, n=3, cutoff=0.5)
@@ -360,6 +352,15 @@ def _config_from_experiment(
         console.print("[dim]See[/dim]  qforge list")
         raise typer.Exit(code=1) from None
 
+
+def _config_from_experiment(
+    name: str,
+    overrides: dict[str, Any] | None,
+) -> ExperimentConfig:
+    """Load a registered experiment's default config and apply CLI overrides."""
+    from qforge.engine.models import ExperimentConfig
+
+    experiment = _experiment_or_exit(name)
     config = experiment.default_config()
     if not overrides:
         return config
@@ -456,6 +457,28 @@ def _print_path(label: str, path: str) -> None:
     console.print(line, overflow="ignore", crop=False)
 
 
+def _print_gate_explainers(result: ExperimentResult) -> None:
+    """Print unique-gate explainers when circuit visualization ran."""
+    rows: list[dict[str, str]] = []
+    for artifact in result.artifacts:
+        if artifact.kind != "circuit":
+            continue
+        extra = artifact.metadata.get("gate_explainers") if artifact.metadata else None
+        if extra:
+            rows = list(extra)
+            break
+    if not rows:
+        return
+    console.print()
+    console.print("[bold]Circuit[/bold]  [dim]Qiskit draw · unique gates[/dim]")
+    table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 2, 0, 0))
+    table.add_column("gate", style="cyan", no_wrap=True)
+    table.add_column("explainer")
+    for row in rows:
+        table.add_row(row.get("label", row.get("name", "")), row.get("explainer", ""))
+    console.print(table)
+
+
 def _print_artifacts(result: ExperimentResult) -> None:
     """Print saved files so a CLI run is not a silent write to results/."""
     if not result.artifacts:
@@ -498,7 +521,7 @@ def _print_counts(result: ExperimentResult) -> None:
         console.print(f"[dim]  … {extra} more in the histogram[/dim]")
 
 
-def _print_metrics(result: ExperimentResult, hint: str | None = None) -> None:
+def _print_metrics(result: ExperimentResult) -> None:
     if not result.metrics_bundle:
         return
     bundle = result.metrics_bundle
@@ -511,8 +534,6 @@ def _print_metrics(result: ExperimentResult, hint: str | None = None) -> None:
     for name, entry in sorted(bundle.metrics.items()):
         table.add_row(name, f"{entry.value:.4f}")
     console.print(table)
-    if hint:
-        console.print(f"[dim]{hint}[/dim]")
 
 
 def _print_observables(result: ExperimentResult) -> None:
@@ -529,6 +550,26 @@ def _print_observables(result: ExperimentResult) -> None:
     for pauli, entry in estimates.items():
         stderr = f"±{entry.stderr:.4f}" if entry.stderr is not None else "exact"
         table.add_row(pauli, f"{entry.value:.4f}", stderr)
+    console.print(table)
+
+
+def _print_extras(result: ExperimentResult) -> None:
+    """Print experiment-program extras (VQE energy, QAOA MaxCut) that are not engine fields."""
+    extras = {
+        key: value for key, value in (result.__pydantic_extra__ or {}).items() if value is not None
+    }
+    if not extras:
+        return
+    console.print()
+    console.print("[bold]Interpretation[/bold]")
+    table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 2, 0, 0))
+    table.add_column("name", style="cyan")
+    table.add_column("value", justify="right")
+    for key, value in extras.items():
+        if isinstance(value, float):
+            table.add_row(key, f"{value:.6f}")
+        else:
+            table.add_row(key, str(value))
     console.print(table)
 
 
@@ -554,8 +595,12 @@ def _print_result(
         console.print(f"[dim]{bits}  ·  {state}[/dim]")
 
     _print_counts(result)
-    _print_metrics(result, hint=metrics_hint)
+    _print_metrics(result)
     _print_observables(result)
+    _print_extras(result)
+    if metrics_hint:
+        console.print(f"[dim]{metrics_hint}[/dim]")
+    _print_gate_explainers(result)
     _print_artifacts(result)
 
 

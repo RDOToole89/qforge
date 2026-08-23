@@ -93,6 +93,7 @@ schema_output = metrics_to_schema(results)  # v1.0 compliant
 - **Return raw floats** — Use MetricResult dataclass
 - **Enumerate 2^n for large n** — Use closed-form when possible (see asymmetry_index.py)
 - **Skip validation functions** — Every metric needs `validate_X_properties()`
+- **Register VQE energy, QAOA MaxCut cost, Grover success, or a molecular Hamiltonian** — those are experiment interpretations of ⟨P⟩ / counts, not distribution metrics
 
 ## Always
 

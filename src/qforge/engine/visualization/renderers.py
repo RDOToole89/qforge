@@ -23,6 +23,7 @@ from matplotlib.ticker import FuncFormatter
 from qforge.engine.models import ArtifactRef
 
 from .export import save_figure
+from .gate_explainers import explain_circuit_gates
 from .service import VisualizationRenderer
 
 logger = logging.getLogger(__name__)
@@ -688,9 +689,12 @@ class CorrelationRenderer(VisualizationRenderer):
 
 
 class CircuitDiagramRenderer(VisualizationRenderer):
-    """Renders a Qiskit QuantumCircuit diagram via ``circuit.draw(output='mpl')``.
+    """Renders a circuit with Qiskit's ``circuit.draw(output='mpl')``.
 
-    Requires ``data["circuit"]`` to be a live ``QuantumCircuit`` object.
+    Requires ``data["circuit"]`` to be a live ``QuantumCircuit``. A short
+    explainer for each unique gate is drawn under the diagram and stored
+    on the artifact. Skip this renderer by omitting ``"circuit"`` from
+    ``visualization_type`` (or set it to ``"none"``).
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
@@ -708,9 +712,9 @@ class CircuitDiagramRenderer(VisualizationRenderer):
         data.get("analysis", {}).get("experiment_parameters", {}) or {}
 
         fig = circuit.draw(output="mpl")
-        # Annotate with depth and gate count
         depth = circuit.depth()
         num_gates = len(circuit.data)
+        explainers = explain_circuit_gates(circuit)
         fig.text(
             0.99,
             0.01,
@@ -720,6 +724,17 @@ class CircuitDiagramRenderer(VisualizationRenderer):
             fontsize=9,
             bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
         )
+        if explainers:
+            legend = "\n".join(f"{row['label']}: {row['explainer']}" for row in explainers)
+            fig.text(
+                0.01,
+                0.01,
+                legend,
+                ha="left",
+                va="bottom",
+                fontsize=8,
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
+            )
 
         # --- Save ---
         base = Path(output_path)
@@ -738,6 +753,7 @@ class CircuitDiagramRenderer(VisualizationRenderer):
                 "depth": depth,
                 "num_gates": num_gates,
                 "num_qubits": circuit.num_qubits,
+                "gate_explainers": explainers,
                 "saved_formats": [Path(p).suffix.lstrip(".") for p in saved_paths],
             },
         )

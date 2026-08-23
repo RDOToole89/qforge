@@ -25,7 +25,7 @@ jobs:
       run: uv python install ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: uv sync --frozen --python ${{ matrix.python-version }}
+      run: uv sync --frozen --extra api --python ${{ matrix.python-version }}
 
     - name: Lint and format check with ruff
       run: |

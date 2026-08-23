@@ -155,13 +155,15 @@ class BellCorrelation(BaseExperiment):
             # metrics=None is the default — this experiment computes its own
         )
 
-    def run(self, overrides: Mapping[str, Any] | None = None) -> ExperimentResult:
+    def run(
+        self, overrides: Mapping[str, Any] | None = None, *, ctx: Any | None = None
+    ) -> ExperimentResult:
         """Run Bell correlation experiment and compute Bell-specific metrics.
 
         Returns standard ExperimentResult. Access Bell metrics via:
             result.analysis.counts → compute_bell_metrics(counts, variant)
         """
-        return super().run(overrides)
+        return super().run(overrides, ctx=ctx)
 
     def run_with_bell_metrics(
         self, overrides: dict[str, Any] | None = None

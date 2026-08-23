@@ -53,6 +53,7 @@ src/qforge/core/
 - **Use global mutable state** — Pass context explicitly via function parameters
 - **Create hardware-specific code** — Keep physics generic; engine handles backends
 - **Name metric profiles after a research topic** — built-in profiles stay topic-free (`structure`, `quick`, `information_theory`)
+- **Add chemistry, a Hamiltonian type, or an energy metric** — observables are Pauli strings and ⟨P⟩. Weighted sums (VQE energy, QAOA cost) and domain names stay in experiment programs
 
 ## Always
 

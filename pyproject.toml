@@ -31,7 +31,10 @@ dependencies = [
     "click>=8.1",
     "tqdm>=4.66",
     "natsort>=8.4",
-    # API server (primary deployment artifact)
+]
+
+[project.optional-dependencies]
+api = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
 ]

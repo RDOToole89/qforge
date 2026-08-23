@@ -161,7 +161,8 @@ git clone https://github.com/RDOToole89/qforge.git
 cd qforge
 
 # Install uv once (https://docs.astral.sh/uv/), then:
-uv sync   # creates .venv and installs everything from uv.lock
+uv sync              # engine + CLI + dev/test
+uv sync --extra api  # also FastAPI for apps/api
 
 # List available experiments
 uv run qforge list
@@ -218,7 +219,7 @@ See [Hardware Setup Guide](docs/guides/hardware-setup.md) for IBM Quantum creden
 ### Launch the Frontend
 
 ```bash
-# Start the API server
+uv sync --extra api
 uv run uvicorn apps.api.main:app --reload --port 8000
 
 # In another terminal
@@ -286,7 +287,7 @@ Start here                      Go deeper                        Study noise
 | `grover` | Search with quadratic speedup via amplitude amplification |
 | `teleportation` | Transfer a state using entanglement + classical bits |
 | `vqe` | Find molecular ground states with hybrid quantum-classical loops |
-| `qaoa` | Solve combinatorial optimization (MaxCut) |
+| `qaoa` | MaxCut ⟨C⟩ from one ⟨ZZ⟩ per edge |
 
 ### Decoherence — 6-Step Noise Study Path
 

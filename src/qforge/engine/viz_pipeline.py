@@ -30,8 +30,14 @@ def render_visualizations(
     analysis: ExperimentAnalysis,
     metrics_bundle: Any,
     saved_path: str,
+    *,
+    circuit: Any | None = None,
 ) -> list[ArtifactRef]:
     """Render all configured visualizations, returning artifact references.
+
+    Circuit diagrams use Qiskit's ``circuit.draw`` and need the live
+    ``circuit`` object. Omit ``"circuit"`` from ``visualization_type``
+    (or set ``"none"``) to skip them.
 
     Non-fatal: if rendering fails for any type, it is logged and skipped.
     Returns an empty list if visualization is disabled or unavailable.
@@ -55,6 +61,8 @@ def render_visualizations(
                     "metrics_bundle": (metrics_bundle.model_dump() if metrics_bundle else None),
                     "export_formats": cfg.export_formats,
                 }
+                if circuit is not None:
+                    viz_payload["circuit"] = circuit
                 out_path = os.path.join(os.path.dirname(saved_path), vt)
                 artifact = service.render_or_none(vt, viz_payload, out_path)
                 if artifact:

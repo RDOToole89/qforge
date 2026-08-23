@@ -222,7 +222,9 @@ def run(
     artifacts: list[ArtifactRef] = [ArtifactRef(kind="analysis", path=saved_path, metadata={})]
 
     # 7) Visualization (multi-type, multi-format)
-    artifacts.extend(render_visualizations(cfg_model, analysis, metrics_bundle, saved_path))
+    artifacts.extend(
+        render_visualizations(cfg_model, analysis, metrics_bundle, saved_path, circuit=circuit)
+    )
 
     # 8) Package final typed result
     result = ExperimentResult(

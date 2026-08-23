@@ -65,8 +65,8 @@ Apply the techniques from the steps to real-world problems.
 | 2 | `qforge run dd_bernstein_vazirani` | Find a hidden string in one query — a more practical oracle problem |
 | 4 | `qforge run dd_bb84` | BB84 quantum key distribution — provably secure communication |
 | 6 | `qforge run shor` | Shor's factoring algorithm — uses QFT to break RSA |
-| 7 | `qforge run vqe` | Variational Quantum Eigensolver — quantum chemistry |
-| 7 | `qforge run qaoa` | Quantum Approximate Optimization — combinatorial problems |
+| 7 | `qforge run vqe` | VQE — ⟨H⟩ for the 2-qubit H2 operator from Pauli estimates |
+| 7 | `qforge run qaoa` | QAOA — MaxCut ⟨C⟩ from one ⟨ZZ⟩ per edge |
 | Any | `qforge run grover` | Extended Grover's search with scaling analysis |
 
 ---

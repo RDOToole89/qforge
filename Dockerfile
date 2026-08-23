@@ -11,7 +11,7 @@ WORKDIR /app
 # --no-install-project: don't build/install qforge — it has no .git in the image
 #   (setuptools_scm would fail), and the app runs from the copied source below.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project --extra api
 
 # Copy the engine and API source. PYTHONPATH makes `import qforge` resolve
 # without installing the project (setuptools_scm needs git).

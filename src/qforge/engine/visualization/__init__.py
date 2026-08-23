@@ -22,6 +22,7 @@ Typical usage:
 from __future__ import annotations
 
 from .export import save_figure
+from .gate_explainers import explain_circuit_gates
 from .renderers import (
     BlochSphereRenderer,
     CircuitDiagramRenderer,
@@ -50,6 +51,7 @@ __all__ = [
     "BlochSphereRenderer",
     "save_figure",
     "create_default_service",
+    "explain_circuit_gates",
     "render_sweep_summary",
     "render_comparison_histograms",
 ]

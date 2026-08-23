@@ -51,7 +51,7 @@ experiments/
 
 ## Visualization System
 
-6 renderers (histogram, density_matrix, correlation, circuit, metrics_summary, bloch_sphere) plus sweep utilities. Plugin architecture in `src/qforge/engine/visualization/`. Config accepts `visualization_type: list[str] | str`.
+6 renderers (histogram, density_matrix, correlation, circuit, metrics_summary, bloch_sphere) plus sweep utilities. Plugin architecture in `src/qforge/engine/visualization/`. Config accepts `visualization_type: list[str] | str`. The circuit renderer is Qiskit's `circuit.draw(output='mpl')` plus unique-gate explainers; omit `"circuit"` or set `"none"` to skip.
 
 ## Local AGENTS.md Files
 
@@ -71,6 +71,7 @@ These refine the rules above but may not contradict them.
 ## Never
 
 - Mix experiment logic into `src/core` or physics primitives into `src/engine`
+- Add chemistry, a Hamiltonian type, or an energy metric to core — engine estimates ⟨P⟩; programs interpret (VQE energy, QAOA MaxCut cost)
 - Skip physics tests when modifying metrics or noise models
 - Add visual-lab features, presets, or native-app work while the visual-lab freeze is in `apps/AGENTS.md`
 - Add AI attribution (Co-Authored-By, Powered by, Generated with) to commits, code, or docs
