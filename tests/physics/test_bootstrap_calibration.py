@@ -14,8 +14,8 @@ These tests are marked as slow because they require many Monte Carlo trials.
 import numpy as np
 import pytest
 
-from src.core.analysis.core.bootstrap import bootstrap_confidence_interval
-from src.core.analysis.core.information_theory import counts_to_probabilities, entropy
+from qforge.core.analysis.core.bootstrap import bootstrap_confidence_interval
+from qforge.core.analysis.core.information_theory import counts_to_probabilities, entropy
 
 
 class TestBootstrapCoverage:

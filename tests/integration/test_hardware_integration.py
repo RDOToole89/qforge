@@ -23,8 +23,8 @@ class TestHardwareIntegration:
 
     def test_ghz_3qubit_hardware(self):
         """Run a 3-qubit GHZ experiment on real hardware."""
-        from src.engine.api import run
-        from src.engine.models import ExperimentConfig
+        from qforge.engine.api import run
+        from qforge.engine.models import ExperimentConfig
 
         result = run(
             ExperimentConfig(
@@ -43,8 +43,8 @@ class TestHardwareIntegration:
 
     def test_hardware_provenance_populated(self):
         """Hardware provenance includes backend and transpilation info."""
-        from src.engine.api import run
-        from src.engine.models import ExperimentConfig
+        from qforge.engine.api import run
+        from qforge.engine.models import ExperimentConfig
 
         result = run(
             ExperimentConfig(
@@ -68,8 +68,8 @@ class TestHardwareIntegration:
 
     def test_hardware_fidelity_computed(self):
         """Hardware results should have a counts-based fidelity estimate."""
-        from src.engine.api import run
-        from src.engine.models import ExperimentConfig
+        from qforge.engine.api import run
+        from qforge.engine.models import ExperimentConfig
 
         result = run(
             ExperimentConfig(

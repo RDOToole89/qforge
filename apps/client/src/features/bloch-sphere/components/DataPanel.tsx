@@ -152,7 +152,7 @@ export default function DataPanel(props: DataPanelProps) {
                 </>
               ) : (
                 <div style={{ fontSize: "11px", color: chrome.text.tertiary, fontStyle: "italic", padding: "10px" }}>
-                  No metrics available. Run with metrics enabled (e.g. metrics="decoherence").
+                  No metrics available. Run with metrics enabled (e.g. metrics="structure").
                 </div>
               )}
             </>

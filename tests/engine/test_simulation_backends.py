@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 from pydantic import ValidationError
 
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge.engine.api import run
+from qforge.engine.models import ExperimentConfig
 
 # ---------------------------------------------------------------------------
 # Config validation

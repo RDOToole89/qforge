@@ -93,7 +93,7 @@ export function useExperimentConfig(): UseExperimentConfigReturn {
   const [balanceCircuit, setBalanceCircuit] = useState(false);
   const [metricsEnabled, setMetricsEnabled] = useState(false);
   const [metricsMode, setMetricsMode] = useState<"profile" | "individual">("profile");
-  const [selectedProfile, setSelectedProfile] = useState("decoherence");
+  const [selectedProfile, setSelectedProfile] = useState("structure");
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
   const [experimentType, setExperimentType] = useState<ExperimentType | null>(null);
   const [multipleRuns, setMultipleRuns] = useState(1);

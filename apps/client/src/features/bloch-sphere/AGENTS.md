@@ -243,4 +243,6 @@ The Data tab accepts JSON arrays of fingerprint entries via the Config modal:
 
 ## Next Priority
 
-**Measurement basis toggle** (v5.1) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. See README.md roadmap for details.
+Frozen until the Python package is installable as `qforge`. Do not add renderers, presets, or native-app work. Parked item when the freeze lifts:
+
+**Measurement basis toggle** (v5.1) — adding X/Y basis to the 2-qubit view so Cluster states show non-zero correlators. Tracked as **FE-4** in `apps/AGENTS.md`.

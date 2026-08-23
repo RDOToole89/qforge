@@ -1,0 +1,42 @@
+"""Shared, tested mathematical primitives for the quantum framework.
+
+Single source of truth for low-level math used across physics (noise models,
+state preparation), analysis (metrics), and the engine (fidelity, Bloch). Import
+these instead of re-deriving the same constants/formulas in multiple modules so
+each concept is implemented and tested exactly once.
+"""
+
+from qforge.core.math.distances import gini_coefficient, total_variation_distance
+from qforge.core.math.indexing import bit_for_qubit, physical_qubit_of_index
+from qforge.core.math.observables import (
+    is_z_basis_pauli,
+    measurement_basis,
+    parse_pauli_string,
+    pauli_expectation_from_counts,
+    pauli_expectation_from_density_matrix,
+    pauli_expectation_from_statevector,
+    pauli_matrix,
+)
+from qforge.core.math.pauli import PAULI_I, PAULI_X, PAULI_Y, PAULI_Z, PAULIS, pauli
+from qforge.core.math.rates import relaxation_probability
+
+__all__ = [
+    "PAULI_I",
+    "PAULI_X",
+    "PAULI_Y",
+    "PAULI_Z",
+    "PAULIS",
+    "pauli",
+    "pauli_matrix",
+    "parse_pauli_string",
+    "is_z_basis_pauli",
+    "measurement_basis",
+    "pauli_expectation_from_counts",
+    "pauli_expectation_from_statevector",
+    "pauli_expectation_from_density_matrix",
+    "relaxation_probability",
+    "total_variation_distance",
+    "gini_coefficient",
+    "bit_for_qubit",
+    "physical_qubit_of_index",
+]

@@ -3,11 +3,11 @@
 These tests lock the numeric/canonicalization behavior of the measurement
 pipeline that feeds every analysis metric:
 
-  * src/engine/analysis/metrics.py  -> extract_counts_from_result,
+  * src/qforge/engine/analysis/metrics.py  -> extract_counts_from_result,
     compute_metrics_bundle
-  * src/engine/models/measurement.py             -> probability/normalization,
+  * src/qforge/engine/models/measurement.py             -> probability/normalization,
     auto-healing validators
-  * src/engine/models/circuit.py                 -> circuit-stat reconciliation
+  * src/qforge/engine/models/circuit.py                 -> circuit-stat reconciliation
 
 Bit-ordering convention (verified end-to-end against Qiskit):
   - Qiskit `get_counts` returns MSB-left bitstrings: the RIGHTMOST character is
@@ -30,13 +30,13 @@ import math
 import pytest
 from pydantic import ValidationError
 
-from src.engine.analysis.metrics import (
+from qforge.engine.analysis.metrics import (
     compute_metrics_bundle,
     extract_counts_from_result,
 )
-from src.engine.models.circuit import CircuitStatistics
-from src.engine.models.config import ExperimentConfig
-from src.engine.models.measurement import MeasurementResults
+from qforge.engine.models.circuit import CircuitStatistics
+from qforge.engine.models.config import ExperimentConfig
+from qforge.engine.models.measurement import MeasurementResults
 
 # ---------------------------------------------------------------------------
 # Helpers / fakes
@@ -389,16 +389,16 @@ def test_compute_metrics_bundle_none_when_metrics_disabled():
 
 
 def test_compute_metrics_bundle_none_on_empty_counts():
-    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="decoherence")
+    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="structure")
     assert compute_metrics_bundle({}, cfg) is None
 
 
 def test_compute_metrics_bundle_metadata_and_entries():
-    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="decoherence")
+    cfg = ExperimentConfig(num_qubits=3, state_type="GHZ", metrics="structure")
     counts = {"000": 400, "111": 400, "001": 100, "110": 100}
     bundle = compute_metrics_bundle(counts, cfg)
     assert bundle is not None
-    assert bundle.profile == "decoherence"
+    assert bundle.profile == "structure"
     assert bundle.metadata.total_shots == 1000
     assert bundle.metadata.unique_outcomes == 4
     assert bundle.metadata.num_qubits == 3
@@ -413,7 +413,7 @@ def test_compute_metrics_bundle_includes_noise_conditions():
     cfg = ExperimentConfig(
         num_qubits=2,
         state_type="GHZ",
-        metrics="decoherence",
+        metrics="structure",
         noise_enabled=True,
         noise_type="phase_flip",
         error_rate=0.05,
@@ -438,7 +438,7 @@ def test_compute_metrics_bundle_no_noise_conditions_when_disabled():
     cfg = ExperimentConfig(
         num_qubits=2,
         state_type="GHZ",
-        metrics="decoherence",
+        metrics="structure",
         noise_enabled=False,
     )
     bundle = compute_metrics_bundle({"00": 1, "11": 1}, cfg)
@@ -460,7 +460,7 @@ def test_e2e_ghz_mass_on_all_zero_and_all_one():
     from qiskit import transpile
     from qiskit_aer import AerSimulator
 
-    from src.core.state_preparation import prepare_state
+    from qforge.core.state_preparation import prepare_state
 
     qc = prepare_state(num_qubits=3, state_type="GHZ")
     qc.measure_all()
@@ -483,7 +483,7 @@ def test_e2e_metric_qubit_index_is_left_positional():
     metric index 2 (= n-1). Locking this catches any silent endianness change
     on either side of the boundary.
     """
-    from src.core.analysis.core.information_theory import marginal_distribution
+    from qforge.core.analysis.core.information_theory import marginal_distribution
 
     counts = extract_counts_from_result({"001": 100}, num_qubits=3)
     # metric index 2 (rightmost) sees the excited bit -> P(bit=1) dominant

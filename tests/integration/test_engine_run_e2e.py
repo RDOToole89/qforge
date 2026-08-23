@@ -15,9 +15,9 @@ import math
 
 import pytest
 
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
-from src.engine.models.results import ExperimentResult
+from qforge.engine.api import run
+from qforge.engine.models import ExperimentConfig
+from qforge.engine.models.results import ExperimentResult
 
 
 def _ghz_qasm(**overrides):
@@ -30,7 +30,7 @@ def _ghz_qasm(**overrides):
         noise_enabled=True,
         noise_type="depolarizing",
         error_rate=0.05,
-        metrics="decoherence",
+        metrics="structure",
     )
     cfg.update(overrides)
     return run(ExperimentConfig(**cfg))

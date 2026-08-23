@@ -11,7 +11,7 @@ index of a basis state is ``sum(q_i * 2**i)``.  All references below are written
 directly in this little-endian basis ordering.
 
 The goal is rigorous correctness plus near-100% line coverage of
-``src/core/state_preparation/``.
+``src/qforge/core/state_preparation/``.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ import pytest
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
-from src.core.state_preparation import (
+from qforge.core.state_preparation import (
     BellState,
     ClusterState,
     CustomState,
@@ -37,8 +37,8 @@ from src.core.state_preparation import (
     prepare_state_for_hardware,
     validate_state_request,
 )
-from src.core.state_preparation import state_constants as sc
-from src.core.state_preparation.base_state import BaseState
+from qforge.core.state_preparation import state_constants as sc
+from qforge.core.state_preparation.base_state import BaseState
 from tests._qhelpers import BELL_STATEVECTORS, INV_SQRT2, ghz_statevector, w_statevector
 
 ATOL = 1e-9

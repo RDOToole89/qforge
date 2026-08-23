@@ -12,7 +12,7 @@ import pytest
 sys.path.insert(0, "apps")
 from api.routes.experiments import _qiskit_to_circuit
 
-from src.core.state_preparation.state_factory import prepare_state
+from qforge.core.state_preparation.state_factory import prepare_state
 
 # ---------------------------------------------------------------------------
 # Helpers

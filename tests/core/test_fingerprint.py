@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.core.analysis.core.correlations import (
+from qforge.core.analysis.core.correlations import (
     cosine_similarity_matrix,
     excess_covariance_matrix,
     fingerprint_vector,

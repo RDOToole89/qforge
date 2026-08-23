@@ -1,113 +1,143 @@
 # CLI Reference
 
-The `qforge` command-line tool provides quick access to the quantum experiment framework without writing Python code.
-
-## Installation
-
-After installing the package, the `qforge` command is available:
+The `qforge` command is a thin wrapper: parse arguments, call
+`ExperimentProgram.run()` or engine `sweep()`, print. It does not decide
+physics. Prefix commands with `uv run` unless the project venv is active.
 
 ```bash
 uv sync
 uv run qforge --help
 ```
 
-The examples below use the bare `qforge` command; prefix with `uv run` if you have not activated the project virtual environment.
+If you just cloned the repo, start with
+[First 15 minutes](../guides/getting-started/first-run.md) instead of this page.
 
-## Commands
+## How a command maps to the engine
 
-### `qforge list`
+```mermaid
+flowchart LR
+    A["qforge run NAME -s k=v"] --> B[lookup ExperimentProgram]
+    B --> C[program.default_config]
+    C --> D[apply -s overrides]
+    D --> E[program.run]
+    E --> F["engine.run(config)"]
+    F --> G[print outcomes, ⟨P⟩, extras, plots]
+```
 
-List all registered experiment programs.
+`qforge run` always goes through the **experiment program**, so extras such as
+`h2_energy` or `maxcut_cost` print. `qforge run-config` loads an
+`ExperimentConfig` JSON and calls engine `run()` directly — no program extras.
+
+## Global flags
+
+These sit on `qforge` itself, before the subcommand:
+
+| Flag | Default | Meaning |
+|------|---------|---------|
+| `-h`, `--help` | | Help |
+| `--version` | | Package version |
+| `-l`, `--log-level` | `WARNING` (or `QEF_LOG_LEVEL`) | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `-q`, `--quiet` | off | Log level ERROR |
+| `--results-dir` | `results/` (or `QEF_RESULTS_DIR`) | Where histograms and `analysis.json` go |
 
 ```bash
-$ qforge list
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Name              ┃ Description                                              ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 01_superposition            │ What IS a qubit? Superposition and measurement           │
-│ 11_noise_and_entanglement   │ How entanglement changes error patterns                  │
-│ bell_correlation  │ Bell state correlation test - quantum vs classical       │
-│                   │ bounds                                                   │
-└───────────────────┴──────────────────────────────────────────────────────────┘
+uv run qforge --version
+uv run qforge --results-dir tmp/out run 01_superposition
 ```
 
-### `qforge run <name>`
+## `qforge list`
 
-Run a registered experiment by name.
+Registered programs, grouped for display (basics / advanced / decoherence /
+hardware / deep dives). Grouping is presentation only.
 
 ```bash
-qforge run <experiment_name> [OPTIONS]
+uv run qforge list
 ```
 
-**Arguments:**
-- `name` - Experiment name from registry (use `qforge list` to see available)
+Out-of-tree programs appear here after `register_experiment()` or an installed
+entry point in group `qforge.experiments`.
 
-**Options:**
-- `-s, --set KEY=VALUE` - Override config values (can be used multiple times)
-- `-j, --json` - Output full result as JSON instead of summary
+## `qforge run <name>`
 
-**Examples:**
+Runs the program's **default config**, then applies `-s` overrides.
 
 ```bash
-# Run with defaults
-qforge run 01_superposition
-
-# Override parameters
-qforge run 01_superposition -s num_qubits=3 -s error_rate=0.1
-
-# Multiple overrides
-qforge run bell_correlation -s shots=8192 -s error_rate=0.05
-
-# JSON output for scripting
-qforge run 01_superposition --json > result.json
-
-# Disable noise
-qforge run 01_superposition -s noise_enabled=false
+uv run qforge run <name> [-s KEY=VALUE]... [--json] [--results-dir DIR]
 ```
 
-**Output:**
-
-```
-Running experiment: 01_superposition
-Overrides: {'num_qubits': 3, 'error_rate': 0.1}
-
-Status: completed
-Timestamp: 2025-12-02T17:51:18.395984
-
-Analysis Metrics:
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
-┃ Metric                               ┃   Value ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
-│ Asymmetry Index (AI)                 │  0.6761 │
-│ Pathway Concentration (PCR)          │ 95.1000 │
-│ Entanglement-Error Correlation (EEC) │  0.0000 │
-│ Structure Score (SS)                 │  0.6761 │
-│ Concentration Index (CI)             │ 95.1000 │
-│ Total Correlation (TC)               │  1.5197 │
-└──────────────────────────────────────┴─────────┘
-
-Measurements: 1024 shots
-Top outcomes:
-  111: 496 (48.4%)
-  000: 455 (44.4%)
-  001: 23 (2.2%)
-```
-
-### `qforge run-config <path>`
-
-Run an experiment from a JSON configuration file.
+| Option | Meaning |
+|--------|---------|
+| `-s`, `--set KEY=VALUE` | Override one `ExperimentConfig` field. Repeatable. Values are JSON if they parse (`true`, `0.05`, `[...]`) otherwise strings |
+| `-j`, `--json` | Full `ExperimentResult` JSON on stdout |
 
 ```bash
-qforge run-config <config_path> [OPTIONS]
+uv run qforge run 01_superposition
+uv run qforge run 01_superposition -s shots=2048 -s rng_seed=42
+uv run qforge run 06_ghz_states -s noise_enabled=true -s noise_type=depolarizing -s error_rate=0.05
+uv run qforge run 01_superposition --json > result.json
 ```
 
-**Arguments:**
-- `config_path` - Path to JSON config file
+### What prints
 
-**Options:**
-- `-j, --json` - Output full result as JSON
+1. **Outcomes** — top shot bitstrings  
+2. **Metrics** — if the experiment requested any, plus `metrics_hint`  
+3. **Observables** — if `observables=` was set  
+4. **Interpretation** — program extras (`h2_energy`, `maxcut_cost`, …)  
+5. **Circuit** — Qiskit text draw + unique-gate explainers when circuit viz ran  
+6. **Saved** — paths under `results/`
 
-**Example config file** (`my_experiment.json`):
+`qforge run` is one default. Extra methods (`run_all_states`, `run_theta_sweep`)
+are Python-only.
+
+### Visualization
+
+| `-s visualization_type=…` | Effect |
+|---------------------------|--------|
+| `histogram` | Outcome histogram (engine default) |
+| `circuit` | Qiskit `circuit.draw` (PNG via matplotlib/`pylatexenc`, else text) + gate explainers |
+| `["histogram", "circuit"]` | Both (QAOA / VQE default) |
+| `none` | Analysis JSON only; no plots |
+| `all` | Every renderer whose data exists |
+
+```bash
+uv run qforge run qaoa
+uv run qforge run qaoa -s visualization_type=circuit
+uv run qforge run qaoa -s visualization_type=none
+```
+
+### Observables
+
+```bash
+uv run qforge run 05_bell_states -s "observables=[\"ZZ\",\"XX\",\"YY\"]"
+```
+
+On PowerShell, quoting JSON lists is awkward; use Python or a JSON file
+(`run-config`) for lists. Named experiments that already set `observables`
+(VQE, QAOA) need no extra flag.
+
+## `qforge sweep <name>`
+
+Cartesian product of `-p` ranges on top of the experiment default (and `-s`
+overrides applied to every point).
+
+```bash
+uv run qforge sweep <name> -p KEY=v1,v2,v3 [-s KEY=VALUE]... [--json]
+```
+
+`-p` also accepts a JSON list: `-p "num_qubits=[2,3,4]"`.
+
+```bash
+uv run qforge sweep 06_ghz_states -p num_qubits=2,3,4 -s shots=1024
+uv run qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1 -s noise_enabled=true -s noise_type=depolarizing
+uv run qforge sweep 06_ghz_states -p num_qubits=2,3 -p error_rate=0.01,0.05 -s noise_enabled=true -s noise_type=depolarizing
+```
+
+Prefer `sweep` over a shell loop when you want one table.
+
+## `qforge run-config <path>`
+
+Load a JSON `ExperimentConfig` and call engine `run()` — **not** a named
+program. No VQE/QAOA extras.
 
 ```json
 {
@@ -117,75 +147,76 @@ qforge run-config <config_path> [OPTIONS]
   "noise_type": "depolarizing",
   "error_rate": 0.05,
   "shots": 4096,
-  "metrics": "decoherence"
+  "metrics": "structure",
+  "visualization_type": "histogram"
 }
 ```
 
-**Usage:**
-
 ```bash
-qforge run-config my_experiment.json
-qforge run-config my_experiment.json --json > results.json
+uv run qforge run-config my_experiment.json
+uv run qforge run-config my_experiment.json --json > results.json
 ```
 
-## Configuration Options
+## `qforge sweep-config <path>`
 
-When using `-s` overrides or JSON config files, these parameters are available:
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `num_qubits` | int | 4 | Number of qubits in the system |
-| `state_type` | str | "GHZ" | Quantum state: "GHZ", "W", "Bell", "Cluster" |
-| `noise_enabled` | bool | true | Whether to apply noise |
-| `noise_type` | str | "depolarizing" | Noise model: "depolarizing", "amplitude_damping" |
-| `error_rate` | float | 0.05 | Noise strength (0.0 to 1.0) |
-| `shots` | int | 4096 | Number of measurement shots |
-| `metrics` | str \| list | None | Metric profile name ("decoherence", "quick", "information_theory") or explicit list of metric names |
-| `experiment_type` | str | "decoherence" | Experiment category tag ("decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep") |
-
-## Scripting Examples
-
-### Batch experiments
+JSON [SweepManifest](../guides/getting-started/quickstart.md): `base_config` plus
+`parameter_ranges`.
 
 ```bash
-#!/bin/bash
-for rate in 0.01 0.05 0.1 0.2; do
-  qforge run 01_superposition -s error_rate=$rate --json >> sweep_results.jsonl
-done
+uv run qforge sweep-config my_sweep.json
 ```
 
-### Process results with jq
+## `-s` keys
+
+Any `ExperimentConfig` field works. Common ones:
+
+| Parameter | Type | Notes |
+|-----------|------|--------|
+| `num_qubits` | int | |
+| `state_type` | str | `GHZ`, `W`, `BELL`, `CLUSTER`, `SUPERPOSITION`, `CUSTOM` |
+| `sim_mode` | str | `qasm`, `statevector`, `density_matrix`, `hardware` |
+| `noise_enabled` | bool | |
+| `noise_type` | str | e.g. `depolarizing`, `amplitude_damping` |
+| `error_rate` | float | 0–1 |
+| `shots` | int | |
+| `rng_seed` | int | Reproducible shots / bootstrap |
+| `metrics` | str or list | Profile or explicit names |
+| `observables` | list of str | Pauli strings, MSB-left |
+| `visualization_type` | str or list | See table above |
+| `experiment_type` | str | Storage label only |
+| `backend_name` | str | IBM backend when `sim_mode=hardware` |
+
+Full field list: [Architecture](../architecture/architecture.md) and
+`ExperimentConfig` in `src/qforge/engine/models/config.py`.
+
+## Scripting
 
 ```bash
-# Extract asymmetry index from result
-qforge run 01_superposition --json | jq '.metrics_bundle.metrics.asymmetry_index.value'
-
-# Get measurement counts
-qforge run bell_correlation --json | jq '.analysis.measurement_results.raw_counts'
+uv run qforge run 01_superposition --json | jq ".metrics_bundle.metrics.asymmetry_index.value"
+uv run qforge run qaoa --json | jq ".maxcut_cost"
 ```
-
-### Compare experiments
 
 ```bash
-# Run same config with different states
-for state in GHZ W Cluster; do
-  echo "=== $state ==="
-  qforge run 01_superposition -s state_type=$state
-done
+uv run qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1 \
+  -s noise_enabled=true -s noise_type=depolarizing --json
 ```
 
-## Exit Codes
+## Exit codes
 
-- `0` - Success
-- `1` - Error (unknown experiment, invalid config, execution failure)
+- `0` — success  
+- `1` — unknown experiment, invalid config, or execution failure  
+
+Unknown names print close matches from the registry.
 
 ## Help
 
-Each command has built-in help:
-
 ```bash
-qforge --help
-qforge run --help
-qforge run-config --help
-qforge list --help
+uv run qforge --help
+uv run qforge run --help
+uv run qforge sweep --help
+uv run qforge run-config --help
+uv run qforge sweep-config --help
+uv run qforge list --help
 ```
+
+Engine internals behind these commands: [Engine](../architecture/engine.md).

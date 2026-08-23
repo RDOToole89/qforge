@@ -5,22 +5,22 @@ Test metric calculation modules.
 import numpy as np
 import pytest
 
-from src.core.analysis.metrics.asymmetry_index import (
+from qforge.core.analysis.metrics.asymmetry_index import (
     AsymmetryAnalysis,
     compute_asymmetry_index,
     validate_asymmetry_index_properties,
 )
-from src.core.analysis.metrics.complexity_emergence_score import (
+from qforge.core.analysis.metrics.complexity_emergence_score import (
     EmergenceAnalysis,
     compute_complexity_emergence_score,
 )
-from src.core.analysis.metrics.entanglement_error_correlation import (
+from qforge.core.analysis.metrics.entanglement_error_correlation import (
     compute_entanglement_error_correlation,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
+from qforge.core.analysis.metrics.pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
 )
-from src.core.analysis.metrics.temporal_pathway_stability import (
+from qforge.core.analysis.metrics.temporal_pathway_stability import (
     TemporalAnalysis,
     compute_temporal_pathway_stability,
 )

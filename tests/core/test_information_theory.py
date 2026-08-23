@@ -5,8 +5,8 @@ Test information theory core module for entropy, divergence, and probability cal
 import numpy as np
 import pytest
 
-from src.core.analysis.constants import ALPHA
-from src.core.analysis.core.information_theory import (
+from qforge.core.analysis.constants import ALPHA
+from qforge.core.analysis.core.information_theory import (
     counts_to_probabilities,
     entropy,
     jensen_shannon_divergence,

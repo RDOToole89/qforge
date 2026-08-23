@@ -1,4 +1,4 @@
-"""Rigorous physics verification tests for ``src/core/noise_models``.
+"""Rigorous physics verification tests for ``src/qforge/core/noise_models``.
 
 These tests verify *real* quantum physics of every noise channel:
 
@@ -26,11 +26,11 @@ from qiskit_aer.noise import (
     phase_damping_error,
 )
 
-from src.core.noise_models.amplitude_damping import AmplitudeDampingNoise
-from src.core.noise_models.bit_flip import BitFlipNoise
-from src.core.noise_models.correlated_depolarizing import CorrelatedDepolarizingNoise
-from src.core.noise_models.depolarizing import DepolarizingNoise
-from src.core.noise_models.noise_factory import (
+from qforge.core.noise_models.amplitude_damping import AmplitudeDampingNoise
+from qforge.core.noise_models.bit_flip import BitFlipNoise
+from qforge.core.noise_models.correlated_depolarizing import CorrelatedDepolarizingNoise
+from qforge.core.noise_models.depolarizing import DepolarizingNoise
+from qforge.core.noise_models.noise_factory import (
     NOISE_CLASSES,
     _apply_readout_errors,
     create_noise_instance,
@@ -40,9 +40,9 @@ from src.core.noise_models.noise_factory import (
     get_noise_info,
     validate_noise_request,
 )
-from src.core.noise_models.phase_damping import PhaseDampingNoise
-from src.core.noise_models.phase_flip import PhaseFlipNoise
-from src.core.noise_models.thermal_relaxation import ThermalRelaxationNoise
+from qforge.core.noise_models.phase_damping import PhaseDampingNoise
+from qforge.core.noise_models.phase_flip import PhaseFlipNoise
+from qforge.core.noise_models.thermal_relaxation import ThermalRelaxationNoise
 from tests._qhelpers import I2, X, Y, Z, apply_channel, choi_equal, completeness_sum
 
 # --------------------------------------------------------------------------- #
@@ -933,7 +933,7 @@ def _raise(*_a, **_k):
 
 def test_depolarizing_apply_error_branches(monkeypatch) -> None:
     """Channel-creation failure and per-gate failure branches log and continue."""
-    import src.core.noise_models.depolarizing as depol_mod
+    import qforge.core.noise_models.depolarizing as depol_mod
 
     noise = DepolarizingNoise(error_rate=0.05, num_qubits=1)
     # Channel creation failure -> warning + continue (no exception escapes).
@@ -949,7 +949,7 @@ def test_depolarizing_apply_error_branches(monkeypatch) -> None:
 
 def test_amplitude_damping_apply_error_branches(monkeypatch) -> None:
     """AD channel-creation failure raises ValueError; add failure is captured."""
-    import src.core.noise_models.amplitude_damping as ad_mod
+    import qforge.core.noise_models.amplitude_damping as ad_mod
 
     noise = AmplitudeDampingNoise(error_rate=0.05)
     monkeypatch.setattr(ad_mod, "amplitude_damping_error", _raise)

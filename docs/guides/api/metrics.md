@@ -2,43 +2,59 @@
 
 Information-theoretic and statistical metrics over quantum measurement outcome distributions.
 
+If you have not seen a metric on real counts yet, start with
+[First 15 minutes](../getting-started/first-run.md) — it explains Structure
+Score against a noisy GHZ histogram.
+
+## Structure Score
+
+Jensen-Shannon divergence between the observed outcome distribution and its
+**factorized null**: the product of the per-qubit marginals. Independent qubits
+score near 0; correlated outcomes (Bell, GHZ, and those states under moderate
+noise) score higher. Bounded to \([0, 1]\) (bits).
+
+This is not a noise-magnitude meter. A product of \(|+\rangle\) states under the
+same depolarizing channel stays near 0; a GHZ state does not.
+
+::: qforge.core.analysis.metrics.structure_score.compute_structure_score
+
 ## Asymmetry Index
 
 Total variation distance between the observed outcome distribution and the uniform distribution over all 2^n outcomes.
 
-::: src.core.analysis.metrics.asymmetry_index
+::: qforge.core.analysis.metrics.asymmetry_index
 
 ## Pathway Concentration Ratio
 
 Ratio of probability mass in the top outcome quartile versus the bottom quartile.
 
-::: src.core.analysis.metrics.pathway_concentration_ratio
+::: qforge.core.analysis.metrics.pathway_concentration_ratio
 
 ## Entanglement-Error Correlation
 
 Pearson correlation between an entanglement topology adjacency matrix and the pairwise mutual-information matrix computed from measurement counts.
 
-::: src.core.analysis.metrics.entanglement_error_correlation
+::: qforge.core.analysis.metrics.entanglement_error_correlation
 
 ## Temporal Pathway Stability
 
 Spearman rank correlation of outcome orderings across experimental conditions.
 
-::: src.core.analysis.metrics.temporal_pathway_stability
+::: qforge.core.analysis.metrics.temporal_pathway_stability
 
 ## Complexity Emergence Score
 
 Logistic fit locating a threshold in a metric-versus-system-size curve.
 
-::: src.core.analysis.metrics.complexity_emergence_score
+::: qforge.core.analysis.metrics.complexity_emergence_score
 
 ## Usage Examples
 
 ### Basic Metric Computation
 
 ```python
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.pathway_concentration_ratio import compute_pathway_concentration_ratio
 
 # Quantum measurement data
 counts = {"000": 400, "111": 350, "001": 150, "110": 100}
@@ -54,8 +70,8 @@ print(f"Pathway Concentration: {pcr:.2f}x")
 ### Comprehensive Analysis
 
 ```python
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
-from src.core.analysis.metrics.entanglement_error_correlation import compute_entanglement_error_correlation
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.metrics.entanglement_error_correlation import compute_entanglement_error_correlation
 
 # GHZ state decoherence analysis
 ghz_counts = {"000": 450, "111": 450, "001": 50, "110": 50}
@@ -72,7 +88,7 @@ print(f"Topology Correlation: {eec:.4f}")
 ### Temporal Analysis
 
 ```python
-from src.core.analysis.metrics.temporal_pathway_stability import compute_temporal_pathway_stability
+from qforge.core.analysis.metrics.temporal_pathway_stability import compute_temporal_pathway_stability
 
 # Pathway rankings across different noise levels
 rankings = [
@@ -90,7 +106,7 @@ print(f"Persistent Pathways: {tps.persistent_pathways}")
 ### Emergence Analysis
 
 ```python
-from src.core.analysis.metrics.complexity_emergence_score import compute_complexity_emergence_score
+from qforge.core.analysis.metrics.complexity_emergence_score import compute_complexity_emergence_score
 
 # Multi-qubit system data
 multi_qubit_data = {
@@ -104,6 +120,35 @@ print(f"Emergence Score: {ces.complexity_emergence_score:.4f}")
 print(f"Critical Threshold: {ces.critical_threshold:.1f} qubits")
 print(f"Emergence Quality: {ces.emergence_quality}")
 ```
+
+### Custom metrics and profiles
+
+You do not need to edit `src/qforge/core` to add a metric. Import your module
+(an experiment program can do this on import) so `@register` runs, then point
+`metrics=` at a profile you registered — or at an explicit list of names.
+
+```python
+from qforge import ExperimentConfig, run
+from qforge.core.analysis.metrics import MetricResult, register, register_profile
+
+@register("my_metric")
+def compute_my_metric(**kwargs) -> MetricResult:
+    counts = kwargs["counts"]
+    return MetricResult(value=float(len(counts)), ci95=(0.0, 0.0), status="experimental")
+
+register_profile("my_profile", ["my_metric"])
+
+result = run(ExperimentConfig(num_qubits=2, state_type="BELL", metrics="my_profile"))
+print(result.metrics_bundle.metrics["my_metric"].value)
+```
+
+Built-in profiles: `structure`, `quick`, `information_theory`. Registered
+experiment programs already pick an explicit teaching list (not a kitchen-sink
+profile) so `qforge run 05_bell_states` prints Structure Score without extra
+flags. Leave `metrics=None` when the lesson is a protocol, not a histogram
+shape. The named `structure` profile includes `pathway_persistence` and
+`complexity_emergence_score`, which need extra inputs and print empty on a
+single run.
 
 ## Mathematical Foundations
 

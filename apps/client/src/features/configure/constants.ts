@@ -48,7 +48,6 @@ const NOISE_UI: Record<string, { label: string; description: string }> = {
 // Experiment types shown in the UI. The catalog also exposes "batch_sweep"; it is
 // intentionally omitted from this picker (no UI label -> not rendered).
 const EXPERIMENT_TYPE_UI: Record<string, { label: string }> = {
-  decoherence: { label: "Decoherence" },
   parameter_sweep:        { label: "Parameter Sweep" },
   noise_comparison:       { label: "Noise Comparison" },
   control:                { label: "Control" },
@@ -57,7 +56,7 @@ const EXPERIMENT_TYPE_UI: Record<string, { label: string }> = {
 };
 
 const PROFILE_UI: Record<string, { label: string; description: string }> = {
-  decoherence:        { label: "Decoherence",        description: "Full distribution-structure metric suite" },
+  structure:          { label: "Structure",          description: "Distribution-structure metric suite" },
   quick:              { label: "Quick",              description: "Fast overview with 2 key metrics" },
   information_theory: { label: "Information Theory", description: "Information-theoretic analysis" },
 };
@@ -159,8 +158,8 @@ export const INFO_TEXT: Record<string, { title: string; content: string }> = {
   metrics: {
     title: "Analysis Metrics",
     content:
-      "Profiles select curated sets of metrics for common analysis tasks. The Decoherence " +
-      "profile computes all 6 metrics: Structure Score (JSD from null model), " +
+      "Profiles select curated sets of metrics for the question you are asking. The Structure " +
+      "profile computes 6 metrics: Structure Score (JSD from null model), " +
       "Entanglement-Error Correlation (topology vs mutual information), Concentration Index " +
       "(Gini-like concentration measure), Pathway Persistence (rank stability across conditions), " +
       "Complexity Emergence (logistic threshold detection), and Total Correlation " +

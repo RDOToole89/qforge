@@ -17,8 +17,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from apps.api.main import app
-from src.engine.api import run as engine_run
-from src.engine.models import ExperimentConfig
+from qforge.engine.api import run as engine_run
+from qforge.engine.models import ExperimentConfig
 
 client = TestClient(app)
 
@@ -167,7 +167,7 @@ def test_run_experiment_with_metrics_profile() -> None:
     """Requesting a metrics profile populates the metrics bundle."""
     resp = client.post(
         "/api/experiments/run",
-        json=_tiny_run_config(metrics="decoherence"),
+        json=_tiny_run_config(metrics="structure"),
     )
     assert resp.status_code == 200
     body = resp.json()

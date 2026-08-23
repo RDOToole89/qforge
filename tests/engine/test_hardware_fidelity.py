@@ -1,6 +1,6 @@
 """Tests for counts-based fidelity estimation (hardware mode)."""
 
-from src.engine.fidelity import _compute_fidelity_from_counts
+from qforge.engine.fidelity import _compute_fidelity_from_counts
 
 
 class TestCountsBasedFidelity:

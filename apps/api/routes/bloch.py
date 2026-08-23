@@ -1,6 +1,6 @@
 """Bloch sphere visualization endpoints.
 
-Thin HTTP layer over src.engine.bloch_math. Handles file loading,
+Thin HTTP layer over qforge.engine.bloch_math. Handles file loading,
 path validation, and request/response serialization.
 """
 
@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from src.engine.bloch_math import compute_bloch_data
+from qforge.engine.bloch_math import compute_bloch_data
 
 router = APIRouter()
 
@@ -69,8 +69,8 @@ class BlochSweepRequest(BaseModel):
 @router.post("/sweep")
 def run_bloch_sweep(req: BlochSweepRequest) -> dict[str, Any]:
     """Run experiments at multiple error rates and return Bloch snapshots."""
-    from src.engine.api import run as engine_run
-    from src.engine.models import ExperimentConfig
+    from qforge.engine.api import run as engine_run
+    from qforge.engine.models import ExperimentConfig
 
     snapshots = []
 

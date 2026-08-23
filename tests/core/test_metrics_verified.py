@@ -1,4 +1,4 @@
-"""Rigorous exact-value regression tests for src/core/analysis/metrics.
+"""Rigorous exact-value regression tests for src/qforge/core/analysis/metrics.
 
 These tests assert REAL analytical values (computed by hand where possible, or
 locked as regression values where the math depends on an optimizer / scipy).
@@ -16,25 +16,25 @@ import math
 import numpy as np
 import pytest
 
-from src.core.analysis.metrics.asymmetry_index import (
+from qforge.core.analysis.metrics.asymmetry_index import (
     AsymmetryAnalysis,
     asymmetry_index_educational_demo,
     compute_asymmetry_index,
     compute_asymmetry_index_with_null_comparison,
     validate_asymmetry_index_properties,
 )
-from src.core.analysis.metrics.complexity_emergence_score import (
+from qforge.core.analysis.metrics.complexity_emergence_score import (
     EmergenceAnalysis,
     complexity_emergence_educational_demo,
     compute_complexity_emergence_score,
     compute_emergence_across_metrics,
     validate_ces_properties,
 )
-from src.core.analysis.metrics.concentration_index import (
+from qforge.core.analysis.metrics.concentration_index import (
     compute_concentration_index,
     compute_concentration_with_gini,
 )
-from src.core.analysis.metrics.entanglement_error_correlation import (
+from qforge.core.analysis.metrics.entanglement_error_correlation import (
     TopologyAnalysis,
     _compute_topology_error_correlation,
     compute_entanglement_error_correlation,
@@ -42,47 +42,53 @@ from src.core.analysis.metrics.entanglement_error_correlation import (
     entanglement_error_correlation_educational_demo,
     validate_eec_properties,
 )
-from src.core.analysis.metrics.noise_topology_correlation import (
+from qforge.core.analysis.metrics.noise_topology_correlation import (
     noise_topology_correlation,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
+from qforge.core.analysis.metrics.pathway_concentration_ratio import (
     ConcentrationAnalysis,
     compute_pathway_concentration_ratio,
     validate_pcr_properties,
 )
-from src.core.analysis.metrics.pathway_persistence import (
+from qforge.core.analysis.metrics.pathway_persistence import (
     compute_pathway_persistence,
     compute_pathway_persistence_scores,
     compute_temporal_transition_matrix,
 )
-from src.core.analysis.metrics.profiles import METRIC_PROFILES, resolve_metrics
-from src.core.analysis.metrics.registry import (
+from qforge.core.analysis.metrics.profiles import (
+    METRIC_PROFILES,
+    list_profiles,
+    register_profile,
+    resolve_metrics,
+    unregister_profile,
+)
+from qforge.core.analysis.metrics.registry import (
     compute_all,
     compute_metric,
     determine_status,
 )
-from src.core.analysis.metrics.structure_score import (
+from qforge.core.analysis.metrics.structure_score import (
     compute_asymmetry_index as ss_compute_ai,
 )
-from src.core.analysis.metrics.structure_score import (
+from qforge.core.analysis.metrics.structure_score import (
     compute_entanglement_error_correlation as ss_compute_eec,
 )
-from src.core.analysis.metrics.structure_score import (
+from qforge.core.analysis.metrics.structure_score import (
     compute_pathway_concentration_ratio as ss_compute_pcr,
 )
-from src.core.analysis.metrics.structure_score import (
+from qforge.core.analysis.metrics.structure_score import (
     compute_structure_score,
 )
-from src.core.analysis.metrics.structure_score import (
+from qforge.core.analysis.metrics.structure_score import (
     compute_temporal_pathway_stability as ss_compute_tps,
 )
-from src.core.analysis.metrics.temporal_pathway_stability import (
+from qforge.core.analysis.metrics.temporal_pathway_stability import (
     TemporalAnalysis,
     compute_temporal_pathway_stability,
     temporal_pathway_stability_educational_demo,
     validate_tps_properties,
 )
-from src.core.analysis.metrics.total_correlation import compute_total_correlation
+from qforge.core.analysis.metrics.total_correlation import compute_total_correlation
 
 UNIFORM_2Q = {"00": 250, "01": 250, "10": 250, "11": 250}
 BELL_2Q = {"00": 500, "11": 500}
@@ -855,8 +861,44 @@ class TestProfiles:
         assert resolve_metrics(None) is None
 
     def test_resolve_profile_name(self):
-        out = resolve_metrics("decoherence")
-        assert out == METRIC_PROFILES["decoherence"]
+        out = resolve_metrics("structure")
+        assert out == METRIC_PROFILES["structure"]
+        assert "structure_score" in out
+
+    def test_resolve_legacy_decoherence_profile_removed(self):
+        with pytest.raises(KeyError, match="decoherence"):
+            resolve_metrics("decoherence")
+
+    def test_register_and_unregister_profile(self):
+        register_profile("tmp_profile", ["structure_score"])
+        try:
+            assert resolve_metrics("tmp_profile") == ["structure_score"]
+        finally:
+            unregister_profile("tmp_profile")
+        with pytest.raises(KeyError):
+            resolve_metrics("tmp_profile")
+
+    def test_register_profile_rejects_duplicate(self):
+        with pytest.raises(KeyError, match="already registered"):
+            register_profile("structure", ["structure_score"])
+
+    def test_register_profile_rejects_empty(self):
+        with pytest.raises(ValueError):
+            register_profile("empty_profile", [])
+
+    def test_register_profile_replace(self):
+        register_profile("tmp_replace", ["structure_score"])
+        try:
+            register_profile("tmp_replace", ["total_correlation"], replace=True)
+            assert resolve_metrics("tmp_replace") == ["total_correlation"]
+        finally:
+            unregister_profile("tmp_replace")
+
+    def test_list_profiles_returns_a_copy(self):
+        listed = list_profiles()
+        assert "structure" in listed
+        listed["structure"].append("injected")
+        assert "injected" not in METRIC_PROFILES["structure"]
 
     def test_resolve_list_passthrough(self):
         out = resolve_metrics(["structure_score", "total_correlation"])
@@ -871,7 +913,7 @@ class TestProfiles:
 # Extra branch-coverage tests
 # ---------------------------------------------------------------------------
 
-from src.core.analysis.metrics.asymmetry_index import (  # noqa: E402
+from qforge.core.analysis.metrics.asymmetry_index import (  # noqa: E402
     _entropy_full_support_fast,
 )
 
@@ -1095,7 +1137,7 @@ class TestStructureScoreDelegationBranches:
         assert ss_compute_tps([["a", "b", "c"], ["x", "y", "z"], ["p", "q", "r"]]) == 0.0
 
     def test_ces_delegation(self):
-        from src.core.analysis.metrics.structure_score import (
+        from qforge.core.analysis.metrics.structure_score import (
             compute_complexity_emergence_score as ss_ces,
         )
 
@@ -1111,7 +1153,7 @@ class TestPCREducationalDemoBrokenNumpy:
     """
 
     def test_lorenz_helper_raises_attributeerror(self):
-        from src.core.analysis.metrics.pathway_concentration_ratio import (
+        from qforge.core.analysis.metrics.pathway_concentration_ratio import (
             _compute_lorenz_curve_data,
         )
 
@@ -1119,7 +1161,7 @@ class TestPCREducationalDemoBrokenNumpy:
             _compute_lorenz_curve_data({"000": 600, "111": 300, "001": 50})
 
     def test_educational_demo_raises_attributeerror(self):
-        from src.core.analysis.metrics.pathway_concentration_ratio import (
+        from qforge.core.analysis.metrics.pathway_concentration_ratio import (
             pathway_concentration_educational_demo,
         )
 

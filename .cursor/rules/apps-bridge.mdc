@@ -1,0 +1,15 @@
+---
+description: Engine–frontend bridge, visual-lab freeze, and parked FE gaps
+globs: apps/**
+alwaysApply: false
+---
+
+# Apps bridge
+
+The engine is the product. `apps/api` and `apps/client` are consumers.
+
+- Do not add visual-lab features, presets, glossary terms, or native iOS/Android work until `from qforge import run` is the documented API.
+- The HTTP JSON contract and codegen/golden scripts are the live wires — not Python import paths. See `apps/AGENTS.md`.
+- Circuit-builder TypeScript simulation is pedagogical. Qiskit remains scientific source of truth.
+- Frontend qubit 0 = MSB. Qiskit qubit 0 = LSB. Codegen uses `reverse_qargs()`. Do not loosen golden tolerances.
+- After any engine-model or `bloch_math` change, run `scripts/gen_frontend_constants.py` and `scripts/gen_quantum_golden.py` and keep those generated files committed.

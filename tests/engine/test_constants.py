@@ -4,7 +4,7 @@ Test constants module for validation, type safety, and helper functions.
 
 import pytest
 
-from src.core.analysis.constants import (
+from qforge.core.analysis.constants import (
     ALPHA,
     CONF_INT_DEFAULT,
     MAX_TOP_K,

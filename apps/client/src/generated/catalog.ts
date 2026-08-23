@@ -32,15 +32,15 @@ export const SIM_MODES: readonly string[] = ["qasm", "statevector", "density_mat
 /** Noise channel ids (ExperimentConfig.noise_type). */
 export const NOISE_TYPES: readonly string[] = ["depolarizing", "amplitude_damping", "phase_damping", "bit_flip", "phase_flip", "thermal_relaxation", "correlated_depolarizing"] as const;
 
-/** Experiment categories (ExperimentConfig.experiment_type). */
-export const EXPERIMENT_TYPES: readonly string[] = ["decoherence", "parameter_sweep", "noise_comparison", "control", "scaling", "convergence", "batch_sweep"] as const;
+/** Suggested experiment_type labels (free string on the engine; not a closed enum). */
+export const EXPERIMENT_TYPES: readonly string[] = ["control", "scaling", "parameter_sweep", "noise_comparison", "convergence", "batch_sweep"] as const;
 
 /** Individual metric ids (union of all profile metrics, registry-backed). */
 export const METRIC_NAMES: readonly string[] = ["structure_score", "entanglement_error_correlation", "concentration_index", "pathway_persistence", "complexity_emergence_score", "total_correlation"] as const;
 
 /** Named metric profiles -> ordered metric id list. */
 export const METRIC_PROFILES: Readonly<Record<string, readonly string[]>> = {
-  decoherence: ["structure_score", "entanglement_error_correlation", "concentration_index", "pathway_persistence", "complexity_emergence_score", "total_correlation"] as readonly string[],
+  structure: ["structure_score", "entanglement_error_correlation", "concentration_index", "pathway_persistence", "complexity_emergence_score", "total_correlation"] as readonly string[],
   quick: ["structure_score", "concentration_index"] as readonly string[],
   information_theory: ["structure_score", "concentration_index", "total_correlation"] as readonly string[],
 };

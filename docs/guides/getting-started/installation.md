@@ -22,10 +22,14 @@ cd qforge
 # Create the .venv and install runtime + dev + test deps from uv.lock.
 # uv reads .python-version and installs Python 3.12 if needed.
 uv sync
+
+# HTTP server (apps/api) is an extra — not required for the engine or CLI
+uv sync --extra api
 ```
 
 That's it — `uv sync` creates `.venv/`, resolves the pinned interpreter, and installs
-everything. Run commands inside the environment with `uv run <command>`.
+the engine. Add `--extra api` for FastAPI / uvicorn. Run commands inside the
+environment with `uv run <command>`.
 
 To include the documentation or security tool groups as well:
 
@@ -34,12 +38,16 @@ uv sync --all-groups        # everything
 uv sync --group docs        # add the docs group
 ```
 
-### Production Installation
+### From this repository
 
-For production use:
+Until QForge is published to PyPI, install from a clone:
 
 ```bash
-pip install qforge
+git clone https://github.com/RDOToole89/qforge.git
+cd qforge
+uv sync
+uv run python -c "from qforge import run"
+uv run qforge list
 ```
 
 ## Verification
@@ -51,13 +59,23 @@ Verify the installation by running the test suite:
 uv run pytest
 
 # Run with coverage
-uv run pytest --cov=src/core/analysis --cov-report=html
+uv run pytest --cov=src/qforge/core/analysis --cov-report=html
 
 # Run specific test modules
 uv run pytest tests/core/test_metrics.py -v
 ```
 
 ## Optional Dependencies
+
+### HTTP API (`qforge[api]`)
+
+The engine and CLI do not need FastAPI. The visual-lab server does:
+
+```bash
+uv sync --extra api
+# or, once published: pip install 'qforge[api]'
+uv run uvicorn apps.api.main:app --reload --port 8000
+```
 
 ### Documentation
 
@@ -116,7 +134,7 @@ After installation, your project structure should look like:
 
 ```
 qforge/
-├── src/
+├── src/qforge/
 │   ├── engine/              # Engine API: run(), sweep()
 │   ├── core/                # Pure physics: circuits, noise, metrics
 │   └── experiments/         # Experiment programs
@@ -134,12 +152,12 @@ qforge/
 
 ### Common Issues
 
-**ImportError: No module named 'qiskit'** / **No module named 'src'**
+**ImportError: No module named 'qiskit'** / **No module named 'qforge'**
 
 ```bash
 # Re-sync the environment from the lockfile, then prefix commands with `uv run`
 uv sync
-uv run python -c "import qiskit; from src.engine.api import run"
+uv run python -c "import qiskit; from qforge import run"
 ```
 
 **Lockfile out of date after editing pyproject.toml**
@@ -175,6 +193,7 @@ sudo apt-get install python3-dev
 
 After successful installation:
 
-1. Continue to the [Quick Start](quickstart.md) for immediate usage
-2. Explore the [Metrics Reference](../api/metrics.md) for the analysis API
-3. Set up [Hardware Access](../hardware-setup.md) for IBM Quantum experiments
+1. Take the [First 15 minutes](first-run.md) path — superposition, Bell, noisy GHZ, one metric
+2. Continue to the [Quick Start](quickstart.md) for the engine API
+3. Explore the [Metrics Reference](../api/metrics.md) for the analysis API
+4. Set up [Hardware Access](../hardware-setup.md) for IBM Quantum experiments

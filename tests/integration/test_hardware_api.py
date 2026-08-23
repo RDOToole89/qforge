@@ -100,7 +100,7 @@ def _config(num_qubits: int = 3, shots: int = 1024) -> dict[str, object]:
 
 def test_validate_no_credentials(monkeypatch):
     """resolve_backend failing -> graceful available:false, HTTP 200."""
-    import src.engine.execution.hardware as hw
+    import qforge.engine.execution.hardware as hw
 
     def _boom(*args, **kwargs):
         raise RuntimeError("Failed to connect to IBM Quantum.")
@@ -116,7 +116,7 @@ def test_validate_no_credentials(monkeypatch):
 
 def test_validate_feasible(monkeypatch):
     """A fitting config on a big backend is feasible with no violations."""
-    import src.engine.execution.hardware as hw
+    import qforge.engine.execution.hardware as hw
 
     monkeypatch.setattr(
         hw, "resolve_backend", lambda *a, **k: FakeBackend(name="ibm_big", num_qubits=27)
@@ -133,7 +133,7 @@ def test_validate_feasible(monkeypatch):
 
 def test_validate_oversized(monkeypatch):
     """A circuit larger than the backend is infeasible with a clear message."""
-    import src.engine.execution.hardware as hw
+    import qforge.engine.execution.hardware as hw
 
     monkeypatch.setattr(
         hw, "resolve_backend", lambda *a, **k: FakeBackend(name="ibm_small", num_qubits=5)

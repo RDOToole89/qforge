@@ -17,8 +17,8 @@ These tests ensure our metrics have discriminative power for publication.
 import numpy as np
 import pytest
 
-from src.core.analysis.core.information_theory import total_correlation
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
+from qforge.core.analysis.core.information_theory import total_correlation
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index
 
 
 class TestNullModelAI:

@@ -1,4 +1,4 @@
-/** TypeScript types matching the Pydantic models in src/engine/models/. */
+/** TypeScript types matching the Pydantic models in src/qforge/engine/models/. */
 
 // ── Config (what the user tunes) ──────────────────────────────────────
 
@@ -20,7 +20,7 @@ export type NoiseType =
   | "correlated_depolarizing";
 
 export type SimMode = "qasm" | "statevector" | "density_matrix" | "hardware";
-export type ExperimentType = "decoherence" | "parameter_sweep" | "noise_comparison" | "control" | "scaling" | "convergence";
+export type ExperimentType = string;
 export type VisualizationType = "histogram" | "density_matrix" | "correlation" | "circuit" | "all" | "none";
 
 export interface ExperimentConfig {

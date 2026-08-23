@@ -1,4 +1,4 @@
-"""Exact-value tests for INTERMEDIARY math helpers in ``src/core/analysis/metrics``.
+"""Exact-value tests for INTERMEDIARY math helpers in ``src/qforge/core/analysis/metrics``.
 
 These functions / analysis-object fields are computed during normal metric
 evaluation but their numeric outputs were never directly asserted. Each value
@@ -15,32 +15,32 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.analysis.constants import ALPHA
-from src.core.analysis.metrics.asymmetry_index import (
+from qforge.core.analysis.constants import ALPHA
+from qforge.core.analysis.metrics.asymmetry_index import (
     compute_asymmetry_index,
     compute_asymmetry_index_with_null_comparison,
 )
-from src.core.analysis.metrics.asymmetry_index import compute_asymmetry_index as _cai
-from src.core.analysis.metrics.complexity_emergence_score import (
+from qforge.core.analysis.metrics.asymmetry_index import compute_asymmetry_index as _cai
+from qforge.core.analysis.metrics.complexity_emergence_score import (
     _calculate_ces_from_fit,
     _fit_best_emergence_model,
     _fit_emergence_model,
     _fit_logistic_emergence,
 )
-from src.core.analysis.metrics.entanglement_error_correlation import (
+from qforge.core.analysis.metrics.entanglement_error_correlation import (
     _compute_error_correlation_matrix,
     _compute_kway_entanglement_weight,
     _compute_kway_error_frequency,
     _construct_entanglement_topology,
     compute_multiway_entanglement_correlation,
 )
-from src.core.analysis.metrics.noise_topology_correlation import (
+from qforge.core.analysis.metrics.noise_topology_correlation import (
     noise_topology_correlation,
 )
-from src.core.analysis.metrics.pathway_concentration_ratio import (
+from qforge.core.analysis.metrics.pathway_concentration_ratio import (
     compute_pathway_concentration_ratio,
 )
-from src.core.analysis.metrics.temporal_pathway_stability import (
+from qforge.core.analysis.metrics.temporal_pathway_stability import (
     compute_pathway_persistence_scores,
     compute_temporal_pathway_stability,
     compute_temporal_transition_matrix,

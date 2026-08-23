@@ -157,7 +157,7 @@ for (let i = 0; i < dim; i++) {
 }
 ```
 
-MSB qubit convention: qubit 0 is the most significant bit. This matches Qiskit's convention.
+Frontend qubit 0 = MSB = leftmost bitstring character. Qiskit statevectors are little-endian (qubit 0 = LSB). Catalog/golden codegen uses `reverse_qargs()` so the two conventions line up. Do not flip the TS simulator to Qiskit LSB without regenerating goldens — see `apps/AGENTS.md`.
 
 ### Bloch Vector from State Vector
 

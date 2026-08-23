@@ -14,13 +14,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.noise_models.amplitude_damping import AmplitudeDampingNoise
-from src.core.noise_models.bit_flip import BitFlipNoise
-from src.core.noise_models.correlated_depolarizing import CorrelatedDepolarizingNoise
-from src.core.noise_models.depolarizing import DepolarizingNoise
-from src.core.noise_models.phase_damping import PhaseDampingNoise
-from src.core.noise_models.phase_flip import PhaseFlipNoise
-from src.core.noise_models.thermal_relaxation import ThermalRelaxationNoise
+from qforge.core.noise_models.amplitude_damping import AmplitudeDampingNoise
+from qforge.core.noise_models.bit_flip import BitFlipNoise
+from qforge.core.noise_models.correlated_depolarizing import CorrelatedDepolarizingNoise
+from qforge.core.noise_models.depolarizing import DepolarizingNoise
+from qforge.core.noise_models.phase_damping import PhaseDampingNoise
+from qforge.core.noise_models.phase_flip import PhaseFlipNoise
+from qforge.core.noise_models.thermal_relaxation import ThermalRelaxationNoise
 
 # --------------------------------------------------------------------------- #
 # Thermal relaxation intermediates

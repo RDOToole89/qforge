@@ -10,8 +10,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.analysis.metrics.registry import MetricResult, compute_all
-from src.core.analysis.metrics.schema_bridge import (
+from qforge.core.analysis.metrics.registry import MetricResult, compute_all
+from qforge.core.analysis.metrics.schema_bridge import (
     get_schema_field_mapping,
     metrics_to_schema,
     validate_schema_output,

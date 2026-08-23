@@ -5,10 +5,10 @@ End-to-end integration tests for the analysis framework.
 import numpy as np
 import pytest
 
-from src.core.analysis.core.bootstrap import compute_metric_with_confidence
-from src.core.analysis.core.correlations import mi_matrix
-from src.core.analysis.core.information_theory import counts_to_probabilities, entropy
-from src.core.analysis.pipelines.pathway_analysis import (
+from qforge.core.analysis.core.bootstrap import compute_metric_with_confidence
+from qforge.core.analysis.core.correlations import mi_matrix
+from qforge.core.analysis.core.information_theory import counts_to_probabilities, entropy
+from qforge.core.analysis.pipelines.pathway_analysis import (
     analyze_decoherence_structure,
     compute_all_pathway_metrics,
 )

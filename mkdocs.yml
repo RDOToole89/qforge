@@ -40,7 +40,11 @@ markdown_extensions:
   - admonition
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.arithmatex:
       generic: true
   - toc:
@@ -53,6 +57,7 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation: guides/getting-started/installation.md
+    - First 15 minutes: guides/getting-started/first-run.md
     - Quick Start: guides/getting-started/quickstart.md
   - Guides:
     - Hardware Setup: guides/hardware-setup.md
@@ -63,3 +68,4 @@ nav:
     - CLI: reference/cli.md
   - Architecture:
     - Overview: architecture/architecture.md
+    - Engine: architecture/engine.md

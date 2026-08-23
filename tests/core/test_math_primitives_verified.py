@@ -1,4 +1,4 @@
-"""Exact-value tests for the shared math primitives in ``src/core/math``.
+"""Exact-value tests for the shared math primitives in ``src/qforge/core/math``.
 
 These are the single source of truth for Pauli matrices, relaxation probability,
 total variation distance, Gini, and the qubit/bit indexing convention. Every
@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.core.math import (
+from qforge.core.math import (
     PAULI_I,
     PAULI_X,
     PAULI_Y,

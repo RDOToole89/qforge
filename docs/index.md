@@ -18,7 +18,7 @@ QForge abstracts away the plumbing of quantum experimentation. You pick a quantu
 
 ## Analysis Metrics
 
-All metrics are general-purpose information-theoretic and statistical measures over measurement outcome distributions:
+All metrics are general-purpose information-theoretic and statistical measures over measurement outcome distributions. Registered experiments already pick a teaching list for the question they ask — `qforge run 01_superposition` prints Asymmetry Index; `qforge run 05_bell_states` prints Structure Score and Total Correlation. Request a named profile (`structure`, `quick`, `information_theory`) or an explicit list when you call `run()` yourself.
 
 ### Distribution Structure
 
@@ -43,22 +43,21 @@ All metrics are general-purpose information-theoretic and statistical measures o
 
 ```bash
 # List available experiments
-uv run python -m src.cli list
+uv run qforge list
 
 # Run an experiment
-uv run python -m src.cli run 01_superposition
+uv run qforge run 01_superposition
 
 # With custom parameters
-uv run python -m src.cli run 01_superposition -s error_rate=0.1 -s num_qubits=3
+uv run qforge run 01_superposition -s error_rate=0.1 -s num_qubits=3
 ```
 
-See [CLI Reference](reference/cli.md) for full documentation.
+See the [First 15 minutes](guides/getting-started/first-run.md) path for superposition → Bell → noisy GHZ. See [CLI Reference](reference/cli.md) for full documentation.
 
 **Using the Engine API:**
 
 ```python
-from src.engine.api import run
-from src.engine.models import ExperimentConfig
+from qforge import run, ExperimentConfig
 
 config = ExperimentConfig(
     num_qubits=3,
@@ -67,7 +66,7 @@ config = ExperimentConfig(
     noise_enabled=True,
     noise_type="depolarizing",
     error_rate=0.05,
-    metrics="decoherence",
+    metrics="structure",
 )
 
 result = run(config)
@@ -79,30 +78,25 @@ See the [Quick Start](guides/getting-started/quickstart.md) for more usage examp
 
 ## Use Cases
 
-- **Learning quantum mechanics**: Preset experiments with step-by-step explanations, from superposition to entanglement
+- **Learning quantum mechanics**: Preset experiments with step-by-step explanations; each step prints the metrics that match its question
 - **Noise characterization**: Compare noise channels and their effect on different entangled states
 - **Entanglement studies**: See how different topologies (GHZ, W, Cluster) respond to noise
 - **Hardware experiments**: Run the same experiments on real IBM Quantum processors with full provenance
 
 ## Architecture
 
-The framework follows an **engine-first architecture** with clean separation:
-
-- **Engine API**: Clean entry points via `run()` and `sweep()` functions
-- **Core Logic**: Quantum mechanics implementation and analysis algorithms
-- **Analysis Framework**: Information-theoretic metrics and statistical methods
-- **Schema System**: Standardized data formats for reproducible experiments
-
-See [Architecture](architecture/architecture.md) for the detailed design.
+The framework follows an **engine-first architecture** with clean separation.
+See [Architecture](architecture/architecture.md) for Mermaid maps and
+[Engine](architecture/engine.md) for the `run()` pipeline.
 
 ## Documentation Structure
 
-- **[CLI Reference](reference/cli.md)**: Command-line tool usage and examples
-- **Getting Started**: [Installation](guides/getting-started/installation.md) and [Quick Start](guides/getting-started/quickstart.md)
+- **Getting Started**: [Installation](guides/getting-started/installation.md), [First 15 minutes](guides/getting-started/first-run.md), [Quick Start](guides/getting-started/quickstart.md)
+- **[CLI Reference](reference/cli.md)**: every command, `-s` keys, visualization, extras
+- **Architecture**: [Overview](architecture/architecture.md) (Mermaid maps) and [Engine](architecture/engine.md) (`run()` internals)
 - **API Reference**: [Metrics](guides/api/metrics.md) and [Constants](guides/api/constants.md)
-- **[Hardware Setup](guides/hardware-setup.md)**: Running on IBM Quantum
-- **[Architecture](architecture/architecture.md)**: System design and integration patterns
+- **[Hardware Setup](guides/hardware-setup.md)**: IBM Quantum
 
 ## Getting Started
 
-Continue to the [Installation Guide](guides/getting-started/installation.md) to set up the framework, or jump to the [Quick Start](guides/getting-started/quickstart.md) for immediate usage examples.
+Continue to the [Installation Guide](guides/getting-started/installation.md) to set up the framework, then take the [First 15 minutes](guides/getting-started/first-run.md) path. The [Quick Start](guides/getting-started/quickstart.md) is the broader engine API tour.

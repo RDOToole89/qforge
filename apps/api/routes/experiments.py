@@ -6,10 +6,10 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from src.engine.api import run as engine_run
-from src.engine.api import sweep as engine_sweep
-from src.engine.models import ExperimentConfig, ExperimentResult, SweepManifest
-from src.experiments import get_experiment, list_experiments
+from qforge.engine.api import run as engine_run
+from qforge.engine.api import sweep as engine_sweep
+from qforge.engine.models import ExperimentConfig, ExperimentResult, SweepManifest
+from qforge.experiments import get_experiment, list_experiments
 
 router = APIRouter()
 
@@ -49,7 +49,7 @@ def preview_circuit(config: ExperimentConfig) -> dict[str, Any]:
     Returns structured gate data for visual rendering, ASCII diagram
     as fallback, and circuit statistics.
     """
-    from src.core.state_preparation.state_factory import prepare_state
+    from qforge.core.state_preparation.state_factory import prepare_state
 
     try:
         circuit = prepare_state(config.state_type, config.num_qubits)

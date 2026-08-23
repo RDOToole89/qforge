@@ -27,7 +27,7 @@ function baseState(over: Partial<ConfigState> = {}): ConfigState {
     balanceCircuit: false,
     metricsEnabled: false,
     metricsMode: "profile",
-    selectedProfile: "decoherence",
+    selectedProfile: "structure",
     selectedMetrics: [],
     experimentType: null,
     multipleRuns: 1,
@@ -145,7 +145,7 @@ describe("buildExperimentConfig", () => {
 
   it("selects profile vs individual metrics based on metricsMode", () => {
     expect(buildExperimentConfig(baseState({ metricsEnabled: true, metricsMode: "profile" })).metrics).toBe(
-      "decoherence",
+      "structure",
     );
     expect(
       buildExperimentConfig(

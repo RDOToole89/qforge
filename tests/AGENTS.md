@@ -17,14 +17,14 @@ tests/
 │   ├── test_numerical_stability.py   # Floating-point robustness
 │   └── test_properties.py           # Mathematical property verification (requires hypothesis)
 │
-├── core/                             Unit tests for src/core
+├── core/                             Unit tests for src/qforge/core
 │   ├── test_core_modules.py          # State preparation, noise models, imports
 │   ├── test_metrics.py               # AI, SS, EEC, TC, CI, PCR, TPS, CES
 │   ├── test_information_theory.py    # Entropy, MI, KL/JS divergence, smoothing
 │   ├── test_pipelines.py            # Analysis pipeline orchestration
 │   └── test_fingerprint.py          # Delta-Cov fingerprinting
 │
-├── engine/                           Unit tests for src/engine
+├── engine/                           Unit tests for src/qforge/engine
 │   ├── test_constants.py            # Configuration thresholds
 │   ├── test_registry.py             # Metric registry, dynamic computation
 │   ├── test_simulation_backends.py  # qasm/statevector/density_matrix modes
@@ -74,10 +74,10 @@ IBM_QUANTUM_TOKEN=1 pytest tests/integration/test_hardware_integration.py -v
 
 | Changed | Run |
 |---------|-----|
-| `src/core/` | `pytest tests/physics/ tests/core/` |
-| `src/engine/` | `pytest tests/engine/ tests/integration/` |
-| `src/engine/visualization/` | `pytest tests/engine/test_visualization.py` |
-| `src/experiments/` | `pytest tests/integration/` |
+| `src/qforge/core/` | `pytest tests/physics/ tests/core/` |
+| `src/qforge/engine/` | `pytest tests/engine/ tests/integration/` |
+| `src/qforge/engine/visualization/` | `pytest tests/engine/test_visualization.py` |
+| `src/qforge/experiments/` | `pytest tests/integration/` |
 | Any change | `pytest tests/ --ignore=tests/physics/test_properties.py` |
 
 ## Rules
@@ -98,6 +98,6 @@ IBM_QUANTUM_TOKEN=1 pytest tests/integration/test_hardware_integration.py -v
 
 ## Coverage
 
-- `src/core/`: 95% gate enforced in pytest.ini (verified against analytical values; remaining uncovered lines are unreachable defensive guards)
-- `src/engine/`: 80%+ target
-- `src/experiments/`: tested via integration, not unit coverage
+- `src/qforge/core/`: 95% gate enforced in pytest.ini (verified against analytical values; remaining uncovered lines are unreachable defensive guards)
+- `src/qforge/engine/`: 80%+ target
+- `src/qforge/experiments/`: tested via integration, not unit coverage

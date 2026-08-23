@@ -1,4 +1,4 @@
-"""Rigorous exact-value tests for the pure-math core (``src/core/analysis/core``).
+"""Rigorous exact-value tests for the pure-math core (``src/qforge/core/analysis/core``).
 
 Every assertion locks a hand-computed or analytically derived value rather than a
 smoke check. Floating comparisons use ``pytest.approx`` / ``np.isclose`` with tight
@@ -15,13 +15,13 @@ import math
 import numpy as np
 import pytest
 
-from src.core.analysis.core.bootstrap import (
+from qforge.core.analysis.core.bootstrap import (
     MetricWithConfidence,
     bootstrap_confidence_interval,
     compute_metric_with_confidence,
     determine_validation_status,
 )
-from src.core.analysis.core.correlations import (
+from qforge.core.analysis.core.correlations import (
     adjacency_from_distances,
     bit_covariance_matrix,
     correlation_upper_triangle,
@@ -31,7 +31,7 @@ from src.core.analysis.core.correlations import (
     get_topology_adjacency,
     mi_matrix,
 )
-from src.core.analysis.core.information_theory import (
+from qforge.core.analysis.core.information_theory import (
     all_bitstrings,
     counts_to_probabilities,
     counts_to_vector,
@@ -44,7 +44,7 @@ from src.core.analysis.core.information_theory import (
     pairwise_joint_distribution,
     total_correlation,
 )
-from src.core.analysis.core.null_models import (
+from qforge.core.analysis.core.null_models import (
     factorized_null,
     factorized_null_model,
     generate_null_samples,
@@ -53,7 +53,7 @@ from src.core.analysis.core.null_models import (
     readout_confusion_model,
     sample_multinomial_counts,
 )
-from src.core.analysis.core.topology import (
+from qforge.core.analysis.core.topology import (
     TOPOLOGY_BUILDERS,
     all_to_all_adjacency,
     chain_adjacency,
