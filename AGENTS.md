@@ -70,7 +70,7 @@ These refine the rules above but may not contradict them.
 
 ## Never
 
-- Mix experiment logic into `src/core` or physics primitives into `src/engine`
+- Mix experiment logic into `src/qforge/core` or physics primitives into `src/qforge/engine`
 - Add chemistry, a Hamiltonian type, or an energy metric to core — engine estimates ⟨P⟩; programs interpret (VQE energy, QAOA MaxCut cost)
 - Skip physics tests when modifying metrics or noise models
 - Add visual-lab features, presets, or native-app work while the visual-lab freeze is in `apps/AGENTS.md`
@@ -84,5 +84,5 @@ These refine the rules above but may not contradict them.
 - Update the nearest `AGENTS.md` when adding structural concepts
 - Register in-tree experiments in 4 places (folder init, root init, folder README, experiments AGENTS.md). Out-of-tree programs use `register_experiment()` — do not require a core or registry edit.
 - Run `pytest` and verify via CLI before submitting changes
-- Use `src/core` utilities instead of duplicating physics/math helpers — `src/qforge/core/math/` is the single source of truth for Pauli matrices, relaxation probabilities, TVD/Gini, and the canonical qubit/bit indexing convention
+- Use `src/qforge/core` utilities instead of duplicating physics/math helpers — `src/qforge/core/math/` is the single source of truth for Pauli matrices, relaxation probabilities, TVD/Gini, and the canonical qubit/bit indexing convention
 - When changing engine models, metric profiles, state preparation, or `bloch_math`, regenerate frontend catalogs and goldens (`scripts/gen_frontend_constants.py`, `scripts/gen_quantum_golden.py`) and keep `git diff` clean on `apps/client/src/generated` and the golden fixtures — see `apps/AGENTS.md`

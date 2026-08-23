@@ -1,6 +1,6 @@
 # Test Suite
 
-~1,100 tests organized by layer (core, engine, integration, physics, schemas) with custom pytest markers. The physics/math core (all of `src/core` plus the engine math modules: `fidelity`, `bloch_math`, `analysis/metrics`, `models/measurement`) sits behind a 95% coverage gate; the verified-value suites assert outputs against analytical/closed-form calculations.
+~1,100 tests organized by layer (core, engine, integration, physics, schemas) with custom pytest markers. The physics/math core (all of `src/qforge/core` plus the engine math modules: `fidelity`, `bloch_math`, `analysis/metrics`, `models/measurement`) sits behind a 95% coverage gate; the verified-value suites assert outputs against analytical/closed-form calculations.
 
 ---
 
@@ -8,23 +8,20 @@
 
 ```bash
 # Full suite with coverage (default, mirrors CI)
-pytest
+uv run pytest
 
 # Specific layer
-pytest tests/core/
-pytest tests/engine/
-pytest tests/physics/
+uv run pytest tests/core/
+uv run pytest tests/engine/
+uv run pytest tests/physics/
 
 # By marker
-pytest -m unit
-pytest -m integration
-pytest -m "not slow"
+uv run pytest -m unit
+uv run pytest -m integration
+uv run pytest -m "not slow"
 
 # Quick check (no coverage enforcement)
-pytest --no-cov -x -q
-
-# Via Makefile
-make test
+uv run pytest --no-cov -x -q
 ```
 
 ---
@@ -97,7 +94,6 @@ Custom markers from `pytest.ini`:
 
 ## Coverage
 
-- **Gate**: 95% on `src/core`, enforced by `--cov-fail-under=95` (remaining uncovered lines are unreachable defensive guards)
+- **Gate**: 95% on `src/qforge/core` plus the engine math modules listed in `pyproject.toml` (`--cov-fail-under=95`)
 - **Report**: HTML report generated at `htmlcov/`
-- **Scope**: Coverage is measured on `src/qforge/core/analysis` only; other modules are tested but not coverage-gated
-- **CI**: `make test` runs the full suite with coverage enforcement
+- **CI**: `uv run pytest` (mirrors `.github/workflows/ci.yml`)

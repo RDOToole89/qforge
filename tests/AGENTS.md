@@ -17,14 +17,14 @@ tests/
 │   ├── test_numerical_stability.py   # Floating-point robustness
 │   └── test_properties.py           # Mathematical property verification (requires hypothesis)
 │
-├── core/                             Unit tests for src/core
+├── core/                             Unit tests for src/qforge/core
 │   ├── test_core_modules.py          # State preparation, noise models, imports
 │   ├── test_metrics.py               # AI, SS, EEC, TC, CI, PCR, TPS, CES
 │   ├── test_information_theory.py    # Entropy, MI, KL/JS divergence, smoothing
 │   ├── test_pipelines.py            # Analysis pipeline orchestration
 │   └── test_fingerprint.py          # Delta-Cov fingerprinting
 │
-├── engine/                           Unit tests for src/engine
+├── engine/                           Unit tests for src/qforge/engine
 │   ├── test_constants.py            # Configuration thresholds
 │   ├── test_registry.py             # Metric registry, dynamic computation
 │   ├── test_simulation_backends.py  # qasm/statevector/density_matrix modes

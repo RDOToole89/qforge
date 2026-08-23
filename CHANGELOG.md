@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Personal research-program documentation (docs/research/, docs/planning/, and
   stale historical design documents); docs now describe the general-purpose
   framework only
+- `SECURITY.md` — placeholder policy (unused inbox, version table, 48-hour SLA)
+  for a package that is not published
 
 ### Added
 - `src/qforge/core/math/` shared math primitives — single source of truth for Pauli
@@ -55,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deployment configs: Dockerfile, railway.json, vercel.json
 - Environment variable handling for CORS origins and API URL
 - `.env.example` template for contributor onboarding
-- Community files: CODE_OF_CONDUCT, SECURITY, CONTRIBUTING improvements
+- Community files: CODE_OF_CONDUCT, CONTRIBUTING improvements
 - GitHub issue and PR templates
 - Docker build smoke test in CI
 - Dynamic version injection via `importlib.metadata`
@@ -88,6 +90,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture, engine, and CLI docs: Mermaid maps of the three layers and
   `run()` pipeline (`docs/architecture/`), full CLI reference, README
   pointers for a first clone.
+- README is engine-first: CLI / `run()` as the product, FastAPI as
+  `qforge[api]`, visual lab marked optional and frozen. Does not claim the
+  circuit builder submits to IBM. Notes that PyPI `qforge` is a different
+  project.
 
 ### Changed
 - Migrated Python tooling to `uv` (pyproject.toml + uv.lock; `uv sync` / `uv run`);
