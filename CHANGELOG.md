@@ -80,10 +80,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QAOA deep dive estimates one ⟨ZZ⟩ per MaxCut edge via `observables=`
   and reports ⟨C⟩ / exact MaxCut on the result. Same pattern as VQE —
   a cost, not a core metric.
-- Circuit visualization uses Qiskit's `circuit.draw(output='mpl')`. The
-  live circuit is passed into the renderer. Unique-gate explainers appear
-  on the figure and in the CLI when `visualization_type` includes
-  `circuit`. Omit `circuit` or set `none` to skip.
+- Circuit visualization uses Qiskit's `circuit.draw`. Matplotlib/PNG
+  needs `pylatexenc` (now a runtime dep). If the mpl drawer is missing,
+  the text drawer is saved instead so `visualization_type=circuit` never
+  silently skips. Unique-gate explainers print in the CLI. Omit `circuit`
+  or set `none` to skip.
+- Architecture, engine, and CLI docs: Mermaid maps of the three layers and
+  `run()` pipeline (`docs/architecture/`), full CLI reference, README
+  pointers for a first clone.
 
 ### Changed
 - Migrated Python tooling to `uv` (pyproject.toml + uv.lock; `uv sync` / `uv run`);

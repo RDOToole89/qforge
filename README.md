@@ -154,6 +154,12 @@ The 15-minute path is superposition → Bell → noisy GHZ, then one metric in
 plain language. You do not need the Expo app. Walkthrough:
 [docs/guides/getting-started/first-run.md](docs/guides/getting-started/first-run.md).
 
+How the engine and CLI work (Mermaid + command reference):
+
+- [Architecture](docs/architecture/architecture.md)
+- [Engine internals](docs/architecture/engine.md)
+- [CLI reference](docs/reference/cli.md)
+
 ### Run an Experiment (CLI)
 
 ```bash

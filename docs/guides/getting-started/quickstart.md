@@ -141,7 +141,8 @@ Open [http://localhost:8081](http://localhost:8081) in your browser.
 ## What's Next
 
 - **[First 15 minutes](first-run.md)** — superposition → Bell → noisy GHZ, Structure Score in plain language
-- **[CLI Reference](../../reference/cli.md)** — Full command documentation
-- **[Metrics Guide](../api/metrics.md)** — Deep dive into the 8 analysis metrics
-- **[Hardware Setup](../hardware-setup.md)** — Run experiments on IBM Quantum hardware
-- **[Architecture](../../architecture/architecture.md)** — Understand the three-layer design
+- **[CLI Reference](../../reference/cli.md)** — every command, visualization, extras
+- **[Engine](../../architecture/engine.md)** — `run()` pipeline
+- **[Architecture](../../architecture/architecture.md)** — layers and Mermaid maps
+- **[Metrics Guide](../api/metrics.md)** — the 8 analysis metrics
+- **[Hardware Setup](../hardware-setup.md)** — IBM Quantum

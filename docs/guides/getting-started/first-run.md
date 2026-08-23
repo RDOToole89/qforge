@@ -201,6 +201,7 @@ Concentration Index.
 - Continue the basics path: `uv run qforge list`, then steps `02`–`11`.
 - Sweep a parameter: `uv run qforge sweep 06_ghz_states -p error_rate=0.01,0.05,0.1 -s noise_enabled=true -s noise_type=depolarizing`
 - Use the engine directly: [Quick Start](quickstart.md).
+- How `qforge run` works: [CLI](../../reference/cli.md). How `run()` works: [Engine](../../architecture/engine.md).
 - Read the rest of the metrics: [Metrics](../api/metrics.md).
 
 The Expo / React Native app is optional. Everything above is the installable

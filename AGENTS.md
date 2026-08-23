@@ -51,7 +51,7 @@ experiments/
 
 ## Visualization System
 
-6 renderers (histogram, density_matrix, correlation, circuit, metrics_summary, bloch_sphere) plus sweep utilities. Plugin architecture in `src/qforge/engine/visualization/`. Config accepts `visualization_type: list[str] | str`. The circuit renderer is Qiskit's `circuit.draw(output='mpl')` plus unique-gate explainers; omit `"circuit"` or set `"none"` to skip.
+6 renderers (histogram, density_matrix, correlation, circuit, metrics_summary, bloch_sphere) plus sweep utilities. Plugin architecture in `src/qforge/engine/visualization/`. Config accepts `visualization_type: list[str] | str`. The circuit renderer is Qiskit's `circuit.draw` (mpl PNG when `pylatexenc` is present, otherwise the text drawer) plus unique-gate explainers; omit `"circuit"` or set `"none"` to skip.
 
 ## Local AGENTS.md Files
 

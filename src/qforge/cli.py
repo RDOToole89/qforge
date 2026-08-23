@@ -458,19 +458,20 @@ def _print_path(label: str, path: str) -> None:
 
 
 def _print_gate_explainers(result: ExperimentResult) -> None:
-    """Print unique-gate explainers when circuit visualization ran."""
-    rows: list[dict[str, str]] = []
-    for artifact in result.artifacts:
-        if artifact.kind != "circuit":
-            continue
-        extra = artifact.metadata.get("gate_explainers") if artifact.metadata else None
-        if extra:
-            rows = list(extra)
-            break
-    if not rows:
+    """Print Qiskit's text circuit and unique-gate explainers when viz ran."""
+    artifact = next((item for item in result.artifacts if item.kind == "circuit"), None)
+    if artifact is None or not artifact.metadata:
+        return
+    ascii_diagram = artifact.metadata.get("circuit_text")
+    rows = artifact.metadata.get("gate_explainers") or []
+    if not ascii_diagram and not rows:
         return
     console.print()
-    console.print("[bold]Circuit[/bold]  [dim]Qiskit draw · unique gates[/dim]")
+    console.print("[bold]Circuit[/bold]  [dim]Qiskit draw[/dim]")
+    if ascii_diagram:
+        console.print(f"[dim]{ascii_diagram}[/dim]")
+    if not rows:
+        return
     table = Table(show_header=False, box=None, pad_edge=False, padding=(0, 2, 0, 0))
     table.add_column("gate", style="cyan", no_wrap=True)
     table.add_column("explainer")

@@ -32,20 +32,6 @@ from qforge.engine.visualization import (
 )
 
 
-def _has_pylatexenc() -> bool:
-    try:
-        import pylatexenc  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
-
-# ---------------------------------------------------------------------------
-# Config validation
-# ---------------------------------------------------------------------------
-
-
 class TestConfigValidation:
     """Verify new visualization_type and export_formats fields."""
 
@@ -329,7 +315,6 @@ class TestCircuitDiagramRenderer:
         data = {"circuit": QuantumCircuit(2)}
         assert renderer.can_render("histogram", data) is False
 
-    @pytest.mark.skipif(not _has_pylatexenc(), reason="pylatexenc not installed")
     def test_render_produces_artifact(self, tmp_path: Path):
         renderer = CircuitDiagramRenderer()
         qc = QuantumCircuit(2)
@@ -342,11 +327,12 @@ class TestCircuitDiagramRenderer:
         assert os.path.isfile(artifact.path)
         assert artifact.metadata["renderer"] == "CircuitDiagramRenderer"
         assert artifact.metadata["num_qubits"] == 2
+        ascii_diagram = artifact.metadata["circuit_text"]
+        assert "H" in ascii_diagram or "h" in ascii_diagram.lower()
         labels = [row["label"] for row in artifact.metadata["gate_explainers"]]
         assert "H" in labels
         assert "CX" in labels
 
-    @pytest.mark.skipif(not _has_pylatexenc(), reason="pylatexenc not installed")
     def test_integration_circuit_viz(self):
         """Full integration: run experiment with circuit rendering."""
         result = run(
@@ -363,6 +349,7 @@ class TestCircuitDiagramRenderer:
         assert os.path.isfile(circuit_arts[0].path)
         explainers = circuit_arts[0].metadata["gate_explainers"]
         assert any(row["name"] == "h" for row in explainers)
+        assert circuit_arts[0].metadata.get("circuit_text")
 
     def test_visualization_none_skips_circuit(self):
         result = run(
@@ -439,13 +426,7 @@ class TestVizTypeAll:
         # Should have at least histogram and density_matrix
         assert "histogram" in kinds
         assert "density_matrix" in kinds
-        # Circuit rendering requires pylatexenc; check if available
-        try:
-            import pylatexenc  # noqa: F401
-
-            assert "circuit" in kinds
-        except ImportError:
-            pass  # Circuit rendering skipped without pylatexenc
+        assert "circuit" in kinds
 
 
 class TestVizTypeNone:

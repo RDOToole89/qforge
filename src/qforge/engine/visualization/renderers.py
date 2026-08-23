@@ -688,13 +688,27 @@ class CorrelationRenderer(VisualizationRenderer):
 # ---------------------------------------------------------------------------
 
 
-class CircuitDiagramRenderer(VisualizationRenderer):
-    """Renders a circuit with Qiskit's ``circuit.draw(output='mpl')``.
+def _circuit_text(circuit: Any) -> str:
+    """Qiskit text drawer — no pylatexenc required."""
+    return str(circuit.draw(output="text"))
 
-    Requires ``data["circuit"]`` to be a live ``QuantumCircuit``. A short
-    explainer for each unique gate is drawn under the diagram and stored
-    on the artifact. Skip this renderer by omitting ``"circuit"`` from
-    ``visualization_type`` (or set it to ``"none"``).
+
+def _try_mpl_figure(circuit: Any) -> Any | None:
+    """Qiskit matplotlib drawer. Returns None if pylatexenc (or mpl) is missing."""
+    try:
+        return circuit.draw(output="mpl")
+    except Exception as exc:
+        logger.info("Qiskit mpl drawer unavailable (%s); using text draw", exc)
+        return None
+
+
+class CircuitDiagramRenderer(VisualizationRenderer):
+    """Renders a circuit with Qiskit's ``circuit.draw``.
+
+    Tries ``output='mpl'`` (PNG). If pylatexenc is missing, falls back to
+    ``output='text'`` so ``visualization_type='circuit'`` never silently
+    skips. Unique-gate explainers are always stored on the artifact.
+    Omit ``"circuit"`` or set ``"none"`` to skip.
     """
 
     def can_render(self, viz_type: str, data: dict[str, Any]) -> bool:
@@ -702,58 +716,67 @@ class CircuitDiagramRenderer(VisualizationRenderer):
         if viz_type != "circuit":
             return False
         circuit = data.get("circuit")
-        # Check for QuantumCircuit without importing it at module level
         return circuit is not None and hasattr(circuit, "draw") and hasattr(circuit, "depth")
 
     def render(self, data: dict[str, Any], output_path: str) -> ArtifactRef:
         """Render a quantum circuit diagram and save it to disk."""
         circuit = data["circuit"]
         export_formats = data.get("export_formats", ["png"])
-        data.get("analysis", {}).get("experiment_parameters", {}) or {}
-
-        fig = circuit.draw(output="mpl")
         depth = circuit.depth()
         num_gates = len(circuit.data)
         explainers = explain_circuit_gates(circuit)
-        fig.text(
-            0.99,
-            0.01,
-            f"Depth: {depth}  |  Gates: {num_gates}",
-            ha="right",
-            va="bottom",
-            fontsize=9,
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
-        )
-        if explainers:
-            legend = "\n".join(f"{row['label']}: {row['explainer']}" for row in explainers)
+        ascii_diagram = _circuit_text(circuit)
+
+        base = Path(output_path)
+        base.parent.mkdir(parents=True, exist_ok=True)
+        base_no_ext = base.parent / base.stem
+        saved_paths: list[str] = []
+        drawer = "text"
+
+        fig = _try_mpl_figure(circuit)
+        if fig is not None:
             fig.text(
+                0.99,
                 0.01,
-                0.01,
-                legend,
-                ha="left",
+                f"Depth: {depth}  |  Gates: {num_gates}",
+                ha="right",
                 va="bottom",
-                fontsize=8,
+                fontsize=9,
                 bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
             )
+            if explainers:
+                legend = "\n".join(f"{row['label']}: {row['explainer']}" for row in explainers)
+                fig.text(
+                    0.01,
+                    0.01,
+                    legend,
+                    ha="left",
+                    va="bottom",
+                    fontsize=8,
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="0.95", edgecolor="0.8"),
+                )
+            saved_paths.extend(save_figure(fig, base_no_ext, export_formats))
+            plt.close(fig)
+            drawer = "mpl"
 
-        # --- Save ---
-        base = Path(output_path)
-        base_no_ext = base.parent / base.stem
-        saved_paths = save_figure(fig, base_no_ext, export_formats)
-        plt.close(fig)
+        text_path = base_no_ext.with_suffix(".txt")
+        text_path.write_text(ascii_diagram + "\n", encoding="utf-8")
+        saved_paths.append(str(text_path))
 
-        primary_path = saved_paths[0] if saved_paths else str(base)
-        logger.info("Saved circuit diagram to %s", primary_path)
+        primary_path = saved_paths[0]
+        logger.info("Saved circuit diagram (%s) to %s", drawer, primary_path)
 
         return ArtifactRef(
             kind="circuit",
             path=primary_path,
             metadata={
                 "renderer": "CircuitDiagramRenderer",
+                "drawer": drawer,
                 "depth": depth,
                 "num_gates": num_gates,
                 "num_qubits": circuit.num_qubits,
                 "gate_explainers": explainers,
+                "circuit_text": ascii_diagram,
                 "saved_formats": [Path(p).suffix.lstrip(".") for p in saved_paths],
             },
         )

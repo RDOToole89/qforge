@@ -85,22 +85,17 @@ See the [Quick Start](guides/getting-started/quickstart.md) for more usage examp
 
 ## Architecture
 
-The framework follows an **engine-first architecture** with clean separation:
-
-- **Engine API**: Clean entry points via `run()` and `sweep()` functions
-- **Core Logic**: Quantum mechanics implementation and analysis algorithms
-- **Analysis Framework**: Information-theoretic metrics and statistical methods
-- **Schema System**: Standardized data formats for reproducible experiments
-
-See [Architecture](architecture/architecture.md) for the detailed design.
+The framework follows an **engine-first architecture** with clean separation.
+See [Architecture](architecture/architecture.md) for Mermaid maps and
+[Engine](architecture/engine.md) for the `run()` pipeline.
 
 ## Documentation Structure
 
-- **[CLI Reference](reference/cli.md)**: Command-line tool usage and examples
-- **Getting Started**: [Installation](guides/getting-started/installation.md), [First 15 minutes](guides/getting-started/first-run.md), and [Quick Start](guides/getting-started/quickstart.md)
+- **Getting Started**: [Installation](guides/getting-started/installation.md), [First 15 minutes](guides/getting-started/first-run.md), [Quick Start](guides/getting-started/quickstart.md)
+- **[CLI Reference](reference/cli.md)**: every command, `-s` keys, visualization, extras
+- **Architecture**: [Overview](architecture/architecture.md) (Mermaid maps) and [Engine](architecture/engine.md) (`run()` internals)
 - **API Reference**: [Metrics](guides/api/metrics.md) and [Constants](guides/api/constants.md)
-- **[Hardware Setup](guides/hardware-setup.md)**: Running on IBM Quantum
-- **[Architecture](architecture/architecture.md)**: System design and integration patterns
+- **[Hardware Setup](guides/hardware-setup.md)**: IBM Quantum
 
 ## Getting Started
 

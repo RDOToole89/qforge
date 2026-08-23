@@ -40,7 +40,11 @@ markdown_extensions:
   - admonition
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.arithmatex:
       generic: true
   - toc:
@@ -64,3 +68,4 @@ nav:
     - CLI: reference/cli.md
   - Architecture:
     - Overview: architecture/architecture.md
+    - Engine: architecture/engine.md

@@ -19,6 +19,7 @@ dependencies = [
     "numpy>=2.1",
     "scipy>=1.13",
     "matplotlib>=3.9",
+    "pylatexenc>=2.10",
     "hypernetx>=2.3",
     # Models & validation
     "pydantic>=2.0",
