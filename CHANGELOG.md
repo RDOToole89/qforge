@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   framework only
 - `SECURITY.md` — placeholder policy (unused inbox, version table, 48-hour SLA)
   for a package that is not published
+- `CODE_OF_CONDUCT.md` — Contributor Covenant pointing at unused
+  `conduct@qforge.dev`
 
 ### Added
 - `src/qforge/core/math/` shared math primitives — single source of truth for Pauli
@@ -57,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deployment configs: Dockerfile, railway.json, vercel.json
 - Environment variable handling for CORS origins and API URL
 - `.env.example` template for contributor onboarding
-- Community files: CODE_OF_CONDUCT, CONTRIBUTING improvements
+- Community files: CONTRIBUTING improvements
 - GitHub issue and PR templates
 - Docker build smoke test in CI
 - Dynamic version injection via `importlib.metadata`
